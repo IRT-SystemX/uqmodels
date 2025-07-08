@@ -1,0 +1,398 @@
+uqmodels\UQModel.py:10:17: F401 [*] `numpy` imported but unused
+   |
+ 8 | import os
+ 9 |
+10 | import numpy as np
+   |                 ^^ F401
+11 | from sklearn.base import BaseEstimator
+   |
+   = help: Remove unused import: `numpy`
+
+uqmodels\UQModel.py:14:51: F401 [*] `uqmodels.postprocessing.UQKPI_Processor` imported but unused
+   |
+13 | import uqmodels.modelization.ML_estimator.random_forest_UQ as RF_UQ
+14 | import uqmodels.postprocessing.UQKPI_Processor as UQProc
+   |                                                   ^^^^^^ F401
+15 | import uqmodels.preprocessing.preprocessing as pre_pre
+16 | import uqmodels.preprocessing.structure as pre_struc
+   |
+   = help: Remove unused import: `uqmodels.postprocessing.UQKPI_Processor`
+
+uqmodels\UQModel.py:15:48: F401 [*] `uqmodels.preprocessing.preprocessing` imported but unused
+   |
+13 | import uqmodels.modelization.ML_estimator.random_forest_UQ as RF_UQ
+14 | import uqmodels.postprocessing.UQKPI_Processor as UQProc
+15 | import uqmodels.preprocessing.preprocessing as pre_pre
+   |                                                ^^^^^^^ F401
+16 | import uqmodels.preprocessing.structure as pre_struc
+17 | from uqmodels.processing import Cache_manager
+   |
+   = help: Remove unused import: `uqmodels.preprocessing.preprocessing`
+
+uqmodels\UQModel.py:16:44: F401 [*] `uqmodels.preprocessing.structure` imported but unused
+   |
+14 | import uqmodels.postprocessing.UQKPI_Processor as UQProc
+15 | import uqmodels.preprocessing.preprocessing as pre_pre
+16 | import uqmodels.preprocessing.structure as pre_struc
+   |                                            ^^^^^^^^^ F401
+17 | from uqmodels.processing import Cache_manager
+18 | from uqmodels.utils import add_random_state, apply_mask, apply_middledim_reduction, cut
+   |
+   = help: Remove unused import: `uqmodels.preprocessing.structure`
+
+uqmodels\UQModel.py:18:85: F401 [*] `uqmodels.utils.cut` imported but unused
+   |
+16 | import uqmodels.preprocessing.structure as pre_struc
+17 | from uqmodels.processing import Cache_manager
+18 | from uqmodels.utils import add_random_state, apply_mask, apply_middledim_reduction, cut
+   |                                                                                     ^^^ F401
+   |
+   = help: Remove unused import: `uqmodels.utils.cut`
+
+uqmodels\custom_UQModel.py:13:48: F401 [*] `uqmodels.modelization.DL_estimator.lstm_ed` imported but unused
+   |
+11 | import uqmodels.preprocessing.preprocessing as pre_pre
+12 | import uqmodels.preprocessing.structure as pre_struc
+13 | from uqmodels.modelization.DL_estimator import lstm_ed, transformer_ed
+   |                                                ^^^^^^^ F401
+14 | from uqmodels.modelization.DL_estimator.metalayers import mlp
+15 | from uqmodels.modelization.DL_estimator.neural_network_UQ import (
+   |
+   = help: Remove unused import
+
+uqmodels\custom_UQModel.py:13:57: F401 [*] `uqmodels.modelization.DL_estimator.transformer_ed` imported but unused
+   |
+11 | import uqmodels.preprocessing.preprocessing as pre_pre
+12 | import uqmodels.preprocessing.structure as pre_struc
+13 | from uqmodels.modelization.DL_estimator import lstm_ed, transformer_ed
+   |                                                         ^^^^^^^^^^^^^^ F401
+14 | from uqmodels.modelization.DL_estimator.metalayers import mlp
+15 | from uqmodels.modelization.DL_estimator.neural_network_UQ import (
+   |
+   = help: Remove unused import
+
+uqmodels\custom_UQModel.py:26:5: F401 [*] `uqmodels.preprocessing.features_processing.compute_pca` imported but unused
+   |
+24 | from uqmodels.preprocessing.Custom_Preprocessor import Generic_Features_processor
+25 | from uqmodels.preprocessing.features_processing import (
+26 |     compute_pca,
+   |     ^^^^^^^^^^^ F401
+27 |     fit_compute_lag_values,
+28 |     fit_pca,
+   |
+   = help: Remove unused import: `uqmodels.preprocessing.features_processing.compute_pca`
+
+uqmodels\custom_UQModel.py:169:17: F601 Dictionary key literal `"reduc_filter"` repeated
+    |
+167 |                 "reduc_filter": reduc_filter_pred,
+168 |                 "roll": 0,
+169 |                 "reduc_filter": reduc_filter_pred,
+    |                 ^^^^^^^^^^^^^^ F601
+170 |             }
+171 |         )
+    |
+    = help: Remove repeated key literal `"reduc_filter"`
+
+uqmodels\data_generation\Gen_multivariate_normal_data.py:8:33: F401 [*] `uqmodels.processing.write` imported but unused
+  |
+6 | from scipy.signal import convolve2d, savgol_filter
+7 |
+8 | from uqmodels.processing import write
+  |                                 ^^^^^ F401
+  |
+  = help: Remove unused import: `uqmodels.processing.write`
+
+uqmodels\modelization\DL_estimator\lstm_ed.py:1:17: F401 [*] `numpy` imported but unused
+  |
+1 | import numpy as np
+  |                 ^^ F401
+2 | import tensorflow as tf
+3 | import tensorflow.keras.backend as K
+  |
+  = help: Remove unused import: `numpy`
+
+uqmodels\modelization\DL_estimator\lstm_ed.py:13:5: F401 [*] `uqmodels.modelization.DL_estimator.neural_network_UQ.get_training_parameters` imported but unused
+   |
+11 | from uqmodels.modelization.DL_estimator.neural_network_UQ import (
+12 |     NN_UQ,
+13 |     get_training_parameters,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ F401
+14 |     get_UQEstimator_parameters,
+15 |     mlp,
+   |
+   = help: Remove unused import
+
+uqmodels\modelization\DL_estimator\lstm_ed.py:14:5: F401 [*] `uqmodels.modelization.DL_estimator.neural_network_UQ.get_UQEstimator_parameters` imported but unused
+   |
+12 |     NN_UQ,
+13 |     get_training_parameters,
+14 |     get_UQEstimator_parameters,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ F401
+15 |     mlp,
+16 | )
+   |
+   = help: Remove unused import
+
+uqmodels\modelization\DL_estimator\lstm_ed.py:21:46: F401 [*] `uqmodels.utils.apply_mask` imported but unused
+   |
+19 |     set_global_determinism,
+20 | )
+21 | from uqmodels.utils import add_random_state, apply_mask, stack_and_roll
+   |                                              ^^^^^^^^^^ F401
+22 |
+23 | # Basic memory module
+   |
+   = help: Remove unused import: `uqmodels.utils.apply_mask`
+
+uqmodels\modelization\DL_estimator\metalayers.py:9:40: F401 [*] `...utils.generate_random_state` imported but unused
+   |
+ 7 | from uqmodels.modelization.DL_estimator.utils import set_global_determinism
+ 8 |
+ 9 | from ...utils import add_random_state, generate_random_state, get_fold_nstep
+   |                                        ^^^^^^^^^^^^^^^^^^^^^ F401
+10 |
+11 | # EDL head
+   |
+   = help: Remove unused import: `...utils.generate_random_state`
+
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:4:8: F401 [*] `random` imported but unused
+  |
+2 | import inspect
+3 | import os
+4 | import random
+  |        ^^^^^^ F401
+5 |
+6 | import numpy as np
+  |
+  = help: Remove unused import: `random`
+
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:12:59: F401 [*] `uqmodels.modelization.DL_estimator.metalayers.mlp` imported but unused
+   |
+10 | import uqmodels.modelization.DL_estimator.loss as uqloss
+11 | import uqmodels.processing as uqproc
+12 | from uqmodels.modelization.DL_estimator.metalayers import mlp
+   |                                                           ^^^ F401
+13 | from uqmodels.modelization.DL_estimator.utils import set_global_determinism
+14 | from uqmodels.modelization.UQEstimator import UQEstimator, get_UQEstimator_parameters
+   |
+   = help: Remove unused import: `uqmodels.modelization.DL_estimator.metalayers.mlp`
+
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:14:60: F401 [*] `uqmodels.modelization.UQEstimator.get_UQEstimator_parameters` imported but unused
+   |
+12 | from uqmodels.modelization.DL_estimator.metalayers import mlp
+13 | from uqmodels.modelization.DL_estimator.utils import set_global_determinism
+14 | from uqmodels.modelization.UQEstimator import UQEstimator, get_UQEstimator_parameters
+   |                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^ F401
+15 | from uqmodels.utils import add_random_state, apply_mask, cut, generate_random_state
+   |
+   = help: Remove unused import: `uqmodels.modelization.UQEstimator.get_UQEstimator_parameters`
+
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:15:63: F401 [*] `uqmodels.utils.generate_random_state` imported but unused
+   |
+13 | from uqmodels.modelization.DL_estimator.utils import set_global_determinism
+14 | from uqmodels.modelization.UQEstimator import UQEstimator, get_UQEstimator_parameters
+15 | from uqmodels.utils import add_random_state, apply_mask, cut, generate_random_state
+   |                                                               ^^^^^^^^^^^^^^^^^^^^^ F401
+   |
+   = help: Remove unused import: `uqmodels.utils.generate_random_state`
+
+uqmodels\modelization\DL_estimator\transformer_ed.py:2:17: F401 [*] `numpy` imported but unused
+  |
+1 | import keras.backend as K
+2 | import numpy as np
+  |                 ^^ F401
+3 | import tensorflow as tf
+4 | from keras.layers import TimeDistributed
+  |
+  = help: Remove unused import: `numpy`
+
+uqmodels\modelization\DL_estimator\transformer_ed.py:5:24: F401 [*] `tensorflow.keras` imported but unused
+  |
+3 | import tensorflow as tf
+4 | from keras.layers import TimeDistributed
+5 | from tensorflow import keras
+  |                        ^^^^^ F401
+6 | from tensorflow.keras import Input, layers
+  |
+  = help: Remove unused import: `tensorflow.keras`
+
+uqmodels\modelization\DL_estimator\transformer_ed.py:16:5: F401 [*] `uqmodels.modelization.DL_estimator.neural_network_UQ.get_training_parameters` imported but unused
+   |
+14 | from uqmodels.modelization.DL_estimator.neural_network_UQ import (
+15 |     NN_UQ,
+16 |     get_training_parameters,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ F401
+17 |     get_UQEstimator_parameters,
+18 |     mlp,
+   |
+   = help: Remove unused import
+
+uqmodels\modelization\DL_estimator\transformer_ed.py:17:5: F401 [*] `uqmodels.modelization.DL_estimator.neural_network_UQ.get_UQEstimator_parameters` imported but unused
+   |
+15 |     NN_UQ,
+16 |     get_training_parameters,
+17 |     get_UQEstimator_parameters,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ F401
+18 |     mlp,
+19 | )
+   |
+   = help: Remove unused import
+
+uqmodels\modelization\ML_estimator\baseline.py:22:5: F401 [*] `uqmodels.modelization.UQEstimator.get_UQEstimator_parameters` imported but unused
+   |
+20 |     MeanVarUQEstimator,
+21 |     QuantileUQEstimator,
+22 |     get_UQEstimator_parameters,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ F401
+23 | )
+24 | from uqmodels.utils import add_random_state
+   |
+   = help: Remove unused import: `uqmodels.modelization.UQEstimator.get_UQEstimator_parameters`
+
+uqmodels\modelization\UQEstimator.py:67:9: F601 Dictionary key literal `"factory_parameters"` repeated
+   |
+65 |         "factory_parameters": factory_parameters,
+66 |         "model_parameters": model_parameters,
+67 |         "factory_parameters": factory_parameters,
+   |         ^^^^^^^^^^^^^^^^^^^^ F601
+68 |         "training_parameters": training_parameters,
+69 |         "type_output": type_output,
+   |
+   = help: Remove repeated key literal `"factory_parameters"`
+
+uqmodels\postprocessing\UQ_processing.py:298:5: F841 Local variable `escale_val` is assigned to but never used
+    |
+296 |         UQ: normalised UQmeasure
+297 |     """
+298 |     escale_val = 1
+    |     ^^^^^^^^^^ F841
+299 |     if scaler is not None:
+300 |         rescale_val = scaler.var_
+    |
+    = help: Remove assignment to unused variable `escale_val`
+
+uqmodels\postprocessing\custom_UQKPI_Processor.py:1:18: F401 [*] `copy.deepcopy` imported but unused
+  |
+1 | from copy import deepcopy
+  |                  ^^^^^^^^ F401
+2 |
+3 | import numpy as np
+  |
+  = help: Remove unused import: `copy.deepcopy`
+
+uqmodels\postprocessing\custom_UQKPI_Processor.py:6:49: F401 [*] `uqmodels.postprocessing.UQ_processing` imported but unused
+  |
+5 | import uqmodels.postprocessing.anomaly_processing as anom_proc
+6 | import uqmodels.postprocessing.UQ_processing as UQ_proc
+  |                                                 ^^^^^^^ F401
+7 | import uqmodels.postprocessing.UQKPI_Processor as UQKPI_proc
+8 | from uqmodels.processing import Processor
+  |
+  = help: Remove unused import: `uqmodels.postprocessing.UQ_processing`
+
+uqmodels\postprocessing\custom_UQKPI_Processor.py:8:33: F401 [*] `uqmodels.processing.Processor` imported but unused
+  |
+6 | import uqmodels.postprocessing.UQ_processing as UQ_proc
+7 | import uqmodels.postprocessing.UQKPI_Processor as UQKPI_proc
+8 | from uqmodels.processing import Processor
+  |                                 ^^^^^^^^^ F401
+9 | from uqmodels.utils import apply_middledim_reduction
+  |
+  = help: Remove unused import: `uqmodels.processing.Processor`
+
+uqmodels\postprocessing\custom_UQKPI_Processor.py:9:28: F401 [*] `uqmodels.utils.apply_middledim_reduction` imported but unused
+  |
+7 | import uqmodels.postprocessing.UQKPI_Processor as UQKPI_proc
+8 | from uqmodels.processing import Processor
+9 | from uqmodels.utils import apply_middledim_reduction
+  |                            ^^^^^^^^^^^^^^^^^^^^^^^^^ F401
+  |
+  = help: Remove unused import: `uqmodels.utils.apply_middledim_reduction`
+
+uqmodels\preprocessing\structure.py:170:13: E721 Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
+    |
+168 |     date_init = check_date(date_init, dtype).astype(float)
+169 |
+170 |     if (not type(step) == np.array) & (not type(step) == np.ndarray):
+    |             ^^^^^^^^^^^^^^^^^^^^^^ E721
+171 |         step = np.array(step)
+    |
+
+uqmodels\preprocessing\structure.py:170:44: E721 Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
+    |
+168 |     date_init = check_date(date_init, dtype).astype(float)
+169 |
+170 |     if (not type(step) == np.array) & (not type(step) == np.ndarray):
+    |                                            ^^^^^^^^^^^^^^^^^^^^^^^^ E721
+171 |         step = np.array(step)
+    |
+
+uqmodels\processing.py:33:11: F632 [*] Use `!=` to compare constant literals
+   |
+31 |     """
+32 |     folder_name = []
+33 |     while path is not "":
+   |           ^^^^^^^^^^^^^^ F632
+34 |         path, tail = os.path.split(path)
+35 |         print(path)
+   |
+   = help: Replace `is not` with `!=`
+
+uqmodels\processing.py:412:12: F632 [*] Use `!=` to compare constant literals
+    |
+410 |         # print('save', query, filename)
+411 |
+412 |         if query is not {}:
+    |            ^^^^^^^^^^^^^^^ F632
+413 |
+414 |             # Use by default storing and filename
+    |
+    = help: Replace `is not` with `!=`
+
+uqmodels\processing.py:499:12: E721 Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
+    |
+497 |     def default_update_query(self, query):
+498 |         type_ = type(query)
+499 |         if type_ == dict:
+    |            ^^^^^^^^^^^^^ E721
+500 |             pass
+501 |         if type_ == str:
+    |
+
+uqmodels\processing.py:501:12: E721 Use `is` and `is not` for type comparisons, or `isinstance()` for isinstance checks
+    |
+499 |         if type_ == dict:
+500 |             pass
+501 |         if type_ == str:
+    |            ^^^^^^^^^^^^ E721
+502 |             pass
+503 |         else:
+    |
+
+uqmodels\visualization\visualization.py:511:9: F841 Local variable `list_name_subset` is assigned to but never used
+    |
+509 | def aux_fill_area(context, **kwargs):
+510 |     if "list_name_subset" in kwargs.keys():
+511 |         list_name_subset = kwargs["list_name_subset"]
+    |         ^^^^^^^^^^^^^^^^ F841
+    |
+    = help: Remove assignment to unused variable `list_name_subset`
+
+uqmodels\visualization\visualization.py:1011:17: F821 Undefined name `a0`
+     |
+1010 |             for i in range(n_chan* n_sensor):
+1011 |                 a0.hlines(i, 0, len(f_obs), color="grey", lw=0.5)
+     |                 ^^ F821
+1012 |
+1013 |             for i in range(n_sensor):
+     |
+
+uqmodels\visualization\visualization.py:1014:17: F821 Undefined name `a0`
+     |
+1013 |             for i in range(n_sensor):
+1014 |                 a0.hlines(i * n_chan,0, len(f_obs), color="black", lw=1)
+     |                 ^^ F821
+     |
+
+Found 39 errors.
+[*] 29 fixable with the `--fix` option (4 hidden fixes can be enabled with the `--unsafe-fixes` option).

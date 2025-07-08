@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>flake8 violations: uqmodels\preprocessing\preprocessing.py</title>
+      <meta http-equiv="Content-Type" value="text/html; charset=UTF-8">
+      <link rel="stylesheet" href="styles.css">
+<script>
+function bindHandler(link) {
+   var code = link.getAttribute('data-code');
+   var key = location.pathname + '#' + code;
+
+   var ul = link.parentNode.querySelector('.details');
+   if (sessionStorage[key] != 'open') {
+      ul.style.display = 'none';
+   }
+   link.addEventListener('click', function (event) {
+      if (!ul.style.display || ul.style.display == 'none') {
+         ul.style.display = 'block';
+         sessionStorage[key] = 'open';
+      } else {
+         ul.style.display = 'none';
+         sessionStorage[key] = 'closed';
+      }
+   });
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+   var links = document.querySelectorAll('#index > li > a');
+   for (var i = 0; i < links.length; i++) {
+      bindHandler(links[i]);
+   }
+});
+</script>
+   </head>
+   <body>
+      <div id="masthead" class="sev-2"></div>
+      <div id="page">
+         <p id="srclink">
+            <a title="View full annotated source"
+               href="uqmodels.preprocessing.preprocessing.source.html">
+               <img src="file.svg" alt="&#x2261;">
+            </a></p>
+         <h1>
+            <a href="index.html">
+               <img src="back.svg" alt="&#x2B05;">
+               uqmodels\preprocessing\preprocessing.py
+            </a>
+         </h1>
+
+         <ul id="index">
+         
+         <li>
+            <a data-code="E203">
+               <span class="count sev-2">
+                  7
+               </span>
+               <strong>E203:</strong> whitespace before ':'
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l599">
+                  <tt><i>599</i>         <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="n">window_size</span><span class="p">)</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l616">
+                  <tt><i>616</i>     <span class="n">acorr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">set_</span><span class="p">,</span> <span class="n">set_</span><span class="p">,</span> <span class="s2">&quot;full&quot;</span><span class="p">)[</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l638">
+                  <tt><i>638</i>     <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">)[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l639">
+                  <tt><i>639</i>     <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">fft</span><span class="p">)[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l649">
+                  <tt><i>649</i>             <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="n">window_size</span><span class="p">]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l653">
+                  <tt><i>653</i>             <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="n">size_bot</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="n">size_top</span><span class="p">]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l656">
+                  <tt><i>656</i>             <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="p">(</span><span class="n">window_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         <li>
+            <a data-code="E226">
+               <span class="count sev-2">
+                  2
+               </span>
+               <strong>E226:</strong> missing whitespace around arithmetic operator
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l500">
+                  <tt><i>500</i>                 <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;min_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mean_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l501">
+                  <tt><i>501</i>                 <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;extremum_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mean_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         </ul>
+      </div>
+   </body>
+</html>

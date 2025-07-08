@@ -1,0 +1,22 @@
+
+# Build package artefacts
+build/
+uqmodels.egg-info
+
+# Sphinx documentation
+docs/_build/
+
+# Cache folder
+.ruff_cache/
+.pytest_cache/
+*__pycache__*
+*.ipynb_checkpoints*
+
+# Sphinx documentation
+docs/_build/
+docs/build
+docs/source/_static
+docs/source/examples
+docs/source/uqmodels*.rst
+
+

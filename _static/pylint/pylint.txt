@@ -1,0 +1,1572 @@
+************* Module uqmodels.custom_UQModel
+uqmodels\custom_UQModel.py:34:0: C0301: Line too long (202/120) (line-too-long)
+uqmodels\custom_UQModel.py:890:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\custom_UQModel.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\custom_UQModel.py:44:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\custom_UQModel.py:45:4: E0101: Explicit return in __init__ (return-in-init)
+uqmodels\custom_UQModel.py:45:4: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\custom_UQModel.py:131:12: W0621: Redefining name 'type_output' from outer scope (line 39) (redefined-outer-name)
+uqmodels\custom_UQModel.py:165:27: W0109: Duplicate key 'reduc_filter' in dictionary (duplicate-key)
+uqmodels\custom_UQModel.py:174:8: E1111: Assigning result of a function call, where the function has no return (assignment-from-no-return)
+uqmodels\custom_UQModel.py:175:12: E0606: Possibly using variable 'UQEstimator_initializer' before assignment (possibly-used-before-assignment)
+uqmodels\custom_UQModel.py:176:12: E0601: Using variable 'UQEstimator_parameters' before assignment (used-before-assignment)
+uqmodels\custom_UQModel.py:52:8: W0613: Unused argument 'reduc_coef' (unused-argument)
+uqmodels\custom_UQModel.py:85:12: W0612: Unused variable 'y_' (unused-variable)
+uqmodels\custom_UQModel.py:189:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\custom_UQModel.py:190:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\custom_UQModel.py:190:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\custom_UQModel.py:190:4: R0917: Too many positional arguments (18/5) (too-many-positional-arguments)
+uqmodels\custom_UQModel.py:292:4: R0917: Too many positional arguments (13/5) (too-many-positional-arguments)
+uqmodels\custom_UQModel.py:409:39: E0606: Possibly using variable 'size_data' before assignment (possibly-used-before-assignment)
+uqmodels\custom_UQModel.py:425:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\custom_UQModel.py:488:4: W0221: Variadics removed in overriding 'MultiDEEPUQModel.predict' method (arguments-differ)
+uqmodels\custom_UQModel.py:538:15: E0606: Possibly using variable 'loaded_data' before assignment (possibly-used-before-assignment)
+uqmodels\custom_UQModel.py:526:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\custom_UQModel.py:540:4: W0221: Number of parameters was 5 in 'UQModel.score' and is now 4 in overriding 'MultiDEEPUQModel.score' method (arguments-differ)
+uqmodels\custom_UQModel.py:601:4: R0917: Too many positional arguments (15/5) (too-many-positional-arguments)
+uqmodels\custom_UQModel.py:707:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\custom_UQModel.py:738:16: W0212: Access to a protected member _tuning of a client class (protected-access)
+uqmodels\custom_UQModel.py:775:15: E0606: Possibly using variable 'loaded_data' before assignment (possibly-used-before-assignment)
+uqmodels\custom_UQModel.py:777:4: W0222: Signature differs from overridden 'fit' method (signature-differs)
+uqmodels\custom_UQModel.py:806:4: W0237: Parameter 'shuffle' has been renamed to 'skip_UQEstimator' in overriding 'MultiUQModel.fit_with_generator' method (arguments-renamed)
+uqmodels\custom_UQModel.py:857:4: W0237: Parameter 'name_save' has been renamed to 'recovers_at_end' in overriding 'MultiUQModel.predict' method (arguments-renamed)
+uqmodels\custom_UQModel.py:953:4: W0221: Number of parameters was 5 in 'UQModel.score' and is now 4 in overriding 'MultiUQModel.score' method (arguments-differ)
+uqmodels\custom_UQModel.py:13:0: W0611: Unused lstm_ed imported from uqmodels.modelization.DL_estimator (unused-import)
+uqmodels\custom_UQModel.py:13:0: W0611: Unused transformer_ed imported from uqmodels.modelization.DL_estimator (unused-import)
+uqmodels\custom_UQModel.py:25:0: W0611: Unused compute_pca imported from uqmodels.preprocessing.features_processing (unused-import)
+************* Module uqmodels.processing
+uqmodels\processing.py:326:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\processing.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\processing.py:19:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\processing.py:33:10: R0123: In 'path is not ''', use '!=' when comparing constant literals not 'is not' ('path != ''') (literal-comparison)
+uqmodels\processing.py:42:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\processing.py:48:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\processing.py:49:4: W0237: Parameter 'o' has been renamed to 'obj' in overriding 'MyEncoder.default' method (arguments-renamed)
+uqmodels\processing.py:50:8: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+uqmodels\processing.py:65:19: W0718: Catching too general exception BaseException (broad-exception-caught)
+uqmodels\processing.py:64:23: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\processing.py:49:4: R0911: Too many return statements (8/6) (too-many-return-statements)
+uqmodels\processing.py:91:28: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+uqmodels\processing.py:94:13: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+uqmodels\processing.py:102:15: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+uqmodels\processing.py:102:15: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+uqmodels\processing.py:153:15: W1514: Using open without explicitly specifying an encoding (unspecified-encoding)
+uqmodels\processing.py:158:29: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+uqmodels\processing.py:153:15: R1732: Consider using 'with' for resource-allocating operations (consider-using-with)
+uqmodels\processing.py:185:7: E0606: Possibly using variable 'mode' before assignment (possibly-used-before-assignment)
+uqmodels\processing.py:169:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\processing.py:225:7: E0606: Possibly using variable 'mode' before assignment (possibly-used-before-assignment)
+uqmodels\processing.py:227:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\processing.py:210:0: R0912: Too many branches (15/12) (too-many-branches)
+uqmodels\processing.py:210:0: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+uqmodels\processing.py:210:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\processing.py:256:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\processing.py:332:11: C1803: "x == []" can be simplified to "not x", if it is strictly a sequence, as an empty list is falsey (use-implicit-booleaness-not-comparison)
+uqmodels\processing.py:340:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\processing.py:341:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\processing.py:394:12: W0707: Consider explicitly re-raising using 'except (FileNotFoundError, NotADirectoryError) as exc' and 'raise FileNotFoundError(new_query['storing'], new_query['keys']) from exc' (raise-missing-from)
+uqmodels\processing.py:412:11: R0123: In 'query is not {}', use '!=' when comparing constant literals not 'is not' ('query != {}') (literal-comparison)
+uqmodels\processing.py:470:11: C1803: "x == []" can be simplified to "not x", if it is strictly a sequence, as an empty list is falsey (use-implicit-booleaness-not-comparison)
+uqmodels\processing.py:479:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\processing.py:493:8: C0206: Consider iterating with .items() (consider-using-dict-items)
+uqmodels\processing.py:493:23: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\processing.py:497:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\processing.py:511:18: W0613: Unused argument 'data' (unused-argument)
+uqmodels\processing.py:538:31: W0622: Redefining built-in 'object' (redefined-builtin)
+uqmodels\processing.py:569:20: W0622: Redefining built-in 'property' (redefined-builtin)
+uqmodels\processing.py:561:8: R1720: Unnecessary "else" after "raise", remove the "else" and de-indent the code inside it (no-else-raise)
+uqmodels\processing.py:570:20: C2801: Unnecessarily calls dunder method __setattr__. Set attribute directly or use setattr built-in function. (unnecessary-dunder-call)
+uqmodels\processing.py:573:16: W0707: Consider explicitly re-raising using 'except BaseException as exc' and 'raise FileNotFoundError from exc' (raise-missing-from)
+uqmodels\processing.py:604:8: R1720: Unnecessary "else" after "raise", remove the "else" and de-indent the code inside it (no-else-raise)
+uqmodels\processing.py:612:16: W0707: Consider explicitly re-raising using 'except (FileNotFoundError, NotADirectoryError) as exc' and 'raise FileNotFoundError from exc' (raise-missing-from)
+uqmodels\processing.py:618:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\processing.py:620:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\processing.py:621:67: W0613: Unused argument 'skip_cache' (unused-argument)
+uqmodels\processing.py:666:23: W0718: Catching too general exception BaseException (broad-exception-caught)
+uqmodels\processing.py:660:16: W0612: Unused variable 'n' (unused-variable)
+uqmodels\processing.py:755:49: E0606: Possibly using variable 'X' before assignment (possibly-used-before-assignment)
+uqmodels\processing.py:755:52: E0606: Possibly using variable 'y' before assignment (possibly-used-before-assignment)
+uqmodels\processing.py:680:4: R0912: Too many branches (19/12) (too-many-branches)
+************* Module uqmodels.UQModel
+uqmodels\UQModel.py:331:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\UQModel.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\UQModel.py:21:0: R0902: Too many instance attributes (19/15) (too-many-instance-attributes)
+uqmodels\UQModel.py:27:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\UQModel.py:27:4: R0917: Too many positional arguments (14/5) (too-many-positional-arguments)
+uqmodels\UQModel.py:96:8: C0206: Consider iterating with .items() (consider-using-dict-items)
+uqmodels\UQModel.py:96:23: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\UQModel.py:140:12: C2801: Unnecessarily calls dunder method __setattr__. Set attribute directly or use setattr built-in function. (unnecessary-dunder-call)
+uqmodels\UQModel.py:140:34: C2801: Unnecessarily calls dunder method __getattribute__. Access attribute directly or use getattr built-in function. (unnecessary-dunder-call)
+uqmodels\UQModel.py:325:23: W0212: Access to a protected member _format of a client class (protected-access)
+uqmodels\UQModel.py:337:26: E0601: Using variable 'generator' before assignment (used-before-assignment)
+uqmodels\UQModel.py:267:4: R0912: Too many branches (13/12) (too-many-branches)
+uqmodels\UQModel.py:321:36: W0612: Unused variable 'w_' (unused-variable)
+uqmodels\UQModel.py:452:48: E0601: Using variable 'generator' before assignment (used-before-assignment)
+uqmodels\UQModel.py:579:23: W0212: Access to a protected member _format of a client class (protected-access)
+uqmodels\UQModel.py:586:48: E0601: Using variable 'generator' before assignment (used-before-assignment)
+uqmodels\UQModel.py:575:36: W0612: Unused variable 'w_' (unused-variable)
+uqmodels\UQModel.py:10:0: W0611: Unused numpy imported as np (unused-import)
+uqmodels\UQModel.py:14:0: W0611: Unused uqmodels.postprocessing.UQKPI_Processor imported as UQProc (unused-import)
+uqmodels\UQModel.py:15:0: W0611: Unused uqmodels.preprocessing.preprocessing imported as pre_pre (unused-import)
+uqmodels\UQModel.py:16:0: W0611: Unused uqmodels.preprocessing.structure imported as pre_struc (unused-import)
+uqmodels\UQModel.py:18:0: W0611: Unused cut imported from uqmodels.utils (unused-import)
+************* Module uqmodels.utils
+uqmodels\utils.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\utils.py:28:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\utils.py:48:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:125:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:155:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:174:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:186:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:196:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:201:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:205:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:215:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:270:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:270:68: W0613: Unused argument 'name' (unused-argument)
+uqmodels\utils.py:357:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\utils.py:363:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\utils.py:375:33: W0613: Unused argument 'reduc_filter' (unused-argument)
+uqmodels\utils.py:424:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\utils.py:424:0: R0912: Too many branches (17/12) (too-many-branches)
+uqmodels\utils.py:518:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:556:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\utils.py:597:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:604:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:611:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\utils.py:643:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:643:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\utils.py:644:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\utils.py:716:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:716:4: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+uqmodels\utils.py:716:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\utils.py:746:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\utils.py:747:29: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\utils.py:746:59: W0613: Unused argument 'fit' (unused-argument)
+uqmodels\utils.py:774:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\utils.py:801:24: W0622: Redefining built-in 'filter' (redefined-builtin)
+uqmodels\utils.py:814:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+************* Module uqmodels.evaluation.base_metrics
+uqmodels\evaluation\base_metrics.py:13:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:14:11: W1114: Positional arguments appear to be out of order (arguments-out-of-order)
+uqmodels\evaluation\base_metrics.py:17:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:18:19: W1114: Positional arguments appear to be out of order (arguments-out-of-order)
+uqmodels\evaluation\base_metrics.py:21:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:26:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:32:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:33:4: W0106: Expression "-np.log(sigma) - 0.5 * np.log(2 * np.pi) - (y - pred)**2 / (2 * sigma**2)" is assigned to nothing (expression-not-assigned)
+uqmodels\evaluation\base_metrics.py:36:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:40:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:44:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:49:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:53:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:57:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:65:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:75:12: R1736: Unnecessary list index lookup, use 'flag' instead (unnecessary-list-index-lookup)
+uqmodels\evaluation\base_metrics.py:72:11: W0612: Unused variable 'flag' (unused-variable)
+uqmodels\evaluation\base_metrics.py:105:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\base_metrics.py:105:0: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\evaluation\base_metrics.py:106:65: W0613: Unused argument 'verbose' (unused-argument)
+uqmodels\evaluation\base_metrics.py:117:8: W0612: Unused variable 'n' (unused-variable)
+************* Module uqmodels.evaluation.evaluation
+uqmodels\evaluation\evaluation.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\evaluation\evaluation.py:9:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\evaluation.py:22:8: W0104: Statement seems to have no effect (pointless-statement)
+uqmodels\evaluation\evaluation.py:49:8: W0631: Using possibly undefined loop variable 'n' (undefined-loop-variable)
+uqmodels\evaluation\evaluation.py:60:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\evaluation.py:60:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\evaluation\evaluation.py:72:0: C0116: Missing function or method docstring (missing-function-docstring)
+************* Module uqmodels.evaluation.metrics
+uqmodels\evaluation\metrics.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\evaluation\metrics.py:36:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\metrics.py:47:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\evaluation\metrics.py:48:4: W0231: __init__ method from base class 'Encapsulated_metrics' is not called (super-init-not-called)
+uqmodels\evaluation\metrics.py:48:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:76:25: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\evaluation\metrics.py:94:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:117:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:117:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:149:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:181:35: E0606: Possibly using variable 'y_lower' before assignment (possibly-used-before-assignment)
+uqmodels\evaluation\metrics.py:181:50: E0606: Possibly using variable 'y_upper' before assignment (possibly-used-before-assignment)
+uqmodels\evaluation\metrics.py:150:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:191:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:215:16: E0606: Possibly using variable 'sigma' before assignment (possibly-used-before-assignment)
+uqmodels\evaluation\metrics.py:191:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:227:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:253:32: E0606: Possibly using variable 'sigma' before assignment (possibly-used-before-assignment)
+uqmodels\evaluation\metrics.py:228:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:269:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:270:50: W0613: Unused argument 'mode' (unused-argument)
+uqmodels\evaluation\metrics.py:270:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:299:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:317:4: W0127: Assigning the same variable 'val' to itself (self-assigning-variable)
+uqmodels\evaluation\metrics.py:299:11: W0613: Unused argument 'y' (unused-argument)
+uqmodels\evaluation\metrics.py:299:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:314:4: W0612: Unused variable 'pred' (unused-variable)
+uqmodels\evaluation\metrics.py:328:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\metrics.py:328:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:339:8: W0104: Statement seems to have no effect (pointless-statement)
+uqmodels\evaluation\metrics.py:341:25: E1121: Too many positional arguments for function call (too-many-function-args)
+uqmodels\evaluation\metrics.py:354:11: E0606: Possibly using variable 'new_output' before assignment (possibly-used-before-assignment)
+uqmodels\evaluation\metrics.py:329:15: W0613: Unused argument 'set_' (unused-argument)
+uqmodels\evaluation\metrics.py:329:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:357:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\metrics.py:357:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:358:11: W0612: Unused variable 'var_A' (unused-variable)
+uqmodels\evaluation\metrics.py:358:18: W0612: Unused variable 'var_E' (unused-variable)
+uqmodels\evaluation\metrics.py:370:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\metrics.py:370:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:374:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\metrics.py:374:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:378:4: W0127: Assigning the same variable 'val' to itself (self-assigning-variable)
+uqmodels\evaluation\metrics.py:374:8: W0613: Unused argument 'y' (unused-argument)
+uqmodels\evaluation\metrics.py:374:39: W0613: Unused argument 'type_output' (unused-argument)
+uqmodels\evaluation\metrics.py:374:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:375:4: W0612: Unused variable 'pred' (unused-variable)
+uqmodels\evaluation\metrics.py:386:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\metrics.py:386:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:401:4: W0621: Redefining name 'anom_score' from outer scope (line 386) (redefined-outer-name)
+uqmodels\evaluation\metrics.py:395:8: W0104: Statement seems to have no effect (pointless-statement)
+uqmodels\evaluation\metrics.py:400:4: E0601: Using variable 'ind_A' before assignment (used-before-assignment)
+uqmodels\evaluation\metrics.py:387:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:414:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\evaluation\metrics.py:414:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\evaluation\metrics.py:429:4: W0621: Redefining name 'confidence_score' from outer scope (line 414) (redefined-outer-name)
+uqmodels\evaluation\metrics.py:423:8: W0104: Statement seems to have no effect (pointless-statement)
+uqmodels\evaluation\metrics.py:415:4: W0613: Unused argument 'y' (unused-argument)
+uqmodels\evaluation\metrics.py:415:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\evaluation\metrics.py:417:4: W0612: Unused variable 'pred' (unused-variable)
+************* Module uqmodels.modelization.UQEstimator
+uqmodels\modelization\UQEstimator.py:144:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\UQEstimator.py:168:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\UQEstimator.py:171:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\UQEstimator.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\UQEstimator.py:36:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\UQEstimator.py:38:8: W0104: Statement seems to have no effect (pointless-statement)
+uqmodels\modelization\UQEstimator.py:43:0: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\modelization\UQEstimator.py:43:0: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\modelization\UQEstimator.py:43:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\UQEstimator.py:64:29: W0109: Duplicate key 'factory_parameters' in dictionary (duplicate-key)
+uqmodels\modelization\UQEstimator.py:74:4: C0206: Consider iterating with .items() (consider-using-dict-items)
+uqmodels\modelization\UQEstimator.py:74:19: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\modelization\UQEstimator.py:85:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\UQEstimator.py:118:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\UQEstimator.py:118:4: R0912: Too many branches (21/12) (too-many-branches)
+uqmodels\modelization\UQEstimator.py:136:8: W0612: Unused variable 'scalerX' (unused-variable)
+uqmodels\modelization\UQEstimator.py:136:17: W0612: Unused variable 'scalerY' (unused-variable)
+uqmodels\modelization\UQEstimator.py:203:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\UQEstimator.py:204:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\UQEstimator.py:232:19: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\modelization\UQEstimator.py:233:23: C2801: Unnecessarily calls dunder method __getattribute__. Access attribute directly or use getattr built-in function. (unnecessary-dunder-call)
+uqmodels\modelization\UQEstimator.py:234:35: C2801: Unnecessarily calls dunder method __getattribute__. Access attribute directly or use getattr built-in function. (unnecessary-dunder-call)
+uqmodels\modelization\UQEstimator.py:236:35: C2801: Unnecessarily calls dunder method __getattribute__. Access attribute directly or use getattr built-in function. (unnecessary-dunder-call)
+uqmodels\modelization\UQEstimator.py:239:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\UQEstimator.py:240:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\UQEstimator.py:254:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\UQEstimator.py:313:4: W0222: Signature differs from overridden '_format' method (signature-differs)
+uqmodels\modelization\UQEstimator.py:313:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\UQEstimator.py:336:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\UQEstimator.py:337:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\UQEstimator.py:337:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\UQEstimator.py:338:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\UQEstimator.py:384:12: W0612: Unused variable 'n' (unused-variable)
+uqmodels\modelization\UQEstimator.py:392:4: W0222: Signature differs from overridden '_format' method (signature-differs)
+uqmodels\modelization\UQEstimator.py:392:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\UQEstimator.py:424:4: W0221: Number of parameters was 9 in 'UQEstimator._tuning' and is now 7 in overriding 'QuantileUQEstimator._tuning' method (arguments-differ)
+uqmodels\modelization\UQEstimator.py:424:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+************* Module uqmodels.modelization.DL_estimator.baseline_models
+uqmodels\modelization\DL_estimator\baseline_models.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\DL_estimator\baseline_models.py:8:0: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\baseline_models.py:63:4: W0621: Redefining name 'cnn_mlp' from outer scope (line 8) (redefined-outer-name)
+uqmodels\modelization\DL_estimator\baseline_models.py:15:4: W0613: Unused argument 'dim_z' (unused-argument)
+************* Module uqmodels.modelization.DL_estimator.data_embedding
+uqmodels\modelization\DL_estimator\data_embedding.py:237:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\data_embedding.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:22:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:23:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:35:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:24:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:44:27: W0613: Unused argument 'mode' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:71:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:72:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:73:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:96:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\modelization\DL_estimator\data_embedding.py:100:27: E0606: Possibly using variable 'size_output' before assignment (possibly-used-before-assignment)
+uqmodels\modelization\DL_estimator\data_embedding.py:114:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:119:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:124:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:129:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:130:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\data_embedding.py:130:4: R0917: Too many positional arguments (13/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:261:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:281:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:283:8: W0621: Redefining name 'layers' from outer scope (line 7) (redefined-outer-name)
+uqmodels\modelization\DL_estimator\data_embedding.py:293:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:294:4: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:305:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:312:11: W0125: Using a conditional statement with a constant value (using-constant-test)
+uqmodels\modelization\DL_estimator\data_embedding.py:340:34: W0613: Unused argument 'extension' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:360:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:365:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:381:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:390:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:392:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:407:19: W0613: Unused argument 'inputs' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:407:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:419:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:421:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:428:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:442:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:444:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:461:0: W0613: Unused argument 'kargs' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:474:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:476:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:485:0: W0613: Unused argument 'kargs' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:498:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\data_embedding.py:500:8: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\data_embedding.py:509:27: W0613: Unused argument 'x_mark' (unused-argument)
+uqmodels\modelization\DL_estimator\data_embedding.py:509:0: W0613: Unused argument 'kwargs' (unused-argument)
+************* Module uqmodels.modelization.DL_estimator.loss
+uqmodels\modelization\DL_estimator\loss.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\DL_estimator\loss.py:7:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\loss.py:36:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\loss.py:48:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\loss.py:59:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\loss.py:60:11: W0612: Unused variable 'vu' (unused-variable)
+uqmodels\modelization\DL_estimator\loss.py:71:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\loss.py:96:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\loss.py:97:11: W0612: Unused variable 'vu' (unused-variable)
+uqmodels\modelization\DL_estimator\loss.py:120:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\loss.py:123:11: R1714: Consider merging these comparisons with 'in' by using 'type_output in ('MC_Dropout', 'Deep_ensemble')'. Use a set instead if elements are hashable. (consider-using-in)
+uqmodels\modelization\DL_estimator\loss.py:137:26: E0606: Possibly using variable 'logvar' before assignment (possibly-used-before-assignment)
+uqmodels\modelization\DL_estimator\loss.py:127:19: W0612: Unused variable 'vu' (unused-variable)
+uqmodels\modelization\DL_estimator\loss.py:164:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\loss.py:165:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\loss.py:176:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\loss.py:189:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\loss.py:212:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\loss.py:212:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+************* Module uqmodels.modelization.DL_estimator.lstm_ed
+uqmodels\modelization\DL_estimator\lstm_ed.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\DL_estimator\lstm_ed.py:26:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\lstm_ed.py:26:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\lstm_ed.py:26:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\lstm_ed.py:26:0: R0917: Too many positional arguments (23/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\lstm_ed.py:242:7: W0125: Using a conditional statement with a constant value (using-constant-test)
+uqmodels\modelization\DL_estimator\lstm_ed.py:245:34: W0631: Using possibly undefined loop variable 'Decoder' (undefined-loop-variable)
+uqmodels\modelization\DL_estimator\lstm_ed.py:262:7: W0125: Using a conditional statement with a constant value (using-constant-test)
+uqmodels\modelization\DL_estimator\lstm_ed.py:26:0: R0912: Too many branches (18/12) (too-many-branches)
+uqmodels\modelization\DL_estimator\lstm_ed.py:26:0: R0915: Too many statements (61/50) (too-many-statements)
+uqmodels\modelization\DL_estimator\lstm_ed.py:27:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\lstm_ed.py:273:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\lstm_ed.py:274:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\lstm_ed.py:274:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\lstm_ed.py:274:4: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\lstm_ed.py:277:27: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\DL_estimator\lstm_ed.py:278:28: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\DL_estimator\lstm_ed.py:315:4: W0221: Number of parameters was 6 in 'NN_UQ.factory' and is now 6 in overriding 'Lstm_ED_UQ.factory' method (arguments-differ)
+uqmodels\modelization\DL_estimator\lstm_ed.py:334:16: W0632: Possible unbalanced tuple unpacking with sequence defined at line 182 of uqmodels.modelization.DL_estimator.neural_network_UQ: left side has 3 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\lstm_ed.py:353:16: W0632: Possible unbalanced tuple unpacking with sequence defined at line 182 of uqmodels.modelization.DL_estimator.neural_network_UQ: left side has 3 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\lstm_ed.py:367:12: W0632: Possible unbalanced tuple unpacking with sequence defined at line 182 of uqmodels.modelization.DL_estimator.neural_network_UQ: left side has 3 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\lstm_ed.py:315:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\lstm_ed.py:377:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\lstm_ed.py:389:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\lstm_ed.py:389:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\lstm_ed.py:389:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\lstm_ed.py:389:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\lstm_ed.py:389:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\lstm_ed.py:389:0: R0917: Too many positional arguments (23/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\lstm_ed.py:1:0: W0611: Unused numpy imported as np (unused-import)
+uqmodels\modelization\DL_estimator\lstm_ed.py:11:0: W0611: Unused get_training_parameters imported from uqmodels.modelization.DL_estimator.neural_network_UQ (unused-import)
+uqmodels\modelization\DL_estimator\lstm_ed.py:11:0: W0611: Unused get_UQEstimator_parameters imported from uqmodels.modelization.DL_estimator.neural_network_UQ (unused-import)
+uqmodels\modelization\DL_estimator\lstm_ed.py:21:0: W0611: Unused apply_mask imported from uqmodels.utils (unused-import)
+************* Module uqmodels.modelization.DL_estimator.Lstm_WS_ED
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:458:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:516:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:535:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:789:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:958:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:983:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:1023:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:1:0: C0302: Too many lines in module (1093/1000) (too-many-lines)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:27:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:34:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:39:28: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:88:12: W0719: Raising too general exception: Exception (broad-exception-raised)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:79:12: W0612: Unused variable 'size_subseq_enc' (unused-variable)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:108:28: W0612: Unused variable 'dim_target_in' (unused-variable)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:108:54: W0612: Unused variable 'dp_r' (unused-variable)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:150:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:164:11: R1714: Consider merging these comparisons with 'in' by using 'self.type_output in ('MC_Dropout', 'MCDP')'. Use a set instead if elements are hashable. (consider-using-in)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:315:34: W0108: Lambda may not be necessary (unnecessary-lambda)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:354:55: E0601: Using variable 'Z_futur_query' before assignment (used-before-assignment)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:150:4: R0912: Too many branches (22/12) (too-many-branches)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:150:4: R0915: Too many statements (99/50) (too-many-statements)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:469:4: W0237: Parameter 'X' has been renamed to 'Inputs' in overriding 'Lstm.fit' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:469:4: W0237: Parameter 'y' has been renamed to 'Targets' in overriding 'Lstm.fit' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:469:4: W0237: Parameter 'skip_format' has been renamed to 'validation_data' in overriding 'Lstm.fit' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:469:4: R0917: Too many positional arguments (17/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:569:42: C2801: Unnecessarily calls dunder method __len__. Use len built-in function. (unnecessary-dunder-call)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:570:39: C2801: Unnecessarily calls dunder method __len__. Use len built-in function. (unnecessary-dunder-call)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:469:4: R0912: Too many branches (21/12) (too-many-branches)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:469:4: R0915: Too many statements (57/50) (too-many-statements)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:481:8: W0613: Unused argument 'sample_weight' (unused-argument)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:598:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:598:4: W0237: Parameter 'X' has been renamed to 'Inputs' in overriding 'Lstm.predict' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:598:4: W0237: Parameter 'skip_format' has been renamed to 'n_ech' in overriding 'Lstm.predict' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:598:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:671:35: E0601: Using variable 'UQ' before assignment (used-before-assignment)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:598:4: R0912: Too many branches (13/12) (too-many-branches)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:647:24: W0612: Unused variable 'i' (unused-variable)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:674:4: W0221: Number of parameters was 6 in 'UQEstimator._format' and is now 5 in overriding 'Lstm._format' method (arguments-differ)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:693:20: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:700:23: R1725: Consider using Python 3 style super() without arguments (super-with-arguments)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:707:4: W0237: Parameter 'type_transform' has been renamed to 'mask' in overriding 'Lstm.factory' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:707:4: W0237: Parameter 'only_fit_scaler' has been renamed to 'cut_param' in overriding 'Lstm.factory' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:707:4: W0221: Variadics removed in overriding 'Lstm.factory' method (arguments-differ)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:707:4: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:707:4: R0912: Too many branches (15/12) (too-many-branches)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:707:4: R0915: Too many statements (59/50) (too-many-statements)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:713:8: W0613: Unused argument 'fit_rescale' (unused-argument)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:863:4: W0221: Number of parameters was 2 in 'UQEstimator.get_params' and is now 1 in overriding 'Lstm.get_params' method (arguments-differ)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:873:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:880:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:887:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:897:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:910:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:910:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:935:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:935:0: R0902: Too many instance attributes (20/15) (too-many-instance-attributes)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:936:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:972:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:1054:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\Lstm_WS_ED.py:1054:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+************* Module uqmodels.modelization.DL_estimator.metalayers
+uqmodels\modelization\DL_estimator\metalayers.py:1:0: C0302: Too many lines in module (1258/1000) (too-many-lines)
+uqmodels\modelization\DL_estimator\metalayers.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\DL_estimator\metalayers.py:18:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\metalayers.py:26:4: W0237: Parameter 'inputs' has been renamed to 'x' in overriding 'EDLProcessing.call' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\metalayers.py:26:4: W0221: Variadics removed in overriding 'EDLProcessing.call' method (arguments-differ)
+uqmodels\modelization\DL_estimator\metalayers.py:61:4: W0237: Parameter 'inputs' has been renamed to 'x' in overriding 'ProbabilisticProcessing.call' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\metalayers.py:61:4: W0221: Variadics removed in overriding 'ProbabilisticProcessing.call' method (arguments-differ)
+uqmodels\modelization\DL_estimator\metalayers.py:81:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\metalayers.py:81:0: R0917: Too many positional arguments (12/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:185:4: W0621: Redefining name 'mlp' from outer scope (line 81) (redefined-outer-name)
+uqmodels\modelization\DL_estimator\metalayers.py:156:9: R1714: Consider merging these comparisons with 'in' by using 'type_output in ('MC_Dropout', 'Deep_ensemble')'. Use a set instead if elements are hashable. (consider-using-in)
+uqmodels\modelization\DL_estimator\metalayers.py:82:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\metalayers.py:195:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:196:56: W0622: Redefining built-in 'format' (redefined-builtin)
+uqmodels\modelization\DL_estimator\metalayers.py:216:4: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+uqmodels\modelization\DL_estimator\metalayers.py:245:8: R1722: Consider using 'sys.exit' instead (consider-using-sys-exit)
+uqmodels\modelization\DL_estimator\metalayers.py:195:0: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+uqmodels\modelization\DL_estimator\metalayers.py:250:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:251:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\metalayers.py:327:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:328:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\metalayers.py:402:0: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:403:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\metalayers.py:474:0: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:475:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\metalayers.py:561:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\metalayers.py:561:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:588:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\metalayers.py:588:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:590:4: W0613: Unused argument 'dim_chan' (unused-argument)
+uqmodels\modelization\DL_estimator\metalayers.py:613:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\metalayers.py:613:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\metalayers.py:613:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\metalayers.py:613:0: R0917: Too many positional arguments (11/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:614:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\metalayers.py:683:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\metalayers.py:683:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:707:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\metalayers.py:707:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:729:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\metalayers.py:729:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\metalayers.py:729:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\metalayers.py:729:0: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:730:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\metalayers.py:798:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\metalayers.py:798:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\metalayers.py:798:0: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:870:12: W0622: Redefining built-in 'slice' (redefined-builtin)
+uqmodels\modelization\DL_estimator\metalayers.py:868:8: W0612: Unused variable 'i' (unused-variable)
+uqmodels\modelization\DL_estimator\metalayers.py:886:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:896:4: W0246: Useless parent or super() delegation in method 'build' (useless-parent-delegation)
+uqmodels\modelization\DL_estimator\metalayers.py:899:4: W0237: Parameter 'inputs' has been renamed to 'input_data' in overriding 'Moving_slice_layer.call' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\metalayers.py:899:4: W0221: Variadics removed in overriding 'Moving_slice_layer.call' method (arguments-differ)
+uqmodels\modelization\DL_estimator\metalayers.py:938:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:948:4: W0246: Useless parent or super() delegation in method 'build' (useless-parent-delegation)
+uqmodels\modelization\DL_estimator\metalayers.py:951:4: W0237: Parameter 'inputs' has been renamed to 'input_data' in overriding 'Double_Moving_slice_layer.call' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\metalayers.py:951:4: W0221: Variadics removed in overriding 'Double_Moving_slice_layer.call' method (arguments-differ)
+uqmodels\modelization\DL_estimator\metalayers.py:1018:8: W0612: Unused variable 'outputs' (unused-variable)
+uqmodels\modelization\DL_estimator\metalayers.py:1044:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:1066:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:1131:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\metalayers.py:1172:37: E1120: No value for argument 'values' in function call (no-value-for-parameter)
+uqmodels\modelization\DL_estimator\metalayers.py:1186:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\metalayers.py:1195:4: W0221: Number of parameters was 4 in 'Layer.call' and is now 3 in overriding 'Add_query_to_Z_Processing_with_state.call' method (arguments-differ)
+uqmodels\modelization\DL_estimator\metalayers.py:1195:4: W0221: Variadics removed in overriding 'Add_query_to_Z_Processing_with_state.call' method (arguments-differ)
+uqmodels\modelization\DL_estimator\metalayers.py:9:0: W0611: Unused generate_random_state imported from utils (unused-import)
+************* Module uqmodels.modelization.DL_estimator.neural_network_UQ
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:370:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:18:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:18:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:25:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:25:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:25:4: R0917: Too many positional arguments (12/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:29:27: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:30:28: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:25:4: R0912: Too many branches (13/12) (too-many-branches)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:135:12: W0127: Assigning the same variable 'loss' to itself (self-assigning-variable)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:163:4: W0221: Number of parameters was 6 in 'UQEstimator._format' and is now 5 in overriding 'NN_UQ._format' method (arguments-differ)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:167:4: W0237: Parameter 'type_transform' has been renamed to 'mask' in overriding 'NN_UQ.factory' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:167:4: W0237: Parameter 'only_fit_scaler' has been renamed to 'cut_param' in overriding 'NN_UQ.factory' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:167:4: W0221: Variadics removed in overriding 'NN_UQ.factory' method (arguments-differ)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:167:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:171:16: W0127: Assigning the same variable 'y' to itself (self-assigning-variable)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:188:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:207:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:215:12: C2801: Unnecessarily calls dunder method __setattr__. Set attribute directly or use setattr built-in function. (unnecessary-dunder-call)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:227:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:244:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:251:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:262:16: W0612: Unused variable 'i' (unused-variable)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:268:4: W0237: Parameter 'X' has been renamed to 'Inputs' in overriding 'NN_UQ.fit' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:268:4: W0237: Parameter 'y' has been renamed to 'Targets' in overriding 'NN_UQ.fit' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:268:4: W0237: Parameter 'skip_format' has been renamed to 'train' in overriding 'NN_UQ.fit' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:268:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:310:12: W0612: Unused variable 'i' (unused-variable)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:315:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:315:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:315:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:315:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:315:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:315:4: R0917: Too many positional arguments (19/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:315:4: R0912: Too many branches (16/12) (too-many-branches)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:316:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:460:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:500:30: C2801: Unnecessarily calls dunder method __len__. Use len built-in function. (unnecessary-dunder-call)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:501:31: C2801: Unnecessarily calls dunder method __len__. Use len built-in function. (unnecessary-dunder-call)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:518:4: W0237: Parameter 'skip_format' has been renamed to 'type_output' in overriding 'NN_UQ.predict' method (arguments-renamed)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:534:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:534:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:586:12: W0719: Raising too general exception: Exception (broad-exception-raised)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:535:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:592:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:592:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:169:12: W0201: Attribute 'y_shape' defined outside __init__ (attribute-defined-outside-init)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:202:8: W0201: Attribute 'model' defined outside __init__ (attribute-defined-outside-init)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:205:8: W0201: Attribute 'model' defined outside __init__ (attribute-defined-outside-init)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:247:8: W0201: Attribute 'model' defined outside __init__ (attribute-defined-outside-init)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:261:12: W0201: Attribute 'model' defined outside __init__ (attribute-defined-outside-init)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:265:12: W0201: Attribute 'model' defined outside __init__ (attribute-defined-outside-init)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:596:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:626:16: W0632: Possible unbalanced tuple unpacking with sequence defined at line 785 of numpy.lib.shape_base: left side has 2 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:646:12: W0632: Possible unbalanced tuple unpacking with sequence defined at line 785 of numpy.lib.shape_base: left side has 2 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:618:16: W0612: Unused variable 'i' (unused-variable)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:679:8: W0632: Possible unbalanced tuple unpacking with sequence defined at line 785 of numpy.lib.shape_base: left side has 4 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:693:8: W0632: Possible unbalanced tuple unpacking with sequence defined at line 785 of numpy.lib.shape_base: left side has 2 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:654:44: W0613: Unused argument 'ddof' (unused-argument)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:730:12: W0632: Possible unbalanced tuple unpacking with sequence defined at line 785 of numpy.lib.shape_base: left side has 2 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:742:8: W0632: Possible unbalanced tuple unpacking with sequence defined at line 785 of numpy.lib.shape_base: left side has 2 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:706:69: W0613: Unused argument 'type_output' (unused-argument)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:750:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:750:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:750:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:750:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:750:0: R0917: Too many positional arguments (12/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:799:4: C0206: Consider iterating with .items() (consider-using-dict-items)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:799:19: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:804:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:804:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:804:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:840:4: C0206: Consider iterating with .items() (consider-using-dict-items)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:840:19: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:846:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:847:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:868:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:948:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:4:0: W0611: Unused import random (unused-import)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:12:0: W0611: Unused mlp imported from uqmodels.modelization.DL_estimator.metalayers (unused-import)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:14:0: W0611: Unused get_UQEstimator_parameters imported from uqmodels.modelization.UQEstimator (unused-import)
+uqmodels\modelization\DL_estimator\neural_network_UQ.py:15:0: W0611: Unused generate_random_state imported from uqmodels.utils (unused-import)
+************* Module uqmodels.modelization.DL_estimator.transformer_ed
+uqmodels\modelization\DL_estimator\transformer_ed.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:28:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:33:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:38:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:44:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:53:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\transformer_ed.py:54:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\transformer_ed.py:105:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:121:8: W0127: Assigning the same variable 'config' to itself (self-assigning-variable)
+uqmodels\modelization\DL_estimator\transformer_ed.py:125:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:150:0: R0902: Too many instance attributes (17/15) (too-many-instance-attributes)
+uqmodels\modelization\DL_estimator\transformer_ed.py:153:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\transformer_ed.py:154:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\transformer_ed.py:186:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\transformer_ed.py:242:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:265:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:293:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\transformer_ed.py:293:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\transformer_ed.py:293:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\transformer_ed.py:293:0: R0917: Too many positional arguments (26/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\transformer_ed.py:294:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\DL_estimator\transformer_ed.py:495:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\transformer_ed.py:495:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\transformer_ed.py:495:4: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\transformer_ed.py:499:28: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\DL_estimator\transformer_ed.py:537:4: W0221: Number of parameters was 6 in 'NN_UQ.factory' and is now 6 in overriding 'Transformer_ED_UQ.factory' method (arguments-differ)
+uqmodels\modelization\DL_estimator\transformer_ed.py:556:16: W0632: Possible unbalanced tuple unpacking with sequence defined at line 182 of uqmodels.modelization.DL_estimator.neural_network_UQ: left side has 3 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\transformer_ed.py:575:16: W0632: Possible unbalanced tuple unpacking with sequence defined at line 182 of uqmodels.modelization.DL_estimator.neural_network_UQ: left side has 3 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\transformer_ed.py:589:12: W0632: Possible unbalanced tuple unpacking with sequence defined at line 182 of uqmodels.modelization.DL_estimator.neural_network_UQ: left side has 3 labels, right side has 0 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\transformer_ed.py:537:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\modelization\DL_estimator\transformer_ed.py:598:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\transformer_ed.py:610:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\transformer_ed.py:610:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\transformer_ed.py:610:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\transformer_ed.py:610:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\transformer_ed.py:610:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\DL_estimator\transformer_ed.py:610:0: R0917: Too many positional arguments (24/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\transformer_ed.py:2:0: W0611: Unused numpy imported as np (unused-import)
+uqmodels\modelization\DL_estimator\transformer_ed.py:5:0: W0611: Unused keras imported from tensorflow (unused-import)
+uqmodels\modelization\DL_estimator\transformer_ed.py:14:0: W0611: Unused get_training_parameters imported from uqmodels.modelization.DL_estimator.neural_network_UQ (unused-import)
+uqmodels\modelization\DL_estimator\transformer_ed.py:14:0: W0611: Unused get_UQEstimator_parameters imported from uqmodels.modelization.DL_estimator.neural_network_UQ (unused-import)
+************* Module uqmodels.modelization.DL_estimator.utils
+uqmodels\modelization\DL_estimator\utils.py:55:0: C0325: Unnecessary parens after 'raise' keyword (superfluous-parens)
+uqmodels\modelization\DL_estimator\utils.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\DL_estimator\utils.py:10:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\utils.py:62:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\utils.py:63:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\utils.py:71:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\utils.py:82:8: W0632: Possible unbalanced tuple unpacking with sequence : left side has 3 labels, right side has 2 values (unbalanced-tuple-unpacking)
+uqmodels\modelization\DL_estimator\utils.py:82:28: E1123: Unexpected keyword argument 'fit_rescale' in function call (unexpected-keyword-arg)
+uqmodels\modelization\DL_estimator\utils.py:95:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\utils.py:99:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\utils.py:107:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\modelization\DL_estimator\utils.py:118:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\modelization\DL_estimator\utils.py:118:0: R0902: Too many instance attributes (19/15) (too-many-instance-attributes)
+uqmodels\modelization\DL_estimator\utils.py:119:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\modelization\DL_estimator\utils.py:167:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\modelization\DL_estimator\utils.py:205:12: W0104: Statement seems to have no effect (pointless-statement)
+************* Module uqmodels.modelization.ML_estimator.baseline
+uqmodels\modelization\ML_estimator\baseline.py:136:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\ML_estimator\baseline.py:416:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\ML_estimator\baseline.py:50:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\modelization\ML_estimator\baseline.py:50:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\baseline.py:88:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\baseline.py:126:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\baseline.py:146:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\baseline.py:181:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\baseline.py:237:4: W0221: Number of parameters was 9 in 'UQEstimator._tuning' and is now 4 in overriding 'GPR_UQEstimator._tuning' method (arguments-differ)
+uqmodels\modelization\ML_estimator\baseline.py:247:4: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\baseline.py:267:8: W0127: Assigning the same variable 'type_UQ' to itself (self-assigning-variable)
+uqmodels\modelization\ML_estimator\baseline.py:293:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\baseline.py:294:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\ML_estimator\baseline.py:305:4: W0221: Number of parameters was 2 in 'UQEstimator.get_params' and is now 2 in overriding 'REGML_UQEstimator.get_params' method (arguments-differ)
+uqmodels\modelization\ML_estimator\baseline.py:305:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\ML_estimator\baseline.py:396:35: E0601: Using variable 'UQ' before assignment (used-before-assignment)
+uqmodels\modelization\ML_estimator\baseline.py:399:4: W0221: Number of parameters was 9 in 'UQEstimator._tuning' and is now 7 in overriding 'REGML_UQEstimator._tuning' method (arguments-differ)
+uqmodels\modelization\ML_estimator\baseline.py:399:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\baseline.py:19:0: W0611: Unused get_UQEstimator_parameters imported from uqmodels.modelization.UQEstimator (unused-import)
+************* Module uqmodels.modelization.ML_estimator.random_forest_UQ
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:523:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:14:4: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:67:38: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:82:4: W0222: Signature differs from overridden '_format' method (signature-differs)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:82:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:82:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:103:4: W0237: Parameter 'skip_format' has been renamed to 'sample_weight' in overriding 'RF_UQEstimator.fit' method (arguments-renamed)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:124:30: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:110:8: R0912: Too many branches (15/12) (too-many-branches)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:110:40: W0613: Unused argument 'pred_leaf' (unused-argument)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:210:8: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:265:30: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:314:33: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:103:4: R0915: Too many statements (80/50) (too-many-statements)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:103:4: R1711: Useless return at end of function or method (useless-return)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:321:4: W0237: Parameter 'skip_format' has been renamed to 'beta' in overriding 'RF_UQEstimator.predict' method (arguments-renamed)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:338:25: W0612: Unused variable 'var_A' (unused-variable)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:338:32: W0612: Unused variable 'var_E' (unused-variable)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:385:12: W0613: Unused argument 'prediction' (unused-argument)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:519:29: E0606: Possibly using variable 'UQ' before assignment (possibly-used-before-assignment)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:521:4: W0221: Number of parameters was 9 in 'UQEstimator._tuning' and is now 7 in overriding 'RF_UQEstimator._tuning' method (arguments-differ)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:521:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\modelization\ML_estimator\random_forest_UQ.py:533:0: R0917: Too many positional arguments (17/5) (too-many-positional-arguments)
+************* Module uqmodels.postprocessing.anomaly_processing
+uqmodels\postprocessing\anomaly_processing.py:271:0: C0301: Line too long (131/120) (line-too-long)
+uqmodels\postprocessing\anomaly_processing.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\postprocessing\anomaly_processing.py:40:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\postprocessing\anomaly_processing.py:40:0: R0912: Too many branches (16/12) (too-many-branches)
+uqmodels\postprocessing\anomaly_processing.py:166:0: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\postprocessing\anomaly_processing.py:234:8: W0104: Statement seems to have no effect (pointless-statement)
+uqmodels\postprocessing\anomaly_processing.py:256:0: R0917: Too many positional arguments (13/5) (too-many-positional-arguments)
+uqmodels\postprocessing\anomaly_processing.py:361:0: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\postprocessing\anomaly_processing.py:488:0: R0917: Too many positional arguments (23/5) (too-many-positional-arguments)
+uqmodels\postprocessing\anomaly_processing.py:489:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\postprocessing\anomaly_processing.py:604:0: R0917: Too many positional arguments (26/5) (too-many-positional-arguments)
+uqmodels\postprocessing\anomaly_processing.py:815:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\postprocessing\anomaly_processing.py:604:0: R0912: Too many branches (14/12) (too-many-branches)
+uqmodels\postprocessing\anomaly_processing.py:851:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\postprocessing\anomaly_processing.py:851:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\postprocessing\anomaly_processing.py:851:0: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\postprocessing\anomaly_processing.py:852:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\postprocessing\anomaly_processing.py:889:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\postprocessing\anomaly_processing.py:889:0: R0917: Too many positional arguments (11/5) (too-many-positional-arguments)
+uqmodels\postprocessing\anomaly_processing.py:890:0: W0613: Unused argument 'kwargs' (unused-argument)
+************* Module uqmodels.postprocessing.custom_UQKPI_Processor
+uqmodels\postprocessing\custom_UQKPI_Processor.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:15:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:18:23: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:47:8: C0206: Consider iterating with .items() (consider-using-dict-items)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:47:19: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:61:4: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:88:17: R1728: Consider using a generator instead 'max(len(list_y[source_id]) for source_id in range(n_dim))' (consider-using-generator)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:182:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:188:4: W0237: Parameter 'UQ' has been renamed to 'list_UQ' in overriding 'Multiscale_Anomscore_processor.fit' method (arguments-renamed)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:188:4: W0237: Parameter 'pred' has been renamed to 'list_pred' in overriding 'Multiscale_Anomscore_processor.fit' method (arguments-renamed)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:188:4: W0237: Parameter 'y' has been renamed to 'list_y' in overriding 'Multiscale_Anomscore_processor.fit' method (arguments-renamed)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:188:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:219:4: W0237: Parameter 'UQ' has been renamed to 'list_UQ' in overriding 'Multiscale_Anomscore_processor.transform' method (arguments-renamed)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:219:4: W0237: Parameter 'pred' has been renamed to 'list_pred' in overriding 'Multiscale_Anomscore_processor.transform' method (arguments-renamed)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:219:4: W0237: Parameter 'y' has been renamed to 'list_y' in overriding 'Multiscale_Anomscore_processor.transform' method (arguments-renamed)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:219:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:1:0: W0611: Unused deepcopy imported from copy (unused-import)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:6:0: W0611: Unused uqmodels.postprocessing.UQ_processing imported as UQ_proc (unused-import)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:8:0: W0611: Unused Processor imported from uqmodels.processing (unused-import)
+uqmodels\postprocessing\custom_UQKPI_Processor.py:9:0: W0611: Unused apply_middledim_reduction imported from uqmodels.utils (unused-import)
+************* Module uqmodels.postprocessing.UQKPI_Processor
+uqmodels\postprocessing\UQKPI_Processor.py:147:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\postprocessing\UQKPI_Processor.py:202:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\postprocessing\UQKPI_Processor.py:398:0: C0304: Final newline missing (missing-final-newline)
+uqmodels\postprocessing\UQKPI_Processor.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\postprocessing\UQKPI_Processor.py:21:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\postprocessing\UQKPI_Processor.py:47:4: W0237: Parameter 'data' has been renamed to 'UQ' in overriding 'UQKPI_Processor.fit' method (arguments-renamed)
+uqmodels\postprocessing\UQKPI_Processor.py:47:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQKPI_Processor.py:48:14: W0613: Unused argument 'UQ' (unused-argument)
+uqmodels\postprocessing\UQKPI_Processor.py:48:37: W0613: Unused argument 'pred' (unused-argument)
+uqmodels\postprocessing\UQKPI_Processor.py:48:48: W0613: Unused argument 'y' (unused-argument)
+uqmodels\postprocessing\UQKPI_Processor.py:48:56: W0613: Unused argument 'type_UQ_params' (unused-argument)
+uqmodels\postprocessing\UQKPI_Processor.py:48:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\postprocessing\UQKPI_Processor.py:63:4: W0237: Parameter 'data' has been renamed to 'UQ' in overriding 'UQKPI_Processor.transform' method (arguments-renamed)
+uqmodels\postprocessing\UQKPI_Processor.py:63:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQKPI_Processor.py:64:48: W0613: Unused argument 'y' (unused-argument)
+uqmodels\postprocessing\UQKPI_Processor.py:64:56: W0613: Unused argument 'type_UQ_params' (unused-argument)
+uqmodels\postprocessing\UQKPI_Processor.py:64:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\postprocessing\UQKPI_Processor.py:108:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\postprocessing\UQKPI_Processor.py:131:4: W0222: Signature differs from overridden 'fit' method (signature-differs)
+uqmodels\postprocessing\UQKPI_Processor.py:131:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQKPI_Processor.py:179:4: W0222: Signature differs from overridden 'transform' method (signature-differs)
+uqmodels\postprocessing\UQKPI_Processor.py:179:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQKPI_Processor.py:237:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\postprocessing\UQKPI_Processor.py:253:4: W0222: Signature differs from overridden 'fit' method (signature-differs)
+uqmodels\postprocessing\UQKPI_Processor.py:253:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQKPI_Processor.py:269:4: W0222: Signature differs from overridden 'transform' method (signature-differs)
+uqmodels\postprocessing\UQKPI_Processor.py:269:4: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQKPI_Processor.py:300:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\postprocessing\UQKPI_Processor.py:300:56: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\postprocessing\UQKPI_Processor.py:316:4: W0222: Signature differs from overridden 'fit' method (signature-differs)
+uqmodels\postprocessing\UQKPI_Processor.py:316:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQKPI_Processor.py:360:4: W0222: Signature differs from overridden 'transform' method (signature-differs)
+uqmodels\postprocessing\UQKPI_Processor.py:360:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+************* Module uqmodels.postprocessing.UQ_processing
+uqmodels\postprocessing\UQ_processing.py:976:0: C0325: Unnecessary parens after 'raise' keyword (superfluous-parens)
+uqmodels\postprocessing\UQ_processing.py:1068:0: C0325: Unnecessary parens after 'raise' keyword (superfluous-parens)
+uqmodels\postprocessing\UQ_processing.py:1:0: C0302: Too many lines in module (1136/1000) (too-many-lines)
+uqmodels\postprocessing\UQ_processing.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\postprocessing\UQ_processing.py:26:8: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+uqmodels\postprocessing\UQ_processing.py:13:0: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+uqmodels\postprocessing\UQ_processing.py:75:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\postprocessing\UQ_processing.py:75:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:120:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:184:0: R0917: Too many positional arguments (15/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:187:4: W0613: Unused argument 'pred' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:188:4: W0613: Unused argument 'y' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:189:4: W0613: Unused argument 'type_UQ_params' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:265:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:303:18: E0606: Possibly using variable 'rescale_val' before assignment (possibly-used-before-assignment)
+uqmodels\postprocessing\UQ_processing.py:298:4: W0612: Unused variable 'escale_val' (unused-variable)
+uqmodels\postprocessing\UQ_processing.py:326:0: R0917: Too many positional arguments (11/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:330:4: W0613: Unused argument 'y' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:420:0: R0917: Too many positional arguments (17/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:423:4: W0613: Unused argument 'pred' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:424:4: W0613: Unused argument 'y' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:426:4: W0613: Unused argument 'var_min' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:427:4: W0613: Unused argument 'var_max' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:421:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:501:0: R0917: Too many positional arguments (20/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:652:20: E0606: Possibly using variable 'UQ_bot' before assignment (possibly-used-before-assignment)
+uqmodels\postprocessing\UQ_processing.py:662:29: E0606: Possibly using variable 'UQ_top' before assignment (possibly-used-before-assignment)
+uqmodels\postprocessing\UQ_processing.py:680:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\postprocessing\UQ_processing.py:501:0: R0912: Too many branches (22/12) (too-many-branches)
+uqmodels\postprocessing\UQ_processing.py:501:0: R0915: Too many statements (70/50) (too-many-statements)
+uqmodels\postprocessing\UQ_processing.py:686:0: R0917: Too many positional arguments (13/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:775:8: E0601: Using variable 'gaussian_quantile' before assignment (used-before-assignment)
+uqmodels\postprocessing\UQ_processing.py:780:0: R0917: Too many positional arguments (15/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:783:4: W0613: Unused argument 'pred' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:784:4: W0613: Unused argument 'y' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:781:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:843:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\postprocessing\UQ_processing.py:843:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:844:4: W0613: Unused argument 'UQ' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:845:4: W0613: Unused argument 'type_UQ' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:846:4: W0613: Unused argument 'pred' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:847:4: W0613: Unused argument 'y' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:848:4: W0613: Unused argument 'list_alpha' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:849:4: W0613: Unused argument 'type_UQ_params' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:850:4: W0613: Unused argument 'reduc_filter' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:844:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:875:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\postprocessing\UQ_processing.py:875:0: R0917: Too many positional arguments (13/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:876:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:945:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\postprocessing\UQ_processing.py:945:0: R0917: Too many positional arguments (14/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:958:4: W0613: Unused argument 'mode' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:946:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\postprocessing\UQ_processing.py:1027:8: W0612: Unused variable 'n' (unused-variable)
+uqmodels\postprocessing\UQ_processing.py:1034:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\postprocessing\UQ_processing.py:1034:0: R0917: Too many positional arguments (15/5) (too-many-positional-arguments)
+uqmodels\postprocessing\UQ_processing.py:1126:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+************* Module uqmodels.preprocessing.Custom_Preprocessor
+uqmodels\preprocessing\Custom_Preprocessor.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\preprocessing\Custom_Preprocessor.py:15:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\preprocessing\Custom_Preprocessor.py:20:4: W0221: Number of parameters was 4 in 'Preprocessor.fit' and is now 3 in overriding 'dict_to_TS_Dataset.fit' method (arguments-differ)
+uqmodels\preprocessing\Custom_Preprocessor.py:24:4: W0222: Signature differs from overridden 'transform' method (signature-differs)
+uqmodels\preprocessing\Custom_Preprocessor.py:57:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\preprocessing\Custom_Preprocessor.py:58:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\Custom_Preprocessor.py:58:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\Custom_Preprocessor.py:58:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\Custom_Preprocessor.py:58:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\Custom_Preprocessor.py:58:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\Custom_Preprocessor.py:58:4: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\Custom_Preprocessor.py:58:4: R0917: Too many positional arguments (19/5) (too-many-positional-arguments)
+uqmodels\preprocessing\Custom_Preprocessor.py:118:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Custom_Preprocessor.py:118:4: W0221: Number of parameters was 4 in 'Preprocessor.fit' and is now 4 in overriding 'Generic_Features_processor.fit' method (arguments-differ)
+uqmodels\preprocessing\Custom_Preprocessor.py:118:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\Custom_Preprocessor.py:159:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Custom_Preprocessor.py:223:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\preprocessing\Custom_Preprocessor.py:159:4: R0912: Too many branches (17/12) (too-many-branches)
+uqmodels\preprocessing\Custom_Preprocessor.py:159:40: W0613: Unused argument 'training' (unused-argument)
+uqmodels\preprocessing\Custom_Preprocessor.py:159:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\preprocessing\Custom_Preprocessor.py:228:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Custom_Preprocessor.py:228:4: W0222: Signature differs from overridden 'fit_transform' method (signature-differs)
+uqmodels\preprocessing\Custom_Preprocessor.py:228:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\preprocessing\Custom_Preprocessor.py:132:16: W0201: Attribute 'context_scaler' defined outside __init__ (attribute-defined-outside-init)
+uqmodels\preprocessing\Custom_Preprocessor.py:138:12: W0201: Attribute 'data_scaler' defined outside __init__ (attribute-defined-outside-init)
+uqmodels\preprocessing\Custom_Preprocessor.py:234:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\Custom_Preprocessor.py:234:0: R0917: Too many positional arguments (13/5) (too-many-positional-arguments)
+************* Module uqmodels.preprocessing.data_loader
+uqmodels\preprocessing\data_loader.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\preprocessing\data_loader.py:7:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\preprocessing\data_loader.py:8:4: W0246: Useless parent or super() delegation in method '__init__' (useless-parent-delegation)
+************* Module uqmodels.preprocessing.features_processing
+uqmodels\preprocessing\features_processing.py:16:0: W0406: Module import itself (import-self)
+uqmodels\preprocessing\features_processing.py:23:35: W0622: Redefining built-in 'input' (redefined-builtin)
+uqmodels\preprocessing\features_processing.py:49:0: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+uqmodels\preprocessing\features_processing.py:81:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:81:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:82:0: W1404: Implicit string concatenation found in list (implicit-str-concat)
+uqmodels\preprocessing\features_processing.py:84:18: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\preprocessing\features_processing.py:92:22: W0613: Unused argument 'context' (unused-argument)
+uqmodels\preprocessing\features_processing.py:92:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:113:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:151:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:180:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:227:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:232:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:232:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:232:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:235:4: W0613: Unused argument 'ind_data' (unused-argument)
+uqmodels\preprocessing\features_processing.py:264:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:264:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:264:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:264:0: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:294:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:294:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:294:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:294:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:339:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:339:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:374:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:382:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:398:11: E0606: Possibly using variable 'features_mask' before assignment (possibly-used-before-assignment)
+uqmodels\preprocessing\features_processing.py:382:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:401:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:426:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:426:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:427:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:477:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:477:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:478:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:508:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:508:0: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:508:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:508:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:514:21: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\preprocessing\features_processing.py:527:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:527:0: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:527:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:527:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:533:21: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\preprocessing\features_processing.py:533:4: W0613: Unused argument 'estimator_params' (unused-argument)
+uqmodels\preprocessing\features_processing.py:553:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:553:0: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:553:63: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\preprocessing\features_processing.py:553:0: R0912: Too many branches (28/12) (too-many-branches)
+uqmodels\preprocessing\features_processing.py:553:0: R0915: Too many statements (64/50) (too-many-statements)
+uqmodels\preprocessing\features_processing.py:553:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:653:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\features_processing.py:653:0: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:654:39: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\preprocessing\features_processing.py:653:0: R0912: Too many branches (20/12) (too-many-branches)
+uqmodels\preprocessing\features_processing.py:755:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:755:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:755:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:755:0: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:763:4: W0613: Unused argument 'lags' (unused-argument)
+uqmodels\preprocessing\features_processing.py:764:4: W0613: Unused argument 'derivs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:765:4: W0613: Unused argument 'windows' (unused-argument)
+uqmodels\preprocessing\features_processing.py:756:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:806:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:806:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:806:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:806:0: R0917: Too many positional arguments (11/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:807:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:874:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\features_processing.py:874:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:875:34: W0613: Unused argument 'ind_context' (unused-argument)
+uqmodels\preprocessing\features_processing.py:875:68: W0613: Unused argument 'lags' (unused-argument)
+uqmodels\preprocessing\features_processing.py:875:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\features_processing.py:897:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\features_processing.py:898:0: W0613: Unused argument 'kwargs' (unused-argument)
+************* Module uqmodels.preprocessing.preprocessing
+uqmodels\preprocessing\preprocessing.py:659:0: C0325: Unnecessary parens after 'raise' keyword (superfluous-parens)
+uqmodels\preprocessing\preprocessing.py:20:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:27:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:45:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:47:8: W0612: Unused variable 'i' (unused-variable)
+uqmodels\preprocessing\preprocessing.py:53:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:73:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:77:15: W0718: Catching too general exception BaseException (broad-exception-caught)
+uqmodels\preprocessing\preprocessing.py:85:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:86:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\preprocessing\preprocessing.py:90:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\preprocessing\preprocessing.py:132:19: W0718: Catching too general exception BaseException (broad-exception-caught)
+uqmodels\preprocessing\preprocessing.py:102:8: W0612: Unused variable 'n' (unused-variable)
+uqmodels\preprocessing\preprocessing.py:145:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\preprocessing.py:177:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\preprocessing.py:226:15: E1120: No value for argument 'range_temp' in function call (no-value-for-parameter)
+uqmodels\preprocessing\preprocessing.py:250:12: R1731: Consider using 'ratio = max(ratio, 1)' instead of unnecessary if block (consider-using-max-builtin)
+uqmodels\preprocessing\preprocessing.py:333:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\preprocessing\preprocessing.py:334:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:403:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:403:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\preprocessing.py:429:8: E0702: Raising tuple while only classes or instances are allowed (raising-bad-type)
+uqmodels\preprocessing\preprocessing.py:404:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:434:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\preprocessing.py:434:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\preprocessing\preprocessing.py:515:4: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+uqmodels\preprocessing\preprocessing.py:593:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:602:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:602:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:606:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:606:0: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\preprocessing.py:606:21: W0613: Unused argument 'map_' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:612:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:621:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:628:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:632:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:636:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:644:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:659:12: E0702: Raising str while only classes or instances are allowed (raising-bad-type)
+uqmodels\preprocessing\preprocessing.py:644:0: W0613: Unused argument 'kwargs' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:668:23: W0613: Unused argument 'X' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:668:26: W0613: Unused argument 'y' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:710:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:724:0: R0917: Too many positional arguments (9/5) (too-many-positional-arguments)
+uqmodels\preprocessing\preprocessing.py:745:8: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+uqmodels\preprocessing\preprocessing.py:786:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:819:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\preprocessing.py:819:23: W0613: Unused argument 'self' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:819:35: W0613: Unused argument 'query' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:832:27: W0613: Unused argument 'self' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:832:39: W0613: Unused argument 'query' (unused-argument)
+uqmodels\preprocessing\preprocessing.py:955:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\preprocessing\preprocessing.py:961:18: R1721: Unnecessary use of a comprehension, use list(label_df['source']) instead. (unnecessary-comprehension)
+uqmodels\preprocessing\preprocessing.py:977:11: W0612: Unused variable 'name' (unused-variable)
+************* Module uqmodels.preprocessing.Preprocessor
+uqmodels\preprocessing\Preprocessor.py:1:0: C0114: Missing module docstring (missing-module-docstring)
+uqmodels\preprocessing\Preprocessor.py:14:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\preprocessing\Preprocessor.py:38:8: C0206: Consider iterating with .items() (consider-using-dict-items)
+uqmodels\preprocessing\Preprocessor.py:43:4: W0221: Number of parameters was 2 in 'Processor.default_update_query' and is now 3 in overriding 'Preprocessor.default_update_query' method (arguments-differ)
+uqmodels\preprocessing\Preprocessor.py:73:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:88:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:103:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:118:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:132:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:148:12: W0707: Consider explicitly re-raising using 'except (FileNotFoundError, NotADirectoryError) as exc' and 'raise FileNotFoundError() from exc' (raise-missing-from)
+uqmodels\preprocessing\Preprocessor.py:152:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:152:29: W0622: Redefining built-in 'object' (redefined-builtin)
+uqmodels\preprocessing\Preprocessor.py:162:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:170:8: W0622: Redefining built-in 'object' (redefined-builtin)
+uqmodels\preprocessing\Preprocessor.py:177:0: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:177:16: W0613: Unused argument 'self' (unused-argument)
+uqmodels\preprocessing\Preprocessor.py:177:22: W0613: Unused argument 'data' (unused-argument)
+uqmodels\preprocessing\Preprocessor.py:177:28: W0613: Unused argument 'query' (unused-argument)
+uqmodels\preprocessing\Preprocessor.py:177:38: W0613: Unused argument 'structure' (unused-argument)
+uqmodels\preprocessing\Preprocessor.py:187:0: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:187:22: W0613: Unused argument 'self' (unused-argument)
+uqmodels\preprocessing\Preprocessor.py:187:34: W0613: Unused argument 'query' (unused-argument)
+uqmodels\preprocessing\Preprocessor.py:187:44: W0613: Unused argument 'structure' (unused-argument)
+uqmodels\preprocessing\Preprocessor.py:201:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\preprocessing\Preprocessor.py:202:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\Preprocessor.py:239:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:239:4: W0221: Number of parameters was 4 in 'Preprocessor.fit' and is now 3 in overriding 'Generic_Preprocessor.fit' method (arguments-differ)
+uqmodels\preprocessing\Preprocessor.py:256:4: W0102: Dangerous default value {} as argument (dangerous-default-value)
+uqmodels\preprocessing\Preprocessor.py:256:4: W0222: Signature differs from overridden 'transform' method (signature-differs)
+uqmodels\preprocessing\Preprocessor.py:256:0: W0613: Unused argument 'kwarg' (unused-argument)
+************* Module uqmodels.preprocessing.structure
+uqmodels\preprocessing\structure.py:398:0: C0325: Unnecessary parens after 'not' keyword (superfluous-parens)
+uqmodels\preprocessing\structure.py:14:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:18:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:21:4: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+uqmodels\preprocessing\structure.py:35:15: W0718: Catching too general exception BaseException (broad-exception-caught)
+uqmodels\preprocessing\structure.py:38:19: W0718: Catching too general exception BaseException (broad-exception-caught)
+uqmodels\preprocessing\structure.py:39:16: W0133: Exception statement has no effect (pointless-exception-statement)
+uqmodels\preprocessing\structure.py:43:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:46:4: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+uqmodels\preprocessing\structure.py:57:15: W0718: Catching too general exception BaseException (broad-exception-caught)
+uqmodels\preprocessing\structure.py:58:12: W0133: Exception statement has no effect (pointless-exception-statement)
+uqmodels\preprocessing\structure.py:63:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\preprocessing\structure.py:69:8: C0206: Consider iterating with .items() (consider-using-dict-items)
+uqmodels\preprocessing\structure.py:81:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:84:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:84:28: W0613: Unused argument 'str_key' (unused-argument)
+uqmodels\preprocessing\structure.py:84:0: W0613: Unused argument 'kargs' (unused-argument)
+uqmodels\preprocessing\structure.py:87:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\preprocessing\structure.py:150:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:150:16: W0622: Redefining built-in 'str' (redefined-builtin)
+uqmodels\preprocessing\structure.py:170:12: W0143: Comparing against a callable, did you omit the parenthesis? (comparison-with-callable)
+uqmodels\preprocessing\structure.py:170:12: C0123: Use isinstance() rather than type() for a typecheck. (unidiomatic-typecheck)
+uqmodels\preprocessing\structure.py:170:43: C0123: Use isinstance() rather than type() for a typecheck. (unidiomatic-typecheck)
+uqmodels\preprocessing\structure.py:206:0: W0613: Unused argument 'kwarg' (unused-argument)
+uqmodels\preprocessing\structure.py:255:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:255:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\structure.py:260:4: W0613: Unused argument 'delta' (unused-argument)
+uqmodels\preprocessing\structure.py:271:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:279:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:279:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\preprocessing\structure.py:286:14: E0606: Possibly using variable 'mask' before assignment (possibly-used-before-assignment)
+uqmodels\preprocessing\structure.py:289:52: W0613: Unused argument 'delta_target' (unused-argument)
+uqmodels\preprocessing\structure.py:305:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\preprocessing\structure.py:319:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:324:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:330:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\preprocessing\structure.py:334:4: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\preprocessing\structure.py:340:8: W0613: Unused argument 'date_init' (unused-argument)
+uqmodels\preprocessing\structure.py:356:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:361:4: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\preprocessing\structure.py:385:0: C0115: Missing class docstring (missing-class-docstring)
+uqmodels\preprocessing\structure.py:390:12: C0206: Consider iterating with .items() (consider-using-dict-items)
+uqmodels\preprocessing\structure.py:390:23: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\preprocessing\structure.py:414:4: W0221: Variadics removed in overriding 'Multi_source.get_structure' method (arguments-differ)
+uqmodels\preprocessing\structure.py:418:15: W0718: Catching too general exception BaseException (broad-exception-caught)
+uqmodels\preprocessing\structure.py:421:4: W0102: Dangerous default value dict() (builtins.dict) as argument (dangerous-default-value)
+uqmodels\preprocessing\structure.py:421:4: W0221: Variadics removed in overriding 'Multi_source.get' method (arguments-differ)
+uqmodels\preprocessing\structure.py:421:50: R1735: Consider using '{}' instead of a call to 'dict'. (use-dict-literal)
+uqmodels\preprocessing\structure.py:422:8: R1705: Unnecessary "else" after "return", remove the "else" and de-indent the code inside it (no-else-return)
+************* Module uqmodels.visualization.visualization
+uqmodels\visualization\visualization.py:1:0: C0302: Too many lines in module (1312/1000) (too-many-lines)
+uqmodels\visualization\visualization.py:25:4: R1705: Unnecessary "elif" after "return", remove the leading "el" from "elif" (no-else-return)
+uqmodels\visualization\visualization.py:81:8: W0101: Unreachable code (unreachable)
+uqmodels\visualization\visualization.py:16:0: R1710: Either all return statements in a function should return an expression, or none of them should. (inconsistent-return-statements)
+uqmodels\visualization\visualization.py:107:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization.py:123:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization.py:129:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\visualization\visualization.py:182:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization.py:182:0: R0917: Too many positional arguments (6/5) (too-many-positional-arguments)
+uqmodels\visualization\visualization.py:204:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization.py:204:0: R0917: Too many positional arguments (10/5) (too-many-positional-arguments)
+uqmodels\visualization\visualization.py:211:4: W0613: Unused argument 'X' (unused-argument)
+uqmodels\visualization\visualization.py:281:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\visualization\visualization.py:304:20: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\visualization\visualization.py:308:20: C0201: Consider iterating the dictionary directly instead of calling .keys() (consider-iterating-dictionary)
+uqmodels\visualization\visualization.py:1:0: F0002: uqmodels\visualization\visualization.py: Fatal error while checking 'uqmodels\visualization\visualization.py'. Please open an issue in our bug tracker so we address this. There is a pre-filled template that you can use in 'C:\Users\josquin.foulliaron\AppData\Local\pylint\pylint\Cache\pylint-crash-2025-07-08-10-34-29.txt'. (astroid-error)
+************* Module uqmodels.visualization.visualization_mutisource
+uqmodels\visualization\visualization_mutisource.py:1:0: C0302: Too many lines in module (1043/1000) (too-many-lines)
+uqmodels\visualization\visualization_mutisource.py:5:0: C0413: Import "import matplotlib as mpl" should be placed at the top of the module (wrong-import-position)
+uqmodels\visualization\visualization_mutisource.py:6:0: C0413: Import "import matplotlib.dates as mdates" should be placed at the top of the module (wrong-import-position)
+uqmodels\visualization\visualization_mutisource.py:7:0: C0413: Import "import matplotlib.pyplot as plt" should be placed at the top of the module (wrong-import-position)
+uqmodels\visualization\visualization_mutisource.py:8:0: C0413: Import "import numpy as np" should be placed at the top of the module (wrong-import-position)
+uqmodels\visualization\visualization_mutisource.py:10:0: C0413: Import "from uqmodels.preprocessing.structure import get_regular_step_scale, get_step_mask, step_to_date, window_expansion" should be placed at the top of the module (wrong-import-position)
+uqmodels\visualization\visualization_mutisource.py:16:0: C0413: Import "from uqmodels.processing import read" should be placed at the top of the module (wrong-import-position)
+uqmodels\visualization\visualization_mutisource.py:17:0: C0413: Import "from uqmodels.utils import Extract_dict, compute_born, expand_flag" should be placed at the top of the module (wrong-import-position)
+uqmodels\visualization\visualization_mutisource.py:18:0: C0413: Import "from uqmodels.visualization.visualization import provide_cmap" should be placed at the top of the module (wrong-import-position)
+uqmodels\visualization\visualization_mutisource.py:23:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization_mutisource.py:28:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization_mutisource.py:88:15: E0606: Possibly using variable 'y' before assignment (possibly-used-before-assignment)
+uqmodels\visualization\visualization_mutisource.py:88:18: E0606: Possibly using variable 'dates' before assignment (possibly-used-before-assignment)
+uqmodels\visualization\visualization_mutisource.py:137:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization_mutisource.py:137:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\visualization\visualization_mutisource.py:154:8: W0612: Unused variable 'time_step' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:156:8: W0612: Unused variable 'range_' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:159:8: W0612: Unused variable 'list_step_target' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:207:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization_mutisource.py:207:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\visualization\visualization_mutisource.py:314:11: W0125: Using a conditional statement with a constant value (using-constant-test)
+uqmodels\visualization\visualization_mutisource.py:231:8: W0612: Unused variable 'range_' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:234:8: W0612: Unused variable 'list_step_target' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:251:12: W0612: Unused variable 'x_inter' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:265:8: W0612: Unused variable 'x' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:286:8: W0612: Unused variable 'x_chan' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:332:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization_mutisource.py:332:0: W0102: Dangerous default value [] as argument (dangerous-default-value)
+uqmodels\visualization\visualization_mutisource.py:332:0: R0917: Too many positional arguments (8/5) (too-many-positional-arguments)
+uqmodels\visualization\visualization_mutisource.py:495:12: E1123: Unexpected keyword argument 'n_expand' in function call (unexpected-keyword-arg)
+uqmodels\visualization\visualization_mutisource.py:332:0: R0915: Too many statements (52/50) (too-many-statements)
+uqmodels\visualization\visualization_mutisource.py:372:4: W0612: Unused variable 'S_anom_chan' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:372:17: W0612: Unused variable 'S_anom_sensor' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:384:4: W0612: Unused variable 'f' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:543:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization_mutisource.py:543:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\visualization\visualization_mutisource.py:584:0: W1404: Implicit string concatenation found in list (implicit-str-concat)
+uqmodels\visualization\visualization_mutisource.py:633:47: E0606: Possibly using variable 'dtype' before assignment (possibly-used-before-assignment)
+uqmodels\visualization\visualization_mutisource.py:568:12: W0612: Unused variable 'time_step' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:574:12: W0612: Unused variable 'list_time_factor' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:575:12: W0612: Unused variable 'list_sensors_primaire' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:612:59: W0612: Unused variable 'list_top' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:623:4: W0612: Unused variable 'f' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:691:0: C0116: Missing function or method docstring (missing-function-docstring)
+uqmodels\visualization\visualization_mutisource.py:691:0: R0917: Too many positional arguments (7/5) (too-many-positional-arguments)
+uqmodels\visualization\visualization_mutisource.py:887:18: E1124: Argument 'date_init' passed by position and keyword in function call (redundant-keyword-arg)
+uqmodels\visualization\visualization_mutisource.py:988:21: E1124: Argument 'date_init' passed by position and keyword in function call (redundant-keyword-arg)
+uqmodels\visualization\visualization_mutisource.py:691:0: R0915: Too many statements (107/50) (too-many-statements)
+uqmodels\visualization\visualization_mutisource.py:692:76: W0613: Unused argument 'matplot' (unused-argument)
+uqmodels\visualization\visualization_mutisource.py:715:8: W0612: Unused variable 'dtype' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:733:37: W0612: Unused variable 'S_anom_agg' (unused-variable)
+uqmodels\visualization\visualization_mutisource.py:5:0: C0412: Imports from package matplotlib are not grouped (ungrouped-imports)
+uqmodels\visualization\visualization_mutisource.py:8:0: C0412: Imports from package numpy are not grouped (ungrouped-imports)
+uqmodels\visualization\visualization_mutisource.py:10:0: C0412: Imports from package uqmodels are not grouped (ungrouped-imports)
+************* Module uqmodels.visualization.__init__
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.lstm_ed:[303:352]
+==uqmodels.modelization.DL_estimator.transformer_ed:[525:574]
+            model_parameters=model_parameters,
+            factory_parameters=factory_parameters,
+            training_parameters=training_parameters,
+            type_output=type_output,
+            rescale=rescale,
+            n_ech=n_ech,
+            train_ratio=train_ratio,
+            name=name,
+            random_state=random_state,
+        )
+
+    def factory(self, X, y, mask=None, only_fit_scaler=False, **kwarg):
+        model_params = self.model_parameters
+        factory_params = self.factory_parameters
+
+        with_ctx_input = model_params["with_ctx_input"]
+
+        step = 1
+        if "step" in model_params.keys():
+            step = model_params["step"]
+
+        X_none = False
+        if X is None:
+            X_none = True
+
+        if X_none:
+            inputs = None
+        else:
+            if with_ctx_input:
+                X, X_lag = X
+                X, X_lag, mask = super().factory(X, X_lag, mask)
+                if only_fit_scaler:
+                    return None
+                X_lt = stack_and_roll(
+                    X,
+                    model_params["n_windows"],
+                    lag=factory_params["factory_lag_lt"],
+                    step=step,
+                )
+
+                X_st = stack_and_roll(
+                    X_lag,
+                    model_params["size_window"],
+                    lag=factory_params["factory_lag_st"] - 1,
+                    step=step,
+                )
+
+                inputs = [X_lt, X_st]
+            else: (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.lstm_ed:[367:415]
+==uqmodels.modelization.DL_estimator.transformer_ed:[589:637]
+            new_y = stack_and_roll(
+                y,
+                model_params["dim_horizon"],
+                lag=model_params["dim_horizon"] - 1,
+                step=step,
+            )
+
+        return inputs, new_y, mask
+
+    def Build_generator(self, X, y, batch=32, shuffle=True, train=True):
+        return Folder_Generator(
+            X,
+            y,
+            self,
+            batch=batch,
+            shuffle=shuffle,
+            train=train,
+            random_state=self.random_state,
+        )
+
+
+def get_params_dict(
+    dim_ctx,
+    dim_dyn,
+    dim_target,
+    size_window=20,
+    n_windows=5,
+    dim_horizon=5,
+    step=1,
+    dim_chan=1,
+    dp=0.05,
+    dp_rec=0.05,
+    dim_z=50,
+    k_reg=(10e-7, 10e-7),
+    num_lstm_enc=1,
+    num_lstm_dec=1,
+    layers_enc=[150, 75],
+    layers_dec=[200, 125, 75],
+    list_strides=[2, 1, 1, 1],
+    list_filters=[128, 128, 128],
+    list_kernels=None,
+    with_convolution=True,
+    with_ctx_input=True,
+    n_ech=3,
+    type_output="MC_Dropout",
+):
+    dict_params = {
+        "dim_ctx": dim_ctx, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.lstm_ed:[154:167]
+==uqmodels.modelization.DL_estimator.transformer_ed:[392:405]
+    if with_convolution:
+        MWE = Mouving_conv_Embedding(
+            size_window,
+            n_windows,
+            step=step,
+            dim_d=dim_dyn,
+            dim_chan=dim_chan,
+            use_conv2D=True,
+            list_strides=list_strides,
+            list_filters=list_filters,
+            list_kernels=list_kernels,
+            dp=0.05,
+            flag_mc=flag_mc, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.postprocessing.UQ_processing:[471:483]
+==uqmodels.postprocessing.anomaly_processing:[545:557]
+            UQ,
+            type_UQ=type_UQ,
+            min_cut=min_cut,
+            max_cut=max_cut,
+            var_min=0,
+            var_max=None,
+            factor=2,
+            q_var=q_var,
+            q_Eratio=q_Eratio,
+            mode_multidim=True,
+        )
+ (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.lstm_ed:[177:188]
+==uqmodels.modelization.DL_estimator.transformer_ed:[420:431]
+    dim_embedding = MWE.last_shape
+    if with_ctx_input:
+        dim_embedding += dim_ctx
+
+    Embeddor_ctx = mlp(
+        dim_in=dim_embedding,
+        dim_out=None,
+        layers_size=layers_enc,
+        dp=dp,
+        name="Embeddor",
+        regularizer_W=k_reg, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[568:577]
+==uqmodels.modelization.DL_estimator.neural_network_UQ:[499:508]
+                        steps_per_epoch = In_.__len__()
+                    validation_steps = validation_data_.__len__()
+                    batch_size = None
+                else:
+                    In_ = Inputs
+                    Tar_ = Targets
+                    validation_data_ = validation_data
+                    validation_steps = None
+                    steps_per_epoch = None (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.lstm_ed:[353:366]
+==uqmodels.modelization.DL_estimator.transformer_ed:[575:588]
+                if only_fit_scaler:
+                    return None
+                X_lag = X
+                X_st = stack_and_roll(
+                    X,
+                    model_params["size_window"],
+                    lag=factory_params["factory_lag_st"] - 1,
+                    step=step,
+                )
+                inputs = [X_st]
+
+        new_y = None
+        if y is not None: (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.lstm_ed:[90:101]
+==uqmodels.modelization.DL_estimator.transformer_ed:[363:375]
+    Interpretor = mlp(
+        dim_in=dim_z,
+        dim_out=dim_target,
+        layers_size=layers_dec,
+        dp=dp,
+        type_output=type_output,
+        name="Interpretor",
+        random_state=random_state,
+    )
+
+    # Encoder LSTM (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.custom_UQModel:[329:338]
+==uqmodels.postprocessing.custom_UQKPI_Processor:[32:41]
+            "type_norm": "Nsigma_local",
+            "q_var": 1,
+            "d": 2,
+            "beta": 0.001,
+            "beta_source": 0.001,
+            "beta_global": 0.001,
+            "min_cut": 0.002,
+            "max_cut": 0.998,
+            "per_seuil": 0.999, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.ML_estimator.baseline:[95:110]
+==uqmodels.modelization.UQEstimator:[414:433]
+        X, y = super()._format(
+            X=X,
+            y=y,
+            type_transform=type_transform,
+            mode_UQ=mode_UQ,
+            skip_format=skip_format,
+        )
+        return (X, y)
+
+    def fit(self, X: Array, y: Array, skip_format=False, **kwargs) -> None:
+        """Fit GBRQ_UQEstimator list using QuantileUQEstimator fit methods.
+        Args:
+            X: Features
+            y: Target values
+        """ (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.postprocessing.UQKPI_Processor:[154:161]
+==uqmodels.postprocessing.UQ_processing:[226:233]
+                pred=None,
+                y=None,
+                type_UQ_params=None,
+                var_min=0,
+                var_max=None,
+                min_cut=0,
+                max_cut=1, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.postprocessing.UQ_processing:[570:577]
+==uqmodels.postprocessing.anomaly_processing:[741:748]
+                min_cut=min_cut,
+                max_cut=max_cut,
+                var_min=var_min,
+                var_max=var_max,
+                q_var=q_var,
+                q_var_e=q_var_e,
+                k_var_e=k_var_e, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[654:662]
+==uqmodels.modelization.DL_estimator.neural_network_UQ:[631:638]
+        pred = np.concatenate(pred, axis=0)
+        var_a = np.concatenate(var_a, axis=0)
+        var_e = np.concatenate(var_e, axis=0)
+        UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
+    else:
+        output = []
+        for i in range(n_ech): (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:647]
+==uqmodels.modelization.DL_estimator.neural_network_UQ:[611:618]
+    if generator:
+        pred = []
+        var_a = []
+        var_e = []
+        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results
+            output = []
+            for i in range(n_ech): (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.ML_estimator.baseline:[295:302]
+==uqmodels.modelization.UQEstimator:[414:421]
+        X, y = super()._format(
+            X=X,
+            y=y,
+            type_transform=type_transform,
+            mode_UQ=mode_UQ,
+            skip_format=skip_format,
+        ) (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.neural_network_UQ:[64:71]
+==uqmodels.modelization.UQEstimator:[272:279]
+        super().__init__(
+            name=name,
+            type_UQ=type_UQ,
+            rescale=rescale,
+            var_min=var_min,
+            random_state=random_state,
+        ) (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.postprocessing.UQKPI_Processor:[342:348]
+==uqmodels.postprocessing.custom_UQKPI_Processor:[120:126]
+                    UQ=UQ,
+                    type_UQ=type_UQ,
+                    pred=pred,
+                    y=y,
+                    type_UQ_params=type_UQ_params,
+                    ctx_mask=ctx_mask, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:646]
+==uqmodels.modelization.DL_estimator.neural_network_UQ:[720:726]
+            if generator:
+                pred = []
+                var_a = []
+                var_e = []
+                for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results
+                    output = [] (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.ML_estimator.baseline:[271:278]
+==uqmodels.modelization.UQEstimator:[273:279]
+            name=name,
+            type_UQ=type_UQ,
+            rescale=rescale,
+            var_min=var_min,
+            random_state=random_state,
+        ) (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.preprocessing.features_processing:[364:370]
+==uqmodels.utils:[785:791]
+        if i > 0:
+            Y_cur[0:i] = 0
+        for g in range(dim[1]):
+            new_features_list.append(Y_cur[:, g])
+            new_features_name.append("lag_" + str(i) + "_dim:" + str(g))
+    new_features_name = np.array(new_features_name) (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.UQModel:[368:375]
+==uqmodels.custom_UQModel:[821:828]
+            train = None
+            if x_split is not None:
+                train = x_split == 1
+                X, y = apply_mask(X, train), apply_mask(y, train)
+                if sample_weight is not None:
+                    sample_weight = sample_weight[train]
+            # Called fit procedure for each dataset (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.preprocessing.Custom_Preprocessor:[95:100]
+==uqmodels.preprocessing.Preprocessor:[227:232]
+        super().__init__(
+            name=name,
+            cache=cache,
+            structure=structure,
+            update_query=update_query, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.postprocessing.UQ_processing:[361:366]
+==uqmodels.postprocessing.anomaly_processing:[741:746]
+                min_cut=min_cut,
+                max_cut=max_cut,
+                var_min=var_min,
+                var_max=var_max,
+                q_var=q_var, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.postprocessing.UQ_processing:[923:928]
+==uqmodels.postprocessing.anomaly_processing:[306:311]
+            UQ,
+            type_UQ,
+            pred,
+            y=None,
+            type_UQ_params=type_UQ_params, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.postprocessing.UQKPI_Processor:[329:334]
+==uqmodels.postprocessing.anomaly_processing:[558:563]
+            UQ,
+            type_UQ,
+            pred,
+            y=y,
+            type_UQ_params=type_UQ_params, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.postprocessing.UQKPI_Processor:[222:227]
+==uqmodels.postprocessing.anomaly_processing:[399:404]
+            UQ,
+            type_UQ,
+            pred,
+            y,
+            type_UQ_params, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.neural_network_UQ:[854:862]
+==uqmodels.modelization.DL_estimator.utils:[131:139]
+        self.shuffle = shuffle
+        self.batch = batch
+
+        # self.scaler = metamodel.scaler
+        self.factory = metamodel.factory
+        self._format = metamodel._format
+        self.rescale = metamodel.rescale
+ (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[1043:1062]
+==uqmodels.modelization.DL_estimator.utils:[225:233]
+        Inputs = apply_mask(Inputs, selection)
+        Ouputs = apply_mask(Ouputs, selection)
+        return Inputs, Ouputs
+
+    # shuffles the dataset at the end of each epoch
+    def on_epoch_end(self):
+        if self.shuffle:
+            np.random.shuffle(self.indices) (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[947:952]
+==uqmodels.modelization.DL_estimator.utils:[135:141]
+        self.factory = metamodel.factory
+        self._format = metamodel._format
+        self.rescale = metamodel.rescale
+
+        self.causality_remove = None
+        self.model_parameters = metamodel.model_parameters (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[581:587]
+==uqmodels.modelization.DL_estimator.neural_network_UQ:[441:446]
+                        validation_data=validation_data_,
+                        epochs=epochs[i],
+                        steps_per_epoch=steps_per_epoch,
+                        validation_steps=validation_steps,
+                        batch_size=batch_size, (duplicate-code)
+uqmodels\visualization\__init__.py:1:0: R0801: Similar lines in 2 files
+==uqmodels.modelization.DL_estimator.lstm_ed:[156:161]
+==uqmodels.modelization.DL_estimator.transformer_ed:[409:414]
+            size_window,
+            n_windows,
+            step=step,
+            dim_d=dim_dyn,
+            dim_chan=dim_chan, (duplicate-code)
+
+------------------------------------------------------------------
+Your code has been rated at 0.00/10 (previous run: 0.00/10, +0.00)
+

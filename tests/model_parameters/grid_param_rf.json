@@ -1,0 +1,50 @@
+{
+    "n_estimators": [
+        100,
+        250
+    ],
+    "min_impurity_decrease": [
+        0.0001,
+        0.001,
+        0.01
+    ],
+    "ccp_alpha": [
+        0.00001,
+        0.0001,
+        0.001
+    ],
+    "max_features": [
+        0.5,
+        0.7,
+        0.9,
+        1.0
+    ],
+    "max_samples": [
+        0.5,
+        0.7,
+        0.9,
+        0.99
+    ],
+    "max_depth": [
+        6,
+        9,
+        12,
+        15,
+        20
+    ],
+    "min_samples_split": [
+        6,
+        8,
+        10,
+        15
+    ],
+    "min_samples_leaf": [
+        6,
+        8,
+        10,
+        15
+    ],
+    "random_state": [
+        0
+    ]
+}
