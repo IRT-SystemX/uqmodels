@@ -1390,20 +1390,19 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
         random_state=random_state,
     )
 
-    # dim_output_size = Interpretor.output.shape[-1]
- (duplicate-code)
+    # Encoder LSTM (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.custom_UQModel:[329:338]
 ==uqmodels.postprocessing.custom_UQKPI_Processor:[32:41]
-            "type_norm": "Nsigma_local",
-            "q_var": 1,
-            "d": 2,
-            "beta": 0.001,
-            "beta_source": 0.001,
-            "beta_global": 0.001,
-            "min_cut": 0.002,
-            "max_cut": 0.998,
-            "per_seuil": 0.999, (duplicate-code)
+                "type_norm": "Nsigma_local",
+                "q_var": 1,
+                "d": 2,
+                "beta": 0.001,
+                "beta_source": 0.001,
+                "beta_global": 0.001,
+                "min_cut": 0.002,
+                "max_cut": 0.998,
+                "per_seuil": 0.999, (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.ML_estimator.baseline:[95:110]
 ==uqmodels.modelization.UQEstimator:[414:433]
@@ -1439,24 +1438,23 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.postprocessing.UQKPI_Processor:[154:161]
 ==uqmodels.postprocessing.UQ_processing:[226:233]
-                pred=None,
-                y=None,
-                type_UQ_params=None,
-                var_min=0,
-                var_max=None,
-                min_cut=0,
-                max_cut=1, (duplicate-code)
+        pred=None,
+        y=None,
+        type_UQ_params=None,
+        var_min=0,
+        var_max=None,
+        min_cut=0,
+        max_cut=1, (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[654:662]
 ==uqmodels.modelization.DL_estimator.neural_network_UQ:[631:638]
-                pred = np.concatenate(pred, axis=0)
-                var_a = np.concatenate(var_a, axis=0)
-                var_e = np.concatenate(var_e, axis=0)
-                UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
-
-            else:
-                output = []
-                for i in range(n_ech): (duplicate-code)
+        pred = np.concatenate(pred, axis=0)
+        var_a = np.concatenate(var_a, axis=0)
+        var_e = np.concatenate(var_e, axis=0)
+        UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
+    else:
+        output = []
+        for i in range(n_ech): (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:647]
 ==uqmodels.modelization.DL_estimator.neural_network_UQ:[611:618]
@@ -1513,7 +1511,8 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
             rescale=rescale,
             var_min=var_min,
             random_state=random_state,
-        ) (duplicate-code)
+        )
+ (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.preprocessing.features_processing:[364:370]
 ==uqmodels.utils:[785:791]
@@ -1552,11 +1551,11 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.postprocessing.UQKPI_Processor:[329:334]
 ==uqmodels.postprocessing.anomaly_processing:[558:563]
-            UQ,
-            type_UQ,
-            pred,
-            y=y,
-            type_UQ_params=type_UQ_params, (duplicate-code)
+        UQ,
+        type_UQ,
+        pred,
+        y=y,
+        type_UQ_params=type_UQ_params, (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.postprocessing.UQKPI_Processor:[222:227]
 ==uqmodels.postprocessing.anomaly_processing:[399:404]
@@ -1594,14 +1593,24 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
     # shuffles the dataset at the end of each epoch
     def on_epoch_end(self):
         if self.shuffle:
-            np.random.shuffle(self.indices) (duplicate-code)
+            np.random.shuffle(self.indices)
+
+
+def double_roll(
+    y,
+    size_window_past,
+    size_window_futur,
+    size_subseq_dec,
+    padding_past,
+    padding_futur,
+    only_futur=False,
+): (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[947:952]
 ==uqmodels.modelization.DL_estimator.utils:[135:141]
         self.factory = metamodel.factory
         self._format = metamodel._format
         self.rescale = metamodel.rescale
-
         self.causality_remove = None
         self.model_parameters = metamodel.model_parameters (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
