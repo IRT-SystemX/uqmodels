@@ -1,0 +1,541 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.postprocessing.UQKPI_Processor &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.postprocessing.UQKPI_Processor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.postprocessing.UQKPI_Processor</h1><div class="highlight"><pre>
+<span></span><span class="c1">##########################################################################</span>
+<span class="c1"># KPI_Processor : Processor object (fit/transform procedure) that aim to</span>
+<span class="c1"># tranform predictor &amp; UQestimator output into KPI.</span>
+<span class="c1"># We define a KPI_processor view (Transform any kind of UQ measure in a</span>
+<span class="c1"># specific KPI form) rather than an UQ_processor (express an UQ measure in</span>
+<span class="c1"># several KPI forms)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.anomaly_processing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">anom_proc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.UQ_processing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">UQ_proc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache_manager</span><span class="p">,</span> <span class="n">Processor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_middledim_reduction</span>
+
+
+<div class="viewcode-block" id="UQKPI_Processor">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">UQKPI_Processor</span><span class="p">(</span><span class="n">Processor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;KPI processor that aim to process (predictor) &amp; UQestimator output into a KPI.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;UQ_processor&quot;</span><span class="p">,</span>
+        <span class="n">KPI_parameters</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">cache</span><span class="o">=</span><span class="n">Cache_manager</span><span class="p">(),</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Init UQKPI_Processor</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str, optional): name. Defaults to &#39;KPI_processor&#39;.</span>
+<span class="sd">            KPI_parameters: Set of parameters link to UQKPI to produce</span>
+<span class="sd">            cache (cahe_manager or None, optional): cache_manager. if None no cache procedure</span>
+<span class="sd">            random_state (bool): handle experimental random using seed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
+            <span class="n">KPI_parameters</span><span class="o">=</span><span class="n">KPI_parameters</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="UQKPI_Processor.fit">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fitting procedure aim to estimate and store KPI_processor params</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure provide by the UQestiamtor.</span>
+<span class="sd">            type_UQ (str): Type_UQ of the UQestimators.</span>
+<span class="sd">            pred (np.array): Prediction of the predictor or the UQestimator.</span>
+<span class="sd">            y (np.array, optional): Targets/Observations, can be None if processor does&#39;t need y to fit</span>
+<span class="sd">            type_UQ_params (type_UQ_params, optional): Additional information about type_UQ parameters.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="o">=</span> <span class="n">type_UQ</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UQKPI_Processor.transform">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform procedure aim to transform (predictor) &amp; UQestimator output into a KPI using fitted parameters.</span>
+<span class="sd">            by default return row UQ provided by UQEstimators.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure provide by the UQestiamtor.</span>
+<span class="sd">            type_UQ (str): Type_UQ of the UQestimators.</span>
+<span class="sd">            pred (np.array): Prediction of the predictor or the UQestimator.</span>
+<span class="sd">            y (np.array, optional): Targets/Observations, can be None if processor does&#39;t need y to fit</span>
+<span class="sd">            type_UQ_params (type_UQ_params, optional): Additional information about type_UQ parameters.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="o">!=</span> <span class="n">type_UQ</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning : fitted for&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">,</span> <span class="s2">&quot;give :&quot;</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;reduc_filter&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">UQ</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">apply_middledim_reduction</span><span class="p">(</span>
+                            <span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">[</span><span class="s2">&quot;reduc_filter&quot;</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">UQ</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">pred</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">apply_middledim_reduction</span><span class="p">(</span>
+                    <span class="n">pred</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">[</span><span class="s2">&quot;reduc_filter&quot;</span><span class="p">]</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;pred_and_UQ&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">[</span><span class="s2">&quot;pred_and_UQ&quot;</span><span class="p">]:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">UQ</span></div>
+</div>
+
+
+
+<span class="c1"># Predictive_interval_processor :</span>
+
+
+<div class="viewcode-block" id="NormalPIs_processor">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.NormalPIs_processor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NormalPIs_processor</span><span class="p">(</span><span class="n">UQKPI_Processor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Processor aiming to transform UQmeasure in Normal predictive intervals&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Normal_PIs_processor&quot;</span><span class="p">,</span>
+        <span class="n">KPI_parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;list_alpha&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">],</span> <span class="s2">&quot;with_epistemic&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">},</span>
+        <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;NormalPIs_processor initialization</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str, optional): name of processpr. Defaults to &#39;Normal_PIs_processor&#39;.</span>
+<span class="sd">            list_alpha (list, optional): Quantile lvl of predictives interval. Defaults to [0.05, 0.95].</span>
+<span class="sd">            with_epistemic (bool): if type_UQ is &#39;var_A&amp;E and with epistemic is false, ignore epistemic</span>
+<span class="sd">                and produce aleatoric confidence uncertainty</span>
+<span class="sd">            cache (_type_, optional): Cache manager or None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">KPI_parameters</span><span class="o">=</span><span class="n">KPI_parameters</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="NormalPIs_processor.fit">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.NormalPIs_processor.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;fitting procedure aim to estimate and store KPI_processor params for NormalPIs computation</span>
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure provide by the UQestiamtor.</span>
+<span class="sd">            type_UQ (str): Type_UQ of the UQestimators.</span>
+<span class="sd">            pred (np.array): Prediction of the predictor or the UQestimator.</span>
+<span class="sd">            y (np.array, optional): Targets/Observations, can be None if processor does&#39;t need y to fit</span>
+<span class="sd">            type_UQ_params (type_UQ_params, optional): Additional information about type_UQ parameters.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">UQ</span><span class="p">)</span>
+
+        <span class="n">with_epistemic</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s2">&quot;with_epistemic&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">with_epistemic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">[</span><span class="s2">&quot;with_epistemic&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">with_epistemic</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">get_nominal_disentangled_UQ_ratio</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">,</span> <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">3</span>
+            <span class="p">)</span>
+
+            <span class="n">sigma</span><span class="p">,</span> <span class="n">sigma_E</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_TOT_and_E_sigma</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">,</span>
+                <span class="n">type_UQ</span><span class="p">,</span>
+                <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">k_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+                <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span>
+            <span class="p">)</span>
+
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">sigma_E</span> <span class="o">*</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">fit_PI</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span>
+        <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NormalPIs_processor.transform">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.NormalPIs_processor.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform procedure aim to transform (predictor) &amp; UQestimator output into normal predictive intervales</span>
+<span class="sd">        according to the list_alpha stored parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure provide by the UQestiamtor.</span>
+<span class="sd">            type_UQ (str): Type_UQ of the UQestimators.</span>
+<span class="sd">            pred (np.array): Prediction of the predictor or the UQestimator.</span>
+<span class="sd">            y (np.array, optional): Targets/Observations, can be None if processor does&#39;t need y to fit</span>
+<span class="sd">            type_UQ_params (type_UQ_params, optional): Additional information about type_UQ parameters.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list_PIs : Quantiles parametrized by list_alpha provided in the init procedure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">)</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">UQ</span><span class="p">)</span>
+
+        <span class="n">with_epistemic</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s2">&quot;with_epistemic&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">with_epistemic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">[</span><span class="s2">&quot;with_epistemic&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">with_epistemic</span><span class="p">):</span>
+                <span class="n">sigma</span><span class="p">,</span> <span class="n">sigma_E</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_TOT_and_E_sigma</span><span class="p">(</span>
+                    <span class="n">UQ</span><span class="p">,</span>
+                    <span class="n">type_UQ</span><span class="p">,</span>
+                    <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">k_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                    <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span>
+                <span class="p">)</span>
+                <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">sigma_E</span> <span class="o">*</span> <span class="mi">0</span>
+
+        <span class="n">list_PIs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">compute_PI</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">params_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params_</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_PIs</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Epistemicscorelvl_processor">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.Epistemicscorelvl_processor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Epistemicscorelvl_processor</span><span class="p">(</span><span class="n">UQKPI_Processor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Processor aiming to transform UQmeasure (containing epistemic measure) into Epistemic_score_lvl (ADD link)&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Epistemicscorelvl&quot;</span><span class="p">,</span> <span class="n">KPI_parameters</span><span class="o">=</span><span class="p">{},</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str, optional): name Defaults to &#39;Epistemicscorelvl&#39;.</span>
+<span class="sd">            KPI_paramsaters (_type_, optional): Parameters of processor : here none. Defaults to None.</span>
+<span class="sd">            cache (_type_, optional): Cache manager or none</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">KPI_parameters</span><span class="o">=</span><span class="n">KPI_parameters</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Epistemicscorelvl_processor.fit">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.Epistemicscorelvl_processor.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fitting procedure aim to estimate and store KPI_processor params for Epistemicscorelvl computation</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure provide by the UQestiamtor.</span>
+<span class="sd">            type_UQ (str): Type_UQ of the UQestimators.</span>
+<span class="sd">            pred (np.array): Prediction of the predictor or the UQestimator.</span>
+<span class="sd">            y (np.array, optional): Targets/Observations, can be None if processor does&#39;t need y to fit</span>
+<span class="sd">            type_UQ_params (type_UQ_params, optional): Additional information about type_UQ parameters.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">fit_Epistemic_score</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Epistemicscorelvl_processor.transform">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.Epistemicscorelvl_processor.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform procedure aim to transform (predictor) &amp; UQestimator output into a Epistemic_scorelvl</span>
+<span class="sd">        according Episticscore quantile fitted during training procedure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure provide by the UQestiamtor.</span>
+<span class="sd">            type_UQ (str): Type_UQ of the UQestimators.</span>
+<span class="sd">            pred (np.array): Prediction of the predictor or the UQestimator.</span>
+<span class="sd">            y (np.array, optional): Targets/Observations, can be None if processor does&#39;t need y to fit</span>
+<span class="sd">            type_UQ_params (type_UQ_params, optional): Additional information about type_UQ parameters.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns: Epistemic_scorelvl : Epistemic_scorelvl that express the quantile class of Epistemic values</span>
+<span class="sd">            amoung quantile [0.50, 0.80, 0.90, 0.95, 0.975, 0.99, 0.999]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">)</span>
+        <span class="n">Epistemic_scorelvl</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">compute_Epistemic_score</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">params_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params_</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Epistemic_scorelvl</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Anomscore_processor">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.Anomscore_processor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Anomscore_processor</span><span class="p">(</span><span class="n">UQKPI_Processor</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Processor aiming to produce an contextual deviation anomaly score from UQmeasure prediction and observation&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Anomscore&quot;</span><span class="p">,</span> <span class="n">KPI_parameters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str, optional): name. Defaults to &#39;Anomscore&#39;.</span>
+<span class="sd">            KPI_parameters (_type_, optional): dict of parameters link to compute_score function.</span>
+<span class="sd">                Defaults to None will use predefined paramters.</span>
+<span class="sd">            cache (_type_, optional): Cache manager or none</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">KPI_parameters</span><span class="o">=</span><span class="n">KPI_parameters</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fusion_params_</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Anomscore_processor.fit">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.Anomscore_processor.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fitting procedure aim to estimate and store Anomscore_processor params for Anomscore computation</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure provide by the UQestiamtor.</span>
+<span class="sd">            type_UQ (str): Type_UQ of the UQestimators.</span>
+<span class="sd">            pred (np.array): Prediction of the predictor or the UQestimator.</span>
+<span class="sd">            y (np.array, optional): Targets/Observations, can be None if processor does&#39;t need y to fit</span>
+<span class="sd">            type_UQ_params (type_UQ_params, optional): Additional information about type_UQ parameters.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params_</span> <span class="o">=</span> <span class="n">anom_proc</span><span class="o">.</span><span class="n">fit_anom_score</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;fusion&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">[</span><span class="s2">&quot;fusion&quot;</span><span class="p">]:</span>
+                <span class="n">anom_score</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">anom_proc</span><span class="o">.</span><span class="n">compute_anom_score</span><span class="p">(</span>
+                    <span class="n">UQ</span><span class="o">=</span><span class="n">UQ</span><span class="p">,</span>
+                    <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+                    <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                    <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+                    <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+                    <span class="n">params_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params_</span><span class="p">,</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">fusion_params_</span> <span class="o">=</span> <span class="n">anom_proc</span><span class="o">.</span><span class="n">fit_score_fusion</span><span class="p">(</span>
+                    <span class="n">anom_score</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span>
+                <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Anomscore_processor.transform">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQKPI_Processor.Anomscore_processor.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Transform procedure aim to transform (predictor) &amp; UQestimator output into a Epistemic_scorelvl</span>
+<span class="sd">        according Episticscore quantile fitted during training procedure.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure provide by the UQestimator.</span>
+<span class="sd">            type_UQ (str): Type_UQ of the UQestimators.</span>
+<span class="sd">            pred (np.array): Prediction of the predictor or the UQestimator.</span>
+<span class="sd">            y (np.array, optional): Targets/Observations, can be None if processor does&#39;t need y to fit</span>
+<span class="sd">            type_UQ_params (type_UQ_params, optional): Additional information about type_UQ parameters.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns: anom_score : Deviation score (pred-y) process by anom_proc.compute_anom_score</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create a bug for python &gt;3.8 : wrapped() missing 1required positional argument :&#39;X&#39;</span>
+        <span class="c1"># super().transform(type_UQ=type_UQ)</span>
+
+        <span class="n">anom_score</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">anom_proc</span><span class="o">.</span><span class="n">compute_anom_score</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="o">=</span><span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+            <span class="n">params_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">params_</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="s2">&quot;fusion&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span><span class="p">[</span><span class="s2">&quot;fusion&quot;</span><span class="p">]:</span>
+                <span class="n">anom_score</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">anom_proc</span><span class="o">.</span><span class="n">compute_score_fusion</span><span class="p">(</span>
+                    <span class="n">anom_score</span><span class="p">,</span> <span class="n">params_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">fusion_params_</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">KPI_parameters</span>
+                <span class="p">)</span>
+                <span class="n">anom_score</span> <span class="o">=</span> <span class="o">-</span><span class="n">anom_score</span>
+        <span class="k">return</span> <span class="n">anom_score</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

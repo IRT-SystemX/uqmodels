@@ -1,0 +1,1494 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.modelization.DL_estimator.metalayers &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.modelization.DL_estimator.metalayers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.modelization.DL_estimator.metalayers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow.keras.backend</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">K</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">layers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">keras.layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">RNN</span><span class="p">,</span> <span class="n">Dense</span><span class="p">,</span> <span class="n">Dropout</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">,</span> <span class="n">Layer</span><span class="p">,</span> <span class="n">LSTMCell</span><span class="p">,</span> <span class="n">TimeDistributed</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_global_determinism</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">...utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">generate_random_state</span><span class="p">,</span> <span class="n">get_fold_nstep</span>
+
+<span class="c1"># EDL head</span>
+<span class="c1"># https://github.com/aamini/evidential-deep-learning/blob/main/evidential_deep_learning/layers/dense.py</span>
+
+<span class="c1"># tf.keras.utils.get_custom_objects().clear()</span>
+
+
+<div class="viewcode-block" id="EDLProcessing">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing">[docs]</a>
+<span class="nd">@tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;UQModels_layers&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EDLProcessing</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_logvar</span><span class="o">=-</span><span class="mi">6</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_logvar</span> <span class="o">=</span> <span class="n">min_logvar</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="EDLProcessing.compute_output_shape">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.compute_output_shape">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">input_shape</span></div>
+
+
+<div class="viewcode-block" id="EDLProcessing.call">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.call">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply EDLProcessing</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (_type_): input</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mu</span><span class="p">,</span> <span class="n">logv</span><span class="p">,</span> <span class="n">logalpha</span><span class="p">,</span> <span class="n">logbeta</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">logv</span><span class="p">)</span> <span class="o">+</span> <span class="mf">10e-6</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">logalpha</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">softplus</span><span class="p">(</span><span class="n">logbeta</span><span class="p">)</span> <span class="o">+</span> <span class="mf">10e-6</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">mu</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="EDLProcessing.get_config">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.get_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;min_logvar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_logvar</span><span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="ProbabilisticProcessing">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing">[docs]</a>
+<span class="nd">@tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;UQModels_layers&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProbabilisticProcessing</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Layer (_type_): _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">min_logvar</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_logvar</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_logvar</span> <span class="o">=</span> <span class="n">min_logvar</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_logvar</span> <span class="o">=</span> <span class="n">max_logvar</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ProbabilisticProcessing.compute_output_shape">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.compute_output_shape">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">input_shape</span></div>
+
+
+<div class="viewcode-block" id="ProbabilisticProcessing.call">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.call">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply ProbabilisticProcessing to x</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (_type_): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">mu</span><span class="p">,</span> <span class="n">logsigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">logsigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">logsigma</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_logvar</span><span class="p">,</span> <span class="n">logsigma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_logvar</span><span class="p">)</span>
+
+        <span class="n">logsigma</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">logsigma</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_logvar</span><span class="p">,</span> <span class="n">logsigma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_logvar</span><span class="p">)</span>
+        <span class="c1"># logsigma = tf.nn.softplus(logsigma)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">mu</span><span class="p">,</span> <span class="n">logsigma</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProbabilisticProcessing.get_config">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.get_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;min_logvar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_logvar</span><span class="p">,</span> <span class="s2">&quot;max_logvar&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_logvar</span><span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="mlp">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.mlp">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mlp</span><span class="p">(</span>
+    <span class="n">dim_in</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">layers_size</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">with_mc_dp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">logvar_min</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">regularizer_W</span><span class="o">=</span><span class="p">(</span><span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">),</span>
+    <span class="n">shape_2D</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">shape_2D_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a keras MLP model to make preprocessing or head subpart&quot;.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dim_in (int): Input dimension, erase by shape_2D if 2D input_size</span>
+<span class="sd">        dim_out (int or None):  Input dimension, if None take the last layers_size values</span>
+<span class="sd">        layers_size (list of  in, optional): List of size of layers. Defaults to [100, 50].</span>
+<span class="sd">        name (str, optional): Name of model. Defaults to &quot;&quot;.</span>
+<span class="sd">        dp (float, optional): Percentage of dropout. Defaults to 0.01.</span>
+<span class="sd">        type_output (_type_, optional): Specify Head last layers among</span>
+<span class="sd">        [&#39;None&#39;:pred,MC_Dropout:(Pred,var),&quot;EDL&quot;:(Pred,mu,alpha,beta) ]</span>
+<span class="sd">        logvar_min (int, optional): Cut off for small variance estimations</span>
+<span class="sd">        regularizer_W (tuple, optional):Regularisation on Dense layers. Defaults to (0.00001, 0.00001).</span>
+<span class="sd">        shape_2D (tupple or None, optional): if intput shape is 2D. Defaults to None.</span>
+<span class="sd">        shape_2D_out:</span>
+<span class="sd">        random_state (bool): handle experimental random using seed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">set_global_determinism</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="n">reg_l1l2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span><span class="n">l1</span><span class="o">=</span><span class="n">regularizer_W</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l2</span><span class="o">=</span><span class="n">regularizer_W</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">with_mc_dp</span><span class="p">:</span>
+        <span class="n">flag_mc</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">shape_2D</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">dim_in</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;input_&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">inputs</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">shape_2D</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape_2D</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;input_&quot;</span> <span class="o">+</span> <span class="n">name</span>
+        <span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim_in</span><span class="p">)))(</span>
+            <span class="n">inputs</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">layers_size</span><span class="p">):</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+            <span class="n">i</span><span class="p">,</span>
+            <span class="n">activation</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">LeakyReLU</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.01</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;MLP_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span>
+            <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">reg_l1l2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span>
+                <span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+            <span class="p">)(</span><span class="n">layer</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span><span class="p">)</span>
+
+    <span class="c1"># Probablistic NN</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="n">n_param</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">EDL_ouput</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+            <span class="n">n_param</span> <span class="o">*</span> <span class="n">dim_out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;EDL&quot;</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">EDLProcessing</span><span class="p">(</span><span class="n">logvar_min</span><span class="p">)(</span><span class="n">EDL_ouput</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="p">(</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">):</span>
+        <span class="n">n_param</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">Prob_output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+            <span class="n">n_param</span> <span class="o">*</span> <span class="n">dim_out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Mu_logvar&quot;</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="kc">None</span>
+        <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">ProbabilisticProcessing</span><span class="p">(</span><span class="n">logvar_min</span><span class="p">)(</span><span class="n">Prob_output</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;classif&quot;</span><span class="p">:</span>
+        <span class="n">n_param</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">n_param</span> <span class="o">*</span> <span class="n">dim_out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Prob&quot;</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;softmax&quot;</span><span class="p">)(</span>
+            <span class="n">output</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">dim_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">n_param</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">n_param</span> <span class="o">*</span> <span class="n">dim_out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Output_&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="n">shape_2D_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">shape_2D_out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_param</span><span class="p">,</span> <span class="n">shape_2D_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">permute_dimensions</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))(</span>
+            <span class="n">output</span>
+        <span class="p">)</span>
+
+    <span class="n">mlp</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;MLP_&quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mlp</span></div>
+
+
+
+<span class="c1"># Improvemement to do : Transform moving_slice in Keras layers</span>
+<span class="c1"># Dev : Preprocessing et reconstruction basé cnn 1D for independant multivariate TS : depreciated</span>
+
+<span class="c1"># Old</span>
+
+
+<div class="viewcode-block" id="stack_and_roll_layer">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.stack_and_roll_layer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stack_and_roll_layer</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="p">,</span> <span class="n">size_window</span><span class="p">,</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;tf_slice&quot;</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Layers that produce a stack rolled layers to produce a batch of subsequence</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inputs (_type_): layers</span>
+<span class="sd">        size_window (_type_): size of subseqeuence</span>
+<span class="sd">        size_subseq (_type_): _description_</span>
+<span class="sd">        padding (_type_): _description_</span>
+<span class="sd">        name (str, optional): _description_. Defaults to &quot;&quot;.</span>
+<span class="sd">        format (str, optional): _description_. Defaults to &quot;tf_slice&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Slice and stack tensor to produce folded representation</span>
+    <span class="n">slide_tensor</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">n_step</span> <span class="o">=</span> <span class="n">get_fold_nstep</span><span class="p">(</span><span class="n">size_window</span><span class="p">,</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
+    <span class="c1"># Implementation numpy</span>
+
+    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;tf_slice&quot;</span><span class="p">:</span>  <span class="c1"># tf slice based</span>
+        <span class="n">n_step</span> <span class="o">=</span> <span class="n">get_fold_nstep</span><span class="p">(</span><span class="n">size_window</span><span class="p">,</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
+        <span class="n">z_slice</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">steps</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_step</span> <span class="o">*</span> <span class="n">padding</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+            <span class="n">z_slice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">z_slice</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span>
+    <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;np_slice&quot;</span><span class="p">:</span>  <span class="c1"># np slice based</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_step</span><span class="p">):</span>
+            <span class="n">slide_tensor</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">inputs</span><span class="p">[:,</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="o">+</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="p">:][:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_rollstack&quot;</span><span class="p">)(</span>
+            <span class="n">slide_tensor</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">&quot;tf_map&quot;</span><span class="p">:</span>  <span class="c1"># tf map based</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="o">+</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="p">:],</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">n_step</span><span class="p">),</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">x</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">exit</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unknown format </span><span class="si">{</span><span class="nb">format</span><span class="si">}</span><span class="s2">. Supported formats are: tf_slice, np_slice and tf_map&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="cnn_enc_1D">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_enc_1D">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cnn_enc_1D</span><span class="p">(</span>
+    <span class="n">size_subseq_enc</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="p">,</span>
+    <span class="n">dim_z</span><span class="p">,</span>
+    <span class="n">dim_lt</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;cnn_enc_1D layers</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size_subseq_enc (int, optional): _description_. Defaults to 100.</span>
+<span class="sd">        dim_out (int, optional): _description_. Defaults to 10.</span>
+<span class="sd">        dim_z (int, optional): _description_. Defaults to 100.</span>
+<span class="sd">        dim_lt (int, optional): _description_. Defaults to 100.</span>
+<span class="sd">        type_output (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        k (int, optional): _description_. Defaults to 32.</span>
+<span class="sd">        dp (float, optional): _description_. Defaults to 0.05.</span>
+<span class="sd">        random_state (bool): handle experimental random using seed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">]:</span>
+        <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;st&quot;</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">SeparableConv1D</span><span class="p">(</span>
+        <span class="n">k</span><span class="p">,</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">dim_lt</span> <span class="o">/</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="n">strides</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">depth_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">AveragePooling1D</span><span class="p">((</span><span class="mi">5</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+        <span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">SeparableConv1D</span><span class="p">(</span>
+        <span class="n">k</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">dim_lt</span> <span class="o">/</span> <span class="mi">8</span><span class="p">),</span>
+        <span class="n">strides</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">depth_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">AveragePooling1D</span><span class="p">((</span><span class="mi">2</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">1</span><span class="p">))(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+        <span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">SeparableConv1D</span><span class="p">(</span>
+        <span class="n">k</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">dim_lt</span> <span class="o">/</span> <span class="mi">16</span><span class="p">),</span>
+        <span class="n">strides</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">depth_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">AveragePooling1D</span><span class="p">((</span><span class="mi">2</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Flatten</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">dim_z</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="n">enc</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">enc</span></div>
+
+
+
+<div class="viewcode-block" id="cnn_dec_1D">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_dec_1D">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cnn_dec_1D</span><span class="p">(</span>
+    <span class="n">size_subseq_dec</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">dim_z</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">k</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size_subseq_dec (int, optional): _description_. Defaults to 10.</span>
+<span class="sd">        dim_out (int, optional): _description_. Defaults to 10.</span>
+<span class="sd">        dim_z (int, optional): _description_. Defaults to 100.</span>
+<span class="sd">        type_output (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        k (int, optional): _description_. Defaults to 32.</span>
+<span class="sd">        dp (float, optional): _description_. Defaults to 0.05.</span>
+<span class="sd">        random_state (bool): handle experimental random using seed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dim_chan_out</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">]:</span>
+        <span class="n">dim_chan_out</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">elif</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="n">dim_chan_out</span> <span class="o">=</span> <span class="mi">4</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">dim_z</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;st&quot;</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:])(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">Conv1DTranspose</span><span class="p">(</span>
+        <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">strides</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+        <span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">Conv1DTranspose</span><span class="p">(</span>
+        <span class="n">k</span><span class="p">,</span> <span class="p">(</span><span class="mi">50</span><span class="p">),</span> <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">1</span><span class="p">))(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+        <span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">SeparableConv1D</span><span class="p">(</span>
+        <span class="n">dim_out</span> <span class="o">*</span> <span class="n">dim_chan_out</span><span class="p">,</span>
+        <span class="mi">10</span><span class="p">,</span>
+        <span class="n">strides</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">depth_multiplier</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;sigmoid&quot;</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="c1"># aamini/evidential-deep-learning</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">]:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">ProbabilisticProcessing</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">EDLProcessing</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size_subseq_dec</span> <span class="o">*</span> <span class="n">dim_out</span> <span class="o">*</span> <span class="n">dim_chan_out</span><span class="p">))</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="n">dec</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_lag_dec&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dec</span></div>
+
+
+
+<span class="c1"># Dev : Preprocessing CNN based representation layers for 2D TS without spatial structure</span>
+
+
+<div class="viewcode-block" id="cnn_enc">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_enc">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cnn_enc</span><span class="p">(</span>
+    <span class="n">size_subseq_enc</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="p">,</span>
+    <span class="n">dim_chan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">k1</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">reduction_x1</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">reduction_x2</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">dim_z</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warning depreciated CNN_enc implementation</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size_subseq_enc (_type_): _description_</span>
+<span class="sd">        dim_out (_type_): _description_</span>
+<span class="sd">        dim_chan (int, optional): _description_. Defaults to 1.</span>
+<span class="sd">        k1 (int, optional): _description_. Defaults to 10.</span>
+<span class="sd">        reduction_x1 (int, optional): _description_. Defaults to 8.</span>
+<span class="sd">        reduction_x2 (int, optional): _description_. Defaults to 1.</span>
+<span class="sd">        dim_z (int, optional): _description_. Defaults to 100.</span>
+<span class="sd">        dp (float, optional): _description_. Defaults to 0.02.</span>
+<span class="sd">        random_state (_type_, optional): _description_. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dim_out_reshape</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim_out</span> <span class="o">/</span> <span class="n">dim_chan</span><span class="p">)</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;st&quot;</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">dim_out_reshape</span><span class="p">,</span> <span class="n">dim_chan</span><span class="p">))</span>
+    <span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span>
+        <span class="n">k1</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">reduction_x1</span><span class="p">,</span> <span class="n">reduction_x2</span><span class="p">),</span>
+        <span class="n">strides</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">AveragePooling2D</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="n">reduction_x2</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="c1"># output = tf.keras.layers.Dropout(dp)(output, training=True)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span>
+        <span class="n">k1</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">reduction_x1</span><span class="p">,</span> <span class="n">dim_out_reshape</span><span class="p">),</span>
+        <span class="n">strides</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">AveragePooling2D</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="c1"># output = tf.keras.layers.Dropout(dp)(output, training=True)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span>
+        <span class="n">k1</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">reduction_x1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">strides</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Flatten</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">dim_z</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)(</span><span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">enc</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_lag_enc&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">enc</span></div>
+
+
+
+<div class="viewcode-block" id="cnn_dec">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_dec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cnn_dec</span><span class="p">(</span>
+    <span class="n">size_subseq_dec</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="p">,</span>
+    <span class="n">dim_chan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">k1</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">min_logvar</span><span class="o">=-</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">dim_z</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Warning depreciated CNN_dec implementation</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size_subseq_dec (_type_): _description_</span>
+<span class="sd">        dim_out (_type_): _description_</span>
+<span class="sd">        dim_chan (int, optional): _description_. Defaults to 1.</span>
+<span class="sd">        type_output (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        k1 (int, optional): _description_. Defaults to 10.</span>
+<span class="sd">        min_logvar (int, optional): _description_. Defaults to -6.</span>
+<span class="sd">        dim_z (int, optional): _description_. Defaults to 100.</span>
+<span class="sd">        dp (float, optional): _description_. Defaults to 0.01.</span>
+<span class="sd">        random_state (_type_, optional): _description_. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dim_chan_out</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">]:</span>
+        <span class="n">dim_chan_out</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">elif</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="n">dim_chan_out</span> <span class="o">=</span> <span class="mi">4</span>
+
+    <span class="n">dim_out_reshape</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim_out</span> <span class="o">/</span> <span class="n">dim_chan</span><span class="p">)</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">dim_z</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;st&quot;</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:])(</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DTranspose</span><span class="p">(</span>
+        <span class="n">k1</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">size_subseq_dec</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)),</span> <span class="n">dim_out_reshape</span> <span class="o">*</span> <span class="n">dim_chan</span><span class="p">),</span>
+        <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)(</span><span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DTranspose</span><span class="p">(</span>
+        <span class="n">k1</span><span class="p">,</span>
+        <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="n">size_subseq_dec</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)),</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">1</span><span class="p">))(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DTranspose</span><span class="p">(</span><span class="n">dim_chan_out</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)(</span>
+        <span class="n">output</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Probablistic NN</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">]:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">ProbabilisticProcessing</span><span class="p">(</span><span class="n">min_logvar</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="c1"># aamini/evidential-deep-learning</span>
+    <span class="k">elif</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">EDLProcessing</span><span class="p">(</span><span class="n">min_logvar</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size_subseq_dec</span> <span class="o">*</span> <span class="n">dim_out</span> <span class="o">*</span> <span class="n">dim_chan_out</span><span class="p">))</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">dec</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_lag_dec&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dec</span></div>
+
+
+
+<div class="viewcode-block" id="conv_block_1D">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.conv_block_1D">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">conv_block_1D</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="p">,</span>
+    <span class="n">dim_chan</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">flag_mc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv1D</span><span class="p">(</span>
+        <span class="n">filters</span> <span class="o">*</span> <span class="n">dim_chan</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;causal&quot;</span><span class="p">,</span>
+        <span class="n">groups</span><span class="o">=</span><span class="n">dim_chan</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="conv_block_2D">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.conv_block_2D">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">conv_block_2D</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="p">,</span>
+    <span class="n">dim_chan</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">flag_mc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2D</span><span class="p">(</span>
+        <span class="n">filters</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;valid&quot;</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span>
+    <span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<span class="c1"># Version actuelle : génération d&#39;une structure CNN_ENC parametrable</span>
+
+
+<div class="viewcode-block" id="cnn_enc_bis">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_enc_bis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cnn_enc_bis</span><span class="p">(</span>
+    <span class="n">size_subseq_enc</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+    <span class="n">dim_target</span><span class="o">=</span><span class="mi">52</span><span class="p">,</span>
+    <span class="n">dim_chan</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">list_filters</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>
+    <span class="n">list_kernels</span><span class="o">=</span><span class="p">[(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+    <span class="n">list_strides</span><span class="o">=</span><span class="p">[(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">block</span><span class="o">=</span><span class="s2">&quot;2D&quot;</span><span class="p">,</span>
+    <span class="n">dim_z</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Produce a cnn_enn subpart of a deep learning predictor</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">]:</span>
+        <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">dim_space</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim_target</span> <span class="o">/</span> <span class="n">dim_chan</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dim_chan</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">dim_target</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;st&quot;</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">dim_target</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;st&quot;</span><span class="p">)</span>
+
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">dim_space</span><span class="p">,</span> <span class="n">dim_chan</span><span class="p">))</span>
+        <span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">strides</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+        <span class="nb">zip</span><span class="p">(</span><span class="n">list_filters</span><span class="p">,</span> <span class="n">list_kernels</span><span class="p">,</span> <span class="n">list_strides</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="o">==</span> <span class="s2">&quot;2D&quot;</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">conv_block_2D</span><span class="p">(</span>
+                <span class="n">output</span><span class="p">,</span>
+                <span class="n">dim_space</span><span class="p">,</span>
+                <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+                <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+                <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+                <span class="n">flag_mc</span><span class="o">=</span><span class="n">flag_mc</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">n</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">block</span> <span class="o">==</span> <span class="s2">&quot;1D&quot;</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">conv_block_1D</span><span class="p">(</span>
+                <span class="n">output</span><span class="p">,</span>
+                <span class="n">dim_space</span><span class="p">,</span>
+                <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+                <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+                <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+                <span class="n">flag_mc</span><span class="o">=</span><span class="n">flag_mc</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_filters</span><span class="p">)</span> <span class="o">+</span> <span class="n">n</span><span class="p">),</span>
+            <span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Flatten</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">dim_z</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+        <span class="p">)</span>
+    <span class="n">enc</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_lag_enc&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">enc</span></div>
+
+
+
+<div class="viewcode-block" id="Tconv_block_1D">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Tconv_block_1D">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Tconv_block_1D</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">strides</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">flag_mc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv1DTranspose</span><span class="p">(</span>
+        <span class="n">filters</span> <span class="o">*</span> <span class="n">dim_out</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">,</span>
+        <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+        <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">,</span>
+        <span class="n">groups</span><span class="o">=</span><span class="n">dim_out</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)(</span><span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="Tconv_block_2D">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Tconv_block_2D">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Tconv_block_2D</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="p">,</span>
+    <span class="n">filters</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">flag_mc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DTranspose</span><span class="p">(</span>
+        <span class="n">filters</span><span class="p">,</span> <span class="p">(</span><span class="n">kernel</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">),</span> <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span>
+    <span class="p">)(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">BatchNormalization</span><span class="p">()(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)(</span>
+            <span class="n">output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="cnn_dec_bis">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_dec_bis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cnn_dec_bis</span><span class="p">(</span>
+    <span class="n">size_subseq_dec</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="p">,</span>
+    <span class="n">dim_chan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_logvar</span><span class="o">=-</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">list_filters</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
+    <span class="n">strides</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">list_kernels</span><span class="o">=</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+    <span class="n">dim_z</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">]:</span>
+        <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">dim_chan_out</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">dim_chan</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">]:</span>
+        <span class="n">dim_chan_out</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dim_chan</span>
+
+    <span class="k">elif</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="n">dim_chan_out</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">dim_chan</span>
+
+    <span class="n">dim_space</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dim_out</span> <span class="o">/</span> <span class="n">size_subseq_dec</span><span class="p">)</span>
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">dim_z</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;st&quot;</span><span class="p">)</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:])(</span><span class="n">inputs</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">filters</span><span class="p">,</span> <span class="n">kernel</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">list_filters</span><span class="p">,</span> <span class="n">list_kernels</span><span class="p">)):</span>
+        <span class="n">d_tar</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">d_tar</span> <span class="o">=</span> <span class="n">dim_space</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">Tconv_block_2D</span><span class="p">(</span>
+            <span class="n">output</span><span class="p">,</span>
+            <span class="n">d_tar</span><span class="p">,</span>
+            <span class="n">filters</span><span class="o">=</span><span class="n">filters</span><span class="p">,</span>
+            <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">strides</span><span class="o">=</span><span class="n">strides</span><span class="p">,</span>
+            <span class="n">flag_mc</span><span class="o">=</span><span class="n">flag_mc</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Conv2DTranspose</span><span class="p">(</span><span class="n">dim_chan_out</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">)(</span>
+        <span class="n">output</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Probablistic NN</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">]:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">ProbabilisticProcessing</span><span class="p">(</span><span class="n">min_logvar</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="c1"># aamini/evidential-deep-learning</span>
+    <span class="k">elif</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">EDLProcessing</span><span class="p">(</span><span class="n">min_logvar</span><span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size_subseq_dec</span><span class="p">,</span> <span class="n">dim_space</span> <span class="o">*</span> <span class="n">dim_chan_out</span><span class="p">))</span>
+    <span class="p">)(</span><span class="n">output</span><span class="p">)</span>
+
+    <span class="n">dec</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;conv_lag_dec&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dec</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">dec</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning : inadequate deconvolution window size : model will crash&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dec</span></div>
+
+
+
+<span class="c1"># Dev : Preprocessing CNN based representation layers for 2D TS without spatial structure</span>
+
+
+<div class="viewcode-block" id="dense2D_enc_dec">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.dense2D_enc_dec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dense2D_enc_dec</span><span class="p">(</span>
+    <span class="n">size_subseq_enc</span><span class="p">,</span>
+    <span class="n">size_subseq_dec</span><span class="p">,</span>
+    <span class="n">dim_in</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="p">,</span>
+    <span class="n">layers_size</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span>
+    <span class="n">dim_z</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">enc_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">dim_in</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;st&quot;</span><span class="p">)</span>
+    <span class="n">inputs_flatten</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size_subseq_enc</span> <span class="o">*</span> <span class="n">dim_in</span><span class="p">)))(</span>
+        <span class="n">inputs</span>
+    <span class="p">)</span>
+
+    <span class="n">layers_size_enc</span> <span class="o">=</span> <span class="n">layers_size</span>
+    <span class="n">layers_size_enc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dim_z</span><span class="p">)</span>
+
+    <span class="n">mlp_enc</span> <span class="o">=</span> <span class="n">mlp</span><span class="p">(</span>
+        <span class="n">size_subseq_enc</span> <span class="o">*</span> <span class="n">dim_in</span><span class="p">,</span>
+        <span class="n">dim_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">layers_size</span><span class="o">=</span><span class="n">layers_size_enc</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">dp</span><span class="o">=</span><span class="n">dp</span><span class="p">,</span>
+        <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+    <span class="p">)(</span><span class="n">inputs_flatten</span><span class="p">)</span>
+    <span class="n">enc</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">mlp_enc</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;MLP_enc&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">enc_only</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">enc</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">dim_z</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;embedding&quot;</span><span class="p">)</span>
+    <span class="n">z_flatten</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim_z</span><span class="p">)))(</span><span class="n">inputs</span><span class="p">)</span>
+    <span class="n">mlp_dec</span> <span class="o">=</span> <span class="n">mlp</span><span class="p">(</span>
+        <span class="n">dim_z</span><span class="p">,</span>
+        <span class="n">dim_out</span><span class="o">=</span><span class="n">size_subseq_dec</span> <span class="o">*</span> <span class="n">dim_out</span><span class="p">,</span>
+        <span class="n">layers_size</span><span class="o">=</span><span class="n">layers_size</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">dp</span><span class="o">=</span><span class="n">dp</span><span class="p">,</span>
+        <span class="n">type_output</span><span class="o">=</span><span class="n">type_output</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+    <span class="p">)(</span><span class="n">z_flatten</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="n">dim_out</span> <span class="o">=</span> <span class="n">dim_out</span> <span class="o">*</span> <span class="mi">4</span>
+
+    <span class="k">elif</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout&quot;</span><span class="p">:</span>
+        <span class="n">dim_out</span> <span class="o">=</span> <span class="n">dim_out</span> <span class="o">*</span> <span class="mi">2</span>
+
+    <span class="n">reshape_dec</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size_subseq_dec</span><span class="p">,</span> <span class="n">dim_out</span><span class="p">)))(</span>
+        <span class="n">mlp_dec</span>
+    <span class="p">)</span>
+    <span class="n">dec</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">reshape_dec</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;MLP_dec&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">enc</span><span class="p">,</span> <span class="n">dec</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="moving_slice_map">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.moving_slice_map">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">moving_slice_map</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">n_step</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">kick_off</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">depth_slice</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply Layers on n_step slices of input with padding</span>
+<span class="sd">    Args:</span>
+<span class="sd">        input (TF.tensor): Input tensors</span>
+<span class="sd">        Layers (Keras.model): Submodels</span>
+<span class="sd">        n_step (int): N_slide</span>
+<span class="sd">        padding (int): padding&quot;&quot;&quot;</span>
+
+    <span class="n">steps</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">kick_off</span><span class="p">,</span> <span class="n">kick_off</span> <span class="o">+</span> <span class="n">n_step</span> <span class="o">*</span> <span class="n">padding</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
+    <span class="n">z_slice</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="nb">slice</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">depth_slice</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">slice</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">depth_slice</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">depth_slice</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="nb">slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="n">z_slice</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">)</span>
+
+    <span class="n">z_slice</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))(</span><span class="n">z_slice</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">z_slice</span></div>
+
+
+
+<div class="viewcode-block" id="Moving_slice_layer">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Moving_slice_layer</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Layer that apply moving_slice_map&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">n_step</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">kick_off</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">depth_slice</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ignore_futur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">=</span> <span class="n">n_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding</span> <span class="o">=</span> <span class="n">padding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kick_off</span> <span class="o">=</span> <span class="n">kick_off</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depth_slice</span> <span class="o">=</span> <span class="n">depth_slice</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignore_futur</span> <span class="o">=</span> <span class="n">ignore_futur</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Moving_slice_layer.build">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.build">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Moving_slice_layer.call">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.call">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply moving_slice_map to generate window sequnce</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            input_data (_type_): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignore_futur</span><span class="p">:</span>
+            <span class="n">input_data</span> <span class="o">=</span> <span class="n">input_data</span><span class="p">[:,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignore_futur</span><span class="p">]</span>
+        <span class="n">z_slice</span> <span class="o">=</span> <span class="n">moving_slice_map</span><span class="p">(</span>
+            <span class="n">input_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kick_off</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth_slice</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">z_slice</span></div>
+
+
+<div class="viewcode-block" id="Moving_slice_layer.compute_output_shape">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.compute_output_shape">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kick_off</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kick_off</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth_slice</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">output_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">step</span><span class="p">),</span> <span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_shape</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">step</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">depth_slice</span><span class="p">,</span>
+                <span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">output_shape</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Double_Moving_slice_layer">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Double_Moving_slice_layer</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Layer that apply double moving_slice_map</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Layer (_type_): _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">n_step_out</span><span class="p">,</span> <span class="n">n_step_in</span><span class="p">,</span> <span class="n">padding_out</span><span class="p">,</span> <span class="n">padding_in</span><span class="p">,</span> <span class="n">depth_slice</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step_out</span> <span class="o">=</span> <span class="n">n_step_out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_step_in</span> <span class="o">=</span> <span class="n">n_step_in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding_out</span> <span class="o">=</span> <span class="n">padding_out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">padding_in</span> <span class="o">=</span> <span class="n">padding_in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depth_slice</span> <span class="o">=</span> <span class="n">depth_slice</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Double_Moving_slice_layer.build">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.build">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Double_Moving_slice_layer.call">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.call">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            input_data (_type_): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">z_slice_out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_step_out</span><span class="p">):</span>
+            <span class="n">kick_off</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_out</span>
+            <span class="n">z_slice_in</span> <span class="o">=</span> <span class="n">moving_slice_map</span><span class="p">(</span>
+                <span class="n">input_data</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">n_step_in</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">padding_in</span><span class="p">,</span>
+                <span class="n">kick_off</span><span class="o">=</span><span class="n">kick_off</span><span class="p">,</span>
+                <span class="n">depth_slice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">depth_slice</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">z_slice_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z_slice_in</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span>
+        <span class="n">z_slice</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))(</span><span class="n">z_slice_out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">z_slice</span></div>
+
+
+<div class="viewcode-block" id="Double_Moving_slice_layer.compute_output_shape">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.compute_output_shape">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="n">step_out</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step_out</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_out</span><span class="p">)</span>
+        <span class="n">step_in</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_step_in</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">padding_in</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">depth_slice</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">output_shape</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">step_out</span><span class="p">),</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">step_in</span><span class="p">),</span>
+                <span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_shape</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">step_out</span><span class="p">),</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">step_in</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">depth_slice</span><span class="p">,</span>
+                <span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">output_shape</span></div>
+</div>
+
+
+
+<span class="c1"># Modelisation ensemble de code lié à la construction d&#39;un modèle LSTM ED à prédiction multihorizon</span>
+<span class="c1"># Processing layers : LSTM cell modification to handle state passing.</span>
+
+
+<div class="viewcode-block" id="LSTMCellReturnCellState">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTMCellReturnCellState">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LSTMCellReturnCellState</span><span class="p">(</span><span class="n">LSTMCell</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Layer LSTM returning output and state jointly</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        LSTMCell (_type_): _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LSTMCellReturnCellState.call">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTMCellReturnCellState.call">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inputs (_type_): _description_</span>
+<span class="sd">            states (_type_): _description_</span>
+<span class="sd">            training (_type_, optional): _description_. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outputs</span><span class="p">,</span> <span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">training</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="p">[</span><span class="n">h</span><span class="p">,</span> <span class="n">c</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LSTMCellMidsize">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTMCellMidsize">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LSTMCellMidsize</span><span class="p">(</span><span class="n">LSTMCell</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Hack to take into accout state in cell : size in dim_z*2 | size out dim_z</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        LSTMCell (_type_): _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LSTMCellMidsize.build">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTMCellMidsize.build">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="n">input_shape</span> <span class="o">=</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">input_shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">input_shape</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1"># Processing layers : RNN cell</span>
+
+
+<div class="viewcode-block" id="RNN_states_in_inputs">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.RNN_states_in_inputs">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RNN_states_in_inputs</span><span class="p">(</span><span class="n">RNN</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RNN class dispatching jointly [H,C]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        RNN (_type_): _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="RNN_states_in_inputs.call">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.RNN_states_in_inputs.call">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constants</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inputs (_type_): _description_</span>
+<span class="sd">            mask (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            training (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            initial_state (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            constants (_type_, optional): _description_. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">h</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">states</span> <span class="o">=</span> <span class="p">(</span><span class="n">h</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">call</span><span class="p">(</span>
+            <span class="n">h</span><span class="p">,</span> <span class="n">initial_state</span><span class="o">=</span><span class="n">states</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">training</span><span class="p">,</span> <span class="n">constants</span><span class="o">=</span><span class="n">constants</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LSTM_EProcessing">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTM_EProcessing">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">LSTM_EProcessing</span><span class="p">(</span>
+    <span class="n">n_step</span><span class="p">,</span>
+    <span class="n">dim_in</span><span class="p">,</span>
+    <span class="n">dim_z</span><span class="p">,</span>
+    <span class="n">flag_mc</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">dp_r</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">l1_l2_reg</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0000001</span><span class="p">,</span> <span class="mf">0.0000001</span><span class="p">),</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Encoder Processing as block aim to capture dynamic</span>
+<span class="sd">    Input (batch,n_step,dim_in) output (batch,n_step,dim_z*2) with Z_h and Z_state concatenate)</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        n_step (_type_): _description_</span>
+<span class="sd">        dim_in (_type_): _description_</span>
+<span class="sd">        dim_z (_type_): _description_</span>
+<span class="sd">        flag_mc (_type_): _description_</span>
+<span class="sd">        dp (float, optional): _description_. Defaults to 0.05.</span>
+<span class="sd">        dp_r (float, optional): _description_. Defaults to 0.02.</span>
+<span class="sd">        l1_l2_reg (tuple, optional): _description_. Defaults to (0.0000001, 0.0000001).</span>
+<span class="sd">        random_state (bool): handle experimental random using seed.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Model: Keras model as LSTM Encoder block</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lstm_cell_enc</span> <span class="o">=</span> <span class="n">LSTMCellReturnCellState</span><span class="p">(</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">dim_z</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;LSTM_enc_0&quot;</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;sigmoid&quot;</span><span class="p">,</span>
+        <span class="n">recurrent_dropout</span><span class="o">=</span><span class="n">dp_r</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span>
+            <span class="n">l1</span><span class="o">=</span><span class="n">l1_l2_reg</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l2</span><span class="o">=</span><span class="n">l1_l2_reg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+    <span class="n">lstm_enc</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">RNN</span><span class="p">(</span><span class="n">lstm_cell_enc</span><span class="p">,</span> <span class="n">return_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">EProcessing_in</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_step</span><span class="p">,</span> <span class="n">dim_in</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;input_EProcessing&quot;</span>
+    <span class="p">)</span>
+    <span class="n">Z_input_lstm</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">100</span><span class="p">))(</span>
+        <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">Dense</span><span class="p">(</span><span class="n">dim_z</span><span class="p">))(</span><span class="n">EProcessing_in</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">Z_lstm_output</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">101</span><span class="p">))(</span>
+        <span class="n">lstm_enc</span><span class="p">(</span><span class="n">Z_input_lstm</span><span class="p">),</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Extended with 0 to not affect state part in skip connexion.</span>
+    <span class="n">Z_input_lstm_extended</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">0</span><span class="p">]))(</span>
+        <span class="n">Z_input_lstm</span>
+    <span class="p">)</span>
+
+    <span class="n">EProcessing_out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Add</span><span class="p">()([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]]),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;skip_EProcessing&quot;</span>
+    <span class="p">)([</span><span class="n">Z_lstm_output</span><span class="p">,</span> <span class="n">Z_input_lstm_extended</span><span class="p">])</span>
+
+    <span class="n">LSTM_EProcessing_</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span>
+        <span class="n">EProcessing_in</span><span class="p">,</span> <span class="n">EProcessing_out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;EProcessing&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">LSTM_EProcessing_</span></div>
+
+
+
+<div class="viewcode-block" id="LSTM_DProcessing">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTM_DProcessing">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">LSTM_DProcessing</span><span class="p">(</span>
+    <span class="n">n_step</span><span class="p">,</span>
+    <span class="n">dim_z</span><span class="p">,</span>
+    <span class="n">flag_mc</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">dp_r</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">l1_l2_reg</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0000001</span><span class="p">,</span> <span class="mf">0.0000001</span><span class="p">),</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decoder Processing as block : aim to make temporal projection (Usefull to hold query information)</span>
+<span class="sd">    Input (batch,n_step,dim_z*2) output (batch,n_step,dim_z) with Zdecoding latent space)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n_step (_type_): _description_</span>
+<span class="sd">        dim_z (_type_): _description_</span>
+<span class="sd">        flag_mc (_type_): _description_</span>
+<span class="sd">        dp (float, optional): _description_. Defaults to 0.05.</span>
+<span class="sd">        dp_r (float, optional): _description_. Defaults to 0.02.</span>
+<span class="sd">        l1_l2_reg (tuple, optional): _description_. Defaults to (0.0000001, 0.0000001).</span>
+<span class="sd">        random_state (bool): handle experimental random using seed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Model: Keras model as LSTM Decoder block</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lstm_cell_dec</span> <span class="o">=</span> <span class="n">LSTMCellMidsize</span><span class="p">(</span>
+        <span class="nb">int</span><span class="p">(</span><span class="n">dim_z</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;LSTM_dec_0&quot;</span><span class="p">,</span>
+        <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;sigmoid&quot;</span><span class="p">,</span>
+        <span class="n">recurrent_dropout</span><span class="o">=</span><span class="n">dp_r</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="n">kernel_regularizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">regularizers</span><span class="o">.</span><span class="n">l1_l2</span><span class="p">(</span>
+            <span class="n">l1</span><span class="o">=</span><span class="n">l1_l2_reg</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l2</span><span class="o">=</span><span class="n">l1_l2_reg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">lstm_dec</span> <span class="o">=</span> <span class="n">RNN_states_in_inputs</span><span class="p">(</span><span class="n">lstm_cell_dec</span><span class="p">,</span> <span class="n">return_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">DProcessing_in</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Input</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_step</span><span class="p">,</span> <span class="n">dim_z</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;input_DProcessing&quot;</span>
+    <span class="p">)</span>
+    <span class="n">Z_lstm_output</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span> <span class="o">+</span> <span class="mi">100</span><span class="p">))(</span>
+        <span class="n">lstm_dec</span><span class="p">(</span><span class="n">DProcessing_in</span><span class="p">),</span> <span class="n">training</span><span class="o">=</span><span class="n">flag_mc</span>
+    <span class="p">)</span>
+    <span class="n">DProcessing_out</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Lambda</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Add</span><span class="p">()([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">][:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">dim_z</span><span class="p">]]),</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;skip_DProcessing&quot;</span><span class="p">,</span>
+    <span class="p">)([</span><span class="n">Z_lstm_output</span><span class="p">,</span> <span class="n">DProcessing_in</span><span class="p">])</span>
+
+    <span class="n">LSTM_DProcessing_</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span>
+        <span class="n">DProcessing_in</span><span class="p">,</span> <span class="n">DProcessing_out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;DProcessing&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">LSTM_DProcessing_</span></div>
+
+
+
+<div class="viewcode-block" id="Add_query_to_Z_Processing_with_state">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Add_query_to_Z_Processing_with_state">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Add_query_to_Z_Processing_with_state</span><span class="p">(</span><span class="n">Layer</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim_z</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span> <span class="o">=</span> <span class="n">dim_z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">dim_z</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Add_query_to_Z_Processing_with_state.compute_output_shape">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Add_query_to_Z_Processing_with_state.compute_output_shape">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_output_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_shape</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Add_query_to_Z_Processing_with_state.call">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Add_query_to_Z_Processing_with_state.call">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ZProcessing</span><span class="p">,</span> <span class="n">Query</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            ZProcessing (_type_): _description_</span>
+<span class="sd">            Query (_type_): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">ZProcessing</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span><span class="p">],</span> <span class="n">Query</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">new_Z</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">TimeDistributed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layer</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;wtf&quot;</span><span class="p">)(</span><span class="n">Z</span><span class="p">)</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">new_Z</span><span class="p">,</span> <span class="n">ZProcessing</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Z</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="get_cnn_enc_params">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.get_cnn_enc_params">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cnn_enc_params</span><span class="p">(</span><span class="n">dim_target</span><span class="p">,</span> <span class="n">size_subseq_enc</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim_z</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Produce dict params that can instanciate cnn_enn_bloc</span>
+<span class="sd">    Args:</span>
+<span class="sd">        dim_target (_type_): dimension of motifs to convolute</span>
+<span class="sd">        size_subseq_enc (int, optional): length of motifs to convulute</span>
+<span class="sd">        dim_z (int, optional): latent dimension</span>
+<span class="sd">        random_state (bool): handle experimental random using seed.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dict_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;builder&quot;</span><span class="p">:</span> <span class="n">cnn_enc_bis</span><span class="p">,</span>
+        <span class="s2">&quot;size_subseq_enc&quot;</span><span class="p">:</span> <span class="n">size_subseq_enc</span><span class="p">,</span>
+        <span class="s2">&quot;dim_target&quot;</span><span class="p">:</span> <span class="n">dim_target</span><span class="p">,</span>
+        <span class="s2">&quot;dim_chan&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;list_filters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>
+        <span class="s2">&quot;list_kernels&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+        <span class="s2">&quot;block&quot;</span><span class="p">:</span> <span class="s2">&quot;2D&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dim_z&quot;</span><span class="p">:</span> <span class="n">dim_z</span><span class="p">,</span>
+        <span class="s2">&quot;dp&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+        <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="n">random_state</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">dict_params</span></div>
+
+
+
+<div class="viewcode-block" id="get_cnn_dec_params">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.get_cnn_dec_params">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cnn_dec_params</span><span class="p">(</span><span class="n">dim_target</span><span class="p">,</span> <span class="n">size_subseq_dec</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dim_z</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Produce dict params that can instanciate cnn_dec_bloc</span>
+<span class="sd">    Args:</span>
+<span class="sd">        dim_target (_type_): dimension of motifs to convolute</span>
+<span class="sd">        size_subseq_dec (int, optional): length of motifs to convulute</span>
+<span class="sd">        dim_z (int, optional): latent dimension</span>
+<span class="sd">        random_state (bool): handle experimental random using seed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dict_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;builder&quot;</span><span class="p">:</span> <span class="n">cnn_dec_bis</span><span class="p">,</span>
+        <span class="s2">&quot;dim_z&quot;</span><span class="p">:</span> <span class="n">dim_z</span><span class="p">,</span>
+        <span class="s2">&quot;size_subseq_dec&quot;</span><span class="p">:</span> <span class="n">size_subseq_dec</span><span class="p">,</span>
+        <span class="s2">&quot;dim_target&quot;</span><span class="p">:</span> <span class="n">dim_target</span><span class="p">,</span>
+        <span class="s2">&quot;dim_chan&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;list_filters&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span>
+        <span class="s2">&quot;strides&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;list_kernels&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="s2">&quot;min_logvar&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span>
+        <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="n">random_state</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">dict_params</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+uqmodels package
+================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   uqmodels.evaluation
+   uqmodels.modelization
+   uqmodels.postprocessing
+   uqmodels.preprocessing
+   uqmodels.visualization
+
+Submodules
+----------
+
+uqmodels.UQModel module
+-----------------------
+
+.. automodule:: uqmodels.UQModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+uqmodels.custom\_UQModel module
+-------------------------------
+
+.. automodule:: uqmodels.custom_UQModel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+uqmodels.processing module
+--------------------------
+
+.. automodule:: uqmodels.processing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+uqmodels.utils module
+---------------------
+
+.. automodule:: uqmodels.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: uqmodels
+   :members:
+   :undoc-members:
+   :show-inheritance:

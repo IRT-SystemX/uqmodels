@@ -1,0 +1,1041 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.utils &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.manifold</span><span class="w"> </span><span class="kn">import</span> <span class="n">TSNE</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomizedSearchCV</span><span class="p">,</span> <span class="n">TimeSeriesSplit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="n">EPSILON</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">min</span>  <span class="c1"># small value to avoid underflow</span>
+
+
+<div class="viewcode-block" id="add_random_state">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.add_random_state">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;hold addition with possible None values</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        random_state (int or None): Random state</span>
+<span class="sd">        values (int): Values to add</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        random_state: int or None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">random_state</span> <span class="o">+</span> <span class="n">values</span></div>
+
+
+
+<div class="viewcode-block" id="generate_random_state">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.generate_random_state">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Drawn random number is random_state is None, else return random_state</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        random_state (int or None, optional): random_state. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        random_state: random_state int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">random_state</span></div>
+
+
+
+<div class="viewcode-block" id="norm_signal">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.norm_signal">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">norm_signal</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">y</span><span class="o">.</span><span class="n">std</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="cum_sum_consecutive_zero">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.cum_sum_consecutive_zero">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cum_sum_consecutive_zero</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Count consecutive 0</span>
+<span class="sd">         1 0 1 0 0 0 -&gt; 0 1 0 1 2 3</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (_type_): array of consecutive 0</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">len_</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">array</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">consecutive_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">len_</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">consecutive_count</span><span class="p">[:</span> <span class="n">inds</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="n">inds</span><span class="p">])</span>
+
+    <span class="n">flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">len_</span><span class="p">)</span>
+    <span class="n">cpt</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">flag</span><span class="p">[</span><span class="n">inds</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">flag</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="n">inds</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">inds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">len_</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">inds</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">inds</span> <span class="o">=</span> <span class="n">inds</span><span class="p">[</span><span class="n">flag</span><span class="p">[</span><span class="n">inds</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">consecutive_count</span><span class="p">[</span><span class="n">inds</span><span class="p">]</span> <span class="o">+=</span> <span class="n">cpt</span>
+        <span class="n">flag</span><span class="p">[</span><span class="n">inds</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">consecutive_count</span></div>
+
+
+
+<div class="viewcode-block" id="threshold">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.threshold">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">threshold</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">min_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_val</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Threshold an array with min_val as lower bound and max_val as upper bound</span>
+<span class="sd">        Can hold mutlidimensional threshold on last dimension</span>
+<span class="sd">    Args:</span>
+<span class="sd">        array (_type_): array nd to threeshold</span>
+<span class="sd">        min_val (val, array or): _description_</span>
+<span class="sd">        max_val (_type_): _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">min_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">min_val</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">max_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">max_val</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">array</span></div>
+
+
+
+<div class="viewcode-block" id="corr_matrix_array">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.corr_matrix_array">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">corr_matrix_array</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">a</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a: numpy array</span>
+<span class="sd">    v: true val</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    c: numpy array</span>
+<span class="sd">       correlation coefficients of v against matrix m</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">mean_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">std_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">mean_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">std_i</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">mean_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="n">a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">mean_xy</span> <span class="o">-</span> <span class="n">mean_i</span> <span class="o">*</span> <span class="n">mean_t</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">std_i</span> <span class="o">*</span> <span class="n">std_t</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">c</span></div>
+
+
+
+<div class="viewcode-block" id="coefficients_spreaded">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.coefficients_spreaded">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">coefficients_spreaded</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="n">coefficients</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="mi">1</span><span class="p">,</span>
+            <span class="mi">2</span><span class="p">,</span>
+            <span class="mi">3</span><span class="p">,</span>
+            <span class="mi">5</span><span class="p">,</span>
+            <span class="mi">8</span><span class="p">,</span>
+            <span class="mi">10</span><span class="p">,</span>
+            <span class="mi">15</span><span class="p">,</span>
+            <span class="mi">20</span><span class="p">,</span>
+            <span class="mi">25</span><span class="p">,</span>
+            <span class="mi">33</span><span class="p">,</span>
+            <span class="mi">50</span><span class="p">,</span>
+            <span class="mi">100</span><span class="p">,</span>
+            <span class="mi">250</span><span class="p">,</span>
+            <span class="mi">500</span><span class="p">,</span>
+            <span class="mi">1000</span><span class="p">,</span>
+            <span class="mi">2500</span><span class="p">,</span>
+            <span class="mi">5000</span><span class="p">,</span>
+            <span class="mi">10000</span><span class="p">,</span>
+            <span class="mi">25000</span><span class="p">,</span>
+            <span class="mi">50000</span><span class="p">,</span>
+            <span class="mi">100000</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">coefficients</span> <span class="o">&lt;</span> <span class="n">X</span>
+    <span class="k">return</span> <span class="n">coefficients</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="Extract_dict">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.Extract_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Extract_dict</span><span class="p">(</span><span class="n">dictionaire</span><span class="p">,</span> <span class="n">str_keys</span><span class="p">):</span>
+    <span class="n">list_extract</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">str_name</span> <span class="ow">in</span> <span class="n">str_keys</span><span class="p">:</span>
+        <span class="n">list_extract</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dictionaire</span><span class="p">[</span><span class="n">str_name</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_extract</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">list_extract</span> <span class="o">=</span> <span class="n">list_extract</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">list_extract</span></div>
+
+
+
+<div class="viewcode-block" id="sizeof_fmt">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.sizeof_fmt">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">sizeof_fmt</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;by Fred Cirera,  https://stackoverflow.com/a/1094933/1870254, modified&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">unit</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;Ki&quot;</span><span class="p">,</span> <span class="s2">&quot;Mi&quot;</span><span class="p">,</span> <span class="s2">&quot;Gi&quot;</span><span class="p">,</span> <span class="s2">&quot;Ti&quot;</span><span class="p">,</span> <span class="s2">&quot;Pi&quot;</span><span class="p">,</span> <span class="s2">&quot;Ei&quot;</span><span class="p">,</span> <span class="s2">&quot;Zi&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1024.0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num</span><span class="si">:</span><span class="s2">3.1f</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">unit</span><span class="si">}{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">num</span> <span class="o">/=</span> <span class="mf">1024.0</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> Yi</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="track_memory">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.track_memory">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">track_memory</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Tracking_memory : &quot;</span> <span class="o">+</span> <span class="n">string</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">size</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">getsizeof</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">globals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">())),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+    <span class="p">)[:</span><span class="mi">10</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">&gt;30</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">sizeof_fmt</span><span class="p">(</span><span class="n">size</span><span class="p">)</span><span class="si">:</span><span class="s2">&gt;8</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Track memorry leakage/</span>
+
+
+<div class="viewcode-block" id="propagate">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.propagate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">propagate</span><span class="p">(</span><span class="n">bool_array</span><span class="p">,</span> <span class="n">n_prop</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inv</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sym</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="c1"># Propagate True of a boolean flag to previous and following index</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_prop</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">inv</span> <span class="ow">or</span> <span class="n">sym</span><span class="p">:</span>
+            <span class="n">bool_array</span> <span class="o">=</span> <span class="n">bool_array</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">bool_array</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">inv</span><span class="p">)</span> <span class="ow">or</span> <span class="n">sym</span><span class="p">:</span>
+            <span class="n">bool_array</span> <span class="o">=</span> <span class="n">bool_array</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">bool_array</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bool_array</span></div>
+
+
+
+<div class="viewcode-block" id="expand_flag">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.expand_flag">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">expand_flag</span><span class="p">(</span><span class="n">flag</span><span class="p">):</span>
+    <span class="c1"># Propagate True of a boolean flag to previous and folloxing index</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="get_coeff">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.get_coeff">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_coeff</span><span class="p">(</span><span class="n">alpha</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="flatten">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.flatten">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+
+<span class="c1"># Folding function</span>
+
+
+<div class="viewcode-block" id="get_fold_nstep">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.get_fold_nstep">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_fold_nstep</span><span class="p">(</span><span class="n">size_window</span><span class="p">,</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="n">padding</span><span class="p">):</span>
+    <span class="c1"># Compute the number of step according to size of window, size of subseq and padding.</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">((</span><span class="n">size_window</span> <span class="o">-</span> <span class="n">size_subseq</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">padding</span><span class="p">)))</span> <span class="o">+</span> <span class="mi">1</span></div>
+
+
+
+<span class="c1"># To do update : Hold padding to limit train redunduncy</span>
+<div class="viewcode-block" id="stack_and_roll">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.stack_and_roll">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stack_and_roll</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">seq_idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (_type_): array 2D to stack and roll</span>
+<span class="sd">        horizon (_type_): depth</span>
+<span class="sd">        lag (int, optional): _description_. Defaults to 0.</span>
+<span class="sd">        seq_idx (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        step (int, optional): _description_. Defaults to 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Perform a stack &quot;horizon&quot; time an array and roll in temporal stairs.</span>
+    <span class="c1"># a n+1 dimensional array with value rolled k times for the kth line</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">new_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">array</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">seq_idx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">horizon</span><span class="p">):</span>
+            <span class="n">lag_current</span> <span class="o">=</span> <span class="n">horizon</span> <span class="o">-</span> <span class="n">lag</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">new_array</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">new_array</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">lag_current</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># Erase procedure</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">horizon</span><span class="p">):</span>
+            <span class="n">lag_current</span> <span class="o">=</span> <span class="n">horizon</span> <span class="o">-</span> <span class="n">lag</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">lag_current</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">new_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="n">lag_current</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># by blocks :</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">seq_idx</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">seq_idx</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">idx</span><span class="p">)]:</span>
+            <span class="n">flag</span> <span class="o">=</span> <span class="n">seq_idx</span> <span class="o">==</span> <span class="n">j</span>
+            <span class="n">list_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">flag</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">horizon</span><span class="p">):</span>
+                <span class="n">lag_current</span> <span class="o">=</span> <span class="n">horizon</span> <span class="o">-</span> <span class="n">lag</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">new_array</span><span class="p">[</span><span class="n">flag</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">new_array</span><span class="p">[</span><span class="n">flag</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">lag_current</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="c1"># A optimize : get first non zeros values.</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">horizon</span><span class="p">):</span>
+                <span class="n">lag_current</span> <span class="o">=</span> <span class="n">horizon</span> <span class="o">-</span> <span class="n">lag</span> <span class="o">-</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">new_array</span><span class="p">[</span><span class="n">list_idx</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="p">:</span><span class="n">lag_current</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">))</span> <span class="o">%</span> <span class="n">step</span><span class="p">)</span> <span class="o">==</span> <span class="n">step</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">new_array</span> <span class="o">=</span> <span class="n">new_array</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">new_array</span></div>
+
+
+
+<div class="viewcode-block" id="stack_and_roll_layer">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.stack_and_roll_layer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">stack_and_roll_layer</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">size_window</span><span class="p">,</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="n">padding</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="c1"># slide_tensor = []</span>
+    <span class="n">n_step</span> <span class="o">=</span> <span class="n">get_fold_nstep</span><span class="p">(</span><span class="n">size_window</span><span class="p">,</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
+    <span class="c1"># Implementation numpy</span>
+    <span class="c1"># if False:</span>
+    <span class="c1">#     for i in range(n_step):</span>
+    <span class="c1">#         slide_tensor.append(</span>
+    <span class="c1">#             inputs[:, (i * padding) : (i * padding) + size_subseq, :][:, None]</span>
+    <span class="c1">#         )</span>
+    <span class="c1">#     return Lambda(lambda x: K.concatenate(x, axis=1), name=name + &quot;_rollstack&quot;)(</span>
+    <span class="c1">#         slide_tensor</span>
+    <span class="c1">#     )</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">map_fn</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">):</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="o">+</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="p">:],</span>
+        <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">n_step</span><span class="p">),</span>
+        <span class="n">fn_output_signature</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+
+<div class="viewcode-block" id="apply_middledim_reduction">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.apply_middledim_reduction">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_middledim_reduction</span><span class="p">(</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply middledim using ponderate mean reduc_filter weigth or do nothing</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ndarray (np.array): object to reduce</span>
+<span class="sd">        reduc_filter (np.array): ponderate weigth for reduction</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        reduced_ndarray: reduced object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ndarray</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">ndarray</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">reduc_filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ndarray</span>
+
+    <span class="n">reduc_filter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">reduc_filter</span><span class="p">)</span>
+
+    <span class="n">dim_g</span> <span class="o">=</span> <span class="n">ndarray</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">list_reduced_ndarray_by_dim</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Pour chaque dimension de s</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim_g</span><span class="p">):</span>
+        <span class="c1"># Incompatibility test :</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reduc_filter</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ndarray</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;error expect size of reduc filter : &quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">ndarray</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="s2">&quot;current size :&quot;</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reduc_filter</span><span class="p">)),</span>
+            <span class="p">)</span>
+            <span class="k">break</span>
+
+        <span class="n">filt</span> <span class="o">=</span> <span class="n">reduc_filter</span> <span class="o">/</span> <span class="n">reduc_filter</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">ndarray</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ndarray</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">filt</span>
+        <span class="k">if</span> <span class="n">roll</span><span class="p">:</span>
+            <span class="n">reduced_ndarray</span> <span class="o">=</span> <span class="n">ndarray</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndarray</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">reduced_ndarray</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">ndarray</span><span class="p">[:,</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">roll</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ndarray</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ndarray</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">filt</span>
+            <span class="n">reduced_ndarray</span> <span class="o">=</span> <span class="n">ndarray</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">list_reduced_ndarray_by_dim</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reduced_ndarray</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">])</span>
+    <span class="n">reduced_ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">list_reduced_ndarray_by_dim</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">reduced_ndarray</span></div>
+
+
+
+<div class="viewcode-block" id="apply_mask">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.apply_mask">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_mask</span><span class="p">(</span><span class="n">list_or_array_or_none</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bool_array&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select subpart of an array/list_of_array/tupple using a mask and np.take function.</span>
+<span class="sd">        If list_or_array_or_none is array, then direclty apply selection on it.</span>
+<span class="sd">        else if it is a Tupple or list of array apply it on array in the list/tupple structure</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        list_or_array_or_none (_type_): ND array (list or tupple or ND.array)</span>
+<span class="sd">        mask (_type_): Mask as boolean array or indices array.</span>
+<span class="sd">        axis (int, optional): axis on sub array to apply. Defaults to 1.</span>
+<span class="sd">        mode (str, optional):if &#39;bool_array&#39;, turn bool_array_mask into an indice_array. Defaults to &#39;bool_array&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (List or Tuple or array or Ndarray) : Sub_selected list of array or Ndarray</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;bool_array&quot;</span><span class="p">:</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">))[</span><span class="n">mask</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">list_or_array_or_none</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span> <span class="k">for</span> <span class="n">array</span> <span class="ow">in</span> <span class="n">list_or_array_or_none</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">list_or_array_or_none</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">list_or_array_or_none</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="base_cos_freq">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.base_cos_freq">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">base_cos_freq</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform 1D modulo features [1, N] in cyclic (cos,sin) features for given freq&quot;&quot;&quot;</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">freq</span><span class="p">:</span>
+        <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">array</span><span class="p">))</span>
+        <span class="n">features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">array</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">features</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span></div>
+
+
+
+<span class="c1"># Preprocessing function</span>
+
+
+<div class="viewcode-block" id="apply_conv">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.apply_conv">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_conv</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">filt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply naivly by dimension a convolution to s using filt as filter</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        s (np.array): score to 1D convolute</span>
+<span class="sd">        filt (np.array): filter to apply</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        s: convoluted score</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">filt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">score</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">dim_g</span> <span class="o">=</span> <span class="n">score</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Pour chaque dimension de s</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">score</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                <span class="n">score</span><span class="p">[:,</span> <span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">score</span><span class="p">[:,</span> <span class="n">t</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">filt</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dim_g</span> <span class="o">=</span> <span class="n">score</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Pour chaque dimension de s</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim_g</span><span class="p">):</span>
+            <span class="n">score</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">score</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">filt</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;same&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">score</span></div>
+
+
+
+<div class="viewcode-block" id="cut">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.cut">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">cut</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">cut_min</span><span class="p">,</span> <span class="n">cut_max</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply percentile minimal and maximal threeshold</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values (_type_): values to cut</span>
+<span class="sd">        cut_min (_type_): percentile of the minimam cut threeshold</span>
+<span class="sd">        cut_max (_type_): percentile of the maximal cut threeshold</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">vpmin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">cut_min</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">vpmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">cut_max</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">vpmax</span><span class="p">)</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">vpmin</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">values</span></div>
+
+
+
+<div class="viewcode-block" id="format_data">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.format_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">format_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flag_inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Feature and target Formatting&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span><span class="p">:</span>
+        <span class="n">flag_reshape</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">flag_reshape</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">fit</span><span class="p">:</span>
+            <span class="n">scalerX</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">(</span><span class="n">with_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">scalerX</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">scalerY</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">(</span><span class="n">with_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">scalerY</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="p">[</span><span class="n">scalerX</span><span class="p">,</span> <span class="n">scalerY</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">flag_inverse</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X_transformer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">inverse_transform</span>
+            <span class="n">Y_transformer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">inverse_transform</span>
+            <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">X_transformer</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">var_</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;sigma&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;var&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">):</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">*</span> <span class="n">sigma</span>
+
+                <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;2sigma&quot;</span><span class="p">:</span>
+                    <span class="n">y_reshape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">y_reshape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">y_reshape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">]</span>
+                            <span class="p">],</span>
+                            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="n">y_reshape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">,</span>
+                                <span class="n">y_reshape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sigma</span><span class="p">,</span>
+                            <span class="p">],</span>
+                            <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="p">)</span>
+                <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;quantile&quot;</span><span class="p">:</span>
+                    <span class="n">y_bot</span> <span class="o">=</span> <span class="n">Y_transformer</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+                    <span class="n">y_top</span> <span class="o">=</span> <span class="n">Y_transformer</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">y_bot</span><span class="p">,</span> <span class="n">y_top</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">Y_transformer</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">flag_reshape</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># PIs basics computation functionalities</span>
+
+
+<div class="viewcode-block" id="compute_born">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.compute_born">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_born</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;sigma&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute y_upper and y_lower boundary from gaussian hypothesis (sigma or 2sigma)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y_pred (array) : Mean prediction</span>
+<span class="sd">        sigma (array) : Variance estimation</span>
+<span class="sd">        alpha (float) : Misscoverage ratio</span>
+<span class="sd">        mode (str) : Distribution hypothesis</span>
+<span class="sd">        (sigma : gaussian residual hypothesis, 2sigma : gaussian positive and negative residual hypothesis)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">       (y_lower,y_upper): Lower and upper bondary of Predictive interval</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Case sigma</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;sigma&quot;</span><span class="p">:</span>
+        <span class="n">y_lower</span> <span class="o">=</span> <span class="n">y_pred</span> <span class="o">+</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+        <span class="n">y_upper</span> <span class="o">=</span> <span class="n">y_pred</span> <span class="o">+</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="c1"># Case 2 sigma</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;2sigma&quot;</span><span class="p">:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">y_lower</span> <span class="o">=</span> <span class="n">y_pred</span> <span class="o">+</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">y_upper</span> <span class="o">=</span> <span class="n">y_pred</span> <span class="o">+</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;This mode is not yet implemented.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y_lower</span><span class="p">,</span> <span class="n">y_upper</span></div>
+
+
+
+<span class="c1"># Gaussian mixture quantile estimation :</span>
+<div class="viewcode-block" id="mixture_quantile">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.mixture_quantile">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mixture_quantile</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">var_A</span><span class="p">,</span> <span class="n">quantiles</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">aux_mixture_quantile</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">var_A</span><span class="p">,</span> <span class="n">quantiles</span><span class="p">):</span>
+        <span class="n">list_q</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">n_data</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">n_mixture</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_data</span><span class="p">):</span>
+            <span class="n">mean_law</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+                <span class="n">pred</span><span class="p">[:,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_A</span><span class="p">[:,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+            <span class="p">)</span>
+            <span class="n">xmin</span> <span class="o">=</span> <span class="n">mean_law</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.0000001</span><span class="p">)</span>
+            <span class="n">xmax</span> <span class="o">=</span> <span class="n">mean_law</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mf">0.9999999</span><span class="p">)</span>
+            <span class="n">scale</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="p">(</span><span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span><span class="p">)</span> <span class="o">/</span> <span class="mi">300</span><span class="p">)</span>
+            <span class="n">Mixture_cdf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scale</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_mixture</span><span class="p">):</span>
+                <span class="n">cur_law</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+                <span class="n">Mixture_cdf</span> <span class="o">+=</span> <span class="n">cur_law</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="o">/</span> <span class="n">n_mixture</span>
+            <span class="n">q_val</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">quantiles</span><span class="p">:</span>
+                <span class="n">q_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">scale</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">Mixture_cdf</span> <span class="o">-</span> <span class="n">q</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()])</span>
+            <span class="n">list_q</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q_val</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_q</span><span class="p">)</span>
+
+    <span class="n">list_q</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">n_data</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">parallel_partition</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array_split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_data</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="c1"># Split inputs of auxillar parralel tree statistics extraction</span>
+    <span class="n">parallel_input</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">partition</span> <span class="ow">in</span> <span class="n">parallel_partition</span><span class="p">:</span>
+        <span class="n">parallel_input</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">pred</span><span class="p">[:,</span> <span class="n">partition</span><span class="p">],</span> <span class="n">var_A</span><span class="p">[:,</span> <span class="n">partition</span><span class="p">],</span> <span class="n">quantiles</span><span class="p">))</span>
+    <span class="n">list_q</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">)(</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">aux_mixture_quantile</span><span class="p">)(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span> <span class="k">for</span> <span class="n">inputs</span> <span class="ow">in</span> <span class="n">parallel_input</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">list_q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Scikit tuning function</span>
+
+
+<div class="viewcode-block" id="aux_tuning">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.aux_tuning">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_tuning</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">,</span>
+    <span class="n">X</span><span class="p">,</span>
+    <span class="n">Y</span><span class="p">,</span>
+    <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">score</span><span class="o">=</span><span class="s2">&quot;neg_mean_squared_error&quot;</span><span class="p">,</span>
+    <span class="n">n_esti</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">folds</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Random_search with sequential k-split</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (scikit model): Estimator</span>
+<span class="sd">        X ([type]): Features</span>
+<span class="sd">        Y ([type]): Target</span>
+<span class="sd">        params ([type], optional): parameter_grid. Defaults to None.</span>
+<span class="sd">        score (str, optional): score. Defaults to &#39;neg_mean_squared_error&#39;.</span>
+<span class="sd">        n_esti (int, optional): Number of grid try . Defaults to 100.</span>
+<span class="sd">        folds (int, optional): Number of sequential fold. Defaults to 4.</span>
+<span class="sd">        verbose (int, optional): [description]. Defaults to 0.</span>
+<span class="sd">        random_state (bool) : handle experimental random using seeds.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">model</span>
+    <span class="n">tscv</span> <span class="o">=</span> <span class="n">TimeSeriesSplit</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">folds</span><span class="p">)</span>
+    <span class="n">random_search</span> <span class="o">=</span> <span class="n">RandomizedSearchCV</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">param_distributions</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+        <span class="n">n_iter</span><span class="o">=</span><span class="n">n_esti</span><span class="p">,</span>
+        <span class="n">scoring</span><span class="o">=</span><span class="n">score</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+        <span class="n">cv</span><span class="o">=</span><span class="n">tscv</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">),</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+    <span class="n">random_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">random_search</span><span class="o">.</span><span class="n">best_estimator_</span></div>
+
+
+
+<div class="viewcode-block" id="agg_list">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.agg_list">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">agg_list</span><span class="p">(</span><span class="n">list_</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">list_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="agg_func">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.agg_func">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">agg_func</span><span class="p">(</span><span class="n">list_</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">list_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="GenericCalibrator">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.GenericCalibrator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GenericCalibrator</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_res</span><span class="o">=</span><span class="s2">&quot;res&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;symetric&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generic calibrator implementing several calibratio</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type_res (str, optional): type of score</span>
+<span class="sd">                &quot;no_calib : No calibration</span>
+<span class="sd">                &quot;res&quot; : Calibration based on mean residuals</span>
+<span class="sd">                &quot;w_res&quot; : Calibration based on weigthed mean residuals</span>
+<span class="sd">                &quot;cqr&quot; : Calibration based on quantile residuals</span>
+
+<span class="sd">            mode (str, optional):</span>
+<span class="sd">                if &quot;symetric&quot; : symetric calibration ()</span>
+<span class="sd">                else perform  calibration independently on positive and negative residuals.</span>
+<span class="sd">            name (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            alpha (float, optional): _description_. Defaults to 0.1.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_residuals</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">type_res</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="o">=</span> <span class="n">type_res</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;symetric&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fcorr</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fcorr_lower</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fcorr_upper</span> <span class="o">=</span> <span class="mi">1</span>
+
+<div class="viewcode-block" id="GenericCalibrator.estimate">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.GenericCalibrator.estimate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">estimate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">y_pred_lower</span><span class="p">,</span> <span class="n">y_pred_upper</span><span class="p">,</span> <span class="n">sigma_pred</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="n">flag_res_lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y_true</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">flag_res_upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y_true</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;res&quot;</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;w_res&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span>
+                <span class="n">residuals</span> <span class="o">=</span> <span class="n">y_true</span> <span class="o">-</span> <span class="n">y_pred</span>
+                <span class="n">sigma_pred</span> <span class="o">=</span> <span class="n">y_true</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;w_res&quot;</span><span class="p">:</span>
+                <span class="c1"># sigma_pred = np.maximum(y_pred_upper - y_pred_lower, EPSILON) / 2</span>
+                <span class="n">residuals</span> <span class="o">=</span> <span class="n">y_true</span> <span class="o">-</span> <span class="n">y_pred</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">residuals</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">flag_res_lower</span> <span class="o">=</span> <span class="n">residuals</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+                    <span class="n">flag_res_upper</span> <span class="o">=</span> <span class="n">residuals</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">flag_res_lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">residuals</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y_true</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">flag_res_upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">residuals</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y_true</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">sigma_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                <span class="n">sigma_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">sigma_pred</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">residuals</span><span class="p">[</span><span class="n">flag_res_lower</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">)[</span><span class="n">flag_res_lower</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma_pred</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="n">flag_res_lower</span><span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">residuals</span><span class="p">[</span><span class="n">flag_res_upper</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">)[</span><span class="n">flag_res_upper</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma_pred</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="n">flag_res_upper</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">residuals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma_pred</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;cqr&quot;</span><span class="p">:</span>
+            <span class="n">residuals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">y_pred_lower</span> <span class="o">-</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">y_true</span> <span class="o">-</span> <span class="n">y_pred_upper</span><span class="p">)</span>
+            <span class="n">flag_res_lower</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_pred_lower</span> <span class="o">-</span> <span class="n">y_true</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">y_true</span> <span class="o">-</span> <span class="n">y_pred_upper</span><span class="p">)</span>
+            <span class="n">flag_res_upper</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_pred_lower</span> <span class="o">-</span> <span class="n">y_true</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">y_true</span> <span class="o">-</span> <span class="n">y_pred_upper</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;no_calib&quot;</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unknown type_res&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;symetric&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fcorr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span>
+                <span class="n">residuals</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">residuals</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fcorr_lower</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span>
+                <span class="n">residuals</span><span class="p">[</span><span class="n">flag_res_lower</span><span class="p">],</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">flag_res_lower</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">fcorr_upper</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span>
+                <span class="n">residuals</span><span class="p">[</span><span class="n">flag_res_upper</span><span class="p">],</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">flag_res_upper</span><span class="o">.</span><span class="n">sum</span><span class="p">()),</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="GenericCalibrator.calibrate">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.GenericCalibrator.calibrate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">calibrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">y_pred_lower</span><span class="p">,</span> <span class="n">y_pred_upper</span><span class="p">,</span> <span class="n">sigma_pred</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span>
+            <span class="n">sigma_pred</span> <span class="o">=</span> <span class="n">y_pred</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;symetric&quot;</span><span class="p">:</span>
+            <span class="n">fcorr_lower</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fcorr</span>
+            <span class="n">fcorr_upper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fcorr</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fcorr_lower</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fcorr_lower</span>
+            <span class="n">fcorr_upper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fcorr_upper</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;res&quot;</span><span class="p">,</span> <span class="s2">&quot;w_res&quot;</span><span class="p">,</span> <span class="s2">&quot;no_calib&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">y_pred</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">sigma_pred</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+                <span class="n">sigma_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">sigma_pred</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">y_pred_lower</span> <span class="o">=</span> <span class="n">y_pred</span> <span class="o">-</span> <span class="n">sigma_pred</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">fcorr_lower</span>
+                <span class="n">y_pred_upper</span> <span class="o">=</span> <span class="n">y_pred</span> <span class="o">+</span> <span class="n">sigma_pred</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">fcorr_upper</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y_pred_lower</span> <span class="o">=</span> <span class="n">y_pred</span> <span class="o">-</span> <span class="n">sigma_pred</span> <span class="o">*</span> <span class="n">fcorr_lower</span>
+                <span class="n">y_pred_upper</span> <span class="o">=</span> <span class="n">y_pred</span> <span class="o">+</span> <span class="n">sigma_pred</span> <span class="o">*</span> <span class="n">fcorr_upper</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_res</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cqr&quot;</span><span class="p">]:</span>
+            <span class="n">y_pred_upper</span> <span class="o">=</span> <span class="n">y_pred_upper</span> <span class="o">+</span> <span class="n">fcorr_upper</span>
+            <span class="n">y_pred_lower</span> <span class="o">=</span> <span class="n">y_pred_lower</span> <span class="o">-</span> <span class="n">fcorr_lower</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Unknown type_res&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">return</span> <span class="n">y_pred_lower</span><span class="p">,</span> <span class="n">y_pred_upper</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="dimensional_reduction">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.dimensional_reduction">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dimensional_reduction</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;umap&quot;</span><span class="p">,</span> <span class="n">reducer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s2">&quot;n_components&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;n_components&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="k">if</span> <span class="n">reducer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;umap&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;n_neighbors&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;n_neighbors&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span>
+            <span class="k">if</span> <span class="s2">&quot;min_dist&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;min_dist&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.01</span>
+            <span class="c1"># reducer = umap.UMAP(**kwargs)</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;tsne&quot;</span><span class="p">:</span>
+            <span class="n">reducer</span> <span class="o">=</span> <span class="n">TSNE</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;pca&quot;</span><span class="p">:</span>
+            <span class="n">reducer</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">embedding</span> <span class="o">=</span> <span class="n">reducer</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">embedding</span><span class="p">,</span> <span class="n">reducer</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Moving average function for Lag feature extraction</span>
+
+
+<div class="viewcode-block" id="fit_compute_lag">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.fit_compute_lag">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_compute_lag</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">delay</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create lag features from a numerical array</span>
+<span class="sd">    Args:</span>
+<span class="sd">        Y (float array): Target to extract lag-feature</span>
+<span class="sd">        lag (int, optional): Lag number. Defaults to 3.</span>
+<span class="sd">        delay (int, optional): Delay before 1 lag feature. Defaults to 0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">new_features_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">new_features_name</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lag</span><span class="p">)</span> <span class="o">+</span> <span class="n">delay</span><span class="p">:</span>
+        <span class="n">Y_cur</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">Y_cur</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">new_features_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Y_cur</span><span class="p">[:,</span> <span class="n">g</span><span class="p">])</span>
+            <span class="n">new_features_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;lag_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_dim:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">g</span><span class="p">))</span>
+    <span class="n">new_features_name</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_features_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_features_list</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">new_features_name</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="autocorr">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.autocorr">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">autocorr</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="s2">&quot;Compute autocorrelation of x&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;full&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">size</span> <span class="o">/</span> <span class="mi">2</span><span class="p">):]</span></div>
+
+
+
+<div class="viewcode-block" id="convolute_1D">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.utils.convolute_1D">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">convolute_1D</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convolution by dimension for 1 od 2D array using np.convolve</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        array (_type_): array_to_convolve</span>
+<span class="sd">        filter (_type_, optional): convolution fitler. Defaults to None.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: dimension error</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        array: array_convoluted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">filter</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">array</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">array_convoluted</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">array_convoluted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="nb">filter</span><span class="p">,</span> <span class="s2">&quot;same&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">array_convoluted</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">array</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="nb">filter</span><span class="p">,</span> <span class="s2">&quot;same&quot;</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="p">)</span>
+            <span class="n">array_convoluted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">array_convoluted</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Inapropriate size of array : hold 1 or 2d array&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+        <span class="k">return</span> <span class="n">array_convoluted</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

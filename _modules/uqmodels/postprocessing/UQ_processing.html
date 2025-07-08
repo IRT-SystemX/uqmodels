@@ -1,0 +1,1294 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.postprocessing.UQ_processing &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.postprocessing.UQ_processing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.postprocessing.UQ_processing</h1><div class="highlight"><pre>
+<span></span><span class="c1">####################################################################</span>
+<span class="c1"># Ensemble of processing aim to process UQmesures into Intermediate quantity or into final UQ-KPI</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ut</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_middledim_reduction</span><span class="p">,</span> <span class="n">cut</span>
+
+
+<div class="viewcode-block" id="check_y_vs_pred_and_UQ_shape">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.check_y_vs_pred_and_UQ_shape">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_y_vs_pred_and_UQ_shape</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if y, pred and UQ have compatible shape</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y (_type_): _description_</span>
+<span class="sd">        pred (_type_): _description_</span>
+<span class="sd">        UQ (_type_): _description_</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        y,pred,UQ : Reshaped if needed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;warning y shape :&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;pred shape&quot;</span><span class="p">,</span> <span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">UQ</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">UQ</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">UQ</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">UQ</span> <span class="o">=</span> <span class="n">UQ</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">UQ</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="check_UQ">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.check_UQ">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_UQ</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if UQ and type_UQ are compatible.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (_type_): UQ object</span>
+<span class="sd">        type_UQ (_type_): type_UQ specification</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;res_2var&quot;</span><span class="p">,</span> <span class="s2">&quot;2var&quot;</span><span class="p">,</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">UQ</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="n">type_UQ</span> <span class="o">+</span> <span class="s2">&quot; UQ should contains at least 2 dimension not &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">UQ</span><span class="p">))</span>
+            <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="s2">&quot;res_quantile&quot;</span><span class="p">]:</span>
+        <span class="n">len_UQ</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_UQ_params</span><span class="p">[</span><span class="s2">&quot;list_alpha&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">UQ</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">len_UQ</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="n">type_UQ</span>
+                <span class="o">+</span> <span class="s2">&quot; UQ should contains len(UQ)==&quot;</span>
+                <span class="o">+</span> <span class="n">len_UQ</span>
+                <span class="o">+</span> <span class="s2">&quot; not &quot;</span>
+                <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">UQ</span><span class="p">))</span>
+            <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_var&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;type(UQ) shoud be np.ndarray not &quot;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="n">UQ</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;None&quot;</span><span class="p">]:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="n">type_UQ</span>
+            <span class="o">+</span> <span class="s2">&quot; not in [&#39;var&#39;,&#39;res_var&#39;, &#39;res_2var&#39;, &#39;2var&#39;, &#39;var_A&amp;E&#39;, &#39;quantile&#39;, &#39;res_quantile&#39;]&quot;</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_extremum_var">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.get_extremum_var">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_extremum_var</span><span class="p">(</span>
+    <span class="n">var</span><span class="p">,</span> <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mode_multidim</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+    <span class="c1"># Mode multivariate</span>
+    <span class="k">if</span> <span class="n">mode_multidim</span><span class="p">:</span>
+        <span class="n">dim</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="n">var_min_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">dim</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="n">factor</span><span class="p">,</span> <span class="n">var_min</span>
+        <span class="p">)</span>
+        <span class="n">var_max_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">dim</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="n">factor</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">var_min_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">min_cut</span><span class="p">)</span> <span class="o">/</span> <span class="n">factor</span><span class="p">,</span> <span class="n">var_min</span><span class="p">)</span>
+        <span class="n">var_max_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">)</span> <span class="o">*</span> <span class="n">factor</span>
+
+    <span class="k">if</span> <span class="n">var_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">var_max_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">var_max_</span><span class="p">,</span> <span class="n">var_max</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">var_min_</span><span class="p">,</span> <span class="n">var_max_</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_nominal_disentangled_UQ_ratio">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.get_nominal_disentangled_UQ_ratio">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_nominal_disentangled_UQ_ratio</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute nominal_disentangled_UQ_ration form set of data and k_var_e</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (_type_): _description_</span>
+<span class="sd">        k_var_e (_type_): nominal considerate ratio (high-pass filters)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ndUQ_ratio: nominal disentangled_UQ_ratio</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">q_Eratio</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">q_Eratio</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="n">var_a</span><span class="p">,</span> <span class="n">var_e</span> <span class="o">=</span> <span class="n">UQ</span>
+    <span class="n">var_ratio</span> <span class="o">=</span> <span class="n">var_e</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">var_a</span><span class="p">,</span> <span class="n">q_var</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">q_Eratio</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Empirique quantile</span>
+        <span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">var_ratio</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">q_Eratio</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># N-sigma quantile</span>
+        <span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">var_ratio</span><span class="p">)</span> <span class="o">+</span> <span class="n">q_Eratio</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span>
+            <span class="n">cut</span><span class="p">(</span><span class="n">var_ratio</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.995</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">ndUQ_ratio</span></div>
+
+
+
+<div class="viewcode-block" id="split_var_dUQ">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.split_var_dUQ">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">split_var_dUQ</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">E_cut_in_var_nominal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">A_res_in_var_atypic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;split var_A&amp;E into var_nominal &amp; var_atypique based threshold</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (_type_): _description_</span>
+<span class="sd">        q_var (int, optional): _description_. Defaults to 1.</span>
+<span class="sd">        k_var_e (int, optional): _description_. Defaults to 1.</span>
+<span class="sd">        q_var_e (int, optional): _description_. Defaults to 1.</span>
+<span class="sd">        ndUQ_ratio (int, optional): _description_. Defaults to 0.</span>
+<span class="sd">        extremum_var_TOT (tuple, optional): _description_. Defaults to (None, None).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ndUQ_ratio</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">var_a</span><span class="p">,</span> <span class="n">var_e</span> <span class="o">=</span> <span class="n">UQ</span>
+    <span class="n">ratio_EA</span> <span class="o">=</span> <span class="n">var_e</span> <span class="o">/</span> <span class="n">var_a</span>
+    <span class="n">ratio_EA_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">ratio_EA</span> <span class="o">-</span> <span class="n">ndUQ_ratio</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">E_cut_in_var_nominal</span><span class="p">:</span>
+        <span class="n">var_e_cut</span> <span class="o">=</span> <span class="p">(</span><span class="n">ratio_EA</span> <span class="o">-</span> <span class="n">ratio_EA_res</span><span class="p">)</span> <span class="o">*</span> <span class="n">var_a</span>
+        <span class="n">var_a</span> <span class="o">=</span> <span class="n">var_a</span> <span class="o">+</span> <span class="n">var_e_cut</span>
+
+    <span class="n">var_e</span> <span class="o">=</span> <span class="n">norm_var</span><span class="p">(</span>
+        <span class="n">var_e</span> <span class="o">*</span> <span class="n">var_a</span><span class="p">,</span> <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_var</span><span class="o">=</span><span class="n">q_var_e</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Part of high values link to abnormal espitemic unconfidence</span>
+    <span class="n">var_e_res</span> <span class="o">=</span> <span class="n">norm_var</span><span class="p">(</span>
+        <span class="n">ratio_EA_res</span> <span class="o">*</span> <span class="n">var_a</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="n">q_var_e</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">var_a</span> <span class="o">=</span> <span class="n">norm_var</span><span class="p">(</span><span class="n">var_a</span><span class="p">,</span> <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">)</span>
+    <span class="c1"># Part of low A_values link to nominal aleatoric uncertainty</span>
+    <span class="n">var_a_cut</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span>
+        <span class="n">var_a</span><span class="p">,</span> <span class="n">min_val</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">max_val</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Part of low E_values link to nominal epistemic uncertainty (nominal extrapolation cost)</span>
+    <span class="n">var_e_cut</span> <span class="o">=</span> <span class="n">var_e</span> <span class="o">-</span> <span class="n">var_e_res</span>  <span class="c1"># equal to (ratio_EA - ratio_EA_res) * var_a</span>
+
+    <span class="c1"># Part of high A_values link to abnormal aleatoric uncertainty estimation</span>
+    <span class="n">var_a_res</span> <span class="o">=</span> <span class="n">var_a</span> <span class="o">-</span> <span class="n">var_a_cut</span>
+
+    <span class="k">if</span> <span class="n">A_res_in_var_atypic</span><span class="p">:</span>
+        <span class="n">var_e_res</span> <span class="o">=</span> <span class="n">var_e_res</span> <span class="o">+</span> <span class="n">var_a_res</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">var_a_cut</span><span class="p">,</span> <span class="n">var_e_res</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_extremum_var_TOT_and_ndUQ_ratio">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.get_extremum_var_TOT_and_ndUQ_ratio">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_extremum_var_TOT_and_ndUQ_ratio</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">mode_multidim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">E_cut_in_var_nominal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">A_res_in_var_atypic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs_process_TOT</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate parameters use to seperate from var_A &amp; var_E theirs</span>
+<span class="sd">        Respective nominal part (Affected in TOT,ATYPIC) et atypical part</span>
+<span class="sd">        using empirical threeshold</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (_type_): _description_</span>
+<span class="sd">        type_UQ (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        pred (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        y (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        type_UQ_params (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        min_cut (int, optional): _description_. Defaults to 0.</span>
+<span class="sd">        max_cut (int, optional): _description_. Defaults to 1.</span>
+<span class="sd">        var_min (int, optional): _description_. Defaults to 0.</span>
+<span class="sd">        var_max (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        factor (int, optional): _description_. Defaults to 2.</span>
+<span class="sd">        q_var (int, optional): _description_. Defaults to 1.</span>
+<span class="sd">        q_Eratio (int, optional): _description_. Defaults to 2.</span>
+<span class="sd">        mode_multidim (bool, optional): _description_. Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sigma_TOT</span><span class="p">,</span> <span class="n">sigma_E</span> <span class="o">=</span> <span class="n">process_UQmeasure_to_TOT_and_E_sigma</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="p">(</span><span class="n">var_min</span><span class="p">,</span> <span class="n">var_max</span><span class="p">),</span>
+        <span class="o">**</span><span class="n">kwargs_process_TOT</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">var_E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma_E</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">var_TOT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma_TOT</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">extremum_var_TOT</span> <span class="o">=</span> <span class="n">get_extremum_var</span><span class="p">(</span>
+        <span class="n">var_TOT</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+        <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+        <span class="n">factor</span><span class="o">=</span><span class="n">factor</span><span class="p">,</span>
+        <span class="n">mode_multidim</span><span class="o">=</span><span class="n">mode_multidim</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">UQ_bis</span> <span class="o">=</span> <span class="p">(</span><span class="n">var_TOT</span><span class="p">,</span> <span class="n">var_E</span><span class="p">)</span>
+    <span class="n">UQ_bis</span> <span class="o">=</span> <span class="n">split_var_dUQ</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">E_cut_in_var_nominal</span><span class="o">=</span><span class="n">E_cut_in_var_nominal</span><span class="p">,</span>
+        <span class="n">A_res_in_var_atypic</span><span class="o">=</span><span class="n">A_res_in_var_atypic</span><span class="p">,</span>
+        <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="n">get_nominal_disentangled_UQ_ratio</span><span class="p">(</span><span class="n">UQ_bis</span><span class="p">,</span> <span class="n">q_var</span><span class="p">,</span> <span class="n">q_Eratio</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">extremum_var_TOT</span><span class="p">,</span> <span class="n">ndUQ_ratio</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="norm_var">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.norm_var">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">norm_var</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;variance normalisation</span>
+<span class="sd">    Args:</span>
+<span class="sd">        var (np.array): variance to normalise</span>
+<span class="sd">        min_cut (float): Bottom extremun percentile : [0,1].</span>
+<span class="sd">        max_cut (float): Bottom upper percentile: [0,1].</span>
+<span class="sd">        var_min (float, optional): minimal variance assumption. Defaults to 0.</span>
+<span class="sd">        q_var (float): Power coefficent</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        var: normalised variance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+    <span class="n">var_min</span><span class="p">,</span> <span class="n">var_max</span> <span class="o">=</span> <span class="n">get_extremum_var</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">,</span> <span class="n">var_min</span><span class="p">,</span> <span class="n">var_max</span><span class="p">)</span>
+
+    <span class="n">var</span> <span class="o">=</span> <span class="n">ut</span><span class="o">.</span><span class="n">threshold</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">min_val</span><span class="o">=</span><span class="n">var_min</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">max_val</span><span class="o">=</span><span class="n">var_max</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">q_var</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">q_var</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">var</span></div>
+
+
+
+<div class="viewcode-block" id="renormalise_UQ">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.renormalise_UQ">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">renormalise_UQ</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">scaler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;UQmeasure to normalised</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (np.array): UQmeasure provided by an UQEstimator</span>
+<span class="sd">        type_UQ (_type_): nature of the UQeeasure</span>
+<span class="sd">        rescale_val (np.array): rescale variance term (may be obtain by scikilearn Standard normalizer)</span>
+<span class="sd">        var_min (float, optional): minimal variance assumption. Defaults to 0.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        UQ: normalised UQmeasure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">escale_val</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">scaler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">rescale_val</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">var_</span>
+
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;res_var&quot;</span><span class="p">,</span> <span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">]:</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">UQ</span> <span class="o">*</span> <span class="n">rescale_val</span>
+        <span class="k">if</span> <span class="n">var_min</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">var_min</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">var_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">var_max</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;res_2var&quot;</span><span class="p">,</span> <span class="s2">&quot;2var&quot;</span><span class="p">]:</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">UQ</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">rescale_val</span><span class="p">,</span> <span class="n">UQ</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">rescale_val</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">var_min</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">var_min</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">var_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">var_max</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="s2">&quot;res_quantile&quot;</span><span class="p">]:</span>
+        <span class="n">inv_trans</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">inverse_transform</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">inv_trans</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span> <span class="k">for</span> <span class="n">Q</span> <span class="ow">in</span> <span class="n">UQ</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;renormalise_UQ :&quot;</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="s2">&quot;not_covered&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">UQ</span></div>
+
+
+
+<div class="viewcode-block" id="process_UQmeasure_to_sigma">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_sigma">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_UQmeasure_to_sigma</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process UQ measure into sigma (sqrt(varirance)) according prediction, UQmeasure and observation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (np.array or list): UQmeasure obtain from UQEstimator</span>
+<span class="sd">        type_UQ (_type_): Type UQ that the nature of UQmeasure</span>
+<span class="sd">        pred (np.array): prediction provide by a predictor or an UQEstimator</span>
+<span class="sd">        y (np.array): Targets/Observation</span>
+<span class="sd">        type_UQ_params : additional parameters link to type paradigm (ex : alpha for quantile)</span>
+<span class="sd">        min_cut (_type_): Bottom extremun percentile.</span>
+<span class="sd">        max_cut (_type_): Bottom upper percentile.</span>
+<span class="sd">        q_var (_type_): Power coefficent</span>
+<span class="sd">        sigma_min (float, optional): Minimum values of UQ considered.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        sigma : standards deviation estimation link to ML-uncertainty</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_UQ</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="p">)</span>
+
+    <span class="c1"># Case sigma</span>
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;res_var&quot;</span><span class="p">,</span> <span class="s2">&quot;var&quot;</span><span class="p">]:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">norm_var</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">,</span>
+                <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+                <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+                <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+                <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+                <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Case 2 sigma</span>
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;res_2var&quot;</span><span class="p">,</span> <span class="s2">&quot;2var&quot;</span><span class="p">]:</span>
+        <span class="n">sigma_bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">norm_var</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+                <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+                <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+                <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+                <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">sigma_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">norm_var</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+                <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+                <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+                <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+                <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">sigma_bot</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">sigma_top</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]])</span>
+
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+            <span class="n">norm_var</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">UQ</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+                <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+                <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+                <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+                <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="s2">&quot;res_quantile&quot;</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning quantile renormalisation based on gaussian assumption&quot;</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">param_alpha</span> <span class="ow">in</span> <span class="n">type_UQ_params</span><span class="p">:</span>
+            <span class="n">current_sigma</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">param_alpha</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">sigma</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">((</span><span class="n">pred</span> <span class="o">-</span> <span class="n">UQ</span><span class="p">[</span><span class="n">n</span><span class="p">]))</span> <span class="o">/</span> <span class="n">current_sigma</span><span class="p">)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">norm_var</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">,</span> <span class="n">var_min</span><span class="p">,</span> <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">))</span>
+
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">apply_middledim_reduction</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sigma</span></div>
+
+
+
+<div class="viewcode-block" id="process_UQmeasure_to_TOT_and_E_sigma">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_TOT_and_E_sigma">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_UQmeasure_to_TOT_and_E_sigma</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">k_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_Eratio</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">roll</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process UQ measure into sigma_tot &amp; sigma_E (sqrt(varirance)) according prediction, UQmeasure and observation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (np.array or list): UQmeasure obtain from UQEstimator</span>
+<span class="sd">        type_UQ (_type_): Type UQ that the nature of UQmeasure</span>
+<span class="sd">        pred (np.array): prediction provide by a predictor or an UQEstimator</span>
+<span class="sd">        y (np.array): Targets/Observation</span>
+<span class="sd">        type_UQ_params : additional parameters link to type paradigm (ex : alpha for quantile)</span>
+<span class="sd">        min_cut (_type_): Bottom extremun percentile.</span>
+<span class="sd">        max_cut (_type_): Bottom upper percentile.</span>
+<span class="sd">        q_var (_type_): Power coefficent</span>
+<span class="sd">        sigma_min (float, optional): Minimum values of UQ considered.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        sigma : standards deviation estimation link to ML-uncertainty</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">check_UQ</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="p">)</span>
+    <span class="c1"># Case sigma</span>
+
+    <span class="c1"># Naive disentanglement:</span>
+    <span class="c1"># - Hypothesis estimation of var_E uppon estimation lead to entangled var_E that include amont of var_A in var_E</span>
+    <span class="c1"># - Epistemics contains &#39;nominal espitemics quantity</span>
+
+    <span class="c1"># Consider a ratio of k_var_e nominal epistemics to swith towarsd E var.</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">ndUQ_ratio</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">extremum_var_TOT</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="o">&amp;</span> <span class="p">(</span><span class="n">extremum_var_TOT</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="c1"># print(&#39;Compute ndUQ_ratio from provided data&#39;)</span>
+        <span class="n">extremum_var_TOT</span><span class="p">,</span> <span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="n">get_extremum_var_TOT_and_ndUQ_ratio</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+            <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+            <span class="n">mode_multidim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">var_nominal</span><span class="p">,</span> <span class="n">var_atypic</span> <span class="o">=</span> <span class="n">split_var_dUQ</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="n">q_var_e</span><span class="o">=</span><span class="n">q_var_e</span><span class="p">,</span>
+        <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+        <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">sigma_nominal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_nominal</span><span class="p">)</span>
+    <span class="n">sigma_atypic</span> <span class="o">=</span> <span class="n">k_var_e</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_atypic</span><span class="p">)</span>
+
+    <span class="n">sigma_nominal</span> <span class="o">=</span> <span class="n">apply_middledim_reduction</span><span class="p">(</span><span class="n">sigma_nominal</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="n">roll</span><span class="p">)</span>
+
+    <span class="n">sigma_atypic</span> <span class="o">=</span> <span class="n">apply_middledim_reduction</span><span class="p">(</span><span class="n">sigma_atypic</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="n">roll</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">sigma_nominal</span><span class="p">,</span> <span class="n">sigma_atypic</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="process_UQmeasure_to_residu">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_residu">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_UQmeasure_to_residu</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">with_born</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">k_var_e</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">q_var_e</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">q_Eratio</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+    <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">roll</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process UQ measure to residu according prediction, UQmeasure and observation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (np.array or list): UQ measure obtain from UQ-estimator</span>
+<span class="sd">        type_UQ (_type_): Type UQ that caracterise UQ measre</span>
+<span class="sd">        pred (np.array): prediction</span>
+<span class="sd">        y (np.array): Targets/Observation</span>
+<span class="sd">        type_UQ_params : additional parameters link to type paradigm (ex : alpha for quantile)</span>
+<span class="sd">        min_cut (_type_): Bottom extremun percentile.</span>
+<span class="sd">        max_cut (_type_): Bottom upper percentile.</span>
+<span class="sd">        min_cut (_type_): Bottom extremun percentile.</span>
+<span class="sd">        max_cut (_type_): Bottom upper percentile.</span>
+<span class="sd">        q_var (_type_): Power coefficent</span>
+<span class="sd">        sigma_min (float, optional): Minimum values of UQ considered.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        res : residu</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_UQ</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">q_var_e</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">q_var_e</span> <span class="o">=</span> <span class="n">q_var</span>
+
+    <span class="k">if</span> <span class="n">k_var_e</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">k_var_e</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">res_norm</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">pred</span>
+
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_var&quot;</span><span class="p">,</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_var&quot;</span><span class="p">]:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+                <span class="n">norm_var</span><span class="p">(</span>
+                    <span class="n">UQ</span><span class="p">,</span>
+                    <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+                    <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+                    <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+                    <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+                    <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">E_penalisation</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">elif</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">:</span>
+            <span class="n">sigma</span><span class="p">,</span> <span class="n">E_penalisation</span> <span class="o">=</span> <span class="n">process_UQmeasure_to_TOT_and_E_sigma</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">,</span>
+                <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+                <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+                <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+                <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+                <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+                <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+                <span class="n">q_var_e</span><span class="o">=</span><span class="n">q_var_e</span><span class="p">,</span>
+                <span class="n">k_var_e</span><span class="o">=</span><span class="n">k_var_e</span><span class="p">,</span>
+                <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+                <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">,</span>
+                <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;params : q_var_e:&quot;</span><span class="p">,</span>
+                    <span class="n">q_var_e</span><span class="p">,</span>
+                    <span class="s2">&quot;k_var_e:&quot;</span><span class="p">,</span>
+                    <span class="n">k_var_e</span><span class="p">,</span>
+                    <span class="s2">&quot;q_Eratio:&quot;</span><span class="p">,</span>
+                    <span class="n">q_Eratio</span><span class="p">,</span>
+                    <span class="s2">&quot;extremum_var_TOT:&quot;</span><span class="p">,</span>
+                    <span class="n">extremum_var_TOT</span><span class="p">,</span>
+                    <span class="s2">&quot;ndUQ_ratio:&quot;</span><span class="p">,</span>
+                    <span class="n">ndUQ_ratio</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;d1&quot;</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">res_norm</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">E_penalisation</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                <span class="p">)</span>
+
+        <span class="n">sign_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">res_norm</span><span class="p">)</span>
+        <span class="c1"># In normalised residu, add epistemic set_off equal to part of epistemic overhang (E/tot &gt; (k_var))</span>
+
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span> <span class="o">+</span> <span class="n">ut</span><span class="o">.</span><span class="n">EPSILON</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Start build res raw :&quot;</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">res_norm</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="s2">&quot;Mean_Escore :&quot;</span><span class="p">,</span>
+                <span class="n">E_penalisation</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="s2">&quot;Mean_Sigma :&quot;</span><span class="p">,</span>
+                <span class="n">sigma</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+        <span class="n">res_norm</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">res_norm</span><span class="p">)</span> <span class="o">+</span> <span class="n">E_penalisation</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+        <span class="n">res_norm</span> <span class="o">=</span> <span class="n">sign_res</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">res_norm</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">with_born</span><span class="p">:</span>
+            <span class="n">born_bot</span> <span class="o">=</span> <span class="p">(</span><span class="n">pred</span> <span class="o">+</span> <span class="n">E_penalisation</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="n">born_top</span> <span class="o">=</span> <span class="p">(</span><span class="n">pred</span> <span class="o">-</span> <span class="n">E_penalisation</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+            <span class="n">born_bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">born_bot</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span>
+            <span class="n">born_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">born_top</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;2var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_2var&quot;</span><span class="p">,</span> <span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="s2">&quot;res_quantile&quot;</span><span class="p">]:</span>
+        <span class="n">res_norm</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">pred</span>
+        <span class="n">sign_res</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">res_norm</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;2var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_2var&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Naïf approach mean of 2 sigma&quot;</span><span class="p">)</span>
+            <span class="n">UQ_bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">norm_var</span><span class="p">(</span><span class="n">UQ</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">,</span> <span class="n">var_min</span><span class="p">,</span> <span class="n">q_var</span><span class="p">))</span>
+            <span class="n">UQ_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">norm_var</span><span class="p">(</span><span class="n">UQ</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">,</span> <span class="n">var_min</span><span class="p">,</span> <span class="n">q_var</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;quantile&quot;</span><span class="p">:</span>
+            <span class="n">UQ_bot</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">-</span> <span class="n">cut</span><span class="p">(</span><span class="n">UQ</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">)</span>
+            <span class="n">UQ_top</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">UQ</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">)</span> <span class="o">-</span> <span class="n">pred</span>
+        <span class="k">elif</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;res_quantile&quot;</span><span class="p">:</span>
+            <span class="n">UQ_bot</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">UQ</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">)</span>
+            <span class="n">UQ_top</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">UQ</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">)</span>
+
+        <span class="n">reshape_marker</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">res_norm</span> <span class="o">=</span> <span class="n">res_norm</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">with_born</span><span class="p">:</span>
+                <span class="n">born_bot</span> <span class="o">=</span> <span class="n">born_bot</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="n">born_top</span> <span class="o">=</span> <span class="n">born_top</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+            <span class="n">reshape_marker</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">res_norm</span><span class="p">[:,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">UQ_bot</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span>
+            <span class="n">E_penalisation</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">res_norm</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">res_norm</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">+</span> <span class="n">E_penalisation</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+            <span class="n">res_norm</span> <span class="o">=</span> <span class="n">sign_res</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">res_norm</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">with_born</span><span class="p">:</span>
+                <span class="n">born_bot</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">born_bot</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">+</span> <span class="n">E_penalisation</span> <span class="o">-</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+                <span class="n">born_top</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">born_top</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">-</span> <span class="n">E_penalisation</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">UQ_top</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">],</span> <span class="n">q_var</span><span class="p">)</span>
+            <span class="n">res_norm</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">res_norm</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="n">res_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">res_norm</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">res_norm</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">with_born</span><span class="p">:</span>
+                <span class="n">born_bot</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">born_bot</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">+</span> <span class="n">E_penalisation</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+                <span class="n">born_top</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">born_top</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="o">-</span> <span class="n">E_penalisation</span> <span class="o">+</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">reshape_marker</span><span class="p">:</span>
+            <span class="n">res_norm</span> <span class="o">=</span> <span class="n">res_norm</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mid build res norm:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">res_norm</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">reduc_filter</span><span class="p">,</span> <span class="n">roll</span><span class="p">)</span>
+
+    <span class="n">res_norm</span> <span class="o">=</span> <span class="n">apply_middledim_reduction</span><span class="p">(</span><span class="n">res_norm</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="n">roll</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;End build res norm :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">res_norm</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">with_born</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res_norm</span><span class="p">,</span> <span class="p">(</span><span class="n">born_bot</span><span class="p">,</span> <span class="n">born_top</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res_norm</span></div>
+
+
+
+<div class="viewcode-block" id="process_UQmeasure_to_quantile">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_quantile">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_UQmeasure_to_quantile</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">roll</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process UQ measure into gaussian_quantile according prediction, UQmeasure and observation</span>
+<span class="sd">    and a alpha quantile lvl</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (np.array or list): UQmeasure obtain from UQEstimator</span>
+<span class="sd">        type_UQ (_type_): Type UQ that the nature of UQmeasure</span>
+<span class="sd">        pred (np.array): prediction provide by a predictor or an UQEstimator</span>
+<span class="sd">        y (np.array): Targets/Observation</span>
+<span class="sd">        type_UQ_params : additional parameters link to type paradigm (ex : alpha for quantile)</span>
+<span class="sd">        min_cut (_type_): Bottom extremun percentile.</span>
+<span class="sd">        max_cut (_type_): Bottom upper percentile.</span>
+<span class="sd">        q_var (_type_): Power coefficent</span>
+<span class="sd">        sigma_min (float, optional): Minimum values of UQ considered.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        gaussian_quantile : alpha quantile lvl based on gaussian assumption</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_UQ</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span> <span class="s2">&quot;res_quantile&quot;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">type_UQ_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Missing type_UQ_params : cannot manipulate quantile without alpha parameters&quot;</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">type_UQ_params</span><span class="p">[</span><span class="s2">&quot;list_alpha&quot;</span><span class="p">]:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;recover quantile&quot;</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">type_UQ_params</span><span class="p">[</span><span class="s2">&quot;list_alpha&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;quantile&quot;</span><span class="p">:</span>
+                <span class="n">gaussian_quantile</span> <span class="o">=</span> <span class="n">UQ</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+            <span class="k">elif</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;res_quantile&quot;</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">type_UQ_params</span><span class="p">[</span><span class="s2">&quot;list_alpha&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+                <span class="n">gaussian_quantile</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">+</span> <span class="n">UQ</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;res_2var&quot;</span><span class="p">,</span> <span class="s2">&quot;2var&quot;</span><span class="p">]:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">process_UQmeasure_to_sigma</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">y_shape</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">alpha</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y_shape</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y_shape</span><span class="p">)</span>
+        <span class="n">gaussian_quantile</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">+</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">,</span> <span class="s2">&quot;res_var&quot;</span><span class="p">,</span> <span class="s2">&quot;var&quot;</span><span class="p">]:</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">process_UQmeasure_to_sigma</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">gaussian_quantile</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">+</span> <span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">type_UQ</span> <span class="o">+</span> <span class="s2">&quot; not covered&quot;</span><span class="p">)</span>
+
+    <span class="n">gaussian_quantile</span> <span class="o">=</span> <span class="n">apply_middledim_reduction</span><span class="p">(</span>
+        <span class="n">gaussian_quantile</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="n">roll</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">gaussian_quantile</span></div>
+
+
+
+<div class="viewcode-block" id="process_UQmeasure_to_Epistemicscore">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_Epistemicscore">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_UQmeasure_to_Epistemicscore</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var_e</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">k_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;relative_likelihood&quot;</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">roll</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process UQ measure to epistemicvalues according UQmeasure</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (np.array or list): UQ measure obtain from UQ-estimator</span>
+<span class="sd">        type_UQ (_type_): Type UQ that caracterise UQ measre</span>
+<span class="sd">        pred (np.array): prediction unused</span>
+<span class="sd">        y (np.array): Targets/Observation unused</span>
+<span class="sd">        type_UQ_params : additional parameters unused</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        Eval : Epistemic unconfidence score.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">check_UQ</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">type_UQ</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">q_var_e</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">q_var_e</span> <span class="o">=</span> <span class="n">q_var</span>
+
+    <span class="n">var_A</span> <span class="o">=</span> <span class="n">norm_var</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span> <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span> <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span>
+    <span class="p">)</span>
+
+    <span class="n">var_E</span> <span class="o">=</span> <span class="n">norm_var</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span> <span class="n">q_var</span><span class="o">=</span><span class="n">q_var_e</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;relative_likelihood&quot;</span><span class="p">:</span>
+            <span class="n">Eval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">var_A</span> <span class="o">/</span> <span class="n">var_E</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;relative_variance_part&quot;</span><span class="p">:</span>
+            <span class="n">Eval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_E</span> <span class="o">/</span> <span class="p">(</span><span class="n">var_A</span> <span class="o">+</span> <span class="n">var_E</span><span class="p">))</span>
+
+            <span class="n">Eval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">Eval</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">k_var_e</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;process_UQmeasure_to_Epistemicscore : &quot;</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="s2">&quot; not covered : only cover var_A&amp;E&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span>
+
+    <span class="n">Eval</span> <span class="o">=</span> <span class="n">apply_middledim_reduction</span><span class="p">(</span><span class="n">Eval</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="n">roll</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Eval</span></div>
+
+
+
+<div class="viewcode-block" id="fit_PI">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.fit_PI">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_PI</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">list_alpha</span><span class="o">=</span><span class="p">[</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">],</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that estimate PIs parameters according to normal assumption a list of quantile parametrized</span>
+<span class="sd">    by list alpha from the UQmeasure</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pred (_type_): Mean prediction</span>
+<span class="sd">        UQ (_type_): UQmeasure</span>
+<span class="sd">        type_UQ (_type_):  UQmeasure hypothesis</span>
+<span class="sd">        list_alpha (list, optional): Quantile values. Defaults to [0.025, 0.975].</span>
+<span class="sd">        type_UQ_params (_type_, optional): UQmeasure params. Defaults to None.</span>
+<span class="sd">        PIs_params (_type_, optional): PIs_params : May use externally fit_PIs to obtain it.</span>
+<span class="sd">            If None, fit_PIs is used internally.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: type_UQ not covered</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list_PIs : List of computed quantiles</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">PIs_params_</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">PIs_params_</span></div>
+
+
+
+<div class="viewcode-block" id="compute_PI">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.compute_PI">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_PI</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">list_alpha</span><span class="o">=</span><span class="p">[</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">],</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">params_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute according to normal assumption a list of quantile parametrized by list alpha from the UQmeasre</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pred (_type_): Mean prediction</span>
+<span class="sd">        UQ (_type_): UQmeasure</span>
+<span class="sd">        type_UQ (_type_):  UQmeasure hypothesis</span>
+<span class="sd">        list_alpha (list, optional): Quantile values. Defaults to [0.025, 0.975].</span>
+<span class="sd">        type_UQ_params (_type_, optional): UQmeasure params. Defaults to None.</span>
+<span class="sd">        params_ (_type_, optional): params : May use externally fit_PIs to obtain it.</span>
+<span class="sd">            If None, fit_PIs is used internally.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: type_UQ not covered</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list_PIs : List of computed quantiles</span>
+<span class="sd">        params : Params provided or computed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">params_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params_</span> <span class="o">=</span> <span class="n">fit_PI</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">list_alpha</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">list_PIs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="n">list_alpha</span><span class="p">:</span>
+        <span class="n">quantile_env</span> <span class="o">=</span> <span class="n">process_UQmeasure_to_quantile</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+            <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">list_PIs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">quantile_env</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_PIs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">list_PIs</span> <span class="o">=</span> <span class="n">list_PIs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">list_PIs</span><span class="p">,</span> <span class="n">params_</span></div>
+
+
+
+<div class="viewcode-block" id="fit_Epistemic_score">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.fit_Epistemic_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_Epistemic_score</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">list_percent</span><span class="o">=</span><span class="p">[</span><span class="mf">0.50</span><span class="p">,</span> <span class="mf">0.80</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.995</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;score&quot;</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that estimate parameters link to Epistemic_score_normalisation based on quantile lvl</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pred (_type_): Mean prediction</span>
+<span class="sd">        UQ (_type_): UQmeasure</span>
+<span class="sd">        type_UQ (_type_):  UQmeasure hypothesis</span>
+<span class="sd">        list_percent (list, optional): Quantile values to normalise.</span>
+<span class="sd">            Defaults to [0.50, 0.80, 0.90, 0.95, 0.975, 0.99, 0.999].</span>
+<span class="sd">        type_UQ_params (_type_, optional): UQmeasure params. Defaults to None.</span>
+
+<span class="sd">    returns:</span>
+<span class="sd">       params : Params needed by compute_Epistemic_score</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="o">!=</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="s2">&quot;type_UQ should be &#39;var_A&amp;E&#39; not &quot;</span> <span class="o">+</span> <span class="n">type_UQ</span><span class="p">)</span>
+
+    <span class="n">extremum_var_TOT</span><span class="p">,</span> <span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="n">get_extremum_var_TOT_and_ndUQ_ratio</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+        <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+        <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+        <span class="n">mode_multidim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Do not apply reduc_filter in an intermedaire function.</span>
+    <span class="n">sigma_nominal</span><span class="p">,</span> <span class="n">sigma_atypique</span> <span class="o">=</span> <span class="n">process_UQmeasure_to_TOT_and_E_sigma</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="o">=</span><span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+        <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+        <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+        <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">k_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+        <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">,</span>
+        <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma_nominal</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma_atypique</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">Epistemic_score</span> <span class="o">=</span> <span class="n">process_UQmeasure_to_Epistemicscore</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="o">=</span><span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+        <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">list_q_val</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_percent</span><span class="p">):</span>
+        <span class="n">list_q_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">Epistemic_score</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="n">params_</span> <span class="o">=</span> <span class="n">list_q_val</span><span class="p">,</span> <span class="n">list_percent</span><span class="p">,</span> <span class="n">ndUQ_ratio</span><span class="p">,</span> <span class="n">extremum_var_TOT</span>
+    <span class="k">return</span> <span class="n">params_</span></div>
+
+
+
+<div class="viewcode-block" id="compute_Epistemic_score">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.UQ_processing.compute_Epistemic_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_Epistemic_score</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">list_percent</span><span class="o">=</span><span class="p">[</span><span class="mf">0.80</span><span class="p">,</span> <span class="mf">0.90</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;levels&quot;</span><span class="p">,</span>
+    <span class="n">params_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that compute Epistemic_score_lvl from (predictor) &amp; UQEstimor outputs &amp;</span>
+<span class="sd">    fitted parameters provided by fit_Epistemic_score</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pred (_type_): Mean prediction</span>
+<span class="sd">        UQ (_type_): UQmeasure</span>
+<span class="sd">        type_UQ (_type_):  UQmeasure hypothesis</span>
+<span class="sd">        list_percent (list, optional): Quantile values. Defaults to [0.025, 0.975].</span>
+<span class="sd">        type_UQ_params (_type_, optional): UQmeasure params. Defaults to None.</span>
+<span class="sd">        params_ (_type_, optional): May use externally fit_Epistemic_score to obtain it. If None, internal called to fit</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Epistemic_scorelvl : Epistemic_score_lvl : Quantile class values of Epistemic score</span>
+<span class="sd">        params : Parameters provided or computed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="o">!=</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="s2">&quot;type_UQ should be &#39;var_A&amp;E&#39; not &quot;</span> <span class="o">+</span> <span class="n">type_UQ</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">params_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params_</span> <span class="o">=</span> <span class="n">fit_Epistemic_score</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="o">=</span><span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">list_percent</span><span class="o">=</span><span class="n">list_percent</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+            <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">list_q_val</span><span class="p">,</span> <span class="n">list_percent</span><span class="p">,</span> <span class="n">ndUQ_ratio</span><span class="p">,</span> <span class="n">extremum_var_TOT</span> <span class="o">=</span> <span class="n">params_</span>
+
+    <span class="c1"># Do not apply reduc_filter in an intermedaire function.</span>
+    <span class="n">sigma</span><span class="p">,</span> <span class="n">sigma_E</span> <span class="o">=</span> <span class="n">process_UQmeasure_to_TOT_and_E_sigma</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="o">=</span><span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+        <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+        <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+        <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">k_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+        <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">,</span>
+        <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma_E</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">Epistemic_score</span> <span class="o">=</span> <span class="n">process_UQmeasure_to_Epistemicscore</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="o">=</span><span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+        <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">Epistemic_scorelvl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">Epistemic_score</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Epistemic_score</span><span class="p">,</span> <span class="n">params_</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">q_val</span> <span class="ow">in</span> <span class="n">list_q_val</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pred</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">Epistemic_scorelvl</span> <span class="o">+=</span> <span class="n">Epistemic_score</span> <span class="o">&gt;</span> <span class="n">q_val</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Epistemic_scorelvl</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="n">Epistemic_scorelvl</span><span class="p">[:,</span> <span class="n">d</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Epistemic_score</span><span class="p">[:,</span> <span class="n">d</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">q_val</span><span class="p">[</span><span class="n">d</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">Epistemic_scorelvl</span><span class="p">,</span> <span class="n">params_</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

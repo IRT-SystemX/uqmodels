@@ -1,0 +1,484 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.evaluation package &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=fc837d61"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="uqmodels.modelization package" href="uqmodels.modelization.html" />
+    <link rel="prev" title="uqmodels package" href="uqmodels.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">🔎 Package uqmodels</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="uqmodels.html">uqmodels package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="uqmodels.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">uqmodels.evaluation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.html">uqmodels.modelization package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.postprocessing.html">uqmodels.postprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.preprocessing.html">uqmodels.preprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.visualization.html">uqmodels.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.UQModel">uqmodels.UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.custom_UQModel">uqmodels.custom_UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.processing">uqmodels.processing module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.utils">uqmodels.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">🔎 Package uqmodels</a></li>
+          <li class="breadcrumb-item"><a href="uqmodels.html">uqmodels package</a></li>
+      <li class="breadcrumb-item active">uqmodels.evaluation package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/uqmodels.evaluation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="uqmodels-evaluation-package">
+<h1>uqmodels.evaluation package<a class="headerlink" href="#uqmodels-evaluation-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-uqmodels.evaluation.base_metrics">
+<span id="uqmodels-evaluation-base-metrics-module"></span><h2>uqmodels.evaluation.base_metrics module<a class="headerlink" href="#module-uqmodels.evaluation.base_metrics" title="Link to this heading"></a></h2>
+<p>Metrics module for UQ method evaluation.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.NLL_loss">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">NLL_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#NLL_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.NLL_loss" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.ace">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">ace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#ace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.ace" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.average_coverage">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">average_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_upper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#average_coverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.average_coverage" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.interval_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">interval_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#interval_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.interval_score" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.mae">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">mae</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#mae"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.mae" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.perf_pred">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">perf_pred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#perf_pred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.perf_pred" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.print_real_metrics_meta">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">print_real_metrics_meta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#print_real_metrics_meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.print_real_metrics_meta" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.q_loss">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">q_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#q_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.q_loss" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.quantile_loss">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">quantile_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#quantile_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.quantile_loss" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.real_metrics">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">real_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_fit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#real_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.real_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.rmse">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.rmse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.sharpness">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">sharpness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_pred_lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_upper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#sharpness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.sharpness" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.base_metrics.sharpness2">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.base_metrics.</span></span><span class="sig-name descname"><span class="pre">sharpness2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_pred_lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_upper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/base_metrics.html#sharpness2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.base_metrics.sharpness2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-uqmodels.evaluation.evaluation">
+<span id="uqmodels-evaluation-evaluation-module"></span><h2>uqmodels.evaluation.evaluation module<a class="headerlink" href="#module-uqmodels.evaluation.evaluation" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.evaluation.compute_perf">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.evaluation.</span></span><span class="sig-name descname"><span class="pre">compute_perf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Y_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/evaluation.html#compute_perf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.evaluation.compute_perf" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.evaluation.evaluate">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.evaluation.</span></span><span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_metrics</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_sets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/evaluation.html#evaluate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.evaluation.evaluate" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.evaluation.var_explain">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.evaluation.</span></span><span class="sig-name descname"><span class="pre">var_explain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/evaluation.html#var_explain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.evaluation.var_explain" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-uqmodels.evaluation.metrics">
+<span id="uqmodels-evaluation-metrics-module"></span><h2>uqmodels.evaluation.metrics module<a class="headerlink" href="#module-uqmodels.evaluation.metrics" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.Encapsulated_metrics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">Encapsulated_metrics</span></span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#Encapsulated_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.Encapsulated_metrics" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract Encapsulated Metrics class :
+Allow generic manipulation of metrics with output specifyied format</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.Encapsulated_metrics.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#Encapsulated_metrics.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.Encapsulated_metrics.compute" title="Link to this definition"></a></dt>
+<dd><p>Compute metrics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output</strong> (<em>array</em>) – Model results</p></li>
+<li><p><strong>y</strong> (<em>array</em>) – Targets</p></li>
+<li><p><strong>sets</strong> (<em>array list</em>) – Sub-set (train,test)</p></li>
+<li><p><strong>context</strong> (<em>array</em>) – Additional information that may be used in metrics</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.Generic_metric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">Generic_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ABmetric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Metric'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_ctx_constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#Generic_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.Generic_metric" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#uqmodels.evaluation.metrics.Encapsulated_metrics" title="uqmodels.evaluation.metrics.Encapsulated_metrics"><code class="xref py py-class docutils literal notranslate"><span class="pre">Encapsulated_metrics</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.Generic_metric.compute">
+<span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#Generic_metric.compute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.Generic_metric.compute" title="Link to this definition"></a></dt>
+<dd><p>Compute metrics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output</strong> (<em>array</em>) – Model results</p></li>
+<li><p><strong>y</strong> (<em>array</em>) – Targets</p></li>
+<li><p><strong>sets</strong> (<em>array list</em>) – Sub-set (train,test)</p></li>
+<li><p><strong>context</strong> (<em>array</em>) – Additional information that may be used in metrics</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.UQ_Gaussian_NLL">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">UQ_Gaussian_NLL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'var'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#UQ_Gaussian_NLL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.UQ_Gaussian_NLL" title="Link to this definition"></a></dt>
+<dd><p>Compute Neg likelihood by transform UQ into sigma using guassian assumption</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/observation</p></li>
+<li><p><strong>output</strong> (<em>np.array</em>) – modeling output : (y,UQ)</p></li>
+<li><p><strong>set</strong> (<em>list</em><em> of </em><em>mask</em>) – subset specification</p></li>
+<li><p><strong>mask</strong> (<em>bool array</em>) – mask the last dimension</p></li>
+<li><p><strong>reduce</strong> (<em>bool</em>) – apply reduction</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to “var”.</p></li>
+<li><p><strong>mode</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>val</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.UQ_absolute_residu_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">UQ_absolute_residu_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'var'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#UQ_absolute_residu_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.UQ_absolute_residu_score" title="Link to this definition"></a></dt>
+<dd><p>Compute absolute residu score from UQ,pred,y</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/observation</p></li>
+<li><p><strong>output</strong> (<em>np.array</em>) – modeling output : (y,UQ)</p></li>
+<li><p><strong>set</strong> (<em>list</em><em> of </em><em>mask</em>) – subset specification</p></li>
+<li><p><strong>mask</strong> (<em>bool array</em>) – mask the last dimension</p></li>
+<li><p><strong>reduce</strong> (<em>bool</em>) – apply reduction</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to “var”.</p></li>
+<li><p><strong>mode</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>val</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>val</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.UQ_average_coverage">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">UQ_average_coverage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'var'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.045</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'UQ'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#UQ_average_coverage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.UQ_average_coverage" title="Link to this definition"></a></dt>
+<dd><p>Compute data coverage by transform UQ into (1-alpha)% coverage PIs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/observation</p></li>
+<li><p><strong>output</strong> (<em>np.array</em>) – modeling output : (y,UQ)</p></li>
+<li><p><strong>set</strong> (<em>list</em><em> of </em><em>mask</em>) – subset specification</p></li>
+<li><p><strong>mask</strong> (<em>bool array</em>) – mask the last dimension</p></li>
+<li><p><strong>reduce</strong> (<em>bool</em>) – apply reduction</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to “var”.</p></li>
+<li><p><strong>alpha</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_. Defaults to 0.045.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to ‘UQ’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.UQ_dEI">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">UQ_dEI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'var_A&amp;E'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#UQ_dEI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.UQ_dEI" title="Link to this definition"></a></dt>
+<dd><p>disentangled epistemic indicator from pred,UQ that provide insight about model unreliability</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/observation</p></li>
+<li><p><strong>output</strong> (<em>np.array</em>) – modeling output : (y,UQ)</p></li>
+<li><p><strong>set</strong> (<em>list</em><em> of </em><em>mask</em>) – subset specification</p></li>
+<li><p><strong>mask</strong> (<em>bool array</em>) – mask the last dimension</p></li>
+<li><p><strong>reduce</strong> (<em>bool</em>) – apply reduction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>array of metrics values</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>val</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.UQ_heteroscedasticity_ratio">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">UQ_heteroscedasticity_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'var'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#UQ_heteroscedasticity_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.UQ_heteroscedasticity_ratio" title="Link to this definition"></a></dt>
+<dd><p>Compute ratio  by transform UQ into sigma using guassian assumption</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/observation</p></li>
+<li><p><strong>output</strong> (<em>np.array</em>) – modeling output : (y,UQ)</p></li>
+<li><p><strong>set</strong> (<em>list</em><em> of </em><em>mask</em>) – subset specification</p></li>
+<li><p><strong>mask</strong> (<em>bool array</em>) – mask the last dimension</p></li>
+<li><p><strong>reduce</strong> (<em>bool</em>) – apply reduction</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to “var”.</p></li>
+<li><p><strong>mode</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>val</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.UQ_sharpness">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">UQ_sharpness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'var'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#UQ_sharpness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.UQ_sharpness" title="Link to this definition"></a></dt>
+<dd><p>Compute sharpness by transform UQ into 95% coverage PIs then compute size of PIs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/observation</p></li>
+<li><p><strong>output</strong> (<em>np.array</em>) – modeling output : (y,UQ)</p></li>
+<li><p><strong>set</strong> (<em>list</em><em> of </em><em>mask</em>) – subset specification</p></li>
+<li><p><strong>mask</strong> (<em>bool array</em>) – mask the last dimension</p></li>
+<li><p><strong>reduce</strong> (<em>bool</em>) – apply reduction</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to “var”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.anom_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">anom_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_E</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#anom_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.anom_score" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.build_ctx_mask">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">build_ctx_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_ctx_constraint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#build_ctx_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.build_ctx_mask" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.calibrate_var">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">calibrate_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.955</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#calibrate_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.calibrate_var" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.confidence_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">confidence_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_E</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#confidence_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.confidence_score" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.cov_metrics">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">cov_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_upper</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#cov_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.cov_metrics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.dEI">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">dEI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#dEI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.dEI" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.mae">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">mae</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#mae"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.mae" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.rmse">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.rmse" title="Link to this definition"></a></dt>
+<dd><p>Root mean square error metrics</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/observation</p></li>
+<li><p><strong>output</strong> (<em>np.array</em>) – modeling output : (y,UQ)</p></li>
+<li><p><strong>set</strong> (<em>list</em><em> of </em><em>mask</em>) – subset specification</p></li>
+<li><p><strong>mask</strong> (<em>bool array</em>) – mask the last dimension</p></li>
+<li><p><strong>reduce</strong> (<em>bool</em>) – apply reduction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>rmse values</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>val</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-uqmodels.evaluation">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-uqmodels.evaluation" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="uqmodels.html" class="btn btn-neutral float-left" title="uqmodels package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="uqmodels.modelization.html" class="btn btn-neutral float-right" title="uqmodels.modelization package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

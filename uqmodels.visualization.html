@@ -1,0 +1,367 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.visualization package &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=fc837d61"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="uqmodels.preprocessing package" href="uqmodels.preprocessing.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">🔎 Package uqmodels</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="uqmodels.html">uqmodels package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="uqmodels.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.evaluation.html">uqmodels.evaluation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.html">uqmodels.modelization package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.postprocessing.html">uqmodels.postprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.preprocessing.html">uqmodels.preprocessing package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">uqmodels.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.UQModel">uqmodels.UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.custom_UQModel">uqmodels.custom_UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.processing">uqmodels.processing module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.utils">uqmodels.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">🔎 Package uqmodels</a></li>
+          <li class="breadcrumb-item"><a href="uqmodels.html">uqmodels package</a></li>
+      <li class="breadcrumb-item active">uqmodels.visualization package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/uqmodels.visualization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="uqmodels-visualization-package">
+<h1>uqmodels.visualization package<a class="headerlink" href="#uqmodels-visualization-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-uqmodels.visualization.visualization">
+<span id="uqmodels-visualization-visualization-module"></span><h2>uqmodels.visualization.visualization module<a class="headerlink" href="#module-uqmodels.visualization.visualization" title="Link to this heading"></a></h2>
+<p>Visualization module.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.aux_fill_area">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">aux_fill_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#aux_fill_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.aux_fill_area" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.aux_plot_PIs">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">aux_plot_PIs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_PIs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_alpha_PIs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_colors_PIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_alpha_fig_PIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_label_PIs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#aux_plot_PIs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.aux_plot_PIs" title="Link to this definition"></a></dt>
+<dd><p>Plot PIs enveloppe on ax suplot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ax</strong> (<em>_type_</em>) – ax suplot</p></li>
+<li><p><strong>x</strong> (<em>_type_</em>) – x_scale</p></li>
+<li><p><strong>list_PIs</strong> (<em>_type_</em>) – list of PIs ordered from minumum to maximum: ex [PI_low_1,PI_low_2,PI_high_2,PI_high_1]</p></li>
+<li><p><strong>list_alpha</strong> (<em>_type_</em>) – List of alpha of PIs</p></li>
+<li><p><strong>list_colors_PIs</strong> (<em>list</em><em>, </em><em>optional</em>) – List of color by pair. Defaults to None -&gt; use grey.</p></li>
+<li><p><strong>list_alpha_PIs</strong> (<em>_type_</em><em>, </em><em>optional</em>) – List of color by pair. Defaults to None -&gt; 0.2 as transparancy</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.aux_plot_anom">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">aux_plot_anom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#aux_plot_anom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.aux_plot_anom" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.aux_plot_conf_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">aux_plot_conf_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_lvl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#aux_plot_conf_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.aux_plot_conf_score" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.aux_plot_confiance">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">aux_plot_confiance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_A</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_E</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">born</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">born_bis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_E</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.95,</span> <span class="pre">0.68]</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#aux_plot_confiance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.aux_plot_confiance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.aux_plot_pred">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">aux_plot_pred</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#aux_plot_pred"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.aux_plot_pred" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.dim_1d_check">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">dim_1d_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#dim_1d_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.dim_1d_check" title="Link to this definition"></a></dt>
+<dd><p>Reshape (n,1) 2D array to (n) 1D array else do nothing</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.plot_anom_matrice">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_anom_matrice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_anom_ind</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(15,</span> <span class="pre">6)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">setup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#plot_anom_matrice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.plot_anom_matrice" title="Link to this definition"></a></dt>
+<dd><p>Plot score_anomalie matrice and true label if there is.
+:param score: Anomaly score matrice or list of Anomaly matrix
+:type score: _type_
+:param f_obs: mask_focus
+:type f_obs: _type_, optional
+:param true_label: True label or None
+:type true_label: _type_, optional
+:param vmin: _description_. Defaults to -3.
+:type vmin: int, optional
+:param vmax: _description_. Defaults to 3.
+:type vmax: int, optional
+:param cmap: _description_. Defaults to None.
+:type cmap: _type_, optional
+:param figsize: _description_. Defaults to (15, 6).
+:type figsize: tuple, optional</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.plot_pi">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_pi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_lower</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_upper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">2)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#plot_pi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.plot_pi" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.plot_prediction_interval">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_prediction_interval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_lower</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_upper</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#plot_prediction_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.plot_prediction_interval" title="Link to this definition"></a></dt>
+<dd><p>Plot prediction intervals whose bounds are given by y_pred_lower and y_pred_upper.
+True values and point estimates are also plotted if given as argument.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> – label true values.</p></li>
+<li><p><strong>y_pred_lower</strong> – lower bounds of the prediction interval.</p></li>
+<li><p><strong>y_pred_upper</strong> – upper bounds of the prediction interval.</p></li>
+<li><p><strong>&lt;optionnal&gt;</strong> (<em>y_pred</em>) – abscisse vector.</p></li>
+<li><p><strong>&lt;optionnal&gt;</strong> – predicted values.</p></li>
+<li><p><strong>kwargs</strong> – plot parameters.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.plot_sorted_pi">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_sorted_pi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_lower</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred_upper</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#plot_sorted_pi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.plot_sorted_pi" title="Link to this definition"></a></dt>
+<dd><p>Plot prediction intervals in an ordered fashion (lowest to largest width),
+showing the upper and lower bounds for each prediction.
+:param y: label true values.
+:param y_pred_lower: lower bounds of the prediction interval.
+:param y_pred_upper: upper bounds of the prediction interval.
+:param X &lt;optionnal&gt;: abscisse vector.
+:param y_pred &lt;optionnal&gt;: predicted values.
+:param kwargs: plot parameters.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.plot_var">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">plot_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_full</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impact_anom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(400,</span> <span class="pre">20,</span> <span class="pre">3)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">res_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_s</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">3)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#plot_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.plot_var" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.provide_cmap">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">provide_cmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'bluetored'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#provide_cmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.provide_cmap" title="Link to this definition"></a></dt>
+<dd><p>Generate a bluetored or a cyantopurple cutsom cmap</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – Values: bluetored’ or ‘cyantopurple ‘</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Colormap matplotlib</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.show_dUQ_refinement">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">show_dUQ_refinement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut_A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_Eratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_cut_in_var_nominal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A_res_in_var_atypic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#show_dUQ_refinement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.show_dUQ_refinement" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.uncertainty_plot">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">uncertainty_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(15,</span> <span class="pre">5)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_obs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'UQplot'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">born</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">born_bis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confidence_lvl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.8,</span> <span class="pre">0.9,</span> <span class="pre">0.99,</span> <span class="pre">0.999,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">env</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.95,</span> <span class="pre">0.65]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'old'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#uncertainty_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.uncertainty_plot" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization.visu_latent_space">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization.</span></span><span class="sig-name descname"><span class="pre">visu_latent_space</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embedding</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_obs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context_grid_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization.html#visu_latent_space"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization.visu_latent_space" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-uqmodels.visualization.visualization_mutisource">
+<span id="uqmodels-visualization-visualization-mutisource-module"></span><h2>uqmodels.visualization.visualization_mutisource module<a class="headerlink" href="#module-uqmodels.visualization.visualization_mutisource" title="Link to this heading"></a></h2>
+<p>Visualization_multisource module.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization_mutisource.apply_cmap">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization_mutisource.</span></span><span class="sig-name descname"><span class="pre">apply_cmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization_mutisource.html#apply_cmap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization_mutisource.apply_cmap" title="Link to this definition"></a></dt>
+<dd><p>Transform valyes array into color values array using cmap and considering bound [vmin,vmax]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val</strong> (<em>array</em>) – Values to turn to color</p></li>
+<li><p><strong>vmin</strong> (<em>float</em>) – min_val</p></li>
+<li><p><strong>vmax</strong> (<em>float</em>) – max_val</p></li>
+<li><p><strong>cmap</strong> (<em>cmap</em>) – matplotlib cmap</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of color</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization_mutisource.compute_dev_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization_mutisource.</span></span><span class="sig-name descname"><span class="pre">compute_dev_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization_mutisource.html#compute_dev_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization_mutisource.compute_dev_score" title="Link to this definition"></a></dt>
+<dd><p>Compute signed relative errors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>val</strong> (<em>array</em>) – Prediction</p></li>
+<li><p><strong>y</strong> (<em>array</em>) – Target</p></li>
+<li><p><strong>vmin</strong> (<em>float</em>) – negative minimum sensitivité</p></li>
+<li><p><strong>vmax</strong> (<em>float</em>) – positive minimun sensitivity</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>signed relative errors.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>r</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization_mutisource.load_and_select">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization_mutisource.</span></span><span class="sig-name descname"><span class="pre">load_and_select</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization_mutisource.html#load_and_select"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization_mutisource.load_and_select" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization_mutisource.load_from_metadata">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization_mutisource.</span></span><span class="sig-name descname"><span class="pre">load_from_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str_keys_metadata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization_mutisource.html#load_from_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization_mutisource.load_from_metadata" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization_mutisource.plot_analysis">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization_mutisource.</span></span><span class="sig-name descname"><span class="pre">plot_analysis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storing_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storing_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensors_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization_mutisource.html#plot_analysis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization_mutisource.plot_analysis" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization_mutisource.plot_anom_mat">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization_mutisource.</span></span><span class="sig-name descname"><span class="pre">plot_anom_mat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storing_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storing_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensors_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">12)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization_mutisource.html#plot_anom_mat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization_mutisource.plot_anom_mat" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization_mutisource.plot_channel">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization_mutisource.</span></span><span class="sig-name descname"><span class="pre">plot_channel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storing_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storing_res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensors_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(20,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canal_nature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['Mean',</span> <span class="pre">'Std',</span> <span class="pre">'ExT']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization_mutisource.html#plot_channel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization_mutisource.plot_channel" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization_mutisource.plot_row_series">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization_mutisource.</span></span><span class="sig-name descname"><span class="pre">plot_row_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensors_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization_mutisource.html#plot_row_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization_mutisource.plot_row_series" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.visualization.visualization_mutisource.plot_row_series_statistics">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.visualization.visualization_mutisource.</span></span><span class="sig-name descname"><span class="pre">plot_row_series_statistics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">storing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sensors_mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_min</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_max</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">10)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_init</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/visualization/visualization_mutisource.html#plot_row_series_statistics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.visualization.visualization_mutisource.plot_row_series_statistics" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-uqmodels.visualization">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-uqmodels.visualization" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="uqmodels.preprocessing.html" class="btn btn-neutral float-left" title="uqmodels.preprocessing package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

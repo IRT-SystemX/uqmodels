@@ -1,0 +1,524 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Illustration on synthetic data of the impact of epistemic distinction for Anomaly considering uncertainty quantification. &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Illustration on synthetic data of the impact of epistemic distinction for Anomaly considering uncertainty quantification.</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/Score_anomaly_interpretation.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Illustration-on-synthetic-data-of-the-impact-of-epistemic-distinction-for-Anomaly-considering-uncertainty-quantification.">
+<h1>Illustration on synthetic data of the impact of epistemic distinction for Anomaly considering uncertainty quantification.<a class="headerlink" href="#Illustration-on-synthetic-data-of-the-impact-of-epistemic-distinction-for-Anomaly-considering-uncertainty-quantification." title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
+%autoreload 2
+
+import numpy as np
+import pandas as pd
+import pickle
+import math
+import os
+import warnings
+import scipy
+import matplotlib.pyplot as plt
+warnings.filterwarnings(&quot;ignore&quot;)
+
+from IPython.display import display, HTML
+display(HTML(&quot;&lt;style&gt;.container { width:95% !important; }&lt;/style&gt;&quot;))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<style>.container { width:95% !important; }</style></div>
+</div>
+</section>
+<section id="Generation-of-synthetic-data-with-global-&amp;-local-anomaly-and-OOD-behaviour">
+<h1>Generation of synthetic data with global &amp; local anomaly and OOD behaviour<a class="headerlink" href="#Generation-of-synthetic-data-with-global-&-local-anomaly-and-OOD-behaviour" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.utils import cut, base_cos_freq
+%matplotlib inline
+# Generation of synthetic data
+
+X = []
+y_mean = []
+std =[]
+X_noise = []
+Y_noise = []
+state = []
+
+rng = np.random.RandomState(109)
+rng = np.random.RandomState(42)
+
+def attack_mean(y,loc,dim=[0],f=1):
+    y = np.copy(y)
+    len_ = len(loc)
+    for d in dim:
+        for t in np.arange(len_):
+            y[loc[t],d] += f*np.sqrt(min(t,len_-t)/len_)
+    return(y)
+
+def attack_var(y,loc,dim=[0],f=1):
+    y = np.copy(y)
+    len_ = len(loc)
+    ext_min = scipy.stats.norm.ppf(0.15, 0, f*0.2)
+    ext_max = scipy.stats.norm.ppf(0.85, 0, f*0.2)
+    for d in dim:
+        y[loc,d]+= np.maximum(np.minimum(rng.normal(0, f*0.2,len_),ext_max),ext_min)
+    return(y)
+
+def attack_spike(y,loc,dim=[0],f=1):
+    y = np.copy(y)
+    len_ = len(loc)
+    idx = loc[int(len_/2)]
+    for d in dim:
+        y[idx,d]+= f
+    return(y)
+
+from uqmodels.visualization.visualization import provide_cmap
+def plot_anom_matrice(
+    score,
+    f_obs=None,
+    true_label=None,
+    data=None,
+    x=None,
+    vmin=-3,
+    vmax=3,
+    cmap=None,
+    list_anom_ind=None,
+    figsize=(15, 6),
+    grid_spec=None,
+    x_date=False,
+    show_plot=True,
+    setup=None):
+    &quot;&quot;&quot;Plot score_anomalie matrice and true label if there is.
+    Args:
+        score (_type_): Anomaly score matrice or list of Anomaly matrix
+        f_obs (_type_, optional): mask_focus
+        true_label (_type_, optional): True label or None
+        vmin (int, optional): _description_. Defaults to -3.
+        vmax (int, optional): _description_. Defaults to 3.
+        cmap (_type_, optional): _description_. Defaults to None.
+        figsize (tuple, optional): _description_. Defaults to (15, 6).
+    &quot;&quot;&quot;
+    len_score = len(score)
+    dim_score = score.shape[1]
+
+
+    n_fig=1
+    sharey=True
+
+    fig, ax = plt.subplots(
+        n_fig,
+        1,
+        sharex=True,
+        sharey=sharey,
+        gridspec_kw={&quot;height_ratios&quot;: grid_spec},
+        figsize=figsize,
+    )
+
+    if n_fig == 1:
+        ax.set_title(&quot;score&quot;)
+
+        ax.imshow(
+            score[f_obs].T,
+            cmap=provide_cmap(&quot;bluetored&quot;),
+            vmin=vmin,
+            vmax=vmax,
+            aspect=&quot;auto&quot;,
+            extent=None,
+            interpolation=&quot;None&quot;,
+        )
+        ax.set_yticklabels([&#39;0&#39;,&#39;Mean_1&#39;,&#39;Var_1&#39;,&#39;Extremum_1&#39;,&#39;Mean_2&#39;,&#39;Var_2&#39;,&#39;Extremum_2&#39;,&#39;0&#39;],fontsize=18)
+        ax.set_xticklabels([&#39;9000&#39;,&#39;9200&#39;,&#39;9400&#39;,&#39;9600&#39;,&#39;9800&#39;])
+
+        if(setup) is not None:
+            (n_chan,n_sensor)=setup
+
+            for i in range(n_chan* n_sensor):
+                ax.hlines(i-0.5, 0, len(f_obs), color=&quot;grey&quot;, lw=0.5)
+
+            for i in range(n_sensor):
+                ax.hlines(i * n_chan-0.5, 0, len(f_obs), color=&quot;black&quot;, lw=1)
+    ax.set_xlim(0,900)
+    fig.tight_layout()
+    if show_plot:
+        plt.show()
+
+freq = 100
+N = 10000
+n_mod = 1
+
+X = np.arange(0, freq,freq/N)
+r1 = -0.31
+r2 = 5.1
+r3 = 1.3
+r4 = 0.4
+y_mean = np.cos(X*math.pi+r1) + np.cos(r2*X* math.pi)
+Z_mean = np.power(np.sin(X* math.pi+r3),3) + np.cos(r4*X* math.pi)
+Y_noise = cut(rng.normal(0,1.5,N),0.25,0.75) * (0.02+np.abs(y_mean)/5)
+Z_noise = cut(rng.normal(0,1.2,N),0.25,0.75) * (0.02+np.abs(1-Z_mean)/5)
+
+std = np.abs(y_mean)
+state = np.zeros(len(X))
+
+y = cut(y_mean+Y_noise,0.01,0.99)
+Z = cut(Z_mean + Z_noise,0.01,0.99)
+
+y = y.reshape(-1,1)
+Z = Z.reshape(-1,1)
+
+old_y = np.copy(y.reshape(-1,1))
+old_Z = np.copy(Z.reshape(-1,1))
+
+# Attack 1 locate on mean 1 et var 2
+y = attack_mean(y,np.arange(9100,9120),f=-1.1)
+Z = attack_var(Z,np.arange(9100,9120),f=2)
+
+# Attack 1 locate on mean 1 et var 2
+y = attack_spike(y,np.arange(9501,9502),f=1.55)
+
+# Attack 4 locate on spike on Z
+y = attack_var(y,np.arange(9750,9770),f=2.5)
+Z = attack_spike(Z,np.arange(9770,9771),f=-0.6)
+
+Datasets=[] # X,y,ctx,train,name
+feature = X[:,None]
+from sklearn.preprocessing import StandardScaler
+from uqmodels.preprocessing.preprocessing import rolling_statistics
+
+# irrealistic case :Measure on feature on un-disturbed data
+mean_var_120 = rolling_statistics(pd.DataFrame(np.roll(old_y,60)),60,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values
+
+# irrealistic Measure on feature on un-disturbed data
+Z_mean_var_120 = rolling_statistics(pd.DataFrame(np.roll(old_Z,60)),60,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values
+
+
+# Statistics on real disturbed observation
+mean_var_10 = rolling_statistics(pd.DataFrame(np.roll(y,0)),10,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values[:,:1]
+var_and_ext = rolling_statistics(pd.DataFrame(np.roll(y,0)),30,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values[:,1:]
+
+# Statistics on real disturbed observation
+Z_mean_var_10 = rolling_statistics(pd.DataFrame(np.roll(Z,0)),10,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values[:,:1]
+Z_var_and_ext = rolling_statistics(pd.DataFrame(np.roll(Z,0)),30,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values[:,1:]
+
+# Statistics on real un-disturbed observation : to visualisation purpose
+old_mean_var_10 = rolling_statistics(pd.DataFrame(np.roll(old_y,0)),10,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values[:,:1]
+old_var_and_ext = rolling_statistics(pd.DataFrame(np.roll(old_y,0)),30,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values[:,1:]
+
+# Statistics on real un-disturbed observation : to visualisation purpose
+old_Z_mean_var_10 = rolling_statistics(pd.DataFrame(np.roll(old_Z,0)),10,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values[:,:1]
+old_Z_var_and_ext = rolling_statistics(pd.DataFrame(np.roll(old_Z,0)),30,1,[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;],[&#39;mean&#39;,&#39;std&#39;,&#39;extremum&#39;]).replace(np.nan,0).values[:,1:]
+
+
+# Contains contextual information (related to frequencies structring phenomenom + past window statistic)
+features = np.concatenate([base_cos_freq(X,[0.5,2,0.5*r2,2*r2]),
+                           base_cos_freq(X,[0.5,2,0.5*r4,2*r4])],axis=1)
+
+y_no_obs = np.concatenate([y,Z],axis=1)
+
+
+y = np.concatenate([mean_var_10,var_and_ext,Z_mean_var_10,Z_var_and_ext],axis=1)
+y_old = np.concatenate([old_mean_var_10,old_var_and_ext,old_Z_mean_var_10,old_Z_var_and_ext],axis=1)
+
+features = StandardScaler().fit_transform(features)
+Datasets.append([features,y,state,np.arange(10000)&lt;7000,&#39;Unnoised ML-task&#39;])
+
+X,y,ctx,train,name = Datasets[0]
+
+test = np.invert(train)
+
+f_obs = (np.arange(len(y))&gt;9000) &amp; (np.arange(len(y))&lt;9900)
+plt.figure(figsize=(16,5))
+plt.subplot(2,1,1)
+plt.title(&#39;Variable 1&#39;)
+plt.scatter(np.arange(len(X))[f_obs],y_no_obs[f_obs,0],s=2,marker=&quot;x&quot;,label=&#39;observed data&#39;)
+mask_anom_1 = (np.arange(len(y))&gt;9100) &amp; (np.arange(len(y))&lt;9120)
+plt.scatter(np.arange(len(X))[mask_anom_1&amp;f_obs],y_no_obs[mask_anom_1&amp;f_obs,0],color=&#39;orange&#39;,marker=&#39;X&#39;,label=&#39;Mean anomaly&#39;)
+
+mask_anom_1 = (np.arange(len(y))&gt;9500) &amp; (np.arange(len(y))&lt;9502)
+plt.scatter(np.arange(len(X))[mask_anom_1&amp;f_obs],y_no_obs[mask_anom_1&amp;f_obs,0],color=&#39;red&#39;,marker=&#39;X&#39;,label=&#39;Spike&#39;)
+
+mask_anom_1 = (np.arange(len(y))&gt;9750) &amp; (np.arange(len(y))&lt;9775)
+plt.scatter(np.arange(len(X))[mask_anom_1&amp;f_obs],y_no_obs[mask_anom_1&amp;f_obs,0],color=&#39;purple&#39;,marker=&#39;X&#39;,label=&#39;Var anomaly&#39;)
+plt.xlim(9000,9900)
+plt.subplot(2,1,2)
+plt.title(&#39;Variable 2&#39;)
+plt.scatter(np.arange(len(X))[f_obs],y_no_obs[f_obs,1],s=2,marker=&quot;x&quot;,label=&#39;observed data&#39;)
+mask_anom_1 = (np.arange(len(y))&gt;9100) &amp; (np.arange(len(y))&lt;9110)
+plt.scatter(np.arange(len(X))[mask_anom_1&amp;f_obs],y_no_obs[mask_anom_1&amp;f_obs,1],color=&#39;purple&#39;,marker=&#39;X&#39;,label=&#39;Var anomaly&#39;)
+mask_anom_1 = (np.arange(len(y))&gt;9769) &amp; (np.arange(len(y))&lt;9771)
+plt.scatter(np.arange(len(X))[mask_anom_1&amp;f_obs],y_no_obs[mask_anom_1&amp;f_obs,1],color=&#39;red&#39;,marker=&#39;X&#39;,label=&#39;Spike&#39;)
+plt.scatter(x=[],y=[],color=&#39;orange&#39;,marker=&#39;X&#39;,label=&#39;Mean anomaly&#39;)
+plt.xlim(9000,9900)
+plt.legend(frameon=True, ncol=6, fontsize=14, bbox_to_anchor=(0.5, 0, 0.38, -0.2))
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(16,6))
+for i in range(6):
+    plt.subplot(6,1,i+1)
+    plt.plot(y[f_obs,i],color=&#39;black&#39;,label=&#39;Observation without anomaly&#39;)
+    plt.plot(y_old[f_obs,i],color=&#39;green&#39;,label=&#39;Observation with anomaly&#39;)
+    plt.fill_between(x=np.arange(f_obs.sum()),y1=y[f_obs,i],y2=y_old[f_obs,i],color=&#39;red&#39;,alpha=0.5,label=&#39;impact of anomaly&#39;)
+    plt.xlim(0,900)
+    plt.xticks([])
+plt.legend(frameon=True, ncol=6, fontsize=14, bbox_to_anchor=(0.5, 0, 0.38, -0.2))
+plt.tight_layout()
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Score_anomaly_interpretation_3_0.png" src="../_images/examples_Score_anomaly_interpretation_3_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Score_anomaly_interpretation_3_1.png" src="../_images/examples_Score_anomaly_interpretation_3_1.png" />
+</div>
+</div>
+</section>
+<section id="Anomaly-detection-from-UQModels-Random-forest-with-uncertainty-quantification-using-residu-based-anomaly-scores">
+<h1>Anomaly detection from UQModels Random forest with uncertainty quantification using residu based anomaly scores<a class="headerlink" href="#Anomaly-detection-from-UQModels-Random-forest-with-uncertainty-quantification-using-residu-based-anomaly-scores" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Train and inference of and UQModels based on a Random forest regressor UQ-estimators
+
+
+from uqmodels.modelization.ML_estimator.random_forest_UQ import RF_UQEstimator,get_params_dict
+from uqmodels.custom_UQModel import UQModel_KPI,UQProc
+# We can also create a more complexe UQmodel that hanUQKPI_ProcessorPI_Processor to build at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
+
+# Specification of the UQestimator &amp; Instanciation in a UQmodels wrapper that include post-processing
+RF_UQ_paramaters = get_params_dict(var_min=0.000001,type_UQ=&#39;var_A&amp;E&#39;,rescale=True,
+                                   ccp_alpha=1e-06, max_depth=18, max_features=0.8,
+                                   max_samples=0.8, min_impurity_decrease=0.00001,
+                                   min_samples_leaf=8,min_samples_split=8, n_estimators=150,random_state=0)
+
+RF_UQModel = UQModel_KPI(RF_UQEstimator,
+                         RF_UQ_paramaters,
+                         name=&#39;UQModels&#39;,
+                         reduc_filter_KPI = None,
+                         reduc_filter_pred= None,
+                         anom_with_born=True,
+                         cache_manager=None)
+
+RF_UQModel.list_predict_KPI_processors[2].KPI_parameters = {&#39;list_percent&#39;:[0.9, 0.95, 0.99, 0.995, 0.9995, 1]}
+
+
+RF_UQModel.list_score_KPI_processors[1].KPI_parameters = {&#39;beta&#39;: 0.0001,&#39;type_norm&#39;:&#39;quantiles_local&#39;,&#39;with_born&#39;: True,&#39;d&#39;:2,&#39;min_cut&#39;:0.05,&#39;max_cut&#39;:0.95,
+                                                          &#39;reduc_filter&#39;: None,&#39;q_var&#39;:2,&#39;q_var_e&#39;:2,&#39;k_var_e&#39;:2,&#39;q_Eratio&#39;:3,&#39;filt&#39;:[0.05,0.10,0.12,0.34,0.12,0.10,0.05]}
+
+RF_UQModel.list_score_KPI_processors.append(UQProc.Anomscore_processor(KPI_parameters= {&#39;beta&#39;: 0.0001,&#39;type_norm&#39;:&#39;quantiles_local&#39;,&#39;with_born&#39;: False,&#39;d&#39;:2,&#39;min_cut&#39;:0.05,&#39;max_cut&#39;:0.95,
+                                                                                        &quot;fusion&quot;:True,&quot;beta_global&quot;:0.0001,&quot;type_fusion&quot;:&quot;agg_sum&quot;,
+                                                                                        &#39;reduc_filter&#39;: None,&#39;q_var&#39;:2,&#39;q_var_e&#39;:2,&#39;k_var_e&#39;:2,&#39;q_Eratio&#39;:3,&#39;filt&#39;:[0.05,0.10,0.12,0.34,0.12,0.10,0.05]}))
+
+
+RF_UQModel.fit(X[train],y[train])
+pred,((_,UQ),PIs,Elvl) = RF_UQModel.predict(X,y)
+(pred,UQ),(KPI_anom,born_model),PIs,Escore,score_fusion = RF_UQModel.score(X,y)
+
+from uqmodels.evaluation.metrics import Generic_metric, rmse, UQ_average_coverage, UQ_sharpness, UQ_Gaussian_NLL, UQ_dEI, UQ_absolute_residu_score
+from uqmodels.evaluation.evaluation import evaluate
+
+if(True):
+    list_metrics=[Generic_metric(rmse,&#39;Root mean square&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;),
+                  Generic_metric(UQ_average_coverage,&#39;Root mean square&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;)]
+    output = pred,UQ
+    metrics_val = evaluate(y,output,list_metrics,list_sets=[train,test],verbose=True)
+
+%matplotlib notebook
+%matplotlib inline
+import matplotlib.pyplot as plt
+import uqmodels.visualization.visualization as visu
+
+
+list_alpha = RF_UQModel.list_predict_KPI_processors[1].KPI_parameters[&#39;list_alpha&#39;]
+print(&#39;target&#39;, list_alpha, &#39;empirique&#39;, [(pi&gt;y).mean() for pi in PIs])
+list_percent =RF_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+print(&#39;target elvl&#39;,list_percent,&#39;empirique Elvl&#39;,[np.quantile(Elvl,q) for q in list_percent])
+
+f_obs = np.arange(len(y))[9000:9900]
+visu.uncertainty_plot(y,output,context=None,size=(18,12),f_obs=f_obs,name=&#39;Pred with UQmeasure&#39;,mode_res=False,dim=np.arange(y.shape[1]),confidence_lvl=Elvl,type_UQ=&#39;var_A&amp;E&#39;,list_percent=list_percent,born=born_model)
+plot_anom_matrice(score=KPI_anom,true_label=None,f_obs=f_obs,figsize=(18,4),vmin=-3,vmax=3,setup=(3,2))
+plot_anom_matrice(score=score_fusion,true_label=None,f_obs=f_obs,figsize=(18,4),vmin=-10,vmax=10,setup=(1,1))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Root mean square [array([0.09430756, 0.03809759, 0.09895293, 0.06592479, 0.02082075,
+       0.05012237]), array([0.11340056, 0.04960447, 0.12806282, 0.0776516 , 0.02962544,
+       0.084533  ])]
+Root mean square [array([1.        , 0.99985714, 0.99957143, 1.        , 0.99971429,
+       0.99857143]), array([0.99933333, 0.982     , 0.96366667, 0.99333333, 0.93833333,
+       0.955     ])]
+target [0.025, 0.16, 0.84, 0.975] empirique [0.0037833333333333334, 0.05188333333333333, 0.9483, 0.9945166666666667]
+target elvl [0.9, 0.95, 0.99, 0.995, 0.9995, 1] empirique Elvl [0.0, 1.0, 2.0, 3.0, 5.0, 5.0]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Score_anomaly_interpretation_5_1.png" src="../_images/examples_Score_anomaly_interpretation_5_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Score_anomaly_interpretation_5_2.png" src="../_images/examples_Score_anomaly_interpretation_5_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Score_anomaly_interpretation_5_3.png" src="../_images/examples_Score_anomaly_interpretation_5_3.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plot_anom_matrice(score=KPI_anom,true_label=None,f_obs=f_obs,figsize=(18,4),vmin=-3,vmax=3,setup=(3,2))
+plot_anom_matrice(score=score_fusion,true_label=None,f_obs=f_obs,figsize=(18,1),vmin=-10,vmax=10,setup=(1,1))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Score_anomaly_interpretation_6_0.png" src="../_images/examples_Score_anomaly_interpretation_6_0.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Score_anomaly_interpretation_6_1.png" src="../_images/examples_Score_anomaly_interpretation_6_1.png" />
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

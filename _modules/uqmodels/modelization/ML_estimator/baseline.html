@@ -1,0 +1,626 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.modelization.ML_estimator.baseline &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.modelization.ML_estimator.baseline</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.modelization.ML_estimator.baseline</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Implementation of usual prediction wrappers.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">GradientBoostingRegressor</span><span class="p">,</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.gaussian_process</span><span class="w"> </span><span class="kn">import</span> <span class="n">GaussianProcessRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.gaussian_process.kernels</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">RBF</span><span class="p">,</span>
+    <span class="n">ConstantKernel</span><span class="p">,</span>
+    <span class="n">ExpSineSquared</span><span class="p">,</span>
+    <span class="n">RationalQuadratic</span><span class="p">,</span>
+    <span class="n">WhiteKernel</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.UQEstimator</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MeanVarUQEstimator</span><span class="p">,</span>
+    <span class="n">QuantileUQEstimator</span><span class="p">,</span>
+    <span class="n">get_UQEstimator_parameters</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span>
+
+<span class="n">Array</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Array&quot;</span><span class="p">)</span>
+<span class="n">UQmeasure</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;UQmeasure&quot;</span><span class="p">)</span>
+<span class="n">List_Estimators</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;List_Estimators&quot;</span><span class="p">)</span>
+<span class="n">Estimator</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Estimator&quot;</span><span class="p">)</span>
+<span class="n">Kernel</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Kernel&quot;</span><span class="p">)</span>
+<span class="n">Dict_params</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Dict_params&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="GBRQ_UQEstimator">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GBRQ_UQEstimator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GBRQ_UQEstimator</span><span class="p">(</span><span class="n">QuantileUQEstimator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Uncertainty quantification approch based on Quantile Gradient Boosting :</span>
+<span class="sd">    Instatiation OF QuantileUQEstimators using GBRQ scikilearn models.</span>
+
+<span class="sd">    Attributes/properties:</span>
+<span class="sd">        name (str): Name of the UQ method for future reference.</span>
+<span class="sd">        type_UQ (str): Method family among the main categories of UQUQEstimators.</span>
+<span class="sd">        list_estimators (Estimator): List of quantile estimator.</span>
+<span class="sd">        list_alpha : list of alpha confidence level for each quantile estimators.</span>
+<span class="sd">        pretuned (bool): Whether to disable parameter model tuning.</span>
+
+<span class="sd">    Mean Methods:</span>
+<span class="sd">        fit: Fit the list of quantile estimators.</span>
+<span class="sd">        predict:(pred,UQ) Predict for each quantile estimators</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">list_estimators</span><span class="p">:</span> <span class="n">List_Estimators</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">list_alpha</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">],</span>
+        <span class="n">type_UQ</span><span class="o">=</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;GBRQ_UQEstimator&quot;</span><span class="p">,</span>
+        <span class="n">pretuned</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise all attributes of the UQEstimatorGBRQ class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            list_estimator: List of provided quatile estimators by default use GradientBoostingRegressor</span>
+<span class="sd">                as default estimator.</span>
+<span class="sd">            estimator_qmid: Medium quantile estimator, corresponding to</span>
+<span class="sd">            the UQEstimator making the forecast. If None, use a</span>
+<span class="sd">            GradientBoostingRegressor as default estimator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">list_estimators</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">list_estimators</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_alpha</span><span class="p">):</span>
+                <span class="n">list_estimators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">GradientBoostingRegressor</span><span class="p">(</span>
+                        <span class="n">random_state</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="n">i</span><span class="p">),</span>
+                        <span class="n">loss</span><span class="o">=</span><span class="s2">&quot;quantile&quot;</span><span class="p">,</span>
+                        <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">list_estimators</span><span class="p">,</span>
+            <span class="n">list_alpha</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pretunned</span> <span class="o">=</span> <span class="n">pretuned</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">type_transform</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">mode_UQ</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span>
+            <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">type_transform</span><span class="o">=</span><span class="n">type_transform</span><span class="p">,</span>
+            <span class="n">mode_UQ</span><span class="o">=</span><span class="n">mode_UQ</span><span class="p">,</span>
+            <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GBRQ_UQEstimator.fit">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GBRQ_UQEstimator.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit GBRQ_UQEstimator list using QuantileUQEstimator fit methods.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            X: Features</span>
+<span class="sd">            y: Target values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GBRQ_UQEstimator.predict">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GBRQ_UQEstimator.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform the quantile estimation using QuantileUQEstimator predict methods.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X: Features</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            pred: Median prediction or None if Median quantile estimators is not in list_estimators</span>
+<span class="sd">            UQ  : List of quantiles estimatiors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tuning</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">n_esti</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Dict_params</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform a random search tuning using a parameter grid with QuantileUQEstimator _tuning methode&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pretunned</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_tuning</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_esti</span><span class="p">,</span> <span class="n">folds</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="GPR_UQEstimator">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GPR_UQEstimator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GPR_UQEstimator</span><span class="p">(</span><span class="n">MeanVarUQEstimator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Uncertainty quantification approch based on Gaussian Process Regressor.</span>
+<span class="sd">    Instatiation OF MeanVarUQEstimator using GP scikilearn model.</span>
+<span class="sd">    Warning GP has UQ limitation : see  &quot;The pitfalls of using Gaussian Process Regression for normative modeling&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Gaussian_Process_UQ&quot;</span><span class="p">,</span>
+        <span class="n">kernel</span><span class="p">:</span> <span class="n">Kernel</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">gp_alpha</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.000001</span><span class="p">,</span>
+        <span class="n">drop_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">rescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gp_alpha</span> <span class="o">=</span> <span class="n">gp_alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="n">kernel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop_ratio</span> <span class="o">=</span> <span class="n">drop_ratio</span>
+
+        <span class="k">if</span> <span class="n">kernel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">ConstantKernel</span><span class="p">()</span> <span class="o">*</span> <span class="n">RationalQuadratic</span><span class="p">()</span>
+                <span class="o">+</span> <span class="n">RBF</span><span class="p">()</span> <span class="o">*</span> <span class="n">ExpSineSquared</span><span class="p">()</span>
+                <span class="o">+</span> <span class="n">RBF</span><span class="p">()</span> <span class="o">*</span> <span class="n">WhiteKernel</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">WhiteKernel</span><span class="p">(</span><span class="mf">0.001</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="n">GaussianProcessRegressor</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kernel</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">gp_alpha</span><span class="p">,</span>
+            <span class="n">n_restarts_optimizer</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">,</span>
+            <span class="n">estimator_var</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="s2">&quot;var&quot;</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">type_transform</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">mode_UQ</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span>
+            <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">type_transform</span><span class="o">=</span><span class="n">type_transform</span><span class="p">,</span>
+            <span class="n">mode_UQ</span><span class="o">=</span><span class="n">mode_UQ</span><span class="p">,</span>
+            <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GPR_UQEstimator.fit">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GPR_UQEstimator.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit procedure of Gaussian process</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X: Training vectors.</span>
+<span class="sd">            y: Target values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;fit_transform&quot;</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span>
+
+        <span class="c1"># GP model make native variance estimation</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_ratio</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop_ratio</span>
+            <span class="n">X_mask</span><span class="p">,</span> <span class="n">y_mask</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_mask</span><span class="p">,</span> <span class="n">y_mask</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GPR_UQEstimator.predict">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GPR_UQEstimator.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform the prediction task of the forecasting and</span>
+<span class="sd">        uncertainty models on X.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X: Samples on which to perform the prediction.</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            A tuple containing the forecast, the predicted lower and</span>
+<span class="sd">                upper quantiles and var.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="n">skip_format</span><span class="p">)</span>
+
+        <span class="n">pred</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">return_std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">std</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tuning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform random search tuning using a given grid parameter&quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No tunning procedure&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="REGML_UQEstimator">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">REGML_UQEstimator</span><span class="p">(</span><span class="n">MeanVarUQEstimator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Uncertainty quantification approch based on ML regression of bias and variance</span>
+<span class="sd">    Instanciation of specific Pred-Biais-Var Regression scheme for uncertainty quantification</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">estimator_var</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">pretuned</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;var&quot;</span><span class="p">,</span>
+        <span class="n">use_biais</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;REGML_UQEstimator&quot;</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.000001</span><span class="p">,</span>
+        <span class="n">rescale</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">estimator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">estimator</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">estimator_var</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">estimator_var</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">type_UQ</span>
+        <span class="n">type_UQ</span> <span class="o">=</span> <span class="n">type_UQ</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">,</span>
+            <span class="n">estimator_var</span><span class="o">=</span><span class="n">estimator_var</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pretuned</span> <span class="o">=</span> <span class="n">pretuned</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_biais</span> <span class="o">=</span> <span class="n">use_biais</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_biais</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator_bias</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">std_norm</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_var&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var</span> <span class="o">=</span> <span class="n">estimator_var</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;2var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_2var&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_bot</span> <span class="o">=</span> <span class="n">estimator_var</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_top</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">estimator_var</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span>
+            <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">type_transform</span><span class="o">=</span><span class="n">type_transform</span><span class="p">,</span>
+            <span class="n">mode_UQ</span><span class="o">=</span><span class="n">mode_UQ</span><span class="p">,</span>
+            <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+<div class="viewcode-block" id="REGML_UQEstimator.get_params">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator.get_params">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict_params</span><span class="p">:</span>
+        <span class="n">dict_params</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">dict_params</span></div>
+
+
+<div class="viewcode-block" id="REGML_UQEstimator.fit">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Train y_lowerh forecasting and UQ models on (X,Y).&quot;&quot;&quot;</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;fit_transform&quot;</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span>
+
+        <span class="c1"># Train forecaster models and compute residuals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">residual</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_biais</span><span class="p">:</span>
+            <span class="c1"># Train bias model and reduce bias to residuals</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator_bias</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">residual</span><span class="p">)</span>
+            <span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_bias</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">bias</span><span class="p">)</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="n">residual</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+            <span class="c1"># Normalisation for variance learning</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">std_norm</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Normalisation for variance learning</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">std_norm</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="c1"># Train variance estimator of residuals</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_var&quot;</span><span class="p">]:</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">residual</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_norm</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">residual</span><span class="p">)</span>
+
+        <span class="c1"># Train variance estimators of positive and negative residuals.</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;2var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_2var&quot;</span><span class="p">]:</span>
+            <span class="n">mask_res_bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">((</span><span class="n">residual</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">mask_res_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">((</span><span class="n">residual</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask_res_bot</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">residual</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_norm</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_bot</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">mask_res_bot</span><span class="p">],</span> <span class="n">residual</span><span class="p">[</span><span class="n">mask_res_bot</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_top</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">mask_res_top</span><span class="p">],</span> <span class="n">residual</span><span class="p">[</span><span class="n">mask_res_top</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">residual</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_norm</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_bot</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">residual</span> <span class="o">*</span> <span class="n">mask_res_bot</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_top</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">residual</span> <span class="o">*</span> <span class="n">mask_res_top</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;type_UQ&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">,</span> <span class="s2">&quot;not covered&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="REGML_UQEstimator.predict">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform the prediction task of the forecasting and UQ models</span>
+<span class="sd">        on features (X).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X: Samples on which to perform the prediction.</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            pred, UQ : Prediction and UQmeasure</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span>
+
+        <span class="c1"># predict Forecast and bias</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_biais</span><span class="p">:</span>
+            <span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_bias</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">bias</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Predict std of residuals</span>
+        <span class="n">var_min</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_min</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_var&quot;</span><span class="p">]:</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">var</span><span class="p">[</span><span class="n">var</span> <span class="o">&lt;</span> <span class="n">var_min</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_min</span>
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_norm</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Predict std of positive and negative residuals</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;2var&quot;</span><span class="p">,</span> <span class="s2">&quot;res_2var&quot;</span><span class="p">]:</span>
+            <span class="n">var_bot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_bot</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">var_bot</span><span class="p">[</span><span class="n">var_bot</span> <span class="o">&lt;</span> <span class="n">var_min</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_min</span>
+            <span class="n">var_bot</span> <span class="o">=</span> <span class="n">var_bot</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_norm</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+            <span class="n">var_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_top</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">var_top</span><span class="p">[</span><span class="n">var_top</span> <span class="o">&lt;</span> <span class="n">var_min</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_min</span>
+            <span class="n">var_top</span> <span class="o">=</span> <span class="n">var_top</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_norm</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">var_bot</span><span class="p">,</span> <span class="n">var_top</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">pred</span> <span class="o">+</span> <span class="n">bias</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tuning</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">n_esti</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Dict_params</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform random search tuning using a given grid parameter.&quot;&quot;&quot;</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="s2">&quot;neg_mean_squared_error&quot;</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;fit_transform&quot;</span><span class="p">)</span>
+
+        <span class="c1"># IF there is no parameter grid : skip tuning step.</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># IF forecast model is tunned, skip it&#39;s tuning step.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pretuned</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_tuning</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_esti</span><span class="p">,</span> <span class="n">folds</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">params</span>
+                <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+            <span class="c1"># Build residuals and tune bias model by random search on given greed parameters.</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+            <span class="n">residual</span> <span class="o">=</span> <span class="n">residual</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">residual</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_biais</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_bias</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_tuning</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">estimator_bias</span><span class="p">,</span>
+                    <span class="n">X</span><span class="p">,</span>
+                    <span class="n">residual</span><span class="p">,</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">n_esti</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="n">folds</span><span class="p">,</span>
+                    <span class="n">score</span><span class="p">,</span>
+                    <span class="n">params</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_bias</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">residual</span><span class="p">)</span>
+                <span class="n">bias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_bias</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+                <span class="c1"># Correct residuals and tune variance model by random search on given greed parameters.</span>
+                <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">bias</span><span class="p">)</span>
+                <span class="n">residual</span> <span class="o">=</span> <span class="n">residual</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;var&quot;</span><span class="p">:</span>
+                <span class="c1"># Gaussian hypothesis : 1 variance model.</span>
+                <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">residual</span> <span class="o">/</span> <span class="n">residual</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_tuning</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var</span><span class="p">,</span>
+                    <span class="n">X</span><span class="p">,</span>
+                    <span class="n">residual</span><span class="p">,</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">n_esti</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="n">folds</span><span class="p">,</span>
+                    <span class="n">score</span><span class="p">,</span>
+                    <span class="n">params</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">residual</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;2var&quot;</span><span class="p">:</span>
+                <span class="c1"># 2 Gaussian hypothesis :</span>
+                <span class="c1"># 2 variance models for positive (top) and negative (bot) residuals STD.</span>
+                <span class="n">flag_res_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">((</span><span class="n">residual</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">flag_res_bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">((</span><span class="n">residual</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">residual</span> <span class="o">/</span> <span class="n">residual</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_bot</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_tuning</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_bot</span><span class="p">,</span>
+                    <span class="n">X</span><span class="p">[</span><span class="n">flag_res_bot</span><span class="p">],</span>
+                    <span class="n">residual</span><span class="p">[</span><span class="n">flag_res_bot</span><span class="p">],</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">n_esti</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="n">folds</span><span class="p">,</span>
+                    <span class="n">score</span><span class="p">,</span>
+                    <span class="n">params</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_bot</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">flag_res_bot</span><span class="p">],</span> <span class="n">residual</span><span class="p">[</span><span class="n">flag_res_bot</span><span class="p">])</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_top</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_tuning</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_top</span><span class="p">,</span>
+                    <span class="n">X</span><span class="p">[</span><span class="n">flag_res_top</span><span class="p">],</span>
+                    <span class="n">residual</span><span class="p">[</span><span class="n">flag_res_top</span><span class="p">],</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="n">n_esti</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                    <span class="n">folds</span><span class="p">,</span>
+                    <span class="n">score</span><span class="p">,</span>
+                    <span class="n">params</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var_top</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">flag_res_top</span><span class="p">],</span> <span class="n">residual</span><span class="p">[</span><span class="n">flag_res_top</span><span class="p">])</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

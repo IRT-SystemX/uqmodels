@@ -1,0 +1,1100 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.postprocessing.anomaly_processing &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.postprocessing.anomaly_processing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.postprocessing.anomaly_processing</h1><div class="highlight"><pre>
+<span></span><span class="c1">####################################################################</span>
+<span class="c1"># Ensemble of processing aim to process UQmesures into Intermediate quantity or into Anom-KPI</span>
+
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.covariance</span><span class="w"> </span><span class="kn">import</span> <span class="n">EmpiricalCovariance</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.UQ_processing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">UQ_proc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_conv</span><span class="p">,</span> <span class="n">apply_middledim_reduction</span>
+
+
+<div class="viewcode-block" id="score_seuil">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.anomaly_processing.score_seuil">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">score_seuil</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">per_seuil</span><span class="o">=</span><span class="mf">0.995</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Thresholding of extrem values by percentile by dimension if local = True or globally else.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        s (_type_): _description_</span>
+<span class="sd">        per_seuil (float, optional): _description_. Defaults to 0.995.</span>
+<span class="sd">        local (bool, optional): _description_. Defaults to True.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">local</span><span class="p">:</span>
+        <span class="n">p_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">per_seuil</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">p_s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">per_seuil</span><span class="p">)</span>
+
+    <span class="c1"># Seuillage</span>
+
+    <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">p_s</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">s</span></div>
+
+
+
+<span class="c1"># Convolution of the signal &quot;s&quot; with a filter &quot;filt&quot;</span>
+
+
+<div class="viewcode-block" id="fit_calibrate">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.anomaly_processing.fit_calibrate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_calibrate</span><span class="p">(</span>
+    <span class="n">residuals</span><span class="p">,</span>
+    <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">beta</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">type_norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">empiric_rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that estimate calibrate parameters form residu link to some hypothesis</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        s (_type_): score</span>
+<span class="sd">        ctx_mask : mask for ctx calib</span>
+<span class="sd">        beta (_type_): Anomaly target ratio</span>
+<span class="sd">        type_norm (_type_, optional): assymption</span>
+<span class="sd">        empiric_rescale (bool, optional): _description_. Defaults to True.</span>
+<span class="sd">        deg (int, optional): _description_. Defaults to 1.</span>
+
+<span class="sd">    Type_norm :</span>
+<span class="sd">        &quot;Nsigma_local&quot; : Fexible anomalie thresold (N-sgima) by dimension | Hypothesis :</span>
+<span class="sd">            Anomaly distributed homegeneously by dimension.</span>
+<span class="sd">        &quot;Nsigma_global&quot; : Fexible anomalie thresold (N-sgima) global :  homogeneous anomaly distribution by dimension.</span>
+<span class="sd">        &quot;Chi2&quot;: Theorical Chi2 correction</span>
+<span class="sd">        &quot;quantiles_local&quot; : rigid anomalie thresold (quantiles) by dimension :</span>
+<span class="sd">            heterogeneos anomaly distrubtion by dimension.</span>
+<span class="sd">        &quot;quantiles_global&quot; : (Default) rigid anomalie thresold (quantiles) global :</span>
+<span class="sd">            homogeneous anomaly distribution by dimension.</span>
+<span class="sd">        &quot;None&quot; : No normalisation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        params : (list_norm_val : calibration coeficient for each ctx_values</span>
+<span class="sd">                   list_ctx_id : list of ctx_values)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ctx_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ctx_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">residuals</span><span class="p">))</span>
+    <span class="n">list_ctx_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ctx_mask</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;fit_calib Start&quot;</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">residuals</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+            <span class="p">(</span><span class="n">residuals</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+            <span class="s2">&quot;type_norm&quot;</span><span class="p">,</span>
+            <span class="n">type_norm</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">list_norm_val</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">v_ctx</span> <span class="ow">in</span> <span class="n">list_ctx_id</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">ctx_mask</span> <span class="o">==</span> <span class="n">v_ctx</span>
+        <span class="c1"># Fexible anomalie thresold (N-sgima) by dimension | Hypothesis : Anomaly</span>
+        <span class="c1"># distributed homegeneously by dimension.</span>
+        <span class="k">if</span> <span class="n">type_norm</span> <span class="o">==</span> <span class="s2">&quot;Nsigma_local&quot;</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">empiric_rescale</span><span class="p">:</span>
+                <span class="n">f_corr</span> <span class="o">=</span> <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Fexible anomalie thresold (N-sgima) global :  heterogenous anomaly distribution by dimension.</span>
+        <span class="k">elif</span> <span class="n">type_norm</span> <span class="o">==</span> <span class="s2">&quot;Nsigma_global&quot;</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">empiric_rescale</span><span class="p">:</span>
+                <span class="n">f_corr</span> <span class="o">=</span> <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Theorical Chi2 correction</span>
+        <span class="k">elif</span> <span class="n">type_norm</span> <span class="o">==</span> <span class="s2">&quot;Chi2&quot;</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">,</span> <span class="n">deg</span><span class="p">),</span> <span class="n">d</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="c1"># Chebyshev&#39;s inequality</span>
+        <span class="k">elif</span> <span class="n">type_norm</span> <span class="o">==</span> <span class="s2">&quot;chebyshev_local&quot;</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+
+        <span class="c1"># Chebyshev&#39;s inequality</span>
+        <span class="k">elif</span> <span class="n">type_norm</span> <span class="o">==</span> <span class="s2">&quot;chebyshev_global&quot;</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+
+        <span class="c1"># Cantelli&#39;s inequality</span>
+        <span class="k">elif</span> <span class="n">type_norm</span> <span class="o">==</span> <span class="s2">&quot;Cantelli_local&quot;</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">/</span> <span class="n">beta</span><span class="p">)</span>
+
+        <span class="c1"># Cantelli&#39;s  inequality</span>
+        <span class="k">elif</span> <span class="n">type_norm</span> <span class="o">==</span> <span class="s2">&quot;Cantelli_global&quot;</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span> <span class="o">/</span> <span class="n">beta</span><span class="p">)</span>
+
+        <span class="c1"># rigid anomalie thresold (quantiles) by dimension :  heterogeneos anomaly distrubtion by dimension.</span>
+        <span class="k">elif</span> <span class="n">type_norm</span> <span class="o">==</span> <span class="s2">&quot;quantiles_local&quot;</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]),</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">type_norm</span> <span class="o">==</span> <span class="s2">&quot;quantiles_global&quot;</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]),</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">f_corr</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">list_norm_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f_corr</span> <span class="o">*</span> <span class="n">threshold</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;debug fit_calibrate : Val_ctx&quot;</span><span class="p">,</span>
+                <span class="n">v_ctx</span><span class="p">,</span>
+                <span class="s2">&quot;target&quot;</span><span class="p">,</span>
+                <span class="n">beta</span><span class="p">,</span>
+                <span class="s2">&quot;v_mean&quot;</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mi">3</span><span class="p">),</span>
+                <span class="s2">&quot;emp&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="n">list_norm_val</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="n">list_norm_val</span><span class="p">,</span>
+                <span class="n">type_norm</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="n">params_</span> <span class="o">=</span> <span class="n">list_norm_val</span><span class="p">,</span> <span class="n">list_ctx_id</span>
+
+    <span class="k">return</span> <span class="n">params_</span></div>
+
+
+
+<div class="viewcode-block" id="compute_calibrate">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.anomaly_processing.compute_calibrate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_calibrate</span><span class="p">(</span>
+    <span class="n">residuals</span><span class="p">,</span>
+    <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">beta</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">type_norm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">empiric_rescale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">params_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;score&quot;</span><span class="p">,</span>
+    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function that apply calibration on residu based on some hypothesis</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        res (_type_): residu to calibrate</span>
+<span class="sd">        ctx_mask (None): mask for ctx calib</span>
+<span class="sd">        beta (_type_): Anomaly target ratio</span>
+<span class="sd">        type_norm (_type_, optional): assymption</span>
+<span class="sd">        empiric_rescale (bool, optional): _description_. Defaults to True.</span>
+<span class="sd">        deg (int, optional): Power to apply to the residu. Defaults to 1.</span>
+
+<span class="sd">    type_norm assymption :</span>
+<span class="sd">        &quot;Nsigma_local&quot; : Fexible anomalie thresold (N-sgima) by dimension | Hypothesis :</span>
+<span class="sd">            Anomaly distributed homegeneously by dimension.</span>
+<span class="sd">        &quot;Nsigma_global&quot; : Fexible anomalie thresold (N-sgima) global :  homogeneous anomaly distribution by dimension.</span>
+<span class="sd">        &quot;Chi2&quot;: Theorical Chi2 correction</span>
+<span class="sd">        &quot;quantiles_local&quot; : rigid anomalie thresold (quantiles) by dimension :</span>
+<span class="sd">            heterogeneos anomaly distrubtion by dimension.</span>
+<span class="sd">        &quot;quantiles_global&quot; : (Default) rigid anomalie thresold (quantiles) global :</span>
+<span class="sd">            homogeneous anomaly distribution by dimension.</span>
+<span class="sd">        &quot;None&quot; : No normalisation</span>
+
+
+<span class="sd">    Returns:</span>
+<span class="sd">         res : calibrated residu</span>
+<span class="sd">         params: Params provided or computed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ctx_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ctx_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">residuals</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">params_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params_</span> <span class="o">=</span> <span class="n">fit_calibrate</span><span class="p">(</span>
+            <span class="n">residuals</span><span class="p">,</span>
+            <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+            <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+            <span class="n">type_norm</span><span class="o">=</span><span class="n">type_norm</span><span class="p">,</span>
+            <span class="n">empiric_rescale</span><span class="o">=</span><span class="n">empiric_rescale</span><span class="p">,</span>
+            <span class="n">deg</span><span class="o">=</span><span class="n">deg</span><span class="p">,</span>
+            <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">list_norm_val</span><span class="p">,</span> <span class="n">list_ctx_id</span> <span class="o">=</span> <span class="n">params_</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;compute_calib Start&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="s2">&quot;type_norm&quot;</span><span class="p">,</span>
+                <span class="n">type_norm</span><span class="p">,</span>
+                <span class="s2">&quot;res_mean&quot;</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="n">list_norm_val</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">list_norm_val</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">ctx_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_ctx_id</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">ctx_mask</span> <span class="o">==</span> <span class="n">ctx_val</span>
+        <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">list_norm_val</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span>
+
+            <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">/</span> <span class="n">list_norm_val</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;born&quot;</span><span class="p">:</span>
+            <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">residuals</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">*</span> <span class="n">list_norm_val</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;score&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;compute_calib out&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="s2">&quot;type_norm&quot;</span><span class="p">,</span>
+                <span class="n">type_norm</span><span class="p">,</span>
+                <span class="s2">&quot;res_mean&quot;</span><span class="p">,</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">residuals</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">residuals</span><span class="p">,</span> <span class="n">params_</span></div>
+
+
+
+<div class="viewcode-block" id="fit_born_calibrated">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.anomaly_processing.fit_born_calibrated">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_born_calibrated</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">type_res</span><span class="o">=</span><span class="s2">&quot;res&quot;</span><span class="p">,</span>
+    <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">empiric_rescale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;!!!!Depreciated !!! Estimate calibration parameters in order to calibrate born from UQ measure, pred, observation and target</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (np.array or list): UQmeasure obtain from UQEstimator</span>
+<span class="sd">        type_UQ (_type_): Type UQ that the nature of UQmeasure</span>
+<span class="sd">        pred (np.array): prediction provide by a predictor or an UQEstimator</span>
+<span class="sd">        y (np.array): Targets/Observation</span>
+<span class="sd">        type_UQ_params : additional parameters link to type paradigm (ex : alpha for quantile)</span>
+<span class="sd">        beta: target miss-coverage of the borns</span>
+<span class="sd">        min_cut (_type_): Bottom extremun percentile.</span>
+<span class="sd">        max_cut (_type_): Bottom upper percentile.</span>
+<span class="sd">        q_var (_type_): Power coefficent</span>
+<span class="sd">        sigma_min (float, optional): Minimum values of UQ considered.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        params = (list_norm_val, : list of calibration term for each ctx_values,</span>
+<span class="sd">                list_ctx_id : list of ctx_values)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span>
+        <span class="n">residuals</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">pred</span>
+
+    <span class="k">if</span> <span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;w_res&quot;</span><span class="p">:</span>
+        <span class="n">residuals</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_residu</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;cqr&quot;</span><span class="p">:</span>
+        <span class="n">y_pred_lower</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_quantile</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="n">beta</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">y_pred_upper</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_quantile</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">residuals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">y_pred_lower</span> <span class="o">-</span> <span class="n">y</span><span class="p">,</span> <span class="n">y</span> <span class="o">-</span> <span class="n">y_pred_upper</span><span class="p">)</span> <span class="o">*</span> <span class="o">-</span><span class="p">(</span>
+            <span class="n">y_pred_lower</span> <span class="o">-</span> <span class="n">y</span>
+        <span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y_pred_upper</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;no_calib&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">([</span><span class="mi">1</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;type_res&quot;</span> <span class="o">+</span> <span class="n">type_res</span> <span class="o">+</span> <span class="s2">&quot; not covered&quot;</span><span class="p">)</span>
+
+    <span class="n">list_norm_val</span><span class="p">,</span> <span class="n">list_ctx_id</span> <span class="o">=</span> <span class="n">fit_calibrate</span><span class="p">(</span>
+        <span class="n">residuals</span><span class="p">,</span>
+        <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+        <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+        <span class="n">type_norm</span><span class="o">=</span><span class="s2">&quot;quantiles_local&quot;</span><span class="p">,</span>
+        <span class="n">empiric_rescale</span><span class="o">=</span><span class="n">empiric_rescale</span><span class="p">,</span>
+        <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># To do asymetrical : calibration distinct for negative and positive residuals</span>
+    <span class="c1"># Add symetric or asymetric parameters mode</span>
+    <span class="c1"># -&gt; to implement in calibrate_residuals</span>
+    <span class="c1"># list_norm_val_neg&amp;pos, list_ctx_id = calibrate_residuals(residuals,</span>
+    <span class="c1"># ctx_mask=None, alpha=alpha, type_norm=&quot;quantiles_local&quot;,</span>
+    <span class="c1"># empiric_rescale=True, deg=1)</span>
+    <span class="n">params_</span> <span class="o">=</span> <span class="p">(</span><span class="n">list_norm_val</span><span class="p">,</span> <span class="n">list_ctx_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">params_</span></div>
+
+
+
+<div class="viewcode-block" id="compute_born_calibrated">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.anomaly_processing.compute_born_calibrated">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_born_calibrated</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">beta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">type_res</span><span class="o">=</span><span class="s2">&quot;res&quot;</span><span class="p">,</span>
+    <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">params_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;!!!!Depreciated !!! Compute_UQ_calibration from UQ measure, pred, observation and target</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (np.array or list): UQmeasure obtain from UQEstimator</span>
+<span class="sd">        type_UQ (str): Type UQ that the nature of UQmeasure</span>
+<span class="sd">        pred (np.array): prediction provide by a predictor or an UQEstimator</span>
+<span class="sd">        y (np.array): Targets/Observation</span>
+<span class="sd">        type_UQ_params (_type_, optional): additional parameters link to type paradigm (ex : alpha for quantile)</span>
+<span class="sd">        beta (float, optional): target miss-coverage of the borns</span>
+<span class="sd">        type_res :</span>
+<span class="sd">            &quot;no_calib : No calibration</span>
+<span class="sd">            &quot;res&quot; : Calibration based on mean residuals</span>
+<span class="sd">            &quot;w_res&quot; : Calibration based on weigthed mean residuals</span>
+<span class="sd">            &quot;cqr&quot; : Calibration based on quantile residuals</span>
+<span class="sd">        ctx_mask (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        params (_type_, optional): _description_. Defaults to None.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: _description_</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">         (y_pred_lower, y_pred_upper), params : (upper &amp; lower calibrated bound) &amp; compute params</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">ctx_mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ctx_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">params_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params_</span> <span class="o">=</span> <span class="n">fit_born_calibrated</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+            <span class="n">type_res</span><span class="o">=</span><span class="n">type_res</span><span class="p">,</span>
+            <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">list_norm_val</span><span class="p">,</span> <span class="n">list_ctx_id</span> <span class="o">=</span> <span class="n">params_</span>
+
+    <span class="k">if</span> <span class="n">type_res</span> <span class="o">==</span> <span class="s2">&quot;res&quot;</span><span class="p">:</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">type_UQ</span> <span class="o">=</span> <span class="s2">&quot;var&quot;</span>
+
+    <span class="n">y_pred_lower</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_quantile</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">pred</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">beta</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">y_pred_upper</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_quantile</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">pred</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">ctx_val</span> <span class="ow">in</span> <span class="n">list_ctx_id</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">ctx_mask</span> <span class="o">==</span> <span class="n">ctx_val</span>
+        <span class="k">if</span> <span class="n">type_res</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;res&quot;</span><span class="p">,</span> <span class="s2">&quot;w_res&quot;</span><span class="p">,</span> <span class="s2">&quot;no_calib&quot;</span><span class="p">]:</span>
+            <span class="n">y_pred_lower</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">y_pred_lower</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="n">pred</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span> <span class="o">*</span> <span class="n">list_norm_val</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="p">)</span> <span class="o">+</span> <span class="n">pred</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">y_pred_upper</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="n">y_pred_upper</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="n">pred</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span> <span class="o">*</span> <span class="n">list_norm_val</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="p">)</span> <span class="o">+</span> <span class="n">pred</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">type_res</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;cqr&quot;</span><span class="p">]:</span>
+            <span class="n">y_pred_lower</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_pred_lower</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="n">list_norm_val</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="n">y_pred_upper</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_pred_upper</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">+</span> <span class="n">list_norm_val</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;compute_UQ_calibration : type_res : &quot;</span> <span class="o">+</span> <span class="n">type_res</span> <span class="o">+</span> <span class="s2">&quot; Not covered&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># Hold assymetrical val</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">y_pred_lower</span><span class="p">,</span> <span class="n">y_pred_upper</span><span class="p">),</span> <span class="n">params_</span></div>
+
+
+
+<span class="c1"># FONCTION PRINCIPALE : CONSTRUCTION DU SCORE.</span>
+<span class="c1"># res = Résidu source</span>
+<span class="c1"># v_mean = biais source</span>
+<span class="c1"># v_std = variance source.</span>
+<span class="c1"># Train = mask lié à l&#39;échantillon de test (Pour pouvoir adapater le seuil entre l&#39;échantillon train et test)</span>
+
+<span class="c1"># Paramètre :</span>
+<span class="c1"># Per_nom : ratio de donnée normale (local) à priori (par défault = 95%)</span>
+<span class="c1"># beta : Target anomaly (par défault = 0.05)</span>
+<span class="c1"># Per_seuil = seuillage percentage maximum sur le score d&#39;anomalie.f</span>
+<span class="c1"># min_cut = Valeur pour la coupe basse de la variance et du biais.100</span>
+<span class="c1"># max_cut = Valeur pour la coupe haute de la variance et du biais.</span>
+<span class="c1"># d = Mise en forme puissance du score final.</span>
+<span class="c1"># Type_Norm :</span>
+<span class="c1"># - True = Constante de normalisation selon une hypothèse de distribution d&#39;anomalie homgène par dimension.</span>
+<span class="c1"># - False = Constante de normalisation selon une hypothèse de distribution d&#39;anomalie hétérogène par dimension.</span>
+<span class="c1"># filt = filtre de convolution a appliquées.</span>
+<span class="c1"># Q paramètre q  lié à l&#39;hypthèse de distrubution des anomalies par contexte :</span>
+<span class="c1">#             q &lt; 1 : Anomalie lié au contexte de forte variance.</span>
+<span class="c1">#             q = 1 : Anomalie distribué de manière homogène par contexte</span>
+<span class="c1">#             q &gt; 1 : Anomalie lié au contexte de faible variance.</span>
+<span class="c1"># Dim = dimension de la série.</span>
+
+
+<div class="viewcode-block" id="fit_anom_score">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.anomaly_processing.fit_anom_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_anom_score</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">beta</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">per_seuil</span><span class="o">=</span><span class="mf">0.9995</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">k_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">type_norm</span><span class="o">=</span><span class="s2">&quot;quantiles_local&quot;</span><span class="p">,</span>
+    <span class="n">empiric_rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">global_median_normalization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">filt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">roll</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fit parameters link to anomaly score calibration using Prediction and UQ measure.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (UQ-measure): UQ measure from UQ estimateurs</span>
+<span class="sd">        type_UQ (str, optional): _description_. Defaults to &quot;sigma&quot;.</span>
+<span class="sd">        pred (array): prediction</span>
+<span class="sd">        y (array): Real values</span>
+<span class="sd">        type_UQ_params (str, optional): additional information about UQ. Defaults to None.</span>
+<span class="sd">        ctx_mask : mask for ctx_calib</span>
+<span class="sd">        beta (float, optional): Anom target Defaults to 0.05.</span>
+<span class="sd">        per_seuil (float, optional): Threshold Defaults to 0.995.</span>
+<span class="sd">        min_cut (float, optional): extremum cut Defaults to 0.005.</span>
+<span class="sd">        max_cut (float, optional): extremum cut Defaults to 0.995.</span>
+<span class="sd">        var_min (float, optional): Threshold of minimum var, Default to 0</span>
+<span class="sd">        d (int, optional): residual power Defaults to 2.</span>
+<span class="sd">        type_norm (str, optional): Type of normalisation see  Defaults to &quot;quantiles_local&quot;.</span>
+<span class="sd">        global_median_normalization (bool,optional): Normalisation of residu by each step</span>
+<span class="sd">            by the median residu of all dimension.</span>
+<span class="sd">        filt (list, optional): _description_. Defaults to [0, 1, 0].</span>
+<span class="sd">        q_var (int, optional): _description_. Defaults to 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        params : parameters to calibrate anomaly score</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># print(&#39;debug&#39;, UQ.shape, type_UQ, pred.shape,</span>
+    <span class="c1">#      y.shape, reduc_filter, filt, roll)</span>
+
+    <span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">check_y_vs_pred_and_UQ_shape</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span>
+
+    <span class="n">ndUQ_ratio</span><span class="p">,</span> <span class="n">extremum_var_TOT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">:</span>
+        <span class="n">extremum_var_TOT</span><span class="p">,</span> <span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">get_extremum_var_TOT_and_ndUQ_ratio</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">factor</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+            <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+            <span class="n">mode_multidim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">anom_score</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_residu</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">pred</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+        <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+        <span class="n">k_var_e</span><span class="o">=</span><span class="n">k_var_e</span><span class="p">,</span>
+        <span class="n">q_var_e</span><span class="o">=</span><span class="n">q_var_e</span><span class="p">,</span>
+        <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+        <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+        <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">,</span>
+        <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span>
+        <span class="n">roll</span><span class="o">=</span><span class="n">roll</span><span class="p">,</span>
+        <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">global_median_normalization</span><span class="p">:</span>
+        <span class="n">global_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">anom_score</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">anom_score</span> <span class="o">=</span> <span class="n">anom_score</span> <span class="o">-</span> <span class="n">global_norm</span>
+
+    <span class="c1"># Dim reduction :</span>
+
+    <span class="c1"># Seuillage des résidu normalisé</span>
+
+    <span class="n">anom_score</span> <span class="o">=</span> <span class="n">apply_conv</span><span class="p">(</span><span class="n">anom_score</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span>
+    <span class="n">anom_score</span> <span class="o">=</span> <span class="n">score_seuil</span><span class="p">(</span><span class="n">anom_score</span><span class="p">,</span> <span class="n">per_seuil</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Normalisation lié au seuil d&#39;anomalie (en fonction de type_norm)</span>
+    <span class="n">calib_params_</span> <span class="o">=</span> <span class="n">fit_calibrate</span><span class="p">(</span>
+        <span class="n">anom_score</span><span class="p">,</span>
+        <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+        <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+        <span class="n">type_norm</span><span class="o">=</span><span class="n">type_norm</span><span class="p">,</span>
+        <span class="n">empiric_rescale</span><span class="o">=</span><span class="n">empiric_rescale</span><span class="p">,</span>
+        <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+        <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ndUQ_ratio</span><span class="p">,</span> <span class="n">extremum_var_TOT</span><span class="p">,</span> <span class="n">calib_params_</span></div>
+
+
+
+<div class="viewcode-block" id="compute_anom_score">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.anomaly_processing.compute_anom_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_anom_score</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">type_UQ</span><span class="p">,</span>
+    <span class="n">pred</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">beta</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span>
+    <span class="n">per_seuil</span><span class="o">=</span><span class="mf">0.9995</span><span class="p">,</span>
+    <span class="n">min_cut</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">max_cut</span><span class="o">=</span><span class="mf">0.97</span><span class="p">,</span>
+    <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">d</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">type_norm</span><span class="o">=</span><span class="s2">&quot;quantiles_local&quot;</span><span class="p">,</span>
+    <span class="n">empiric_rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">global_median_normalization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">filt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">k_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">with_born</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">params_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">roll</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute contextual deviation score from observation, Prediction and UQ measure.</span>
+<span class="sd">        Then apply normalise considering threeshold based on beta miss_covered target</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        UQ (UQ-measure): UQ measure from UQ estimateurs</span>
+<span class="sd">        type_UQ (str, optional): _description_. Defaults to &quot;sigma&quot;.</span>
+<span class="sd">        pred (array): prediction</span>
+<span class="sd">        y (array): Real values</span>
+<span class="sd">        type_UQ_params (str, optional): _description_. Defaults to &quot;sigma&quot;.</span>
+<span class="sd">        beta (float, optional): Anom target Defaults to 0.05.</span>
+<span class="sd">        per_seuil (float, optional): Threshold Defaults to 0.995.</span>
+<span class="sd">        min_cut (float, optional): extremum cut Defaults to 0.005.</span>
+<span class="sd">        max_cut (float, optional): extremum cut Defaults to 0.995.</span>
+<span class="sd">        var_min (float, optional): Threshold of minimum var, Default to 0</span>
+<span class="sd">        d (int, optional): residual power Defaults to 2.</span>
+<span class="sd">        type_norm (str, optional): Type of normalisation see norm Defaults to &quot;quantiles_local&quot;.</span>
+<span class="sd">        empiric_rescale (bool,optional): Force empiric rescale based on train percentile</span>
+<span class="sd">        global_median_normalization (bool,optional): Normalisation of residu by each step</span>
+<span class="sd">            by the median residu of all dimension.</span>
+<span class="sd">        filt (list, optional): fitler applied to the score . Defaults to [0, 1, 0].</span>
+<span class="sd">        q_var (int, optional): power coefficent apply to the score. Defaults to 1.</span>
+<span class="sd">        params : params provide by fit function. Defaults to None imply internal call to fit</span>
+
+<span class="sd">    Type_norm :</span>
+<span class="sd">        &quot;Nsigma_local&quot; : Fexible anomalie thresold (N-sgima) by dimension | Hypothesis :</span>
+<span class="sd">            Anomaly distributed homegeneously by dimension.</span>
+<span class="sd">        &quot;Nsigma_global&quot; : Fexible anomalie thresold (N-sgima) global :  homogeneous anomaly distribution by dimension.</span>
+<span class="sd">        &quot;Chi2&quot;: Theorical Chi2 correction</span>
+<span class="sd">        &quot;quantiles_local&quot; : rigid anomalie thresold (quantiles) by dimension :</span>
+<span class="sd">            heterogeneos anomaly distrubtion by dimension.</span>
+<span class="sd">        &quot;quantiles_global&quot; : (Default) rigid anomalie thresold (quantiles) global :</span>
+<span class="sd">            homogeneous anomaly distribution by dimension.</span>
+<span class="sd">        &quot;None&quot; : No normalisation</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        anom_score: 2D anomaly score matrix</span>
+<span class="sd">        params : parameters provided or computed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">check_y_vs_pred_and_UQ_shape</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span>
+
+    <span class="c1"># IF not fit_params :</span>
+    <span class="k">if</span> <span class="n">params_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params_</span> <span class="o">=</span> <span class="n">fit_anom_score</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">pred</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+            <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+            <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+            <span class="n">per_seuil</span><span class="o">=</span><span class="n">per_seuil</span><span class="p">,</span>
+            <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+            <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+            <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+            <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+            <span class="n">k_var_e</span><span class="o">=</span><span class="n">k_var_e</span><span class="p">,</span>
+            <span class="n">q_var_e</span><span class="o">=</span><span class="n">q_var_e</span><span class="p">,</span>
+            <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+            <span class="n">type_norm</span><span class="o">=</span><span class="n">type_norm</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">global_median_normalization</span><span class="o">=</span><span class="n">global_median_normalization</span><span class="p">,</span>
+            <span class="n">filt</span><span class="o">=</span><span class="n">filt</span><span class="p">,</span>
+            <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span>
+            <span class="n">roll</span><span class="o">=</span><span class="n">roll</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+    <span class="n">ndUQ_ratio</span><span class="p">,</span> <span class="n">extremum_var_TOT</span><span class="p">,</span> <span class="n">calib_params_</span> <span class="o">=</span> <span class="n">params_</span>
+
+    <span class="c1"># Résidu normalisé</span>
+    <span class="n">anom_score</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_residu</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="p">,</span>
+        <span class="n">pred</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+        <span class="n">d</span><span class="o">=</span><span class="n">d</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+        <span class="n">k_var_e</span><span class="o">=</span><span class="n">k_var_e</span><span class="p">,</span>
+        <span class="n">q_var_e</span><span class="o">=</span><span class="n">q_var_e</span><span class="p">,</span>
+        <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+        <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+        <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">,</span>
+        <span class="n">with_born</span><span class="o">=</span><span class="n">with_born</span><span class="p">,</span>
+        <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span>
+        <span class="n">roll</span><span class="o">=</span><span class="n">roll</span><span class="p">,</span>
+        <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">with_born</span><span class="p">:</span>
+        <span class="n">anom_score</span><span class="p">,</span> <span class="n">born</span> <span class="o">=</span> <span class="n">anom_score</span>
+
+    <span class="n">global_norm</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">global_median_normalization</span><span class="p">:</span>
+        <span class="n">global_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">anom_score</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">anom_score</span> <span class="o">=</span> <span class="n">anom_score</span> <span class="o">-</span> <span class="n">global_norm</span>
+
+    <span class="k">if</span> <span class="n">with_born</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">type_UQ</span> <span class="o">==</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">:</span>
+            <span class="n">sigma</span><span class="p">,</span> <span class="n">E_penalisation</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_TOT_and_E_sigma</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">,</span>
+                <span class="n">type_UQ</span><span class="p">,</span>
+                <span class="n">pred</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+                <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+                <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+                <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+                <span class="n">var_max</span><span class="o">=</span><span class="n">var_max</span><span class="p">,</span>
+                <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+                <span class="n">q_var_e</span><span class="o">=</span><span class="n">q_var_e</span><span class="p">,</span>
+                <span class="n">k_var_e</span><span class="o">=</span><span class="n">k_var_e</span><span class="p">,</span>
+                <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+                <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">,</span>
+                <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span>
+                <span class="n">roll</span><span class="o">=</span><span class="n">roll</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">process_UQmeasure_to_sigma</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">,</span>
+                <span class="n">type_UQ</span><span class="p">,</span>
+                <span class="n">pred</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                <span class="n">type_UQ_params</span><span class="o">=</span><span class="n">type_UQ_params</span><span class="p">,</span>
+                <span class="n">min_cut</span><span class="o">=</span><span class="n">min_cut</span><span class="p">,</span>
+                <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut</span><span class="p">,</span>
+                <span class="n">q_var</span><span class="o">=</span><span class="n">q_var</span><span class="p">,</span>
+                <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+                <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">E_penalisation</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">anom_padding</span> <span class="o">=</span> <span class="n">global_norm</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">anom_padding</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">E_penalisation</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Reduc middle dim for 3D object (ex : multi-step prediction)</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;res_val post res&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">anom_score</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="c1"># Apply temp Convolution</span>
+
+    <span class="n">anom_score</span> <span class="o">=</span> <span class="n">apply_conv</span><span class="p">(</span><span class="n">anom_score</span><span class="p">,</span> <span class="n">filt</span><span class="p">)</span>
+
+    <span class="c1"># Seuillage des résidu normalisé</span>
+    <span class="c1"># -&gt; Warning : difference between anom &amp; born.</span>
+    <span class="n">anom_score</span> <span class="o">=</span> <span class="n">score_seuil</span><span class="p">(</span><span class="n">anom_score</span><span class="p">,</span> <span class="n">per_seuil</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">anom_score</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="p">(</span><span class="n">anom_score</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">beta</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">with_born</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Start&quot;</span><span class="p">,</span>
+                <span class="p">((</span><span class="n">born</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">anom_padding</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+                <span class="p">((</span><span class="n">born</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">anom_padding</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span>
+            <span class="p">)</span>
+
+    <span class="c1"># IF not fit_params :</span>
+
+    <span class="c1"># Normalisation lié au seuil d&#39;anomalie (en fonction de type_norm)</span>
+
+    <span class="n">anom_score</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">compute_calibrate</span><span class="p">(</span>
+        <span class="n">anom_score</span><span class="p">,</span>
+        <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+        <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+        <span class="n">type_norm</span><span class="o">=</span><span class="n">type_norm</span><span class="p">,</span>
+        <span class="n">empiric_rescale</span><span class="o">=</span><span class="n">empiric_rescale</span><span class="p">,</span>
+        <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">params_</span><span class="o">=</span><span class="n">calib_params_</span><span class="p">,</span>
+        <span class="n">debug</span><span class="o">=</span><span class="n">debug</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">anom_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">anom_score</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">anom_score</span><span class="p">),</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;End&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">anom_score</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="p">(</span><span class="n">anom_score</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">with_born</span><span class="p">:</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">apply_middledim_reduction</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="o">=</span><span class="n">reduc_filter</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="n">roll</span><span class="p">)</span>
+
+        <span class="n">res_born</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+        <span class="n">res_born</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">compute_calibrate</span><span class="p">(</span>
+            <span class="n">res_born</span><span class="p">,</span>
+            <span class="n">ctx_mask</span><span class="o">=</span><span class="n">ctx_mask</span><span class="p">,</span>
+            <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+            <span class="n">type_norm</span><span class="o">=</span><span class="n">type_norm</span><span class="p">,</span>
+            <span class="n">empiric_rescale</span><span class="o">=</span><span class="n">empiric_rescale</span><span class="p">,</span>
+            <span class="n">deg</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">params_</span><span class="o">=</span><span class="n">calib_params_</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;born&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">res_born_bot</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">res_born</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="n">anom_padding</span> <span class="o">+</span> <span class="n">E_penalisation</span>
+        <span class="p">)</span>
+
+        <span class="n">res_born_top</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">res_born</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="n">anom_padding</span> <span class="o">-</span> <span class="n">E_penalisation</span>
+        <span class="p">)</span>
+
+        <span class="n">born</span> <span class="o">=</span> <span class="n">res_born_bot</span><span class="p">,</span> <span class="n">res_born_top</span>
+
+        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;Anom_born&quot;</span><span class="p">,</span>
+                <span class="p">((</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">born</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">|</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">born</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+                <span class="s2">&quot;Anom_res&quot;</span><span class="p">,</span>
+                <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">anom_score</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">anom_score</span><span class="p">,</span> <span class="n">born</span><span class="p">),</span> <span class="n">params_</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">anom_score</span><span class="p">,</span> <span class="n">params_</span></div>
+
+
+
+<div class="viewcode-block" id="fit_score_fusion">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.anomaly_processing.fit_score_fusion">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_score_fusion</span><span class="p">(</span>
+    <span class="n">score</span><span class="p">,</span>
+    <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_fusion</span><span class="o">=</span><span class="s2">&quot;mahalanobis&quot;</span><span class="p">,</span>
+    <span class="n">type_norm</span><span class="o">=</span><span class="s2">&quot;quantiles_global&quot;</span><span class="p">,</span>
+    <span class="n">beta</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">per_seuil</span><span class="o">=</span><span class="mf">0.995</span><span class="p">,</span>
+    <span class="n">filt</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="n">fusion_reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fusion_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="c1"># middle dim reduction</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">apply_middledim_reduction</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">fusion_reduc_filter</span><span class="p">)</span>
+
+    <span class="c1"># Temporal convolution</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">score_seuil</span><span class="p">(</span><span class="n">apply_conv</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">filt</span><span class="p">),</span> <span class="n">per_seuil</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">type_fusion</span> <span class="o">==</span> <span class="s2">&quot;mahalanobis&quot;</span><span class="p">:</span>
+        <span class="c1"># Mahalanobis pour synthese en score global.</span>
+        <span class="n">cov_estimator</span> <span class="o">=</span> <span class="n">EmpiricalCovariance</span><span class="p">(</span><span class="n">assume_centered</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+        <span class="n">anom_score</span> <span class="o">=</span> <span class="n">cov_estimator</span><span class="o">.</span><span class="n">mahalanobis</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+        <span class="c1"># Seuillage du score aggrégées</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cov_estimator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">anom_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fusion_debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start_fit&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">anom_score</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="p">(</span><span class="n">anom_score</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+    <span class="n">anom_score</span> <span class="o">=</span> <span class="n">score_seuil</span><span class="p">(</span><span class="n">anom_score</span><span class="p">,</span> <span class="n">per_seuil</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">params_calibrate_</span> <span class="o">=</span> <span class="n">fit_calibrate</span><span class="p">(</span>
+        <span class="n">anom_score</span><span class="p">,</span> <span class="n">ctx_mask</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">type_norm</span><span class="p">,</span> <span class="n">empiric_rescale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="n">fusion_debug</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">params_calibrate_</span><span class="p">,</span> <span class="n">cov_estimator</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="compute_score_fusion">
+<a class="viewcode-back" href="../../../uqmodels.postprocessing.html#uqmodels.postprocessing.anomaly_processing.compute_score_fusion">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_score_fusion</span><span class="p">(</span>
+    <span class="n">score</span><span class="p">,</span>
+    <span class="n">ctx_mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_fusion</span><span class="o">=</span><span class="s2">&quot;mahalanobis&quot;</span><span class="p">,</span>
+    <span class="n">type_norm</span><span class="o">=</span><span class="s2">&quot;quantiles_global&quot;</span><span class="p">,</span>
+    <span class="n">beta</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">per_seuil</span><span class="o">=</span><span class="mf">0.995</span><span class="p">,</span>
+    <span class="n">filt</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="n">d</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">fusion_reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">params_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fusion_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute and aggregate and 2D anomaly score matrix into an aggregated 1D</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        score (_type_): _description_</span>
+<span class="sd">        ctx_mask (_type_): _description_</span>
+<span class="sd">        type_fusion (str, optional): mahalanobis or mean. Defaults to &quot;mahalanobis&quot;.</span>
+<span class="sd">        type_norm (str, optional): _description_. Defaults to &quot;quantiles_global&quot;.</span>
+<span class="sd">        beta (float, optional): anom ratio target. Defaults to 0.95.</span>
+<span class="sd">        per_seuil (float, optional): _description_. Defaults to 0.995.</span>
+<span class="sd">        filt (list, optional): _description_. Defaults to [0, 1, 0].</span>
+<span class="sd">        d (int, optional): _description_. Defaults to 2.</span>
+<span class="sd">        list_norm_val (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        list_ctx_val (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">        params_: params provided by fit function. Defaults to None imply interal call to fit</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        score_agg: 1D anomaly score matrix</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">params_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params_</span> <span class="o">=</span> <span class="n">fit_score_fusion</span><span class="p">(</span>
+            <span class="n">score</span><span class="p">,</span>
+            <span class="n">ctx_mask</span><span class="p">,</span>
+            <span class="n">type_fusion</span><span class="o">=</span><span class="n">type_fusion</span><span class="p">,</span>
+            <span class="n">type_norm</span><span class="o">=</span><span class="n">type_norm</span><span class="p">,</span>
+            <span class="n">beta</span><span class="o">=</span><span class="n">beta</span><span class="p">,</span>
+            <span class="n">per_seuil</span><span class="o">=</span><span class="n">per_seuil</span><span class="p">,</span>
+            <span class="n">filt</span><span class="o">=</span><span class="n">filt</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">params_calibrate_</span><span class="p">,</span> <span class="n">cov_estimator</span> <span class="o">=</span> <span class="n">params_</span>
+
+    <span class="c1"># Middledim reduction</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">apply_middledim_reduction</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">fusion_reduc_filter</span><span class="p">)</span>
+
+    <span class="c1"># Temporal convolution</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">score_seuil</span><span class="p">(</span><span class="n">apply_conv</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">filt</span><span class="p">),</span> <span class="n">per_seuil</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fusion_debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Start_compute&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">score</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="p">(</span><span class="n">score</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">type_fusion</span> <span class="o">==</span> <span class="s2">&quot;mahalanobis&quot;</span><span class="p">:</span>
+        <span class="c1"># Mahalanobis pour synthese en score global.</span>
+        <span class="n">score_agg</span> <span class="o">=</span> <span class="n">cov_estimator</span><span class="o">.</span><span class="n">mahalanobis</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+        <span class="c1"># Seuillage du score aggrégées</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># type_fusion == &quot;mean&quot;:</span>
+        <span class="n">score_agg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">score</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">score_agg</span> <span class="o">=</span> <span class="n">score_seuil</span><span class="p">(</span><span class="n">score_agg</span><span class="p">,</span> <span class="n">per_seuil</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">score_agg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">compute_calibrate</span><span class="p">(</span>
+        <span class="n">score_agg</span><span class="p">,</span>
+        <span class="n">ctx_mask</span><span class="p">,</span>
+        <span class="n">beta</span><span class="p">,</span>
+        <span class="n">type_norm</span><span class="p">,</span>
+        <span class="n">params_</span><span class="o">=</span><span class="n">params_calibrate_</span><span class="p">,</span>
+        <span class="n">debug</span><span class="o">=</span><span class="n">fusion_debug</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Résidu quadratique.</span>
+    <span class="n">score_agg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">score_agg</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">score_agg</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fusion_debug</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;End compute&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">score</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="p">(</span><span class="n">score</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+
+    <span class="k">return</span> <span class="n">score_agg</span><span class="p">,</span> <span class="n">params_</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

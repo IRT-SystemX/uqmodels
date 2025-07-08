@@ -1,0 +1,1203 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.preprocessing.preprocessing &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.preprocessing.preprocessing</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.preprocessing.preprocessing</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Data preprocessing module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sklearn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.interpolate</span><span class="w"> </span><span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.sparse.csgraph</span><span class="w"> </span><span class="kn">import</span> <span class="n">connected_components</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeSeriesSplit</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.structure</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pre_struc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">ut</span>
+
+<span class="c1"># Target selection based on corrcoef</span>
+
+
+<div class="viewcode-block" id="compute_corr_and_filter">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.compute_corr_and_filter">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_corr_and_filter</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">mat_corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">signal_to_drop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mat_corr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">mat_corr</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">mat_corr</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">mat_corr</span><span class="p">,</span> <span class="n">signal_to_drop</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_k_composants">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.get_k_composants">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_k_composants</span><span class="p">(</span><span class="n">mat_corr</span><span class="p">,</span> <span class="n">n_cible</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">mat_corr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">corr_flow</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">corr_flow</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">connected_components</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mat_corr</span><span class="p">)</span> <span class="o">-</span> <span class="n">i</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">connection</span><span class="o">=</span><span class="s2">&quot;strong&quot;</span>
+            <span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+    <span class="n">corr_flow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">corr_flow</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+    <span class="n">step</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">corr_flow</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">n_cible</span><span class="p">)</span>
+    <span class="n">list_components</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_cible</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">corr_flow</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">==</span> <span class="n">component</span>
+        <span class="n">list_components</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">d</span><span class="p">)[</span><span class="n">mask</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">list_components</span></div>
+
+
+
+<div class="viewcode-block" id="select_best_representant">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.select_best_representant">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_best_representant</span><span class="p">(</span><span class="n">mat_corr</span><span class="p">,</span> <span class="n">list_components</span><span class="p">):</span>
+    <span class="n">best_signals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ind_components</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_components</span><span class="p">):</span>
+        <span class="n">ind_best</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">mat_corr</span><span class="p">[</span><span class="n">ind_components</span><span class="p">][:,</span> <span class="n">ind_components</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">best_signals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind_components</span><span class="p">[</span><span class="n">ind_best</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">best_signals</span></div>
+
+
+
+<div class="viewcode-block" id="select_signal">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.select_signal">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_signal</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">n_cible</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">n_cible</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">n_cible</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">mat_corr</span><span class="p">,</span> <span class="n">signal_to_drop</span> <span class="o">=</span> <span class="n">compute_corr_and_filter</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">raw_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">restricted_mat_corr</span> <span class="o">=</span> <span class="n">mat_corr</span><span class="p">[</span><span class="o">~</span><span class="n">signal_to_drop</span><span class="p">][:,</span> <span class="o">~</span><span class="n">signal_to_drop</span><span class="p">]</span>
+    <span class="n">list_restricted_components</span> <span class="o">=</span> <span class="n">get_k_composants</span><span class="p">(</span><span class="n">restricted_mat_corr</span><span class="p">,</span> <span class="n">n_cible</span><span class="p">)</span>
+    <span class="n">best_restricted_signals</span> <span class="o">=</span> <span class="n">select_best_representant</span><span class="p">(</span>
+        <span class="n">restricted_mat_corr</span><span class="p">,</span> <span class="n">list_restricted_components</span>
+    <span class="p">)</span>
+    <span class="n">best_signals</span> <span class="o">=</span> <span class="n">raw_ind</span><span class="p">[</span><span class="o">~</span><span class="n">signal_to_drop</span><span class="p">][</span><span class="n">best_restricted_signals</span><span class="p">]</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">mat_corr</span><span class="p">[</span><span class="n">best_signals</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">best_signals</span><span class="p">,</span> <span class="n">signal_to_drop</span><span class="p">)</span></div>
+
+
+
+<span class="c1">#</span>
+
+
+<div class="viewcode-block" id="check_is_pd_date">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.check_is_pd_date">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_is_pd_date</span><span class="p">(</span><span class="n">date</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">date</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">date</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">date</span></div>
+
+
+
+<span class="c1"># Base replacement function</span>
+
+
+<div class="viewcode-block" id="locate_near_index_values">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.locate_near_index_values">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">locate_near_index_values</span><span class="p">(</span><span class="n">index_scale</span><span class="p">,</span> <span class="n">index_val</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">index_val</span> <span class="o">&gt;</span> <span class="n">index_scale</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="n">index_val</span> <span class="o">&lt;</span> <span class="n">index_scale</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">index_scale</span> <span class="o">-</span> <span class="n">index_val</span><span class="p">)</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">index_scale</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">-</span> <span class="n">index_val</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ind</span></div>
+
+
+
+<div class="viewcode-block" id="get_event_into_series">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.get_event_into_series">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_event_into_series</span><span class="p">(</span>
+    <span class="n">list_events</span><span class="p">,</span> <span class="n">index_scale</span><span class="p">,</span> <span class="n">n_type_event</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;datetime64[s]&quot;</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Locate flag erros of sensors in regular time_refenrencial&quot;&quot;&quot;</span>
+    <span class="n">nan_series</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">index_scale</span><span class="p">),</span> <span class="n">n_type_event</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">index_scale</span> <span class="o">=</span> <span class="n">index_scale</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">dict_events</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_events</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index_event</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">dict_events</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">type_anom</span> <span class="o">=</span> <span class="n">dict_events</span><span class="p">[</span><span class="n">index_event</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">start_event</span><span class="p">,</span> <span class="n">end_event</span> <span class="o">=</span> <span class="n">index_event</span>
+                <span class="n">start_index</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_event</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">to_datetime64</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="p">)</span>
+
+                <span class="n">end_index</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">end_event</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">to_datetime64</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="p">)</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">start_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">end_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">start_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">start_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+                    <span class="k">if</span> <span class="n">end_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">end_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+                    <span class="n">nan_series</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span><span class="n">end_index</span><span class="p">,</span> <span class="n">type_anom</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                <span class="n">index_event</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">index_event</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">to_datetime64</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+                    <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="n">locate_near_index_values</span><span class="p">(</span><span class="n">index_scale</span><span class="p">,</span> <span class="n">index_event</span><span class="p">)</span>
+                <span class="n">nan_series</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="n">type_anom</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">nan_series</span></div>
+
+
+
+<div class="viewcode-block" id="extract_sensors_errors">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.extract_sensors_errors">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_sensors_errors</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">type_sensor_error</span><span class="o">=</span><span class="p">[]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract list of non floating values</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        series (_type_): series of sensor_values</span>
+<span class="sd">        type_sensor_error (list, optional): list of others errors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">series</span><span class="p">)):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">e</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_sensor_error</span><span class="p">:</span>
+                <span class="n">type_sensor_error</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">type_sensor_error</span></div>
+
+
+
+<div class="viewcode-block" id="handle_nan">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.handle_nan">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_nan</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
+    <span class="s2">&quot;Replace nan values by last values&quot;</span>
+    <span class="n">nan_flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">last_non_nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))[</span><span class="n">nan_flag</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">last_non_nan</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">last_non_nan</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">last_non_nan</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">y</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">y</span></div>
+
+
+
+<div class="viewcode-block" id="interpolate">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.interpolate">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">interpolate</span><span class="p">(</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">xnew</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">time_structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_interpolation</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+    <span class="n">fill_values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">moving_average</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Drop nan values &amp; perform &#39;interpolation&#39; interpolation from [x,y]  to [xnew,ynew]</span>
+<span class="sd">        if xnew is none, compute xnew from time_structure</span>
+
+<span class="sd">        if moving_average=True perform &quot;interpolate moving average&quot; using int(len(xnew)/len(x))= M</span>
+<span class="sd">        in order to perform mean of M interpolated point evenly distributed for each step.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x (array): X_axis</span>
+<span class="sd">        y (array): Y_axis (values)</span>
+<span class="sd">        xnew (array): new X_axis</span>
+<span class="sd">        moving_average (bool, optional): Perform moving average &#39;interpolation&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ynew: new interpolated Y_axis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">fill_values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fill_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">only_fill_nan</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">time_structure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">xnew</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">only_fill_nan</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">xnew</span> <span class="o">=</span> <span class="n">x</span>
+
+    <span class="n">precision</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">xnew</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Interpolation de la série avec prise en compte de l&#39;échantillonage théorique selon la time structure</span>
+        <span class="k">if</span> <span class="n">time_structure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;time_structure is None&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span>
+
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;delta&quot;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># If precision and frequence are provided, else default_value</span>
+        <span class="n">precision</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">frequence</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frequence&quot;</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">new_time_step</span> <span class="o">=</span> <span class="n">delta</span> <span class="o">*</span> <span class="n">frequence</span>
+
+        <span class="n">xnew</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">get_regular_step_scale</span><span class="p">(</span>
+            <span class="n">delta</span><span class="o">=</span><span class="n">new_time_step</span><span class="p">,</span> <span class="n">range_</span><span class="o">=</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">time_offset</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Ignore Nan values</span>
+    <span class="n">nan_flag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># ration of moding average</span>
+    <span class="n">ynew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xnew</span><span class="p">))</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">[</span><span class="o">~</span><span class="n">nan_flag</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">nan_flag</span><span class="p">],</span> <span class="n">type_interpolation</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">only_fill_nan</span><span class="p">:</span>
+        <span class="n">ynew</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="n">ynew</span><span class="p">[</span><span class="n">nan_flag</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">xnew</span><span class="p">[</span><span class="n">nan_flag</span><span class="p">])</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ynew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xnew</span><span class="p">))</span>
+
+        <span class="c1"># ratio of moving average</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">moving_average</span><span class="p">:</span>
+            <span class="n">ratio</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">xnew</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">ratio</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ratio</span><span class="p">):</span>
+            <span class="n">ynew</span> <span class="o">+=</span> <span class="n">f</span><span class="p">(</span><span class="n">xnew</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">xnew</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="n">ratio</span><span class="p">)</span> <span class="o">/</span> <span class="n">ratio</span>
+
+        <span class="k">if</span> <span class="n">precision</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ynew</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">ynew</span><span class="p">,</span> <span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">precision</span><span class="p">))))</span>
+
+    <span class="k">return</span> <span class="n">xnew</span><span class="p">,</span> <span class="n">ynew</span></div>
+
+
+
+<div class="viewcode-block" id="add_row">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.add_row">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_row</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">date_pivot</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add first or last np.Nan row to df with date_pivot as index values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (_type_): dataframe</span>
+<span class="sd">        date_pivot (_type_): index</span>
+<span class="sd">        mode (str, optional): &#39;first&#39; or &#39;last&#39;. Defaults to &#39;first&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        df: dataframe augmented with one row</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">new_row</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">columns</span> <span class="ow">in</span> <span class="n">new_row</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">new_row</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">new_row</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">columns</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">NaN</span>
+    <span class="n">new_row</span> <span class="o">=</span> <span class="n">new_row</span><span class="o">.</span><span class="n">rename</span><span class="p">({</span><span class="n">new_row</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">date_pivot</span><span class="p">})</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">new_row</span><span class="p">,</span> <span class="n">df</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">new_row</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="remove_rows">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.remove_rows">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">remove_rows</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">date_pivot</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove rows smaller/greated than date_pivot. then add apply add_row</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (_type_): dataframe</span>
+<span class="sd">        date_pivot (_type_): index_pivot</span>
+<span class="sd">        mode (str, optional): &#39;first&#39; or &#39;last&#39;. Defaults to &#39;first&#39;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        df: dataframe which removed values and a new bondary row</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">date_pivot</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">&gt;</span> <span class="n">date_pivot</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">date_pivot</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="n">date_pivot</span><span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">add_row</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">date_pivot</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="df_selection">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.df_selection">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">df_selection</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Format dataframe to obtain a new version that start at start_date and finish and end_date</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (_type_): dataframe</span>
+<span class="sd">        start_date (_type_, optional): strat_date or None. Defaults to None: do nothnig</span>
+<span class="sd">        end_date (_type_, optional): end_date or None. Defaults to None: do nothnig</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dataframe: Time formated dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">start_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">start_date</span> <span class="o">=</span> <span class="n">check_is_pd_date</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">remove_rows</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">end_date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">end_date</span> <span class="o">=</span> <span class="n">check_is_pd_date</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">remove_rows</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+
+
+<div class="viewcode-block" id="upscale_series">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.upscale_series">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">upscale_series</span><span class="p">(</span>
+    <span class="n">dataframe</span><span class="p">,</span>
+    <span class="n">delta</span><span class="p">,</span>
+    <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+    <span class="n">max_time_jump</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">replace_val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Upsample series using pandas interpolation function</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataframe (_type_): data to resample</span>
+<span class="sd">        delta (_type_): Timedelta</span>
+<span class="sd">        offset (str, optional): _description_. Defaults to &#39;-1ms&#39;.</span>
+<span class="sd">        origin (str, optional): _description_. Defaults to &#39;start_day&#39;.</span>
+<span class="sd">        mode (str, optional): _description_. Defaults to &#39;time&#39;.</span>
+<span class="sd">        max_time_jump (int, optional): _description_. Defaults to 10.</span>
+<span class="sd">        replace_val (_type_, optional): _description_. Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Generate upsampling with NaN values</span>
+
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">check_date</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">check_date</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">check_delta</span><span class="p">(</span><span class="n">delta</span><span class="p">)</span>
+
+    <span class="n">origin_date</span> <span class="o">=</span> <span class="n">start_date</span>
+    <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">origin_date</span> <span class="o">=</span> <span class="n">origin_date</span> <span class="o">-</span> <span class="n">delta</span>
+
+    <span class="n">dataframe</span> <span class="o">=</span> <span class="n">df_selection</span><span class="p">(</span><span class="n">dataframe</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">origin_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">)</span>
+
+    <span class="c1"># Fill nan using interpolation</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;previous&quot;</span><span class="p">:</span>
+        <span class="n">upscale_dataframe</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">delta</span><span class="p">),</span> <span class="n">origin</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_date</span><span class="p">),</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">ffill</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="n">max_time_jump</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">upscale_dataframe</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">dataframe</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span>
+                <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">delta</span><span class="p">),</span> <span class="n">origin</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_date</span><span class="p">),</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">mode</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">max_time_jump</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">max_time_jump</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">upscale_dataframe</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="c1"># Replace using by min values</span>
+        <span class="k">if</span> <span class="n">replace_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">replace_val</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+                <span class="n">dataframe</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Replace using default values</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">replace_val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">replace_val</span><span class="p">):</span>
+                <span class="n">upscale_dataframe</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">mask</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">upscale_dataframe</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_val</span>
+
+    <span class="k">return</span> <span class="n">upscale_dataframe</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+
+
+<div class="viewcode-block" id="downscale_series">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.downscale_series">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">downscale_series</span><span class="p">(</span>
+    <span class="n">dataframe</span><span class="p">,</span>
+    <span class="n">delta</span><span class="p">,</span>
+    <span class="n">offset</span><span class="o">=</span><span class="s2">&quot;-1ms&quot;</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;datetime64[s]&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">check_date</span><span class="p">(</span><span class="n">end_date</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">check_date</span><span class="p">(</span><span class="n">start_date</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">check_delta</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+
+    <span class="n">dataframe</span> <span class="o">=</span> <span class="n">df_selection</span><span class="p">(</span>
+        <span class="n">dataframe</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_date</span> <span class="o">-</span> <span class="n">delta</span><span class="p">),</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span>
+    <span class="p">)</span>
+
+    <span class="n">downscale</span> <span class="o">=</span> <span class="n">dataframe</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">delta</span><span class="p">),</span> <span class="n">origin</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">start_date</span><span class="p">),</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">downscale</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
+        <span class="n">func_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">downscale</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="n">downscale_dataframe</span> <span class="o">=</span> <span class="n">func_</span><span class="p">()</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="s2">&quot;mode:&quot;</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="s2">&quot;not handle&quot;</span><span class="p">)</span>
+    <span class="n">downscale_dataframe</span><span class="o">.</span><span class="n">index</span> <span class="o">-=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">downscale_dataframe</span></div>
+
+
+
+<div class="viewcode-block" id="rolling_statistics">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.rolling_statistics">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">rolling_statistics</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reduc_functions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">],</span> <span class="n">reduc_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute rollling_statistics from dataframe</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (pd.DataFrame): dataframe (times,sources)</span>
+<span class="sd">        delta (int or timedelta64): size of rolling window</span>
+<span class="sd">        step (int):  Evaluate the window at every ``step`` result</span>
+<span class="sd">        reduc_functions (_type_): str of pandas window function (fast) or custom set-&gt;stat function (slow)</span>
+<span class="sd">        reduc_names (_type_): name stored in stat_dataframe</span>
+<span class="sd">        time_mask (_type_, optional): time_mask. Defaults to None.</span>
+<span class="sd">        **kwargs: others paramaters provide to DataFrame.rolling</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">new_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">colums_transformation</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">reduc_functions</span> <span class="o">=</span> <span class="n">reduc_functions</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">reduc_names</span> <span class="o">=</span> <span class="n">reduc_names</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">pre_struc</span><span class="o">.</span><span class="n">check_delta</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="s2">&quot;datetime64[ns]&quot;</span><span class="p">))</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;datetime64[ns]&quot;</span><span class="p">)</span>
+
+    <span class="n">flag_extremum</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="s2">&quot;extremum&quot;</span> <span class="ow">in</span> <span class="n">reduc_functions</span><span class="p">:</span>
+        <span class="n">flag_extremum</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ind_extremum</span> <span class="o">=</span> <span class="n">reduc_functions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;extremum&quot;</span><span class="p">)</span>
+        <span class="n">reduc_functions</span><span class="p">[</span><span class="n">ind_extremum</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;max&quot;</span>
+        <span class="n">reduc_functions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;min&quot;</span><span class="p">)</span>
+        <span class="n">reduc_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;min&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">reduc_func</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reduc_functions</span><span class="p">):</span>
+        <span class="n">colums_transformation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reduc_names</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reduc_func</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">reduc_func</span> <span class="o">==</span> <span class="s2">&quot;cov_to_median&quot;</span><span class="p">:</span>
+                <span class="c1"># Hold unimplementation of step</span>
+                <span class="n">df_mean</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                <span class="n">tmp_df</span> <span class="o">=</span> <span class="n">df_mean</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">df_mean</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">tmp_df</span> <span class="o">=</span> <span class="n">tmp_df</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">reduc_func</span> <span class="o">==</span> <span class="s2">&quot;corr_to_median&quot;</span><span class="p">:</span>
+                <span class="c1"># Hold unimplementation of step</span>
+                <span class="n">df_mean</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                <span class="n">tmp_df</span> <span class="o">=</span> <span class="n">df_mean</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="o">.</span><span class="n">corr</span><span class="p">(</span><span class="n">df_mean</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">tmp_df</span> <span class="o">=</span> <span class="n">tmp_df</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rolling</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="n">func_</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rolling</span><span class="p">,</span> <span class="n">reduc_func</span><span class="p">)</span>
+                <span class="n">tmp_df</span> <span class="o">=</span> <span class="n">func_</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rolling</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">tmp_df</span> <span class="o">=</span> <span class="n">rolling</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">reduc_func</span><span class="p">)</span>
+        <span class="n">tmp_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">reduc_names</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tmp_df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="n">new_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tmp_df</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">new_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">flag_extremum</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="n">column</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+            <span class="c1"># Max is already named extremum</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;extremum_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;min_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mean_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;extremum_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mean_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;min_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+
+<span class="c1"># Base measure</span>
+
+
+<div class="viewcode-block" id="entropy">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.entropy">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">entropy</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">set_val</span><span class="p">,</span> <span class="n">v_bins</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="s2">&quot;Compute naive entropy score of y by tokenize values with max of v_bins&quot;</span>
+    <span class="n">flag_nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">y</span><span class="p">[</span><span class="n">flag_nan</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.1</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">digitize</span><span class="p">(</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">i</span> <span class="o">/</span> <span class="n">set_val</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">set_val</span><span class="p">,</span> <span class="n">v_bins</span><span class="p">))</span>
+                <span class="p">]</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="n">value</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">set_val</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="n">count</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+        <span class="n">norm_counts</span> <span class="o">=</span> <span class="n">count</span> <span class="o">/</span> <span class="n">count</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">norm_counts</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">norm_counts</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># Preprocessing function:</span>
+
+
+<div class="viewcode-block" id="df_interpolation_and_fusion">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.df_interpolation_and_fusion">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">df_interpolation_and_fusion</span><span class="p">(</span><span class="n">list_df</span><span class="p">,</span> <span class="n">target_index_scale</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;datetime64[s]&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Interpolation of all sources on a same temporal referencial</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        list_df (list of 2D array): List of dataframe</span>
+<span class="sd">        target_index_scale (_type_): Indice of sensors</span>
+<span class="sd">        dtype:</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        interpolated_data: List of interpolated array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">interpolated_data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">list_columns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">target_index_scale</span><span class="p">):</span>
+        <span class="n">target_index_scale</span> <span class="o">=</span> <span class="n">target_index_scale</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">list_df</span><span class="p">:</span>
+        <span class="n">df_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">list_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df_index</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">target_index_scale</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">df_index</span> <span class="o">-</span> <span class="n">target_index_scale</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">interpolated_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_channels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">interpolate</span><span class="p">(</span>
+                        <span class="n">x</span><span class="o">=</span><span class="n">df_index</span><span class="p">,</span>
+                        <span class="n">y</span><span class="o">=</span><span class="n">channels</span><span class="p">,</span>
+                        <span class="n">xnew</span><span class="o">=</span><span class="n">target_index_scale</span><span class="p">,</span>
+                        <span class="n">moving_average</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">channels</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span>
+                <span class="p">]</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="n">interpolated_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_channels</span><span class="p">)</span>
+
+    <span class="n">interpolated_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">interpolated_data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">target_index_scale</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="n">interpolated_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="n">interpolated_data</span><span class="p">,</span>
+        <span class="n">columns</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">list_columns</span><span class="p">),</span>
+        <span class="n">index</span><span class="o">=</span><span class="n">target_index_scale</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">interpolated_data</span></div>
+
+
+
+<span class="c1"># Map reduce statistics (may be computationally suboptimal)</span>
+
+
+<div class="viewcode-block" id="Past_Moving_window_mapping">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.Past_Moving_window_mapping">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Past_Moving_window_mapping</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">deta</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1"># Past moving mapping using yield: Unefficient for large data !</span>
+    <span class="k">if</span> <span class="n">window_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">window_size</span> <span class="o">=</span> <span class="n">deta</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">/</span> <span class="n">deta</span><span class="p">))):</span>
+        <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="n">window_size</span><span class="p">)</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="identity">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.identity">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">identity</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span></div>
+
+
+
+<div class="viewcode-block" id="map_reduce">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.map_reduce">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">map_reduce</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">map_</span><span class="o">=</span><span class="n">identity</span><span class="p">,</span> <span class="n">map_paramaters</span><span class="o">=</span><span class="p">{},</span> <span class="n">reduce</span><span class="o">=</span><span class="n">identity</span><span class="p">):</span>
+    <span class="n">mapping</span> <span class="o">=</span> <span class="n">Regular_Moving_window_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">map_paramaters</span><span class="p">)</span>
+    <span class="n">reduced</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">reduce</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">reduced</span></div>
+
+
+
+<div class="viewcode-block" id="auto_corr_reduce">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.auto_corr_reduce">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">auto_corr_reduce</span><span class="p">(</span><span class="n">set_</span><span class="p">):</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span>
+    <span class="n">set_</span> <span class="o">=</span> <span class="n">set_</span> <span class="o">-</span> <span class="n">mean</span>
+    <span class="n">acorr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">set_</span><span class="p">,</span> <span class="n">set_</span><span class="p">,</span> <span class="s2">&quot;full&quot;</span><span class="p">)[</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:]</span>
+    <span class="n">acorr</span> <span class="o">=</span> <span class="n">acorr</span> <span class="o">/</span> <span class="n">var</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">acorr</span></div>
+
+
+
+<div class="viewcode-block" id="mean_reduce">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.mean_reduce">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mean_reduce</span><span class="p">(</span><span class="n">set_</span><span class="p">):</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">set_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanstd</span><span class="p">(</span><span class="n">set_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">carac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">mu</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">std</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">carac</span></div>
+
+
+
+<div class="viewcode-block" id="last_reduce">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.last_reduce">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">last_reduce</span><span class="p">(</span><span class="n">set_</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">set_</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="corrcoef_reduce">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.corrcoef_reduce">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">corrcoef_reduce</span><span class="p">(</span><span class="n">set_</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">corrcoef</span><span class="p">(</span><span class="n">set_</span><span class="o">.</span><span class="n">T</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fft_reduce">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.fft_reduce">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fft_reduce</span><span class="p">(</span><span class="n">set_</span><span class="p">):</span>
+    <span class="n">fft</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft</span><span class="p">(</span><span class="n">set_</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">)[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span>
+    <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">fft</span><span class="p">)[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span>
+    <span class="n">carac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">energy</span><span class="p">,</span> <span class="n">phase</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">carac</span></div>
+
+
+
+<div class="viewcode-block" id="Regular_Moving_window_mapping">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.Regular_Moving_window_mapping">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Regular_Moving_window_mapping</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">deta</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">window_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">window_size</span> <span class="o">=</span> <span class="n">deta</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">/</span> <span class="n">deta</span><span class="p">))):</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="n">window_size</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;center&quot;</span><span class="p">:</span>
+            <span class="n">size_bot</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">window_size</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">size_top</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">window_size</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="n">size_bot</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="n">size_top</span><span class="p">]</span>
+
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="p">(</span><span class="n">window_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="p">(</span><span class="s2">&quot;error mode&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Splitter</span>
+
+
+<div class="viewcode-block" id="identity_split">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.identity_split">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">identity_split</span><span class="p">(</span><span class="n">X_fit</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">,</span> <span class="n">X_calib</span><span class="p">,</span> <span class="n">y_calib</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Identity splitter that wraps an already existing data assignment&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">iterable_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;X and y are placeholders.&quot;&quot;&quot;</span>
+        <span class="n">iterable</span> <span class="o">=</span> <span class="p">[(</span><span class="n">X_fit</span><span class="p">,</span> <span class="n">y_fit</span><span class="p">,</span> <span class="n">X_calib</span><span class="p">,</span> <span class="n">y_calib</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">iterable</span>
+
+    <span class="k">return</span> <span class="n">iterable_split</span></div>
+
+
+
+<div class="viewcode-block" id="random_split">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.random_split">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">random_split</span><span class="p">(</span><span class="n">ratio</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Random splitter that assign samples given a ratio&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">iterable_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">fit_sample</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span> <span class="o">&gt;</span> <span class="n">ratio</span>
+        <span class="n">cal_sample</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">fit_sample</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">X</span><span class="p">[</span><span class="n">fit_sample</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">fit_sample</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">cal_sample</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">cal_sample</span><span class="p">])]</span>
+
+    <span class="k">return</span> <span class="n">iterable_split</span></div>
+
+
+
+<div class="viewcode-block" id="kfold_random_split">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.kfold_random_split">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">kfold_random_split</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Splitter that randomly assign data into K folds&quot;&quot;&quot;</span>
+    <span class="n">kfold</span> <span class="o">=</span> <span class="n">sklearn</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">KFold</span><span class="p">(</span><span class="n">K</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">iterable_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">iterable</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">fit</span><span class="p">,</span> <span class="n">calib</span> <span class="ow">in</span> <span class="n">kfold</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+            <span class="n">iterable</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">X</span><span class="p">[</span><span class="n">fit</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">fit</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">calib</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">calib</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">iterable</span>
+
+    <span class="k">return</span> <span class="n">iterable_split</span></div>
+
+
+
+<span class="c1"># Encapsulated data from stored dict file:</span>
+
+
+<div class="viewcode-block" id="splitter">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.splitter">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">splitter</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generic data-set provider (Iterable)&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_split</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_split</span> <span class="o">=</span> <span class="n">X_split</span>
+
+<div class="viewcode-block" id="splitter.split">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.splitter.split">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">split</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">cv_split</span><span class="p">(</span><span class="n">X_split</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+            <span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))[</span><span class="n">X_split</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">]</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))[</span><span class="n">X_split</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">cv_split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_split</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_split</span><span class="o">.</span><span class="n">max</span><span class="p">()))</span>
+        <span class="p">]</span></div>
+</div>
+
+
+
+<span class="c1"># Encapsulated data from array:</span>
+
+
+<div class="viewcode-block" id="dataset_generator_from_array">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.dataset_generator_from_array">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">dataset_generator_from_array</span><span class="p">(</span>
+    <span class="n">X</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">objective</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">sk_split</span><span class="o">=</span><span class="n">TimeSeriesSplit</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span>
+    <span class="n">repetition</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">remove_from_train</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">attack_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">cv_list_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Produce data_generator (iterable [X, y, X_split, context, objective, name]) from arrays</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        X (array): Inputs.</span>
+<span class="sd">        y (array or None): Targets.</span>
+<span class="sd">        context (array or None): Additional information.</span>
+<span class="sd">        objective (array or None): Ground truth (Unsupervised task).</span>
+<span class="sd">        sk_split (split strategy): Sklearn split strategy.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">select_or_none</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">array</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span><span class="p">[</span><span class="n">sample</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">remove_from_train</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">remove_from_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+
+    <span class="n">dataset_generator</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n_repet</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">repetition</span><span class="p">):</span>
+        <span class="n">cpt</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">n_repet</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">str_repet</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">str_repet</span> <span class="o">=</span> <span class="s2">&quot;_bis&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n_repet</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span> <span class="ow">in</span> <span class="n">sk_split</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+            <span class="n">X_split</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+            <span class="n">X_split</span><span class="p">[</span><span class="n">train_index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">X_split</span><span class="p">[(</span><span class="n">remove_from_train</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">X_split</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+            <span class="n">sample_cv</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span><span class="p">]))</span>
+            <span class="n">cv_name</span> <span class="o">=</span> <span class="s2">&quot;cv_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cpt</span><span class="p">)</span> <span class="o">+</span> <span class="n">attack_name</span> <span class="o">+</span> <span class="n">str_repet</span>
+            <span class="k">if</span> <span class="n">cv_list_name</span><span class="p">:</span>
+                <span class="n">cv_name</span> <span class="o">=</span> <span class="n">cv_list_name</span><span class="p">[</span><span class="n">cpt</span><span class="p">]</span> <span class="o">+</span> <span class="n">attack_name</span> <span class="o">+</span> <span class="n">str_repet</span>
+            <span class="n">dataset_generator</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">select_or_none</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">sample_cv</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">X_split</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">objective</span><span class="p">,</span> <span class="n">cv_name</span><span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="n">cpt</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">dataset_generator</span></div>
+
+
+
+<span class="c1">####################################################################</span>
+<span class="c1"># Raw data structure regularisation &amp; statistics synthesize.</span>
+
+
+<div class="viewcode-block" id="raw_analysis">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.raw_analysis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">raw_analysis</span><span class="p">(</span><span class="n">raw_series</span><span class="p">,</span> <span class="n">time_structure</span><span class="p">):</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">raw_series</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">raw_series</span><span class="o">.</span><span class="n">index</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">raw_series</span><span class="p">[</span><span class="n">source</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">frequence</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frequence&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;datetime64[s]&quot;</span><span class="p">)</span>
+    <span class="n">n_nan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">range_</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;datetime&quot;</span><span class="p">,</span> <span class="s2">&quot;timedelta&quot;</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">n_obs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">ratio_comp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">n_obs</span> <span class="o">/</span> <span class="p">(</span><span class="n">frequence</span> <span class="o">*</span> <span class="n">range_</span><span class="p">),</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">n_val</span><span class="p">,</span> <span class="n">v_entropy</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="n">n_nan</span><span class="p">,</span> <span class="n">ratio_comp</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+
+    <span class="n">n_val</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="n">v_entropy</span> <span class="o">=</span> <span class="n">entropy</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">n_val</span><span class="p">)</span>
+    <span class="n">time_structure</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;n_obs&quot;</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">)</span>
+    <span class="n">time_structure</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;ratio_comp&quot;</span><span class="p">,</span> <span class="n">ratio_comp</span><span class="p">)</span>
+    <span class="n">time_structure</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;n_val&quot;</span><span class="p">,</span> <span class="n">n_val</span><span class="p">)</span>
+    <span class="n">time_structure</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;v_entropy&quot;</span><span class="p">,</span> <span class="n">v_entropy</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">n_val</span><span class="p">,</span> <span class="n">v_entropy</span><span class="p">,</span> <span class="n">n_obs</span><span class="p">,</span> <span class="n">n_nan</span><span class="p">,</span> <span class="n">ratio_comp</span><span class="p">)</span></div>
+
+
+
+<span class="c1">####################################################################</span>
+<span class="c1"># Auxilliaire Preprocessor function</span>
+
+
+<div class="viewcode-block" id="process_raw_source">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.process_raw_source">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_raw_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">structure</span><span class="p">):</span>
+    <span class="n">time_structure</span> <span class="o">=</span> <span class="n">structure</span>
+
+    <span class="n">raw_series</span><span class="p">,</span> <span class="n">dict_errors</span> <span class="o">=</span> <span class="n">data</span>
+
+    <span class="n">type_sensor_error</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type_sensor_error&quot;</span><span class="p">)</span>
+    <span class="n">time_structure</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;list_error&quot;</span><span class="p">,</span> <span class="n">dict_errors</span><span class="p">)</span>
+    <span class="n">time_structure</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;type_sensor_error&quot;</span><span class="p">,</span> <span class="n">type_sensor_error</span><span class="p">)</span>
+    <span class="n">time_structure</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;dict_errors&quot;</span><span class="p">,</span> <span class="n">dict_errors</span><span class="p">)</span>
+    <span class="n">raw_analysis</span><span class="p">(</span><span class="n">raw_series</span><span class="p">,</span> <span class="n">time_structure</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">raw_series</span><span class="p">,</span> <span class="n">time_structure</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="process_irregular_data">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.process_irregular_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_irregular_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">structure</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply interpolation &amp; statistics extraction on data using query parameters</span>
+<span class="sd">    with metadata stored in structure [&#39;start_date&#39;,&#39;end_date&#39;,&#39;delta&#39;]</span>
+<span class="sd">    of structure are used to specificy the start, the end and the statistics_step_synthesis.</span>
+<span class="sd">    [&#39;window_size&#39;,&#39;begin_by_interpolation] of query are used to specify</span>
+<span class="sd">    the final step (delta*window_size) and if there is a pre-interpolation step.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (_type_): _description_</span>
+<span class="sd">        query (_type_): _description_</span>
+<span class="sd">        structure (_type_): _description_</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">time_structure</span> <span class="o">=</span> <span class="n">structure</span>
+    <span class="n">begin_by_interpolation</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">begin_by_interpolation</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;begin_by_interpolation&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+    <span class="n">window_size</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;window_size&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">raw_series</span><span class="p">,</span> <span class="n">raw_time_structure</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="n">dict_errors</span> <span class="o">=</span> <span class="n">raw_time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dict_errors&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">raw_series</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="n">dict_errors</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">time_structure</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;dict_errors&quot;</span><span class="p">,</span> <span class="n">dict_errors</span><span class="p">)</span>
+
+    <span class="c1"># Specify rolling statistics</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;delta&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;datetime64[s]&quot;</span><span class="p">)</span>
+
+    <span class="n">stats</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stats&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;std&quot;</span><span class="p">,</span> <span class="s2">&quot;extremum&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Statistics processing experte kwdowledge based:</span>
+    <span class="n">frequence</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;frequence&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;precision&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Interpolation specification</span>
+    <span class="n">interpolation</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;interpolation&quot;</span><span class="p">,</span> <span class="s2">&quot;previous&quot;</span><span class="p">)</span>
+    <span class="n">max_time_jump</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_time_jump&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">replace_val</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;replace_val&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Regular interpolation on rolling statistics:</span>
+    <span class="n">start_date</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;start_date&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">end_date</span> <span class="o">=</span> <span class="n">time_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;end_date&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">begin_by_interpolation</span><span class="p">:</span>
+        <span class="n">raw_series</span> <span class="o">=</span> <span class="n">regular_stat_series</span> <span class="o">=</span> <span class="n">upscale_series</span><span class="p">(</span>
+            <span class="n">raw_series</span><span class="p">,</span>
+            <span class="n">delta</span> <span class="o">*</span> <span class="n">frequence</span><span class="p">,</span>
+            <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+            <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+            <span class="n">x_time_jump</span><span class="o">=</span><span class="n">max_time_jump</span><span class="p">,</span>
+            <span class="n">replace_val</span><span class="o">=</span><span class="n">replace_val</span><span class="p">,</span>
+            <span class="n">mode</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">new_delta</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">check_delta</span><span class="p">(</span><span class="n">delta</span> <span class="o">*</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1"># Irregular rolling statistics</span>
+    <span class="n">regular_stat_series</span> <span class="o">=</span> <span class="n">rolling_statistics</span><span class="p">(</span>
+        <span class="n">raw_series</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="n">new_delta</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">reduc_functions</span><span class="o">=</span><span class="n">stats</span><span class="p">,</span> <span class="n">reduc_names</span><span class="o">=</span><span class="n">stats</span>
+    <span class="p">)</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">regular_stat_series</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">flag_extremum</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;extremum&quot;</span> <span class="ow">in</span> <span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">]</span>
+    <span class="n">flag_count</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;count&quot;</span> <span class="ow">in</span> <span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">]</span>
+    <span class="n">flag_std</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;std&quot;</span> <span class="ow">in</span> <span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">]</span>
+
+    <span class="c1"># Normalisation of count statistics</span>
+    <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">[</span><span class="n">flag_std</span><span class="p">]:</span>
+        <span class="n">std_value</span> <span class="o">=</span> <span class="n">regular_stat_series</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">std_value</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">std_value</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">0.000001</span>
+        <span class="n">regular_stat_series</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">precision</span><span class="p">,</span> <span class="n">std_value</span><span class="p">)</span>
+    <span class="c1"># Normalisation of count statistics</span>
+    <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">[</span><span class="n">flag_extremum</span><span class="p">]:</span>
+        <span class="n">regular_stat_series</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+            <span class="mf">0.0001</span> <span class="o">+</span> <span class="n">regular_stat_series</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Include consecutive non-observation in statistics</span>
+    <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">[</span><span class="n">flag_count</span><span class="p">]:</span>
+        <span class="n">consecutive_no_obs</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span>
+                <span class="mf">0.5</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span>
+                    <span class="n">ut</span><span class="o">.</span><span class="n">cum_sum_consecutive_zero</span><span class="p">(</span>
+                        <span class="n">regular_stat_series</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+                    <span class="p">)</span>
+                    <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="mi">0</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="o">/</span> <span class="mi">3</span>
+        <span class="p">)</span>
+
+        <span class="n">regular_stat_series</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">regular_stat_series</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">consecutive_no_obs</span><span class="p">)</span>
+            <span class="o">/</span> <span class="n">frequence</span>
+            <span class="o">*</span> <span class="n">new_delta</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">regular_stat_series</span> <span class="o">=</span> <span class="n">upscale_series</span><span class="p">(</span>
+        <span class="n">regular_stat_series</span><span class="p">,</span>
+        <span class="n">new_delta</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span>
+        <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">max_time_jump</span><span class="o">=</span><span class="n">max_time_jump</span><span class="p">,</span>
+        <span class="n">replace_val</span><span class="o">=</span><span class="n">replace_val</span><span class="p">,</span>
+        <span class="n">mode</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">regular_stat_series</span><span class="p">,</span> <span class="n">time_structure</span><span class="p">)</span></div>
+
+
+
+<span class="c1">####################################################################</span>
+<span class="c1"># Auxilliaire Preprocessor function</span>
+
+
+<div class="viewcode-block" id="process_label">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.process_label">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">process_label</span><span class="p">(</span>
+    <span class="n">label_df</span><span class="p">,</span> <span class="n">sources_selection</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;datetime64[s]&quot;</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Process anom label dataframe with (start: datetime64[s], end: datetime64[s],source)</span>
+<span class="sd">    Into a ground truth matrix with a regular step scale of delta that start at start_date &amp; end at end_date</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">source_anom</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">label_df</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">]]</span>
+    <span class="n">flag_selection</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="ow">in</span> <span class="n">sources_selection</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">source_anom</span><span class="p">]</span>
+
+    <span class="n">step_begin_anoms</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">label_df</span><span class="p">[</span><span class="n">flag_selection</span><span class="p">][</span><span class="s2">&quot;start&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+    <span class="p">)</span>
+    <span class="n">step_end_anoms</span> <span class="o">=</span> <span class="n">label_df</span><span class="p">[</span><span class="n">flag_selection</span><span class="p">][</span><span class="s2">&quot;end&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="n">step_begin</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">date_to_step</span><span class="p">(</span><span class="n">start_date</span><span class="p">)</span>
+    <span class="n">step_end</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">date_to_step</span><span class="p">(</span><span class="n">end_date</span><span class="p">)</span>
+
+    <span class="n">step_scale</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">get_regular_step_scale</span><span class="p">(</span>
+        <span class="n">delta</span><span class="p">,</span> <span class="n">step_end</span> <span class="o">-</span> <span class="n">step_begin</span><span class="p">,</span> <span class="n">step_begin</span>
+    <span class="p">)</span>
+
+    <span class="n">label_anom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">step_scale</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">sources_selection</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sources_selection</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">step_scale</span> <span class="o">&gt;</span> <span class="n">step_begin_anoms</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">step_scale</span> <span class="o">&lt;</span> <span class="n">step_end_anoms</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">label_anom</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">date_index</span> <span class="o">=</span> <span class="n">pre_struc</span><span class="o">.</span><span class="n">step_to_date</span><span class="p">(</span>
+        <span class="n">step_scale</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="n">delta</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span>
+    <span class="p">)</span>
+    <span class="n">label_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">label_anom</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">date_index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">label_df</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

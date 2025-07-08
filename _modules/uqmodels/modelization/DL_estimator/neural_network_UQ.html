@@ -1,0 +1,1143 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.modelization.DL_estimator.neural_network_UQ &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.modelization.DL_estimator.neural_network_UQ</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.modelization.DL_estimator.neural_network_UQ</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">KFold</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.loss</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">uqloss</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.processing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">uqproc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.metalayers</span><span class="w"> </span><span class="kn">import</span> <span class="n">mlp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_global_determinism</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.UQEstimator</span><span class="w"> </span><span class="kn">import</span> <span class="n">UQEstimator</span><span class="p">,</span> <span class="n">get_UQEstimator_parameters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">apply_mask</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">generate_random_state</span>
+
+
+<div class="viewcode-block" id="Identity_factory">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.Identity_factory">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Identity_factory</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="NN_UQ">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">NN_UQ</span><span class="p">(</span><span class="n">UQEstimator</span><span class="p">):</span>
+    <span class="s2">&quot;Neural Network UQ&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_initializer</span><span class="p">,</span>
+        <span class="n">model_parameters</span><span class="p">,</span>
+        <span class="n">factory_parameters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">training_parameters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">n_ech</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">train_ratio</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mf">0.000001</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;NN&quot;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_initializer</span> <span class="o">=</span> <span class="n">model_initializer</span>
+
+        <span class="k">if</span> <span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">params_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">model_initializer</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s2">&quot;seed&quot;</span> <span class="ow">in</span> <span class="n">params_list</span><span class="p">:</span>
+                <span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_state</span>
+
+            <span class="k">elif</span> <span class="s2">&quot;random_state&quot;</span> <span class="ow">in</span> <span class="n">params_list</span><span class="p">:</span>
+                <span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;random_state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_state</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s1">&#39;Warning model_initializer have not &quot;seed&quot; or &quot;random_state&quot; parameters&#39;</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span> <span class="o">=</span> <span class="n">model_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory_parameters</span> <span class="o">=</span> <span class="n">factory_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span> <span class="o">=</span> <span class="n">training_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">=</span> <span class="n">type_output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_ech</span> <span class="o">=</span> <span class="n">n_ech</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train_ratio</span> <span class="o">=</span> <span class="n">train_ratio</span>
+
+        <span class="n">type_UQ</span> <span class="o">=</span> <span class="s2">&quot;var_A&amp;E&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;random_state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_state</span>
+
+        <span class="k">if</span> <span class="s2">&quot;generator&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="s2">&quot;test_batch_size&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;test_batch_size&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20000</span>
+
+        <span class="c1"># Additional deep ensemble parameter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ddof</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="s2">&quot;ddof&quot;</span> <span class="ow">in</span> <span class="n">model_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ddof</span> <span class="o">=</span> <span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;ddof&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;train_ratio&quot;</span> <span class="ow">in</span> <span class="n">model_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">train_ratio</span> <span class="o">=</span> <span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;train_ratio&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;n_ech&quot;</span> <span class="ow">in</span> <span class="n">model_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">n_ech</span> <span class="o">=</span> <span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;n_ech&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s2">&quot;snapshot&quot;</span> <span class="ow">in</span> <span class="n">model_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span> <span class="o">=</span> <span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;snapshot&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_drop</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="s2">&quot;data_drop&quot;</span> <span class="ow">in</span> <span class="n">model_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_drop</span> <span class="o">=</span> <span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;data_drop&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;k_fold&quot;</span> <span class="ow">in</span> <span class="n">model_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">k_fold</span> <span class="o">=</span> <span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;k_fold&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="NN_UQ.build_loss">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.build_loss">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loss</span><span class="p">,</span> <span class="n">param_loss</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build loss from str or loss and loss_parameters</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            loss (_type_): _description_</span>
+<span class="sd">            param_loss (_type_, optional): _description_. Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;BNN&quot;</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">uqloss</span><span class="o">.</span><span class="n">build_BNN_loss</span>
+            <span class="k">if</span> <span class="n">param_loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">param_loss</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">elif</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">uqloss</span><span class="o">.</span><span class="n">build_EDL_loss</span>
+            <span class="k">if</span> <span class="n">param_loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">param_loss</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">elif</span> <span class="n">loss</span> <span class="o">==</span> <span class="s2">&quot;MSE&quot;</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">uqloss</span><span class="o">.</span><span class="n">build_MSE_loss</span>
+            <span class="k">if</span> <span class="n">param_loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">param_loss</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="n">param_loss</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param_loss</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="o">**</span><span class="n">param_loss</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">param_loss</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
+
+        <span class="k">return</span> <span class="n">loss</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.build_metrics">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.build_metrics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">build_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metrics</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Build list of metrics from str or metrics.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            metrics (_type_): _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;MSE&quot;</span><span class="p">:</span>
+                <span class="n">output_size</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">]:</span>
+                    <span class="n">output_size</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;EDL&quot;</span><span class="p">]:</span>
+                    <span class="n">output_size</span> <span class="o">=</span> <span class="mi">4</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="n">uqloss</span><span class="o">.</span><span class="n">build_MSE_loss</span><span class="p">(</span><span class="n">output_size</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">metric</span> <span class="o">==</span> <span class="s2">&quot;BNN&quot;</span><span class="p">:</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="n">uqloss</span><span class="o">.</span><span class="n">build_BNN_loss</span><span class="p">(</span>
+                    <span class="mf">0.95</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">type_output</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type_output</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">list_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_metrics</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="n">type_transform</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="n">mode_UQ</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NN_UQ.factory">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.factory">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">factory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cut_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">only_fit_scaler</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y_shape</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">if</span> <span class="n">cut_param</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cuting_target&quot;</span><span class="p">)</span>
+                <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span> <span class="o">=</span> <span class="n">cut_param</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="s2">&quot;fit_transform&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">only_fit_scaler</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">()</span>
+
+        <span class="c1"># X, y = [X], y</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.save">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">):</span>
+                <span class="n">cur_name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cur_name</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">save_weights</span><span class="p">(</span><span class="n">new_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save_weights</span><span class="p">(</span><span class="n">new_path</span><span class="p">)</span>
+
+        <span class="n">model_tmp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">dict_parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span>
+        <span class="n">uqproc</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">[</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_params&quot;</span><span class="p">],</span> <span class="n">dict_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model_tmp</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.load">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.load">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">old_level_info</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_CPP_MIN_LOG_LEVEL&quot;</span><span class="p">]</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_CPP_MIN_LOG_LEVEL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;2&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">dict_parameters</span> <span class="o">=</span> <span class="n">uqproc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">[</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_params&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">dict_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">attributes</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_neural_network</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">):</span>
+                <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">new_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">new_path</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_CPP_MIN_LOG_LEVEL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_level_info</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.compile">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.compile">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">l_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;l_r&quot;</span><span class="p">][</span><span class="n">step</span><span class="p">]</span>
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">Nadam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="n">l_r</span><span class="p">)</span>
+        <span class="n">kwarg</span><span class="p">[</span><span class="s2">&quot;optimizer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">optimizer</span>
+
+        <span class="k">if</span> <span class="n">loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loss_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;list_loss&quot;</span><span class="p">][</span><span class="n">step</span><span class="p">]</span>
+            <span class="n">param_loss_current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;param_loss&quot;</span><span class="p">][</span><span class="n">step</span><span class="p">]</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_loss</span><span class="p">(</span><span class="n">loss_</span><span class="p">,</span> <span class="n">param_loss_current</span><span class="p">)</span>
+        <span class="n">kwarg</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">loss</span>
+
+        <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">]</span>
+        <span class="n">kwarg</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="o">**</span><span class="n">kwarg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.modify_dropout">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.modify_dropout">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modify_dropout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dp</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;dp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_initializer</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.reset">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.init_neural_network">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.init_neural_network">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init_neural_network</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s2">&quot;apply model_initializer function with model_parameters and store in self.model&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">set_global_determinism</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ech</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_initializer</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_initializer</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.fit">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Inputs</span><span class="p">,</span>
+        <span class="n">Targets</span><span class="p">,</span>
+        <span class="n">train</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">training_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;start_fit&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">training_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">training_parameters</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">verbose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">verbose</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initialized</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_neural_network</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">train</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">last_val</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;model_parameters&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="s2">&quot;size_window&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">last_val</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">generate_train_test</span><span class="p">(</span>
+                <span class="n">len_</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">Targets</span><span class="p">),</span>
+                <span class="n">train_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_ratio</span><span class="p">,</span>
+                <span class="n">last_val</span><span class="o">=</span><span class="n">last_val</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">test</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+
+        <span class="n">history</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basic_fit</span><span class="p">(</span>
+            <span class="n">Inputs</span><span class="p">,</span> <span class="n">Targets</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">history</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span></div>
+
+
+    <span class="c1"># Basic_predict function</span>
+
+<div class="viewcode-block" id="NN_UQ.basic_fit">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.basic_fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">basic_fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Inputs</span><span class="p">,</span>
+        <span class="n">Targets</span><span class="p">,</span>
+        <span class="n">train</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">test</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="o">=</span><span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">],</span>
+        <span class="n">b_s</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
+        <span class="n">l_r</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">],</span>
+        <span class="n">sample_w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">list_loss</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mse&quot;</span><span class="p">],</span>
+        <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">generator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">steps_per_epoch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">callbacks</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="n">validation_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">param_loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">test_batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+
+        <span class="c1"># Training function</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">list_history</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">set_global_determinism</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">generator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">test_batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">test_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;test_batch_size&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">train</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">last_val</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;model_parameters&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="s2">&quot;size_window&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="p">):</span>
+                <span class="n">last_val</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">generate_train_test</span><span class="p">(</span>
+                <span class="n">len_</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">Targets</span><span class="p">),</span>
+                <span class="n">train_ratio</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">train_ratio</span><span class="p">,</span>
+                <span class="n">last_val</span><span class="o">=</span><span class="n">last_val</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">test</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+
+        <span class="n">list_history</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;scaler&quot;</span><span class="p">)):</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">Targets</span><span class="p">,</span> <span class="n">only_fit_scaler</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">n_model</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">:</span>
+            <span class="n">n_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_ech</span>
+            <span class="n">list_sampletoremove</span> <span class="o">=</span> <span class="n">generate_K_fold_removing_index</span><span class="p">(</span>
+                <span class="n">n_model</span><span class="p">,</span>
+                <span class="n">k_fold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">k_fold</span><span class="p">,</span>
+                <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">,</span>
+                <span class="n">data_drop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_drop</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">n_model</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_model</span><span class="p">):</span>
+            <span class="n">train_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+            <span class="n">test_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">test</span><span class="p">)</span>
+
+            <span class="c1"># Deep_ensemble : Submodel dataset differentiation if kfold activated</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">:</span>
+                <span class="n">train_</span><span class="p">[</span><span class="n">list_sampletoremove</span><span class="p">[</span><span class="n">n_model</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">test_</span><span class="p">[</span><span class="n">list_sampletoremove</span><span class="p">[</span><span class="n">n_model</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">loss</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_loss</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">b_s</span><span class="p">,</span> <span class="n">l_r</span><span class="p">)):</span>
+
+                    <span class="n">loss_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_loss</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">param_loss</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+                    <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapshot</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">n_model</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">n_model</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">clone_model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                        <span class="n">current_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">[</span><span class="n">n_model</span><span class="p">]</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">current_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+
+                    <span class="n">current_model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                        <span class="n">optimizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">experimental</span><span class="o">.</span><span class="n">Nadam</span><span class="p">(</span>
+                            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span>
+                        <span class="p">),</span>
+                        <span class="n">loss</span><span class="o">=</span><span class="n">loss_</span><span class="p">,</span>
+                        <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="p">(</span>
+                        <span class="n">In_</span><span class="p">,</span>
+                        <span class="n">Tar_</span><span class="p">,</span>
+                        <span class="n">validation_data_</span><span class="p">,</span>
+                        <span class="n">validation_steps</span><span class="p">,</span>
+                        <span class="n">steps_per_epoch</span><span class="p">,</span>
+                        <span class="n">batch_size</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_generator</span><span class="p">(</span>
+                        <span class="n">Inputs</span><span class="o">=</span><span class="n">apply_mask</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">train_</span><span class="p">),</span>
+                        <span class="n">Targets</span><span class="o">=</span><span class="n">apply_mask</span><span class="p">(</span><span class="n">Targets</span><span class="p">,</span> <span class="n">train_</span><span class="p">),</span>
+                        <span class="n">validation_data</span><span class="o">=</span><span class="p">(</span>
+                            <span class="n">apply_mask</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">test_</span><span class="p">),</span>
+                            <span class="n">apply_mask</span><span class="p">(</span><span class="n">Targets</span><span class="p">,</span> <span class="n">test_</span><span class="p">),</span>
+                        <span class="p">),</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                        <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+                        <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
+                        <span class="n">test_batch_size</span><span class="o">=</span><span class="n">test_batch_size</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">callbacks</span> <span class="o">==</span> <span class="s2">&quot;default&quot;</span><span class="p">:</span>
+                        <span class="n">callbacks</span> <span class="o">=</span> <span class="n">uqloss</span><span class="o">.</span><span class="n">default_callbacks</span><span class="p">()</span>
+
+                    <span class="n">history</span> <span class="o">=</span> <span class="n">current_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                        <span class="n">x</span><span class="o">=</span><span class="n">In_</span><span class="p">,</span>
+                        <span class="n">y</span><span class="o">=</span><span class="n">Tar_</span><span class="p">,</span>
+                        <span class="n">validation_data</span><span class="o">=</span><span class="n">validation_data_</span><span class="p">,</span>
+                        <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">steps_per_epoch</span><span class="o">=</span><span class="n">steps_per_epoch</span><span class="p">,</span>
+                        <span class="n">validation_steps</span><span class="o">=</span><span class="n">validation_steps</span><span class="p">,</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                        <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_w</span><span class="p">,</span>
+                        <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
+                        <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
+                        <span class="n">validation_freq</span><span class="o">=</span><span class="n">validation_freq</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="n">current_model</span><span class="o">.</span><span class="n">compile</span><span class="p">()</span>
+
+                    <span class="n">list_history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">list_history</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.dataset_generator">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.dataset_generator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dataset_generator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Inputs</span><span class="p">,</span>
+        <span class="n">Targets</span><span class="p">,</span>
+        <span class="n">validation_data</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="p">,</span>
+        <span class="n">generator</span><span class="p">,</span>
+        <span class="n">test_batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hold case with or without data generator</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Inputs (_type_): _description_</span>
+<span class="sd">            Targets (_type_): _description_</span>
+<span class="sd">            validation_data (_type_): _description_</span>
+<span class="sd">            batch (_type_): _description_</span>
+<span class="sd">            shuffle (_type_): _description_</span>
+<span class="sd">            generator (_type_): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">generator</span><span class="p">:</span>
+            <span class="n">In_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Build_generator</span><span class="p">(</span>
+                <span class="n">Inputs</span><span class="p">,</span> <span class="n">Targets</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+            <span class="n">Tar_</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">test_batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">test_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;test_batch_size&quot;</span><span class="p">]</span>
+
+            <span class="n">validation_data_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Build_generator</span><span class="p">(</span>
+                <span class="n">validation_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">validation_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">batch</span><span class="o">=</span><span class="n">test_batch_size</span><span class="p">,</span>
+                <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">In_</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+            <span class="n">validation_steps</span> <span class="o">=</span> <span class="n">validation_data_</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+            <span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">In_</span> <span class="o">=</span> <span class="n">Inputs</span>
+            <span class="n">Tar_</span> <span class="o">=</span> <span class="n">Targets</span>
+            <span class="n">validation_data_</span> <span class="o">=</span> <span class="n">validation_data</span>
+            <span class="n">validation_steps</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">In_</span><span class="p">,</span>
+            <span class="n">Tar_</span><span class="p">,</span>
+            <span class="n">validation_data_</span><span class="p">,</span>
+            <span class="n">validation_steps</span><span class="p">,</span>
+            <span class="n">steps_per_epoch</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.predict">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">type_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">type_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span>
+
+        <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">basic_predict</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">n_ech</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_ech</span><span class="p">,</span> <span class="n">type_output</span><span class="o">=</span><span class="n">type_output</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="s2">&quot;inverse_transform&quot;</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span>
+                <span class="kc">None</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="s2">&quot;inverse_transform&quot;</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">True</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.basic_predict">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.basic_predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">basic_predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Inputs</span><span class="p">,</span>
+        <span class="n">n_ech</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+        <span class="n">type_output</span><span class="o">=</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span>
+        <span class="n">generator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">test_batch_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwarg</span>
+    <span class="p">):</span>
+        <span class="c1"># Variational prediction + variance estimation for step T+1 et T+4(lag)</span>
+        <span class="k">if</span> <span class="n">generator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">set_global_determinism</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">generator</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">test_batch_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">test_batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;test_batch_size&quot;</span><span class="p">]</span>
+            <span class="n">Inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Build_generator</span><span class="p">(</span>
+                <span class="n">Inputs</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">test_batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span> <span class="s2">&quot;MC_Dropout_no_PNN&quot;</span><span class="p">]:</span>
+            <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="n">Drawn_based_prediction</span><span class="p">(</span>
+                <span class="n">Inputs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">n_ech</span><span class="p">,</span>
+                <span class="n">ddof</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ddof</span><span class="p">,</span>
+                <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+                <span class="n">type_output</span><span class="o">=</span><span class="n">type_output</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">:</span>
+            <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="n">Ensemble_based_prediction</span><span class="p">(</span>
+                <span class="n">Inputs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">ddof</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ddof</span><span class="p">,</span>
+                <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+                <span class="n">type_output</span><span class="o">=</span><span class="n">type_output</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;EDL&quot;</span><span class="p">,</span> <span class="s2">&quot;PNN&quot;</span><span class="p">,</span> <span class="s2">&quot;None&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+            <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="n">Deterministic_prediction</span><span class="p">(</span>
+                <span class="n">Inputs</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+                <span class="n">ddof</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ddof</span><span class="p">,</span>
+                <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+                <span class="n">type_output</span><span class="o">=</span><span class="n">type_output</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="s2">&quot;Unknown type_output : choose &#39;MC_Dropout&#39; or &#39;Deep_esemble&#39; or &#39;EDL&#39; or &#39;Non&#39; or None&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="NN_UQ.Build_generator">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.Build_generator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Build_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">default_Generator</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Drawn_based_prediction">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.Drawn_based_prediction">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Drawn_based_prediction</span><span class="p">(</span>
+    <span class="n">Inputs</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">n_ech</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">type_output</span><span class="o">=</span><span class="s2">&quot;MC_Dropout&quot;</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prediction (mu,sigma) of Inputs using  Drawn_based UQ-paragim (Ex : MC_dropout)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (tf.model): neural network</span>
+<span class="sd">        n_ech (n_draw): number of dropout drawn</span>
+<span class="sd">        Inputs (_type_): Inputs of model</span>
+<span class="sd">        ddof (_type_): ddof</span>
+<span class="sd">        generator (bool, optional): specify if Inputs is generator or not. Defaults to False.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">generator</span><span class="p">:</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">var_a</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">var_e</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">Inputs_gen</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">Inputs</span><span class="p">:</span>  <span class="c1"># by batch do n inf and aggreagate results</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ech</span><span class="p">):</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs_gen</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout_no_PNN&quot;</span><span class="p">:</span>
+                <span class="n">pred_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+                <span class="n">var_a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">pred_</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout&quot;</span><span class="p">:</span>
+                <span class="n">pred_</span><span class="p">,</span> <span class="n">logvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">var_a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logvar</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="n">pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred_</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">var_e</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred_</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">var_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">var_a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">var_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">var_e</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">var_a</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">var_e</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ech</span><span class="p">):</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout_no_PNN&quot;</span><span class="p">:</span>
+            <span class="n">pred_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+            <span class="n">var_a</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">pred_</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout&quot;</span><span class="p">:</span>
+            <span class="n">pred_</span><span class="p">,</span> <span class="n">logvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">var_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logvar</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">var_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">pred_</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">)</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">var_a</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">var_e</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Deterministic_prediction">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.Deterministic_prediction">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Deterministic_prediction</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prediction (mu,sigma) of Inputs using Deterministic UQ-paragim (Ex : EDL)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (tf.model): neural network</span>
+<span class="sd">        n_ech (n_draw): number of dropout drawn</span>
+<span class="sd">        Inputs (_type_): Inputs of model</span>
+<span class="sd">        ddof (_type_): ddof</span>
+<span class="sd">        generator (bool, optional): specify if Inputs is generator or not. Defaults to False.</span>
+<span class="sd">        type_output : type_output (EDL)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">generator</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">Inputs_gen</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">Inputs</span><span class="p">:</span>  <span class="c1"># by batch do n inf and aggreagate results</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs_gen</span><span class="p">))</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="n">gamma</span><span class="p">,</span> <span class="n">vu</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">+</span> <span class="mf">10e-6</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">gamma</span>
+        <span class="n">var_A</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">/</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># WARNING sqrt or not sqrt ?</span>
+        <span class="n">var_E</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">/</span> <span class="p">(</span><span class="n">vu</span> <span class="o">*</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">var_E</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning inf values in var_E replace by s-min&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">var_A</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning inf values in var_E replace by s-min&quot;</span><span class="p">)</span>
+        <span class="n">var_E</span><span class="p">[</span><span class="n">var_E</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">var_A</span><span class="p">[</span><span class="n">var_A</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">elif</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;PNN&quot;</span><span class="p">:</span>
+        <span class="n">pred</span><span class="p">,</span> <span class="n">logvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">var_A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logvar</span><span class="p">)</span>
+        <span class="n">var_E</span> <span class="o">=</span> <span class="n">logvar</span> <span class="o">*</span> <span class="mi">0</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">output</span>
+        <span class="n">var_A</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">pred</span>
+        <span class="n">var_E</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">pred</span>
+
+    <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">var_E</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">var_A</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Ensemble_based_prediction">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.Ensemble_based_prediction">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">Ensemble_based_prediction</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">ddof</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Prediction (mu,sigma) of Inputs using Ensemble_based UQ-paradign</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (tf.model): neural network</span>
+<span class="sd">        n_ech (n_draw): number of dropout drawn</span>
+<span class="sd">        Inputs (_type_): Inputs of model</span>
+<span class="sd">        ddof (_type_): ddof</span>
+<span class="sd">        generator (bool, optional): specify if Inputs is generator or not. Defaults to False.</span>
+<span class="sd">        type_output : type_output (curently useless)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: _description_</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">generator</span><span class="p">:</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">var_a</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">var_e</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">Inputs_gen</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">Inputs</span><span class="p">:</span>  <span class="c1"># by batch do n inf and aggreagate results</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">submodel</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+                <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">submodel</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs_gen</span><span class="p">))</span>
+
+            <span class="n">pred_</span><span class="p">,</span> <span class="n">logvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">var_a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logvar</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+            <span class="n">var_e</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred_</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">))</span>
+            <span class="n">pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred_</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">var_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">var_a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">var_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">var_e</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">submodel</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+            <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">submodel</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs</span><span class="p">))</span>
+        <span class="n">pred</span><span class="p">,</span> <span class="n">logvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">var_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">logvar</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">var_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="n">ddof</span><span class="p">)</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">var_a</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">var_e</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_training_parameters">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.get_training_parameters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_training_parameters</span><span class="p">(</span>
+    <span class="n">epochs</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+    <span class="n">b_s</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">32</span><span class="p">],</span>
+    <span class="n">l_r</span><span class="o">=</span><span class="p">[</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">],</span>
+    <span class="n">list_loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">generator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">sample_w</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">callbacks</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">list_loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">type_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">list_loss</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MSE&quot;</span><span class="p">]</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MSE&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout&quot;</span><span class="p">:</span>
+            <span class="n">list_loss</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MSE&quot;</span><span class="p">,</span> <span class="s2">&quot;BNN&quot;</span><span class="p">]</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MSE&quot;</span><span class="p">,</span> <span class="s2">&quot;BNN&quot;</span><span class="p">]</span>
+            <span class="n">param_loss</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">:</span>
+            <span class="n">list_loss</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MSE&quot;</span><span class="p">,</span> <span class="s2">&quot;BNN&quot;</span><span class="p">]</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MSE&quot;</span><span class="p">,</span> <span class="s2">&quot;BNN&quot;</span><span class="p">]</span>
+            <span class="n">param_loss</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+            <span class="n">list_loss</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MSE&quot;</span><span class="p">,</span> <span class="s2">&quot;EDL&quot;</span><span class="p">,</span> <span class="s2">&quot;EDL&quot;</span><span class="p">]</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;MSE&quot;</span><span class="p">,</span> <span class="s2">&quot;BNN&quot;</span><span class="p">]</span>
+            <span class="n">param_loss</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="mf">10e-2</span><span class="p">]</span>
+
+    <span class="n">dict_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;epochs&quot;</span><span class="p">:</span> <span class="n">epochs</span><span class="p">,</span>
+        <span class="s2">&quot;b_s&quot;</span><span class="p">:</span> <span class="n">b_s</span><span class="p">,</span>
+        <span class="s2">&quot;l_r&quot;</span><span class="p">:</span> <span class="n">l_r</span><span class="p">,</span>
+        <span class="s2">&quot;sample_w&quot;</span><span class="p">:</span> <span class="n">sample_w</span><span class="p">,</span>
+        <span class="s2">&quot;list_loss&quot;</span><span class="p">:</span> <span class="n">list_loss</span><span class="p">,</span>
+        <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="n">metrics</span><span class="p">,</span>
+        <span class="s2">&quot;param_loss&quot;</span><span class="p">:</span> <span class="n">param_loss</span><span class="p">,</span>
+        <span class="s2">&quot;generator&quot;</span><span class="p">:</span> <span class="n">generator</span><span class="p">,</span>
+        <span class="s2">&quot;shuffle&quot;</span><span class="p">:</span> <span class="n">shuffle</span><span class="p">,</span>
+        <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="n">verbose</span><span class="p">,</span>
+        <span class="s2">&quot;callbacks&quot;</span><span class="p">:</span> <span class="n">callbacks</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">key_arg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">dict_params</span><span class="p">[</span><span class="n">key_arg</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key_arg</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">dict_params</span></div>
+
+
+
+<div class="viewcode-block" id="get_params_dict">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.get_params_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_params_dict</span><span class="p">(</span>
+    <span class="n">dim_in</span><span class="p">,</span>
+    <span class="n">dim_out</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">layers_size</span><span class="o">=</span><span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+    <span class="n">regularizer_</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">,</span> <span class="mf">0.0001</span><span class="p">),</span>
+    <span class="n">dp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;MLP_UQ&quot;</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+
+    <span class="n">dict_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;dim_in&quot;</span><span class="p">:</span> <span class="n">dim_in</span><span class="p">,</span>
+        <span class="s2">&quot;dim_out&quot;</span><span class="p">:</span> <span class="n">dim_out</span><span class="p">,</span>
+        <span class="s2">&quot;layers_size&quot;</span><span class="p">:</span> <span class="n">layers_size</span><span class="p">,</span>
+        <span class="s2">&quot;regularizer_&quot;</span><span class="p">:</span> <span class="n">regularizer_</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+        <span class="s2">&quot;n_ech&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s2">&quot;dp&quot;</span><span class="p">:</span> <span class="n">dp</span><span class="p">,</span>
+        <span class="s2">&quot;type_output&quot;</span><span class="p">:</span> <span class="n">type_output</span><span class="p">,</span>
+        <span class="s2">&quot;logvar_min&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mf">0.00005</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dict_params</span><span class="p">[</span><span class="s2">&quot;dp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.15</span>
+
+    <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;Deep_ensemble&quot;</span><span class="p">:</span>
+        <span class="n">dict_params</span><span class="p">[</span><span class="s2">&quot;n_ech&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="n">dict_params</span><span class="p">[</span><span class="s2">&quot;k_fold&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="n">dp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dict_params</span><span class="p">[</span><span class="s2">&quot;dp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.02</span>
+
+    <span class="k">if</span> <span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dict_params</span><span class="p">[</span><span class="s2">&quot;dp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.02</span>
+
+    <span class="k">for</span> <span class="n">key_arg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">dict_params</span><span class="p">[</span><span class="n">key_arg</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key_arg</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">dict_params</span></div>
+
+
+
+<div class="viewcode-block" id="default_Generator">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">default_Generator</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">metamodel</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">len_</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">train</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span> <span class="o">=</span> <span class="n">shuffle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch</span> <span class="o">=</span> <span class="n">batch</span>
+
+        <span class="c1"># self.scaler = metamodel.scaler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">factory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">rescale</span>
+
+        <span class="k">if</span> <span class="n">shuffle</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">len_</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">)</span>
+
+<div class="viewcode-block" id="default_Generator.load">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.load">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span>
+
+        <span class="n">seuil_min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">seuil_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">len_</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">Inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[</span><span class="n">seuil_min</span><span class="p">:</span><span class="n">seuil_max</span><span class="p">]</span>
+        <span class="n">Targets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">seuil_min</span><span class="p">:</span><span class="n">seuil_max</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">Targets</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">len_</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">Inputs</span><span class="p">,</span> <span class="n">Ouputs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">len_</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Inputs</span><span class="p">)</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+
+        <span class="n">selection</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span> <span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">len_</span><span class="p">,</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">Inputs</span> <span class="o">=</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">selection</span><span class="p">)</span>
+        <span class="n">Ouputs</span> <span class="o">=</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">Ouputs</span><span class="p">,</span> <span class="n">selection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Inputs</span><span class="p">,</span> <span class="n">Ouputs</span>
+
+    <span class="c1"># shuffles the dataset at the end of each epoch</span>
+<div class="viewcode-block" id="default_Generator.on_epoch_end">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.on_epoch_end">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="generate_K_fold_removing_index">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.generate_K_fold_removing_index">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_K_fold_removing_index</span><span class="p">(</span>
+    <span class="n">n_model</span><span class="p">,</span> <span class="n">k_fold</span><span class="p">,</span> <span class="n">train</span><span class="p">,</span> <span class="n">data_drop</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate liste of idx to remove for k_fold deep ensemble procedure</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        n_model (_type_): Number of models</span>
+<span class="sd">        k_fold (_type_): Number of fold</span>
+<span class="sd">        train (_type_): train_flag_idx</span>
+<span class="sd">        data_drop (_type_): % of data drop</span>
+<span class="sd">        random_state : handle experimental random using seed</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: list_sampletoremove idx of sample to remove of train for each submodel</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">list_sampletoremove</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">k_fold</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">k_fold</span> <span class="o">&lt;</span> <span class="n">n_model</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning kfold lesser than model number&quot;</span><span class="p">)</span>
+        <span class="c1"># Drop data using Kfold + random drop ratio to add variability to deep ensemble</span>
+        <span class="k">for</span> <span class="n">n_fold</span><span class="p">,</span> <span class="p">(</span><span class="n">keep</span><span class="p">,</span> <span class="n">removed</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="n">KFold</span><span class="p">(</span><span class="n">k_fold</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">data_drop</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="n">n_fold</span><span class="p">))</span>
+                <span class="n">sampletoremove</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                    <span class="n">keep</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keep</span><span class="p">)</span> <span class="o">*</span> <span class="n">data_drop</span><span class="p">),</span> <span class="n">replace</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+                <span class="n">sampletoremove</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">removed</span><span class="p">,</span> <span class="n">sampletoremove</span><span class="p">]))</span>
+                <span class="n">list_sampletoremove</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sampletoremove</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">list_sampletoremove</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">list_sampletoremove</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_model</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">data_drop</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_sampletoremove</span><span class="p">):</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="n">n_fold</span><span class="p">))</span>
+                <span class="n">sampletoremove</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)),</span>
+                    <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)</span> <span class="o">*</span> <span class="n">data_drop</span><span class="p">),</span>
+                    <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">list_sampletoremove</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampletoremove</span>
+    <span class="k">return</span> <span class="n">list_sampletoremove</span></div>
+
+
+
+<div class="viewcode-block" id="generate_train_test">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.generate_train_test">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_train_test</span><span class="p">(</span><span class="n">len_</span><span class="p">,</span> <span class="n">train_ratio</span><span class="o">=</span><span class="mf">0.92</span><span class="p">,</span> <span class="n">last_val</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">last_val</span><span class="p">:</span>
+        <span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">len_</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">train_ratio</span> <span class="o">*</span> <span class="n">len_</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">len_</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">train_ratio</span>
+    <span class="n">test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">test</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

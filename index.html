@@ -1,0 +1,193 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to Uqmodels’s documentation! &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=fc837d61"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="📖 Guidelines" href="guidelines.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Welcome to Uqmodels’s documentation!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-uqmodels-s-documentation">
+<h1>Welcome to Uqmodels’s documentation!<a class="headerlink" href="#welcome-to-uqmodels-s-documentation" title="Link to this heading"></a></h1>
+<div align="center">
+    <img src="_static/Logo_ConfianceAI.png" width="20%" alt="ConfianceAI Logo" />
+    <h1 style="font-size: large; font-weight: bold;">UQMODELS</h1>
+</div><div align="center">
+    <a href="#">
+        <img src="https://img.shields.io/badge/Python-3.10-efefef">
+    </a>
+        <a href="#">
+        <img src="https://img.shields.io/badge/Python-3.11-efefef">
+    </a>
+    <a href="#">
+        <img src="https://img.shields.io/badge/Licence-Apache%202.0-blue">
+    </a>
+        <a href="_static/pylint/pylint.txt">
+        <img src="_static/pylint/pylint.svg" alt="Pylint Score">
+    </a>
+    <a href="_static/flake8/index.html">
+        <img src="_static/flake8/flake8.svg" alt="Flake8 Report">
+    </a>
+        <a href="_static/coverage/index.html">
+        <img src="_static/coverage/coverage.svg" alt="Coverage report">
+    </a>
+</div>
+<br>
+<p><code class="docutils literal notranslate"><span class="pre">UQMODELS</span></code> for time series is a python library that seeks to put into practice Uncertainty Quantification (UQ) based on ML/Deep learning models for the analysis of numerical data (Regression and time series). UQModels is inspired by scikit-learn for the creation of ML datascience processing chains incorporating uncertainty quantification mechanisms.</p>
+<p>The main objective of these chains is to provide functionality that enhance confidence in model prediction by computing additional UQ-KPI that give insight about ML-modeling uncertainty throught for example : Predictive intervales/Margin of error that catch irreducible variability around an observation, or even local Model unreliability link to the impact of the lack of observation due to data-representativeness issues.</p>
+<p>Therefore, the main functionality of the library concerns the modeling step of data science pipeline, through the implementation of an UQModel wrapper that can combine several implementations of forecasting models, UQestimators, and post-processor to form a mathematical processing chain. Then UQModel library provide :</p>
+<ul class="simple">
+<li><p>Several UQEstimators able to estimate several nature of UQ-measure as statistical measure of ML-uncertainty and optionally make prediction.</p></li>
+<li><p>UQ-Processing functions that process UQ-measure and/or prediction and/or observation to produce some usefull UQ-KPI.</p></li>
+<li><p>Anom-processing functions that process UQ-measures and predictions and observations into a contextual deviation score based on residual (difference between observation and model) prediction normalised by UQmeasure thank to UQ-processing function.</p></li>
+<li><p>UQKPI-Processor that wrap UQ-Processing function in a scikit learn Transformer format (fit/tranform procedure) to provide both UQ or Anom KPI</p></li>
+<li><p>UQModel wrapper that combine a whole pipeline as a (fit/predict/score) object that produce both prediction and specified UQ-KPI</p></li>
+</ul>
+<p>Such UQ-Model object can be used for example :</p>
+<ul class="simple">
+<li><p>In the context of monitoring key variables, to characterize the state of a dynamic system</p></li>
+<li><p>For time series monitoring, by providing forecast augmented by uncertainty KPIs (as error margin or model unreliability score) using predict method or anomaly score using score method.</p></li>
+</ul>
+<p>In addition to  modeling-post-processing pipeline, the library also implements minor functionality (in the form of wrappers) designed to facilitate the formalization of the pre-processing and evaluation step. The library aim is illustrated in the following figure.</p>
+<figure style="text-align:center">
+<img src="_static/UQModels_for_TS_schema.png" width=4000px/>
+</figure>
+<p><code class="docutils literal notranslate"><span class="pre">UQMODELS</span></code> is an initiative under <a class="reference external" href="https://www.confiance.ai/">Confiance.ai</a>, an organization dedicated to fostering transparency, fairness, and trust in the field of artificial intelligence.</p>
+<div id='quickstart'/>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guidelines.html">📖 Guidelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guidelines.html#setting-environement">Setting environement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidelines.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidelines.html#tutorial">Tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidelines.html#description-of-main-object">🔀 Description of main object.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidelines.html#usage">🎮 Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="guidelines.html#structure">Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tech_docs.html">📚 Technical docs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tech_docs.html#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tech_docs.html#brief-summary-of-functionalities">Brief summary of functionalities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tech_docs.html#details-of-functionalities">Details of functionalities</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">🔎 Package uqmodels</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.html">uqmodels package</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="guidelines.html" class="btn btn-neutral float-right" title="📖 Guidelines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

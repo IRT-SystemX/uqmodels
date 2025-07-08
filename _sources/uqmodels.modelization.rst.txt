@@ -1,0 +1,30 @@
+uqmodels.modelization package
+=============================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   uqmodels.modelization.DL_estimator
+   uqmodels.modelization.ML_estimator
+
+Submodules
+----------
+
+uqmodels.modelization.UQEstimator module
+----------------------------------------
+
+.. automodule:: uqmodels.modelization.UQEstimator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: uqmodels.modelization
+   :members:
+   :undoc-members:
+   :show-inheritance:

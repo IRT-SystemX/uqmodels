@@ -1,0 +1,29 @@
+uqmodels.modelization.ML\_estimator package
+===========================================
+
+Submodules
+----------
+
+uqmodels.modelization.ML\_estimator.baseline module
+---------------------------------------------------
+
+.. automodule:: uqmodels.modelization.ML_estimator.baseline
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+uqmodels.modelization.ML\_estimator.random\_forest\_UQ module
+-------------------------------------------------------------
+
+.. automodule:: uqmodels.modelization.ML_estimator.random_forest_UQ
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: uqmodels.modelization.ML_estimator
+   :members:
+   :undoc-members:
+   :show-inheritance:

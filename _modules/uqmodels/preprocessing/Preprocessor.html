@@ -1,0 +1,428 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.preprocessing.Preprocessor &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.preprocessing.Preprocessor</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.preprocessing.Preprocessor</h1><div class="highlight"><pre>
+<span></span><span class="c1">#####################################################################################</span>
+<span class="c1"># Source link to Preprocessor class :</span>
+<span class="c1"># Preprocessing pipeline can combine several Preprocessing.</span>
+<span class="c1"># We suggest to split : Raw_data -&gt; (Raw_data_preprossing) -&gt; Clean_data -&gt; (ML-Preprocessor_Porcessing) -&gt; ML-Dataset</span>
+<span class="c1"># Then we can produce from a same clean_data several ML-Dataset</span>
+<span class="c1"># Cache mecanism aim to avoid to do same preprocessing calculation</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.structure</span><span class="w"> </span><span class="kn">import</span> <span class="n">Structure</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Processor</span>
+
+
+<div class="viewcode-block" id="Preprocessor">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Preprocessor</span><span class="p">(</span><span class="n">Processor</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;formaliser&quot;</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">update_query</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Preprocessor class (inherit from Processor) : that aim to preprocess data in a (fit/transform) scheme</span>
+<span class="sd">        and hold a cache manager functionality to save/load object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str, optional): Name of processor. Defaults to &#39;processor&#39;.</span>
+<span class="sd">            cache (Cache_manager or None, optional): Cache manager. Defaults to None : no save/load procedure</span>
+<span class="sd">            structure (obj or None): structure that contains specification about how data has to be structured</span>
+<span class="sd">                after preprocessing</span>
+<span class="sd">            update_query (function, optional): Function to update query due to Processor application if needed.</span>
+<span class="sd">                Defaults to default_update_query : no update/</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">update_query</span><span class="o">=</span><span class="n">update_query</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">structure</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">(</span><span class="s2">&quot;Data&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="Preprocessor.default_update_query">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.default_update_query">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">default_update_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">new_query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s2">&quot;processing&quot;</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">new_query</span><span class="p">[</span><span class="s2">&quot;processing&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_query</span><span class="p">[</span><span class="s2">&quot;processing&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_query</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">default_update_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_query</span></div>
+
+
+<div class="viewcode-block" id="Preprocessor.get">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.get">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get obj from structure using structure.get</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            keys (_type_): key or list of keys related to attributes to get</span>
+<span class="sd">            default_value (_type_, optional): default_value if no attribute. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">default_value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Preprocessor.set">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.set">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set ogj in structure using structure.get</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            keys (_type_): key or list of keys related to attributes to get</span>
+
+<span class="sd">            obj (_type_): _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Preprocessor.fit">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{},</span> <span class="n">save_preprocessor</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit Preprocessing using data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (obj, optional): data. Defaults to None.</span>
+<span class="sd">            query: dict_query that generated the data</span>
+<span class="sd">            save_formaliser (bool, optional): boolean flag that inform if we have to save preprocessor or not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Fit formaliser using train_data</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">save_preprocessor</span><span class="p">:</span>
+            <span class="n">new_query</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+            <span class="n">query</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">new_query</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Preprocessor.transform">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply Preprocessor to data</span>
+<span class="sd">        Args:</span>
+<span class="sd">            data (obj, optional): data. Defaults to None.</span>
+<span class="sd">            query: dict_query that generated the data</span>
+
+<span class="sd">        Return</span>
+<span class="sd">            data : Preprocessed data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Preprocessor.fit_transform">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.fit_transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit Processor and apply it on data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (obj, optional): data. Defaults to None.</span>
+<span class="sd">            query: dict_query that generated the data.</span>
+
+<span class="sd">        Return</span>
+<span class="sd">            data : Preprocessed data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Preprocessor.update_query">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.update_query">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the update_query_function provided at init to update query</span>
+<span class="sd">        Args:</span>
+<span class="sd">            query (dict): dict_query that generated the data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            new_query: updated query</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_query</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_update_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_update_query</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_query</span></div>
+
+
+<div class="viewcode-block" id="Preprocessor.use_cache">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.use_cache">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">use_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Use_cache manager to check if there is cache link to data already processed</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (dict): dict_query that generated the data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileNotFoundError: cache Not Found error caught by method that called use_case</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            data: if file is found else error</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">use_cache</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">NotADirectoryError</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="Preprocessor.save">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{},</span> <span class="nb">object</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save method to store object at query+name location using cache_manager</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (dict, optional): dict_query that generated the data.</span>
+<span class="sd">            object (obj, optional): object to store. Defaults to None.</span>
+<span class="sd">            name (_type_, optional): filename of obj to store. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Preprocessor.load">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Preprocessor.load">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{},</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load method to load Preprocessor at query+name location using cache_manager and use it parameters</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            query (dict, optional): query_paramaters. Defaults to None.</span>
+<span class="sd">            name (_type_, optional): filename of obj to load. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Load fitted formaliser</span>
+        <span class="nb">object</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">object</span></div>
+</div>
+
+
+
+<span class="c1"># GENERIC_Preprocessor</span>
+
+
+<div class="viewcode-block" id="fit_default">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.fit_default">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{},</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;fit function that done nothing</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (obj): data</span>
+<span class="sd">        query (dict): dict_query that generated the data.</span>
+<span class="sd">        structure (structure obj, optional): structure object that provide all meta information about data.</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="transform_default">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.transform_default">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">transform_default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{},</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform+ function that done nothing</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (obj): data</span>
+<span class="sd">        query (dict): dict_query that generated the data.</span>
+<span class="sd">        structure (structure obj, optional): structure object that provide all meta information about data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+
+<span class="c1"># Default Preprocessor :</span>
+
+
+<div class="viewcode-block" id="Generic_Preprocessor">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Generic_Preprocessor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Generic_Preprocessor</span><span class="p">(</span><span class="n">Preprocessor</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Generic_preprocessor&quot;</span><span class="p">,</span>
+        <span class="n">cache</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">update_query</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fit_function</span><span class="o">=</span><span class="n">fit_default</span><span class="p">,</span>
+        <span class="n">transform_function</span><span class="o">=</span><span class="n">transform_default</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Preprocessor class (inherit from Processor) : that aim to preprocess data in a (fit/transform) scheme and</span>
+<span class="sd">        hold a cache manager functionality to save/load object</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str, optional): Name of processor. Defaults to &#39;processor&#39;.</span>
+<span class="sd">            cache (Cache_manager or None, optional): Cache manager. Defaults to None : no save/load procedure</span>
+<span class="sd">            structure (obj or None): structure that contains specification about how data has to be</span>
+<span class="sd">                structured after preprocessing</span>
+<span class="sd">            update_query (function, optional): Function to update query due to Processor application if needed.</span>
+<span class="sd">                Defaults to default_update_query : no update/</span>
+<span class="sd">            fit_function = function to apply in fit procedure. Defaults to fit_default that does nothing.</span>
+<span class="sd">            transform_function = function to apply in tranform procedure.</span>
+<span class="sd">                Defaults to transform_default that does nothing.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
+            <span class="n">structure</span><span class="o">=</span><span class="n">structure</span><span class="p">,</span>
+            <span class="n">update_query</span><span class="o">=</span><span class="n">update_query</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span> <span class="o">=</span> <span class="n">fit_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform_function</span> <span class="o">=</span> <span class="n">transform_function</span>
+
+<div class="viewcode-block" id="Generic_Preprocessor.fit">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Generic_Preprocessor.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{}):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply fit_function on data with query as query and self.structure as metadata</span>
+<span class="sd">            if query has an &quot;source&quot; attribute:</span>
+<span class="sd">                try to access to corrrespoding substructure by structure.get_structure(query[source])</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (obj, optional): data. Defaults to None.</span>
+<span class="sd">            query: dict_query that generated the data</span>
+<span class="sd">            save_formaliser (bool, optional): boolean flag that inform if we have to save preprocessor or not</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span>
+        <span class="k">if</span> <span class="s2">&quot;source&quot;</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="n">query</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">structure</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Generic_Preprocessor.transform">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.Preprocessor.Generic_Preprocessor.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="p">{},</span> <span class="o">**</span><span class="n">kwarg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply transform_function on data with query as query and self.structure as metadata</span>
+<span class="sd">            if query has an &quot;source&quot; attribute:</span>
+<span class="sd">                try to access to corrrespoding substructure by structure.get_structure(query[source])</span>
+<span class="sd">        Args:</span>
+<span class="sd">            data (obj, optional): data. Defaults to None.</span>
+<span class="sd">            query: dict_query that generated the data</span>
+
+<span class="sd">        Return</span>
+<span class="sd">            data : Preprocessed data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span>
+        <span class="k">if</span> <span class="s2">&quot;source&quot;</span> <span class="ow">in</span> <span class="n">query</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">structure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">get_structure</span><span class="p">(</span><span class="n">query</span><span class="p">[</span><span class="s2">&quot;source&quot;</span><span class="p">])</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="n">structure</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

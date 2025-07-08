@@ -1,0 +1,825 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.modelization.DL_estimator.transformer_ed &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.modelization.DL_estimator.transformer_ed</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.modelization.DL_estimator.transformer_ed</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">keras.backend</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">K</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">keras.layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeDistributed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">keras</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">Input</span><span class="p">,</span> <span class="n">layers</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.data_embedding</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Factice_Time_Extension</span><span class="p">,</span>
+    <span class="n">Mouving_conv_Embedding</span><span class="p">,</span>
+    <span class="n">Mouving_Windows_Embedding</span><span class="p">,</span>
+    <span class="n">PositionalEmbedding</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.neural_network_UQ</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">NN_UQ</span><span class="p">,</span>
+    <span class="n">get_training_parameters</span><span class="p">,</span>
+    <span class="n">get_UQEstimator_parameters</span><span class="p">,</span>
+    <span class="n">mlp</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Folder_Generator</span><span class="p">,</span>
+    <span class="n">set_global_determinism</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">stack_and_roll</span>
+
+
+<div class="viewcode-block" id="MultiHeadAttention">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.MultiHeadAttention">[docs]</a>
+<span class="nd">@tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;UQModels_layers&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MultiHeadAttention</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">MultiHeadAttention</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="LayerNormalization">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.LayerNormalization">[docs]</a>
+<span class="nd">@tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;UQModels_layers&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LayerNormalization</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">LayerNormalization</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
+<div class="viewcode-block" id="Dropout">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Dropout">[docs]</a>
+<span class="nd">@tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;UQModels_layers&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Dropout</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dropout</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
+<span class="c1"># Transformer Encoder Layer</span>
+<div class="viewcode-block" id="Dense">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Dense">[docs]</a>
+<span class="nd">@tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;UQModels_layers&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Dense</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+
+<span class="c1"># Transformer Encoder Layer</span>
+<div class="viewcode-block" id="TransformerEncoder">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder">[docs]</a>
+<span class="nd">@tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;UQModels_layers&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformerEncoder</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">Layer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transformer Encoder Layer from https://keras.io/examples/audio/transformer_asr/&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dim_z</span><span class="p">,</span>
+        <span class="n">num_heads</span><span class="p">,</span>
+        <span class="n">feed_forward_dim</span><span class="p">,</span>
+        <span class="n">dp_rec</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">flag_mc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span> <span class="o">=</span> <span class="n">dim_z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="n">num_heads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feed_forward_dim</span> <span class="o">=</span> <span class="n">feed_forward_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dp_rec</span> <span class="o">=</span> <span class="n">dp_rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flag_mc</span> <span class="o">=</span> <span class="n">flag_mc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="n">set_global_determinism</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+
+        <span class="c1"># Layers instanciation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">att</span> <span class="o">=</span> <span class="n">MultiHeadAttention</span><span class="p">(</span><span class="n">num_heads</span><span class="o">=</span><span class="n">num_heads</span><span class="p">,</span> <span class="n">key_dim</span><span class="o">=</span><span class="n">dim_z</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense1</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">feed_forward_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense2</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">dim_z</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layernorm1</span> <span class="o">=</span> <span class="n">LayerNormalization</span><span class="p">(</span><span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layernorm2</span> <span class="o">=</span> <span class="n">LayerNormalization</span><span class="p">(</span><span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout1</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dp_rec</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout2</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dp_rec</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+<div class="viewcode-block" id="TransformerEncoder.call">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.call">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inputs (_type_): _description_</span>
+<span class="sd">            training (_type_): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">training</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">training</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">attn_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">att</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">inputs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dp_rec</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">attn_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout1</span><span class="p">(</span><span class="n">attn_output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">training</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_mc</span><span class="p">)</span>
+        <span class="n">out1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layernorm1</span><span class="p">(</span><span class="n">inputs</span> <span class="o">+</span> <span class="n">attn_output</span><span class="p">)</span>
+        <span class="n">ffn_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dense2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dense1</span><span class="p">(</span><span class="n">out1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dp_rec</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ffn_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropout2</span><span class="p">(</span><span class="n">ffn_output</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">training</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_mc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">layernorm2</span><span class="p">(</span><span class="n">out1</span> <span class="o">+</span> <span class="n">ffn_output</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TransformerEncoder.get_config">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.get_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;dim_z&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span><span class="p">,</span>
+            <span class="s2">&quot;num_heads&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span>
+            <span class="s2">&quot;feed_forward_dim&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">feed_forward_dim</span><span class="p">,</span>
+            <span class="s2">&quot;dp_rec&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dp_rec</span><span class="p">,</span>
+            <span class="s2">&quot;flag_mc&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_mc</span><span class="p">,</span>
+            <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="s2">&quot;att&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">att</span><span class="p">),</span>
+            <span class="s2">&quot;layernorm1&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layernorm1</span><span class="p">),</span>
+            <span class="s2">&quot;layernorm2&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layernorm2</span><span class="p">),</span>
+            <span class="s2">&quot;dense1&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dense1</span><span class="p">),</span>
+            <span class="s2">&quot;dense2&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dense2</span><span class="p">),</span>
+            <span class="s2">&quot;dropout1&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout1</span><span class="p">),</span>
+            <span class="s2">&quot;dropout2&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout2</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="k">return</span> <span class="n">config</span></div>
+
+
+<div class="viewcode-block" id="TransformerEncoder.from_config">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.from_config">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">att</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;att&quot;</span><span class="p">)</span>
+        <span class="n">layernorm1</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;layernorm1&quot;</span><span class="p">)</span>
+        <span class="n">layernorm2</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;layernorm2&quot;</span><span class="p">)</span>
+        <span class="n">dropout1</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dropout1&quot;</span><span class="p">)</span>
+        <span class="n">dropout2</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dropout2&quot;</span><span class="p">)</span>
+        <span class="n">dense1</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dense1&quot;</span><span class="p">)</span>
+        <span class="n">dense2</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dense2&quot;</span><span class="p">)</span>
+
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">dense1</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">att</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">att</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">att</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">layernorm1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">layernorm1</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">layernorm2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">layernorm2</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">dropout1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">dropout1</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">dropout2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">dropout2</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">dense1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">dense1</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">dense2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">dense2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">obj</span></div>
+</div>
+
+
+
+<span class="c1"># Transformer Decoder Layer</span>
+<div class="viewcode-block" id="TransformerDecoder">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder">[docs]</a>
+<span class="nd">@tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">register_keras_serializable</span><span class="p">(</span><span class="n">package</span><span class="o">=</span><span class="s2">&quot;UQModels_layers&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformerDecoder</span><span class="p">(</span><span class="n">layers</span><span class="o">.</span><span class="n">Layer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transformer Encoder Layer from https://keras.io/examples/audio/transformer_asr/&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dim_z</span><span class="p">,</span>
+        <span class="n">dim_horizon</span><span class="p">,</span>
+        <span class="n">num_heads</span><span class="p">,</span>
+        <span class="n">feed_forward_dim</span><span class="p">,</span>
+        <span class="n">dp_rec</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">flag_mc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span> <span class="o">=</span> <span class="n">dim_z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_horizon</span> <span class="o">=</span> <span class="n">dim_horizon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span> <span class="o">=</span> <span class="n">num_heads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">feed_forward_dim</span> <span class="o">=</span> <span class="n">feed_forward_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dp_rec</span> <span class="o">=</span> <span class="n">dp_rec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flag_mc</span> <span class="o">=</span> <span class="n">flag_mc</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="n">set_global_determinism</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">layernorm1</span> <span class="o">=</span> <span class="n">LayerNormalization</span><span class="p">(</span><span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layernorm2</span> <span class="o">=</span> <span class="n">LayerNormalization</span><span class="p">(</span><span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layernorm3</span> <span class="o">=</span> <span class="n">LayerNormalization</span><span class="p">(</span><span class="n">epsilon</span><span class="o">=</span><span class="mf">1e-6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">self_att</span> <span class="o">=</span> <span class="n">MultiHeadAttention</span><span class="p">(</span><span class="n">num_heads</span><span class="o">=</span><span class="n">num_heads</span><span class="p">,</span> <span class="n">key_dim</span><span class="o">=</span><span class="n">dim_z</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enc_att</span> <span class="o">=</span> <span class="n">MultiHeadAttention</span><span class="p">(</span><span class="n">num_heads</span><span class="o">=</span><span class="n">num_heads</span><span class="p">,</span> <span class="n">key_dim</span><span class="o">=</span><span class="n">dim_z</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">self_dropout</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dp_rec</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enc_dropout</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dp_rec</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ffn_dropout</span> <span class="o">=</span> <span class="n">Dropout</span><span class="p">(</span><span class="n">dp_rec</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense1</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">feed_forward_dim</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dense2</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="n">dim_z</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TransformerDecoder.causal_attention_mask">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.causal_attention_mask">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">causal_attention_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">n_dest</span><span class="p">,</span> <span class="n">n_src</span><span class="p">,</span> <span class="n">dim_horizon</span><span class="p">,</span> <span class="n">dtype</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Masks the upper half of the dot product matrix in self attention.</span>
+
+<span class="sd">        This prevents flow of information from future tokens to current token.</span>
+<span class="sd">        1&#39;s in the lower triangle, counting from the lower right corner.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">len_past</span> <span class="o">=</span> <span class="n">n_dest</span> <span class="o">-</span> <span class="n">dim_horizon</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">len_past</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span> <span class="o">+</span> <span class="n">len_past</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">dim_horizon</span><span class="p">)</span> <span class="o">+</span> <span class="n">len_past</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="mi">0</span><span class="p">,</span>
+        <span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="n">n_src</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="n">n_src</span> <span class="o">+</span> <span class="n">n_dest</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_dest</span><span class="p">,</span> <span class="n">n_src</span><span class="p">])</span>
+        <span class="n">mult</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)],</span> <span class="mi">0</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">mult</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TransformerDecoder.call">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.call">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enc_out</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            enc_out (_type_): _description_</span>
+<span class="sd">            target (_type_): _description_</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">training</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">training</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">input_shape</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">seq_len</span> <span class="o">=</span> <span class="n">input_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">causal_mask</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">causal_attention_mask</span><span class="p">(</span>
+            <span class="n">batch_size</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">,</span> <span class="n">seq_len</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_horizon</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">bool</span>
+        <span class="p">)</span>
+        <span class="n">target_att</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_att</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">attention_mask</span><span class="o">=</span><span class="n">causal_mask</span><span class="p">)</span>
+        <span class="n">target_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layernorm1</span><span class="p">(</span>
+            <span class="n">target</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">self_dropout</span><span class="p">(</span><span class="n">target_att</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">training</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_mc</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">enc_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enc_att</span><span class="p">(</span><span class="n">target_norm</span><span class="p">,</span> <span class="n">enc_out</span><span class="p">)</span>
+        <span class="n">enc_out_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layernorm2</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enc_dropout</span><span class="p">(</span><span class="n">enc_out</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">training</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_mc</span><span class="p">)</span> <span class="o">+</span> <span class="n">target_norm</span>
+        <span class="p">)</span>
+        <span class="n">ffn_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dense2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dense1</span><span class="p">(</span><span class="n">enc_out_norm</span><span class="p">))</span>
+        <span class="n">ffn_out_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layernorm3</span><span class="p">(</span>
+            <span class="n">enc_out_norm</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">ffn_dropout</span><span class="p">(</span><span class="n">ffn_out</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="n">training</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_mc</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ffn_out_norm</span></div>
+
+
+<div class="viewcode-block" id="TransformerDecoder.get_config">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.get_config">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;dim_z&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span><span class="p">,</span>
+            <span class="s2">&quot;dim_horizon&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_horizon</span><span class="p">,</span>
+            <span class="s2">&quot;num_heads&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_heads</span><span class="p">,</span>
+            <span class="s2">&quot;feed_forward_dim&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">feed_forward_dim</span><span class="p">,</span>
+            <span class="s2">&quot;dp_rec&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dp_rec</span><span class="p">,</span>
+            <span class="s2">&quot;flag_mc&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag_mc</span><span class="p">,</span>
+            <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+            <span class="s2">&quot;layernorm1&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layernorm1</span><span class="p">),</span>
+            <span class="s2">&quot;layernorm2&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layernorm2</span><span class="p">),</span>
+            <span class="s2">&quot;layernorm3&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layernorm3</span><span class="p">),</span>
+            <span class="s2">&quot;self_att&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">self_att</span><span class="p">),</span>
+            <span class="s2">&quot;enc_att&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enc_att</span><span class="p">),</span>
+            <span class="s2">&quot;self_dropout&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">self_dropout</span><span class="p">),</span>
+            <span class="s2">&quot;enc_dropout&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enc_dropout</span><span class="p">),</span>
+            <span class="s2">&quot;ffn_dropout&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ffn_dropout</span><span class="p">),</span>
+            <span class="s2">&quot;dense1&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dense1</span><span class="p">),</span>
+            <span class="s2">&quot;dense2&quot;</span><span class="p">:</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">serialize_keras_object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dense2</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">config</span></div>
+
+
+<div class="viewcode-block" id="TransformerDecoder.from_config">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.from_config">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_config</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">layernorm1</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;layernorm1&quot;</span><span class="p">)</span>
+        <span class="n">layernorm2</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;layernorm2&quot;</span><span class="p">)</span>
+        <span class="n">layernorm3</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;layernorm3&quot;</span><span class="p">)</span>
+        <span class="n">self_att</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;self_att&quot;</span><span class="p">)</span>
+        <span class="n">enc_att</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;enc_att&quot;</span><span class="p">)</span>
+        <span class="n">self_dropout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;self_dropout&quot;</span><span class="p">)</span>
+        <span class="n">enc_dropout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;enc_dropout&quot;</span><span class="p">)</span>
+        <span class="n">ffn_dropout</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;ffn_dropout&quot;</span><span class="p">)</span>
+        <span class="n">dense1</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dense1&quot;</span><span class="p">)</span>
+        <span class="n">dense2</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dense2&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="n">obj</span><span class="o">.</span><span class="n">layernorm1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">layernorm1</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">layernorm2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">layernorm2</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">layernorm3</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">layernorm3</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">self_att</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">self_att</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">enc_att</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">enc_att</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">self_dropout</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">self_dropout</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">enc_dropout</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">enc_dropout</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">ffn_dropout</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">ffn_dropout</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">dense1</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">dense1</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">dense2</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">deserialize_keras_object</span><span class="p">(</span><span class="n">dense2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+</div>
+
+
+
+<span class="c1"># encoder</span>
+<div class="viewcode-block" id="build_transformer">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.build_transformer">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_transformer</span><span class="p">(</span>
+    <span class="n">size_window</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">n_windows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">dim_target</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">dim_chan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">dim_horizon</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">dim_ctx</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">dim_z</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">num_heads</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">num_feed_forward</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="n">num_layers_enc</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">num_layers_dec</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">layers_enc</span><span class="o">=</span><span class="p">[</span><span class="mi">150</span><span class="p">],</span>
+    <span class="n">layers_dec</span><span class="o">=</span><span class="p">[</span><span class="mi">150</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">dp_rec</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span>
+    <span class="n">k_reg</span><span class="o">=</span><span class="p">(</span><span class="mf">0.00001</span><span class="p">,</span> <span class="mf">0.00001</span><span class="p">),</span>
+    <span class="n">list_strides</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">list_filters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">list_kernels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dim_dyn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">with_positional_embedding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">with_ctx_input</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">with_convolution</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Builder for Transformer ED with convolutive preprocessing</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        size_window (int, optional): Size of window for lag values. Defaults to 10.</span>
+<span class="sd">        n_windows (int, optional): Number of window in past. Defaults to 5.</span>
+<span class="sd">        step (int, optional): step between windows. Defaults to 1.</span>
+<span class="sd">        dim_target (int, optional): dimension of TS. Defaults to 1.</span>
+<span class="sd">        dim_chan (int, optional): Number of channel of TS. Defaults to 1.</span>
+<span class="sd">        dim_horizon (int, optional): futur_horizon to predict. Defaults to 3.</span>
+<span class="sd">        dim_ctx (int, optional): Number of ctx_features. Defaults to 20.</span>
+<span class="sd">        dim_z (int, optional): Size of latent sapce. Defaults to 100.</span>
+<span class="sd">        num_heads (int, optional): num of heads transformer. Defaults to 2.</span>
+<span class="sd">        num_feed_forward (int, optional): feed_forward transfomer dimension. Defaults to 128.</span>
+<span class="sd">        num_layers_enc (int, optional): num of transformer enc block</span>
+<span class="sd">        (after concatenation of past values embeding + ctx) . Defaults to 3.</span>
+<span class="sd">        num_layers_dec (int, optional): num of transformer dec block Defaults to 2.</span>
+<span class="sd">        layers_enc (list, optional):size of MLP preprocessing</span>
+<span class="sd">        (after concatenation of past values embeding + ctx) Defaults to [150].</span>
+<span class="sd">        layers_dec (list, optional): size of MLP interpretor. Defaults to 2.</span>
+<span class="sd">        dp (float, optional): dropout. Defaults to 0.05.</span>
+<span class="sd">        dp_t (float, optional): transformer dropout. Defaults to 0.1.</span>
+<span class="sd">        k_reg (tuple, optional): _description_. Defaults to (0.00001, 0.00001).</span>
+<span class="sd">        dim_dyn (int, None): size of dyn inputs, if None consider dim_dyn have same size than dim target</span>
+<span class="sd">        with_positional_embedding (bool, optional): _description_. Defaults to False.</span>
+<span class="sd">        with_ctx_input (bool, optional): Expect ctx features in addition to lag. Defaults to True.</span>
+<span class="sd">        with_convolution (bool, optional): use convolution rather than</span>
+<span class="sd">        whole lag values in the windows. Defaults to True.</span>
+<span class="sd">        type_output (_type_, optional): mode of UQ (see NN_UQ). Defaults to None.</span>
+<span class="sd">        random_state (bool): handle experimental random using seed.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        transformer : multi-step forecaster with UQ</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dim_dyn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dim_dyn</span> <span class="o">=</span> <span class="n">dim_target</span>
+
+    <span class="n">flag_mc</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">type_output</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;BNN&quot;</span><span class="p">,</span> <span class="s2">&quot;MC_Dropout&quot;</span><span class="p">]:</span>
+        <span class="n">flag_mc</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">set_global_determinism</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
+
+    <span class="c1"># Embedding_interpretor</span>
+    <span class="n">Interpretor</span> <span class="o">=</span> <span class="n">mlp</span><span class="p">(</span>
+        <span class="n">dim_in</span><span class="o">=</span><span class="n">dim_z</span><span class="p">,</span>
+        <span class="n">dim_out</span><span class="o">=</span><span class="n">dim_target</span><span class="p">,</span>
+        <span class="n">layers_size</span><span class="o">=</span><span class="n">layers_dec</span><span class="p">,</span>
+        <span class="n">dp</span><span class="o">=</span><span class="n">dp</span><span class="p">,</span>
+        <span class="n">type_output</span><span class="o">=</span><span class="n">type_output</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Interpretor&quot;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># dim_output_size = Interpretor.output.shape[-1]</span>
+
+    <span class="n">Pos_Embeddor</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">with_positional_embedding</span><span class="p">:</span>
+        <span class="n">Pos_Embeddor</span> <span class="o">=</span> <span class="n">PositionalEmbedding</span><span class="p">(</span><span class="n">dim_z</span><span class="p">,</span> <span class="n">max_len</span><span class="o">=</span><span class="n">size_window</span> <span class="o">+</span> <span class="n">dim_horizon</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Input definition</span>
+
+    <span class="n">list_input</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">with_ctx_input</span><span class="p">:</span>
+        <span class="n">CTX_inputs</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_windows</span><span class="p">,</span> <span class="n">dim_ctx</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;encoder_inputs&quot;</span><span class="p">)</span>
+        <span class="n">list_input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CTX_inputs</span><span class="p">)</span>
+
+    <span class="n">Y_past_in</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size_window</span><span class="p">,</span> <span class="n">dim_dyn</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;past_inputs&quot;</span><span class="p">)</span>
+    <span class="n">list_input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Y_past_in</span><span class="p">)</span>
+
+    <span class="n">Y_past</span> <span class="o">=</span> <span class="n">Y_past_in</span>
+
+    <span class="c1"># Preprocessing layers definition</span>
+    <span class="k">if</span> <span class="n">with_convolution</span><span class="p">:</span>
+        <span class="n">MWE</span> <span class="o">=</span> <span class="n">Mouving_conv_Embedding</span><span class="p">(</span>
+            <span class="n">size_window</span><span class="p">,</span>
+            <span class="n">n_windows</span><span class="p">,</span>
+            <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+            <span class="n">dim_d</span><span class="o">=</span><span class="n">dim_dyn</span><span class="p">,</span>
+            <span class="n">dim_chan</span><span class="o">=</span><span class="n">dim_chan</span><span class="p">,</span>
+            <span class="n">use_conv2D</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">list_strides</span><span class="o">=</span><span class="n">list_strides</span><span class="p">,</span>
+            <span class="n">list_filters</span><span class="o">=</span><span class="n">list_filters</span><span class="p">,</span>
+            <span class="n">list_kernels</span><span class="o">=</span><span class="n">list_kernels</span><span class="p">,</span>
+            <span class="n">dp</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+            <span class="n">flag_mc</span><span class="o">=</span><span class="n">flag_mc</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">MWE</span> <span class="o">=</span> <span class="n">Mouving_Windows_Embedding</span><span class="p">(</span>
+            <span class="n">size_window</span><span class="p">,</span>
+            <span class="n">n_windows</span><span class="p">,</span>
+            <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+            <span class="n">dim_d</span><span class="o">=</span><span class="n">dim_dyn</span><span class="p">,</span>
+            <span class="n">dim_chan</span><span class="o">=</span><span class="n">dim_chan</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="n">FTE</span> <span class="o">=</span> <span class="n">Factice_Time_Extension</span><span class="p">(</span><span class="n">dim_horizon</span><span class="p">)</span>
+    <span class="n">layers_enc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dim_z</span><span class="p">)</span>
+
+    <span class="n">dim_embedding</span> <span class="o">=</span> <span class="n">MWE</span><span class="o">.</span><span class="n">last_shape</span>
+    <span class="k">if</span> <span class="n">with_ctx_input</span><span class="p">:</span>
+        <span class="n">dim_embedding</span> <span class="o">+=</span> <span class="n">dim_ctx</span>
+
+    <span class="n">Embeddor_ctx</span> <span class="o">=</span> <span class="n">mlp</span><span class="p">(</span>
+        <span class="n">dim_in</span><span class="o">=</span><span class="n">dim_embedding</span><span class="p">,</span>
+        <span class="n">dim_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">layers_size</span><span class="o">=</span><span class="n">layers_enc</span><span class="p">,</span>
+        <span class="n">dp</span><span class="o">=</span><span class="n">dp</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Embeddor&quot;</span><span class="p">,</span>
+        <span class="n">regularizer_W</span><span class="o">=</span><span class="n">k_reg</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Preprocessing computation</span>
+    <span class="n">Data</span> <span class="o">=</span> <span class="n">MWE</span><span class="p">(</span><span class="n">Y_past</span><span class="p">)</span>
+    <span class="c1"># Concat with cat features</span>
+    <span class="k">if</span> <span class="n">with_ctx_input</span><span class="p">:</span>
+        <span class="n">Data</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">CTX_inputs</span><span class="p">,</span> <span class="n">Data</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1"># Factice time augmentation (actually useless but can be usefull for extended predict horizon)</span>
+    <span class="n">Data</span> <span class="o">=</span> <span class="n">FTE</span><span class="p">(</span><span class="n">Data</span><span class="p">)</span>
+
+    <span class="n">Embedding</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">Embeddor_ctx</span><span class="p">)(</span><span class="n">Data</span><span class="p">)</span>
+
+    <span class="c1"># Static Pe that encode window position</span>
+
+    <span class="k">if</span> <span class="n">Pos_Embeddor</span><span class="p">:</span>
+        <span class="n">Pe_Embedding</span> <span class="o">=</span> <span class="n">Pos_Embeddor</span><span class="p">(</span><span class="n">Embedding</span><span class="p">)</span>
+        <span class="n">Embedding</span> <span class="o">=</span> <span class="n">Embedding</span> <span class="o">+</span> <span class="n">Pe_Embedding</span>
+
+    <span class="c1"># Encoder l&#39;information passé</span>
+    <span class="n">enc_out</span> <span class="o">=</span> <span class="n">Embedding</span><span class="p">[:,</span> <span class="p">:(</span><span class="o">-</span><span class="n">dim_horizon</span><span class="p">),</span> <span class="p">:]</span>
+    <span class="n">encoder</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_layers_enc</span><span class="p">):</span>
+        <span class="n">encoder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">TransformerEncoder</span><span class="p">(</span>
+                <span class="n">dim_z</span><span class="p">,</span>
+                <span class="n">num_heads</span><span class="p">,</span>
+                <span class="n">feed_forward_dim</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">num_feed_forward</span><span class="o">=</span><span class="n">num_feed_forward</span><span class="p">,</span>
+                <span class="n">dp_rec</span><span class="o">=</span><span class="n">dp_rec</span><span class="p">,</span>
+                <span class="n">flag_mc</span><span class="o">=</span><span class="n">flag_mc</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">300</span> <span class="o">+</span> <span class="n">i</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">enc_out</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">enc_out</span><span class="p">)</span>
+
+    <span class="c1"># For learning :</span>
+    <span class="n">decoder</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">dec_out</span> <span class="o">=</span> <span class="n">enc_out</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_layers_dec</span><span class="p">):</span>
+        <span class="n">decoder</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">TransformerDecoder</span><span class="p">(</span>
+                <span class="n">dim_z</span><span class="o">=</span><span class="n">dim_z</span><span class="p">,</span>
+                <span class="n">dim_horizon</span><span class="o">=</span><span class="n">dim_horizon</span><span class="p">,</span>
+                <span class="n">feed_forward_dim</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">num_heads</span><span class="o">=</span><span class="n">num_heads</span><span class="p">,</span>
+                <span class="n">num_feed_forward</span><span class="o">=</span><span class="n">num_feed_forward</span><span class="p">,</span>
+                <span class="n">dp_rec</span><span class="o">=</span><span class="n">dp_rec</span><span class="p">,</span>
+                <span class="n">flag_mc</span><span class="o">=</span><span class="n">flag_mc</span><span class="p">,</span>
+                <span class="n">random_state</span><span class="o">=</span><span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="mi">400</span> <span class="o">+</span> <span class="n">i</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">dec_out</span> <span class="o">=</span> <span class="n">decoder</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">](</span><span class="n">dec_out</span><span class="p">,</span> <span class="n">Embedding</span><span class="p">)</span>
+
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">Interpretor</span><span class="p">)(</span><span class="n">dec_out</span><span class="p">[:,</span> <span class="o">-</span><span class="p">(</span><span class="n">dim_horizon</span><span class="p">):])</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">list_input</span><span class="p">,</span> <span class="n">outputs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;model&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+
+<div class="viewcode-block" id="Transformer_ED_UQ">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Transformer_ED_UQ">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Transformer_ED_UQ</span><span class="p">(</span><span class="n">NN_UQ</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transformer_ED for forecasting with UQ : see build_transformer to check model parameters&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_parameters</span><span class="p">,</span>
+        <span class="n">factory_parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;factory_lag_lt&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;factory_lag_st&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+        <span class="n">training_parameters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+        <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">n_ech</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">train_ratio</span><span class="o">=</span><span class="mf">0.9</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Lstm_stacked&quot;</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            model_parameters (_type_): _description_</span>
+<span class="sd">            factory_parameters (dict, optional): _description_. Defaults to {&#39;factory_lag_lt&#39;: 0, &#39;factory_lag_st&#39;: 0}.</span>
+<span class="sd">            training_parameters (_type_, optional): _description_. Defaults to dict().</span>
+<span class="sd">            type_output (_type_, optional): _description_. Defaults to None.</span>
+<span class="sd">            rescale (bool, optional): _description_. Defaults to False.</span>
+<span class="sd">            n_ech (int, optional): _description_. Defaults to 8.</span>
+<span class="sd">            train_ratio (float, optional): _description_. Defaults to 0.9.</span>
+<span class="sd">            name (str, optional): _description_. Defaults to &quot;Lstm_stacked&quot;.</span>
+<span class="sd">            random_state (bool): handle experimental random using seed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">random_state</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning : issues non-deterministic behaviour even with random state&quot;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">model_initializer</span><span class="o">=</span><span class="n">build_transformer</span><span class="p">,</span>
+            <span class="n">model_parameters</span><span class="o">=</span><span class="n">model_parameters</span><span class="p">,</span>
+            <span class="n">factory_parameters</span><span class="o">=</span><span class="n">factory_parameters</span><span class="p">,</span>
+            <span class="n">training_parameters</span><span class="o">=</span><span class="n">training_parameters</span><span class="p">,</span>
+            <span class="n">type_output</span><span class="o">=</span><span class="n">type_output</span><span class="p">,</span>
+            <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">,</span>
+            <span class="n">n_ech</span><span class="o">=</span><span class="n">n_ech</span><span class="p">,</span>
+            <span class="n">train_ratio</span><span class="o">=</span><span class="n">train_ratio</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Transformer_ED_UQ.factory">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Transformer_ED_UQ.factory">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">factory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">only_fit_scaler</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg</span><span class="p">):</span>
+        <span class="n">model_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span>
+        <span class="n">factory_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory_parameters</span>
+
+        <span class="n">with_ctx_input</span> <span class="o">=</span> <span class="n">model_params</span><span class="p">[</span><span class="s2">&quot;with_ctx_input&quot;</span><span class="p">]</span>
+
+        <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="s2">&quot;step&quot;</span> <span class="ow">in</span> <span class="n">model_params</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="n">model_params</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span>
+
+        <span class="n">X_none</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">X_none</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">X_none</span><span class="p">:</span>
+            <span class="n">inputs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">with_ctx_input</span><span class="p">:</span>
+                <span class="n">X</span><span class="p">,</span> <span class="n">X_lag</span> <span class="o">=</span> <span class="n">X</span>
+                <span class="n">X</span><span class="p">,</span> <span class="n">X_lag</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">X_lag</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">only_fit_scaler</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+                <span class="n">X_lt</span> <span class="o">=</span> <span class="n">stack_and_roll</span><span class="p">(</span>
+                    <span class="n">X</span><span class="p">,</span>
+                    <span class="n">model_params</span><span class="p">[</span><span class="s2">&quot;n_windows&quot;</span><span class="p">],</span>
+                    <span class="n">lag</span><span class="o">=</span><span class="n">factory_params</span><span class="p">[</span><span class="s2">&quot;factory_lag_lt&quot;</span><span class="p">],</span>
+                    <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">X_st</span> <span class="o">=</span> <span class="n">stack_and_roll</span><span class="p">(</span>
+                    <span class="n">X_lag</span><span class="p">,</span>
+                    <span class="n">model_params</span><span class="p">[</span><span class="s2">&quot;size_window&quot;</span><span class="p">],</span>
+                    <span class="n">lag</span><span class="o">=</span><span class="n">factory_params</span><span class="p">[</span><span class="s2">&quot;factory_lag_st&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">X_lt</span><span class="p">,</span> <span class="n">X_st</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">X</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">only_fit_scaler</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+                <span class="n">X_lag</span> <span class="o">=</span> <span class="n">X</span>
+                <span class="n">X_st</span> <span class="o">=</span> <span class="n">stack_and_roll</span><span class="p">(</span>
+                    <span class="n">X</span><span class="p">,</span>
+                    <span class="n">model_params</span><span class="p">[</span><span class="s2">&quot;size_window&quot;</span><span class="p">],</span>
+                    <span class="n">lag</span><span class="o">=</span><span class="n">factory_params</span><span class="p">[</span><span class="s2">&quot;factory_lag_st&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">X_st</span><span class="p">]</span>
+
+        <span class="n">new_y</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+            <span class="n">new_y</span> <span class="o">=</span> <span class="n">stack_and_roll</span><span class="p">(</span>
+                <span class="n">y</span><span class="p">,</span>
+                <span class="n">model_params</span><span class="p">[</span><span class="s2">&quot;dim_horizon&quot;</span><span class="p">],</span>
+                <span class="n">lag</span><span class="o">=</span><span class="n">model_params</span><span class="p">[</span><span class="s2">&quot;dim_horizon&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">new_y</span><span class="p">,</span> <span class="n">mask</span></div>
+
+
+<div class="viewcode-block" id="Transformer_ED_UQ.Build_generator">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Transformer_ED_UQ.Build_generator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Build_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Folder_Generator</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">batch</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
+            <span class="n">train</span><span class="o">=</span><span class="n">train</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="get_params_dict">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.get_params_dict">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_params_dict</span><span class="p">(</span>
+    <span class="n">dim_ctx</span><span class="p">,</span>
+    <span class="n">dim_dyn</span><span class="p">,</span>
+    <span class="n">dim_target</span><span class="p">,</span>
+    <span class="n">dim_chan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">size_window</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">n_windows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">dim_horizon</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+    <span class="n">dim_z</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">dp</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">dp_rec</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">num_heads</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">num_feed_forward</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+    <span class="n">num_layers_enc</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">num_layers_dec</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">layers_enc</span><span class="o">=</span><span class="p">[</span><span class="mi">75</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span>
+    <span class="n">layers_dec</span><span class="o">=</span><span class="p">[</span><span class="mi">200</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span> <span class="mi">75</span><span class="p">],</span>
+    <span class="n">list_strides</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">list_filters</span><span class="o">=</span><span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">128</span><span class="p">],</span>
+    <span class="n">list_kernels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">with_convolution</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">with_ctx_input</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_ech</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="s2">&quot;MC_Dropout&quot;</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">dict_params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;dim_ctx&quot;</span><span class="p">:</span> <span class="n">dim_ctx</span><span class="p">,</span>
+        <span class="s2">&quot;size_window&quot;</span><span class="p">:</span> <span class="n">size_window</span><span class="p">,</span>
+        <span class="s2">&quot;n_windows&quot;</span><span class="p">:</span> <span class="n">n_windows</span><span class="p">,</span>
+        <span class="s2">&quot;dim_horizon&quot;</span><span class="p">:</span> <span class="n">dim_horizon</span><span class="p">,</span>
+        <span class="s2">&quot;dim_target&quot;</span><span class="p">:</span> <span class="n">dim_target</span><span class="p">,</span>
+        <span class="s2">&quot;dim_chan&quot;</span><span class="p">:</span> <span class="n">dim_chan</span><span class="p">,</span>
+        <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;dim_z&quot;</span><span class="p">:</span> <span class="n">dim_z</span><span class="p">,</span>
+        <span class="s2">&quot;dp&quot;</span><span class="p">:</span> <span class="n">dp</span><span class="p">,</span>
+        <span class="s2">&quot;dp_rec&quot;</span><span class="p">:</span> <span class="n">dp_rec</span><span class="p">,</span>
+        <span class="s2">&quot;dim_dyn&quot;</span><span class="p">:</span> <span class="n">dim_dyn</span><span class="p">,</span>
+        <span class="s2">&quot;type_output&quot;</span><span class="p">:</span> <span class="n">type_output</span><span class="p">,</span>
+        <span class="s2">&quot;num_heads&quot;</span><span class="p">:</span> <span class="n">num_heads</span><span class="p">,</span>
+        <span class="s2">&quot;num_feed_forward&quot;</span><span class="p">:</span> <span class="n">num_feed_forward</span><span class="p">,</span>
+        <span class="s2">&quot;num_layers_enc&quot;</span><span class="p">:</span> <span class="n">num_layers_enc</span><span class="p">,</span>
+        <span class="s2">&quot;num_layers_dec&quot;</span><span class="p">:</span> <span class="n">num_layers_dec</span><span class="p">,</span>
+        <span class="s2">&quot;k_reg&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mf">10e-6</span><span class="p">,</span> <span class="mf">10e-6</span><span class="p">),</span>
+        <span class="s2">&quot;layers_enc&quot;</span><span class="p">:</span> <span class="n">layers_enc</span><span class="p">,</span>
+        <span class="s2">&quot;layers_dec&quot;</span><span class="p">:</span> <span class="n">layers_dec</span><span class="p">,</span>
+        <span class="s2">&quot;list_strides&quot;</span><span class="p">:</span> <span class="n">list_strides</span><span class="p">,</span>
+        <span class="s2">&quot;list_filters&quot;</span><span class="p">:</span> <span class="n">list_filters</span><span class="p">,</span>
+        <span class="s2">&quot;list_kernels&quot;</span><span class="p">:</span> <span class="n">list_kernels</span><span class="p">,</span>
+        <span class="s2">&quot;with_convolution&quot;</span><span class="p">:</span> <span class="n">with_convolution</span><span class="p">,</span>
+        <span class="s2">&quot;with_ctx_input&quot;</span><span class="p">:</span> <span class="n">with_ctx_input</span><span class="p">,</span>
+        <span class="s2">&quot;n_ech&quot;</span><span class="p">:</span> <span class="n">n_ech</span><span class="p">,</span>
+        <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="n">random_state</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">dict_params</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

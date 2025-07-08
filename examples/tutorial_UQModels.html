@@ -1,0 +1,477 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UQModel : tutorial &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">UQModel : tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/tutorial_UQModels.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="UQModel-:-tutorial">
+<h1>UQModel : tutorial<a class="headerlink" href="#UQModel-:-tutorial" title="Link to this heading"></a></h1>
+<p>This notebook aim to illustrate the use of UQmodels library as provider of KPI to perform system Monitoring on Time series Data. The complete pipleline can be decomposed into 3 step :</p>
+<ol class="arabic simple">
+<li><p>Data load &amp; preprocessing : (row_stored_data -&gt; ML dataset)</p></li>
+<li><p>Modeling &amp; Post processing : (ML_dataset -&gt; pred &amp; UQmesure -&gt; pred &amp; UQ-KPI)</p></li>
+<li><p>Visualisation &amp; Evaluation : (Target, Pred, UQ-KPI) -&gt; (metrics &amp; visualisation)</p></li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
+%autoreload 2
+
+import os
+import warnings
+warnings.filterwarnings(&quot;ignore&quot;)
+
+import sys
+path = &#39;.&#39;
+os.chdir(path=path)
+ROOT_PATH = &quot;demo&quot;
+cwd_path = os.getcwd()
+cwd = os.path.basename(cwd_path)
+
+import numpy as np
+sys.path.insert(1, &#39;..&#39;)
+import uqmodels as uqmodels
+
+if(True):
+    from IPython.core.display import display, HTML
+    display(HTML(
+        &#39;&lt;style&gt;&#39;
+            &#39;#notebook { padding-top:0px !important; } &#39;
+            &#39;.container { width:85% !important; } &#39;
+            &#39;.end_space { min-height:0px !important; } &#39;
+        &#39;&lt;/style&gt;&#39;
+    ))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<style>#notebook { padding-top:0px !important; } .container { width:85% !important; } .end_space { min-height:0px !important; } </style></div>
+</div>
+</section>
+<section id="1)-Data-load-&amp;-preprocessing-:">
+<h1>1) Data load &amp; preprocessing :<a class="headerlink" href="#1)-Data-load-&-preprocessing-:" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import uqmodels.processing as proc
+import uqmodels.preprocessing.Custom_Preprocessor as preproc
+from uqmodels.processing import Data_loader
+from uqmodels.processing import Pipeline
+from uqmodels.preprocessing.Custom_Preprocessor import dict_to_TS_Dataset
+import pickle
+
+#Data loading &amp; Preprocessing
+storing = path + &#39;/data/&#39;
+filename = &#39;synthetic_dataset_multivariate.p&#39;
+
+import pickle
+# Define a loading API
+def load_api(storing,filename,**kwargs):
+    return(pickle.load(open(storing+filename,&#39;rb&#39;)))
+
+# Instanciate Data_loader
+data_loader = Data_loader(data_loader_api=load_api)
+
+# Apply data_loader to get rowdata
+dict_data = data_loader.load({&#39;storing&#39;:storing,&#39;filename&#39;:filename})
+print(&#39;Row data : type=&#39;,type(dict_data),&#39;key&#39;,dict_data.keys())
+
+#Define Pipeline that combine data_loader and preprocesor
+
+# Here preprocessor aim only to recovers already computed feature and targets -&gt; X = dict_data[&#39;X&#39;],y=dict_data[&#39;y&#39;],ect.
+preprocessor = dict_to_TS_Dataset()
+pipeline = Pipeline(data_loader=data_loader,list_processors=[preprocessor])
+
+#Define query link to load api and add a &#39;name&#39; key which is recover by the preprocessor to provide a name to the dataset
+list_query = [{&#39;storing&#39;:storing,&#39;filename&#39;:filename,&#39;name&#39;:&#39;Synthetic_data&#39;}]
+
+#It provide a data_generator (yield) that provide each processed data one by one.
+dataset_generator = pipeline.transform(list_query)
+
+# Execute preprocessing pipeline :
+X, y, sample_weight, x_split, context, objective, name = next(dataset_generator)
+train = x_split==1
+test = np.invert(train)
+print(&#39;X shape:&#39;,X.shape,&#39;y: yshape&#39;,y.shape,&#39;Name:&#39;,name)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Row data : type= &lt;class &#39;dict&#39;&gt; key dict_keys([&#39;X&#39;, &#39;Y&#39;, &#39;context&#39;, &#39;X_name&#39;, &#39;train&#39;, &#39;test&#39;, &#39;X_split&#39;, &#39;context_name&#39;, &#39;aux&#39;, &#39;X_bis&#39;])
+Pipeline : No cache data found : load data and execute the whole pipeline
+X shape: (12000, 19) y: yshape (12000, 3) Name: Synthetic_data
+</pre></div></div>
+</div>
+</section>
+<section id="2)-Modeling-&amp;-Post-processing-:-(ML_dataset--&gt;-pred-&amp;-UQmesure--&gt;-pred-&amp;-UQ-KPI)">
+<h1>2) Modeling &amp; Post processing : (ML_dataset -&gt; pred &amp; UQmesure -&gt; pred &amp; UQ-KPI)<a class="headerlink" href="#2)-Modeling-&-Post-processing-:-(ML_dataset-->-pred-&-UQmesure-->-pred-&-UQ-KPI)" title="Link to this heading"></a></h1>
+<section id="Using-UQestimator-&amp;-Processing-function-or-Processor-object">
+<h2>Using UQestimator &amp; Processing function or Processor object<a class="headerlink" href="#Using-UQestimator-&-Processing-function-or-Processor-object" title="Link to this heading"></a></h2>
+</section>
+</section>
+<section id="Model-UQ-by-design-+-Transformation-d'une-variance-en-une-interval-de-confiance.">
+<h1>Model UQ by design + Transformation d’une variance en une interval de confiance.<a class="headerlink" href="#Model-UQ-by-design-+-Transformation-d'une-variance-en-une-interval-de-confiance." title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from sklearn.ensemble import RandomForestRegressor
+from uqmodels.modelization.ML_estimator.random_forest_UQ import RF_UQEstimator,get_params_dict
+from uqmodels.UQModel import UQModel
+import uqmodels.postprocessing.UQKPI_Processor as UQProc
+
+
+
+# PostProcesseur Instanciation that compute an epistemics lvl score
+UQEstimator_initializer = RF_UQEstimator
+UQEstimator_parameters = get_params_dict()
+
+# We can use UQestimator as standards estimator :
+UQEstimator = UQEstimator_initializer(**UQEstimator_parameters)
+UQEstimator.fit(X[train],y[train])
+pred,UQ = UQEstimator.predict(X)
+print(&#39;pred shape&#39;,pred.shape,&#39;Nature of UQ_mesure&#39;,UQEstimator.type_UQ,&#39;UQ shape : &#39;,UQ.shape,&#39; (2:var_A,Var_E),(12000:time_step),(3:data dimension)&#39;)
+
+# If we want Predictive interval from our UQmeasure :
+list_alpha = [0.025,0.16,0.84,0.975]
+
+# We can manually produce Predictive intervals form UQ_processing function :
+import uqmodels.postprocessing.UQ_processing as UQ_Process
+
+params_ = UQ_Process.fit_PI(UQ=UQ[:,train],type_UQ=UQEstimator.type_UQ,pred=pred[train],y=None,list_alpha=list_alpha)
+PIs_KPIs,_ = UQ_Process.compute_PI(UQ=UQ,type_UQ=UQEstimator.type_UQ,pred=pred,y=None,list_alpha=list_alpha,params_=params_)
+print(&#39;Using processing function : coverage_empiric&#39;,np.round((np.array(PIs_KPIs)[:,test]&gt;y[test]).mean(axis=(1,2))*100,1),&#39; |Coverage_target :&#39;,np.array(list_alpha)*100)
+
+# We can do the same using a post processing object :
+import uqmodels.postprocessing.UQKPI_Processor as UQProc
+
+PIs_proc = UQProc.NormalPIs_processor(KPI_parameters={&#39;list_alpha&#39;:[0.025,0.16,0.84,0.975]})
+params_ = PIs_proc.fit(UQ=UQ[:,train],type_UQ=UQEstimator.type_UQ,pred=pred[train],y=None)
+PIs_KPIs = PIs_proc.transform(UQ=UQ,type_UQ=UQEstimator.type_UQ,pred=pred,y=None)
+print(&#39;Using PIs_processor : coverage_empriric&#39;,np.round((np.array(PIs_KPIs)[:,test]&gt;y[test]).mean(axis=(1,2))*100,1),&#39; |Coverage_target :&#39;,np.array(list_alpha)*100)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+pred shape (12000, 3) Nature of UQ_mesure var_A&amp;E UQ shape :  (2, 12000, 3)  (2:var_A,Var_E),(12000:time_step),(3:data dimension)
+Using processing function : coverage_empiric [ 1.3 10.8 90.3 98.8]  |Coverage_target : [ 2.5 16.  84.  97.5]
+Using PIs_processor : coverage_empriric [ 1.3 10.8 90.3 98.8]  |Coverage_target : [ 2.5 16.  84.  97.5]
+</pre></div></div>
+</div>
+<section id="Using-UQModel-pipeline-for-predictive-interval">
+<h2>Using UQModel pipeline for predictive interval<a class="headerlink" href="#Using-UQModel-pipeline-for-predictive-interval" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.UQModel import UQModel
+
+# We can do the same using a UQModel object:
+PIs_proc = UQProc.NormalPIs_processor(KPI_parameters={&#39;list_alpha&#39;:[0.025,0.16,0.84,0.975]})
+RF_UQModel = UQModel(UQEstimator_initializer,
+                     UQEstimator_parameters,
+                     name=&#39;RF_UQ&#39;,
+                     predictor=None,
+                     list_predict_KPI_processors=[PIs_proc],
+                     list_score_KPI_processors=[])
+# Firstly UQModel fit UQestimator and KPI_processor
+RF_UQModel.fit(X[train],y[train])
+pred,(PIs_KPIs) = RF_UQModel.predict(X)
+print(&#39;Using UQModel pipeline : coverage_empriric&#39;,np.round((np.array(PIs_KPIs)[:,test]&gt;y[test]).mean(axis=(1,2))*100,1),&#39; |Coverage_target :&#39;,np.array(list_alpha)*100)
+
+if(True): # Test load save UQModels wrapper procedure
+    # Save fitted UQEstimator and KPI-Processors
+    RF_UQModel.save(&#39;./model&#39;)
+
+    # New model
+    RF_UQModel = UQModel()
+    # Load fitted UQEstimator and KPI-Processors
+    RF_UQModel.load(path=&#39;model/RF_UQ/&#39;)
+
+#Then it apply the whole pipeline
+pred,(PIs_KPIs) = RF_UQModel.predict(X)
+
+# And perform comparaison of theorical vs real coverage
+print(&#39;Using UQModel pipeline : coverage_empriric&#39;,np.round((np.array(PIs_KPIs)[:,test]&gt;y[test]).mean(axis=(1,2))*100,1),&#39; | Coverage_target :&#39;,np.array(list_alpha)*100)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Using UQModel pipeline : coverage_empriric [ 1.3 10.6 90.2 98.8]  |Coverage_target : [ 2.5 16.  84.  97.5]
+Using UQModel pipeline : coverage_empriric [ 1.3 10.6 90.2 98.8]  | Coverage_target : [ 2.5 16.  84.  97.5]
+</pre></div></div>
+</div>
+</section>
+<section id="Using-UQModel-pipeline-for-multi-KPI-at-inference-(UQMesure,-Predictive-interval-and-model-unreliability-score)-and-after-observation-(Anomaly-score)">
+<h2>Using UQModel pipeline for multi KPI at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)<a class="headerlink" href="#Using-UQModel-pipeline-for-multi-KPI-at-inference-(UQMesure,-Predictive-interval-and-model-unreliability-score)-and-after-observation-(Anomaly-score)" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># We can also create a more complexe UQmodel that handle several UQKPI_Processor to build at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
+
+from uqmodels.processing import Cache_manager
+
+name = &quot;RF_UQ_tuto&quot;
+# Specification of the UQestimator
+UQEstimator_initializer = RF_UQEstimator
+UQEstimator_parameters = get_params_dict()
+
+# Instanciation of PostProcesseur that provide UQ measure.
+UQ_proc = UQProc.UQKPI_Processor()
+
+# PostProcesseur that compute Predictive intervals
+PIs_proc = UQProc.NormalPIs_processor(KPI_parameters={&#39;list_alpha&#39;:[0.025,0.16,0.84,0.975]})
+
+# PostProcesseur  that compute an epistemics lvl score
+Elvl_proc = UQProc.Epistemicscorelvl_processor()
+
+# PostProcesseur Instanciation that compute Anom score
+Anom_proc_no_UQ= UQProc.Anomscore_processor(KPI_parameters={&#39;beta&#39;:0.005,&#39;with_born&#39;:True,&#39;q_var&#39;:0,&#39;k_var_e&#39;:0,&#39;q_var_e&#39;:0,&#39;k_var_e&#39;:0,&#39;q_Eratio&#39;:0})
+Anom_proc_no_epistemic = UQProc.Anomscore_processor(KPI_parameters={&#39;beta&#39;:0.005,&#39;with_born&#39;:True,&#39;q_var_e&#39;:0,&#39;k_var_e&#39;:0,&#39;q_Eratio&#39;:0})
+Anom_proc_with_epistemic = UQProc.Anomscore_processor(KPI_parameters={&#39;beta&#39;:0.005,&#39;with_born&#39;:True})
+
+# Instanciation of the UQmodel modeling pipeline
+RF_UQModel = UQModel(UQEstimator_initializer,
+                     UQEstimator_parameters,
+                     name=name,
+                     predictor=None,
+                     list_predict_KPI_processors=[UQ_proc,PIs_proc,Elvl_proc],
+                     list_score_KPI_processors=[Anom_proc_no_UQ,Anom_proc_no_epistemic,Anom_proc_with_epistemic])
+
+# Fit procedure
+RF_UQModel.fit(X[train],y[train])
+
+# Save fitted UQEstimator and KPI-Processors
+RF_UQModel.save(&#39;./model&#39;)
+
+# New model
+RF_UQModel = UQModel()
+
+# Load fitted UQEstimator and KPI-Processors
+RF_UQModel.load(path=&#39;model/&#39;+name)
+
+pred,(UQ,PIs,Elvl) = RF_UQModel.predict(X)
+KPI_ANOM1, KPI_ANOM2, KPI_ANOM3 = RF_UQModel.score(X,y)
+
+(KPI_anom_no_UQ,born_no_UQ) = KPI_ANOM1
+(KPI_anom_without_epistemic,born_without_epistemic) = KPI_ANOM2
+(KPI_anom_with_epistemic,born_with_epistemic) = KPI_ANOM3
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="3)-Visualisation-&amp;-Evaluation-:-(Target,-Pred,-UQ-KPI)--&gt;-(metrics-&amp;-visualisation)">
+<h1>3) Visualisation &amp; Evaluation : (Target, Pred, UQ-KPI) -&gt; (metrics &amp; visualisation)<a class="headerlink" href="#3)-Visualisation-&-Evaluation-:-(Target,-Pred,-UQ-KPI)-->-(metrics-&-visualisation)" title="Link to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib notebook
+%matplotlib inline
+import matplotlib.pyplot as plt
+import uqmodels.visualization.visualization as visu
+
+output = pred,UQ
+f_obs = np.arange(11750,12000)
+visu.uncertainty_plot(y,output,context=None,size=(20, 7),f_obs=f_obs,name=&#39;Prediction with Aleatoric &amp; Total uncertainty enveloppe&#39;,mode_res=False,dim=np.arange(2),type_UQ=RF_UQModel.type_UQ)
+visu.uncertainty_plot(y,output,context=None,born=born_with_epistemic,size=(20, 7),f_obs=f_obs,name=&#39;Prediction with &#39;,mode_res=False,dim=np.arange(2),type_UQ=RF_UQModel.type_UQ)
+
+print(&#39;Q_bot emp val:2.5%&#39;, (PIs[0]&lt;y).mean(axis=0)*100,&#39;Q_top emp val:97&#39;,(PIs[1]&lt;y).mean(axis=0)*100)
+print(&#39;Elvl :&#39;,[np.quantile(Elvl,q) for q in [0.50, 0.80, 0.90, 0.95, 0.975, 0.99, 0.999]])
+visu.plot_anom_matrice(score=KPI_anom_with_epistemic,true_label=dict_data[&#39;aux&#39;][&#39;anom&#39;][:,None],f_obs=f_obs,figsize=(20, 5))
+</pre></div>
+</div>
+</div>
+</section>
+<section id="3)-Visualisation-:-zoom-to-one-subset-:">
+<h1>3) Visualisation : zoom to one subset :<a class="headerlink" href="#3)-Visualisation-:-zoom-to-one-subset-:" title="Link to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>f_obs = np.arange(11750,12000)
+dim = 1
+fig_s = (18,6)
+output = pred,UQ
+
+visu.plot_var(dict_data[&#39;Y&#39;],dict_data[&#39;aux&#39;][&#39;data_mean_dyn&#39;],dict_data[&#39;aux&#39;][ &#39;var_stat&#39;],dict_data[&#39;aux&#39;][&#39;impact_anom&#39;],dict_data[&#39;aux&#39;][&#39;anom&#39;],f_obs,dict_data[&#39;aux&#39;][&#39;dim&#39;],dim,fig_s=fig_s)
+visu.uncertainty_plot(y,output,born=born_no_UQ,context=None,size=fig_s,f_obs=f_obs,name=&#39;Born_without_UQ&#39;,mode_res=False,dim=dim,type_UQ=&#39;var_A&amp;E&#39;)
+visu.uncertainty_plot(y,output,born=born_without_epistemic,context=None,size=fig_s,f_obs=f_obs,name=&#39;Born_with_UQ&#39;,mode_res=False,dim=dim,type_UQ=&#39;var_A&amp;E&#39;)
+visu.uncertainty_plot(y,output,born=born_with_epistemic,context=None,size=fig_s,f_obs=f_obs,name=&#39;Born_with_UQ_and_ML-risk&#39;,mode_res=False,dim=dim,type_UQ=&#39;var_A&amp;E&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.evaluation.metrics import Generic_metric, rmse, UQ_average_coverage, UQ_sharpness, UQ_Gaussian_NLL, UQ_dEI, UQ_absolute_residu_score
+list_ctx_constraint= None
+if(True):
+    list_metrics=[ Generic_metric(rmse,&#39;Root mean square&#39;, mask=None,list_ctx_constraint=list_ctx_constraint,reduce=True),
+                   Generic_metric(UQ_average_coverage,&quot;Coverage&quot;, mask=None,list_ctx_constraint=list_ctx_constraint,reduce=True,type_UQ=RF_UQModel.type_UQ),
+                   Generic_metric(UQ_sharpness,&quot;Sharpness&quot;, mask=None,list_ctx_constraint=list_ctx_constraint,reduce=True,type_UQ=RF_UQModel.type_UQ),
+                   Generic_metric(UQ_Gaussian_NLL,&quot;NLL&quot;, mask=None,list_ctx_constraint=list_ctx_constraint,reduce=True,type_UQ=RF_UQModel.type_UQ),
+                   Generic_metric(UQ_dEI,&quot;Epistemic_indicator&quot;, mask=None,list_ctx_constraint=list_ctx_constraint,reduce=True,type_UQ=RF_UQModel.type_UQ),
+                   Generic_metric(UQ_absolute_residu_score,&quot;Anom_score&quot;, mask=None,list_ctx_constraint=list_ctx_constraint,reduce=True,type_UQ=RF_UQModel.type_UQ)]
+
+
+commentary = [&#39;Error increase between test and anom due to anomaly&#39;,
+              &#39;Coverage loss between test and anom anomaly&#39;,
+              &#39;Sharpness increase between test and after-anom to incertainty caused by the anomaly (in lag feature)&#39;,
+              &#39;NLL increase between test and anom du to anomaly&#39;,
+              &#39;Epistemic confidence increase between test and after-anomaly due to an OOD input that contain the abnormal lag values&#39;,
+              &#39;Anom score between test and anom du to anomalie&#39;]
+
+print(&quot;Metrics evaluation apply on (pred,UQ)&quot;)
+
+for i,metrics in enumerate(list_metrics):
+    print(&quot;&quot;)
+    mask_anom = (dict_data[&#39;aux&#39;][&#39;anom&#39;]&gt;0.5)
+    mask_anom_after_anom = (np.roll(dict_data[&#39;aux&#39;][&#39;anom&#39;],1)+np.roll(dict_data[&#39;aux&#39;][&#39;anom&#39;],2))&gt;0.5
+    perf = metrics.compute(y,output,[train,test,test&amp;mask_anom,test&amp;mask_anom_after_anom],context=None)
+    print(metrics.name,&#39;train :&#39;,np.round(perf[0],3),&#39;test :&#39;,np.round(perf[1],3),&#39;Anom :&#39;,np.round(perf[2],3),&#39;After_anom :&#39;,np.round(perf[3],3),&#39;|commentary :&#39;,commentary[i])
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

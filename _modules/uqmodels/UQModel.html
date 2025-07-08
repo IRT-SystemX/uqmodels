@@ -1,0 +1,756 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.UQModel &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.UQModel</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.UQModel</h1><div class="highlight"><pre>
+<span></span><span class="c1">###################################################################################</span>
+<span class="c1"># UQModel : &quot;Model than apply an modeling pipeline composed of an predictor(optional), UQestimator and KPI</span>
+<span class="c1"># To write a custom UQModel, inherite from UQModel class an use supoer().__init__()</span>
+
+<span class="c1"># Class UQmodels : from an UQestimators : perform dadada</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.modelization.ML_estimator.random_forest_UQ</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">RF_UQ</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.UQKPI_Processor</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">UQProc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.preprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pre_pre</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.structure</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pre_struc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache_manager</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">apply_mask</span><span class="p">,</span> <span class="n">apply_middledim_reduction</span><span class="p">,</span> <span class="n">cut</span>
+
+
+<div class="viewcode-block" id="UQModel">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.UQModel.UQModel">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">UQModel</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    UQModel class : instanciate a pipeline of model estimation, model UQ estimation and post processing as</span>
+<span class="sd">    a (Fit,Predict,Score) triplet of method</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">UQEstimator_initializer</span><span class="o">=</span><span class="n">RF_UQ</span><span class="o">.</span><span class="n">RF_UQEstimator</span><span class="p">,</span>
+        <span class="n">UQEstimator_params</span><span class="o">=</span><span class="n">RF_UQ</span><span class="o">.</span><span class="n">get_params_dict</span><span class="p">(),</span>
+        <span class="c1"># Necesite with_prediction or to provide a predictor.</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;UQModel&quot;</span><span class="p">,</span>
+        <span class="n">predictor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">preprocessor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">list_predict_KPI_processors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># List of UQProcessor</span>
+        <span class="n">list_score_KPI_processors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">reduc_filter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">roll</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cache_manager</span><span class="o">=</span><span class="n">Cache_manager</span><span class="p">(),</span>
+        <span class="n">save_result</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">save_models</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize UQModel class</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQEstimator_initializer (obj_init): init method for instanciate an UQEstimator</span>
+<span class="sd">            UQEstimator_params (dict_params): params for the init method</span>
+<span class="sd">            name (str, optional): Wrapper name . Defaults to &#39;UQModel&#39;.</span>
+<span class="sd">            predictor (predictor or None, optional): Predictor instanciate if None,</span>
+<span class="sd">                assume that UQEstiamtor also make prediction. Defaults to None.</span>
+<span class="sd">            list_predict_KPI_processors (list_processor or None, optional): List of instanciated</span>
+<span class="sd">                predict_KPI_processors. Defaults to None.</span>
+<span class="sd">            list_score_KPI_processors (list_processor or None, optional): List of instanciated</span>
+<span class="sd">                score_KPI_processors. Defaults to None</span>
+<span class="sd">            reduc_filter (np.array or None): Weigth ponderation for reduc middle dimension (if needed)</span>
+<span class="sd">            cache_manager (cache_manager or None, optional): Cache manager. Defaults to None.</span>
+<span class="sd">            random_state : Controls randoms</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">predictor</span>
+        <span class="k">if</span> <span class="n">predictor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictor_initializer</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictor_params</span> <span class="o">=</span> <span class="n">predictor</span><span class="o">.</span><span class="n">get_params</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator_initializer</span> <span class="o">=</span> <span class="n">UQEstimator_initializer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="o">=</span> <span class="n">preprocessor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator_params</span> <span class="o">=</span> <span class="n">UQEstimator_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_predict_KPI_processors</span> <span class="o">=</span> <span class="n">list_predict_KPI_processors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_score_KPI_processors</span> <span class="o">=</span> <span class="n">list_score_KPI_processors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduc_filter</span> <span class="o">=</span> <span class="n">reduc_filter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roll</span> <span class="o">=</span> <span class="n">roll</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span> <span class="o">=</span> <span class="n">cache_manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator_params</span><span class="p">[</span><span class="s2">&quot;random_state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">random_state</span>
+
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">predict_KPI_processor</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_predict_KPI_processors</span><span class="p">):</span>
+                <span class="n">predict_KPI_processor</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">add_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">score_KPI_processor</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_score_KPI_processors</span><span class="p">):</span>
+                <span class="n">score_KPI_processor</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">add_random_state</span><span class="p">(</span>
+                    <span class="n">random_state</span><span class="p">,</span> <span class="mi">10</span> <span class="o">+</span> <span class="n">n</span>
+                <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_result</span> <span class="o">=</span> <span class="n">save_result</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_models</span> <span class="o">=</span> <span class="n">save_models</span>
+
+        <span class="k">for</span> <span class="n">key_arg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_arg</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key_arg</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Auxiliar load procedure for an specific entity : try to use entity.load method</span>
+<span class="sd">        or force save using UQModel cache_manager</span>
+
+<span class="sd">        Todo:</span>
+<span class="sd">            * Raise fail error -&gt; part already handle by cache manager</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity (obj): Object to load</span>
+<span class="sd">            path (str): Path to load</span>
+<span class="sd">            name (str): name to load</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="s2">&quot;load&quot;</span><span class="p">):</span>
+            <span class="n">arg_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">load</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">arg_list</span><span class="p">:</span>
+                <span class="n">entity</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">entity</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;storing&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">entity</span>
+
+<div class="viewcode-block" id="UQModel.load">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.UQModel.UQModel.load">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;UQModel&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;UQ model load procedure : recovers UQ model structure, then predictor (if existe), then UQestimators</span>
+
+<span class="sd">        Todo:</span>
+<span class="sd">            * Raise fail error -&gt; part already handle by cache manager</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (str, optional): path of UQmodels save if none use path store in cache manager</span>
+<span class="sd">            name (str, optional): name of UQmodels to load uf none use UQModel name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">storing</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;storing&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+        <span class="n">_UQModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">_UQModel</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">_UQModel</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor_initializer</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">predictor_params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;predictor&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator_initializer</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator_params</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;UQEstimator&quot;</span><span class="p">)</span></div>
+
+
+        <span class="c1"># TO do :</span>
+        <span class="c1"># Specific load procedure for predict_KPI_processors and score_KPI_processors</span>
+        <span class="c1"># Specific load procedure for preprocessor object</span>
+        <span class="c1"># Hold currently by global __dict__ parameters save</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">entity</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">UQModel_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Auxiliar save procedure for an specific entity : try to use entity.save</span>
+<span class="sd">        method or force save using UQmMdels cache_manager</span>
+
+<span class="sd">        Todo:</span>
+<span class="sd">            * Raise fail error -&gt; part already handle by cache manager</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            entity (obj): Object to save</span>
+<span class="sd">            path (str): Path to save</span>
+<span class="sd">            name (str): name to save</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">UQModel_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">UQModel_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="s2">&quot;save&quot;</span><span class="p">):</span>
+            <span class="n">arg_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">save</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">arg_list</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">UQModel_name</span><span class="p">)</span>
+                <span class="n">entity</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">UQModel_name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">entity</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;storing&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">UQModel_name</span><span class="p">,</span> <span class="n">name</span><span class="p">]}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">entity</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No_cache_manager : cannot save&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UQModel.save">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.UQModel.UQModel.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;UQ model save procedure : recovers UQ model structure, then predictor (if existe), then UQestimators</span>
+
+<span class="sd">        Todo:</span>
+<span class="sd">            * Raise fail error</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path (path, optional): path of UQmodels save</span>
+<span class="sd">            name (name, optional): name of UQmodels to load</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">storing</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;predictor&quot;</span><span class="p">,</span> <span class="n">UQModel_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">tmp_predictor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;UQEstimator&quot;</span><span class="p">,</span> <span class="n">UQModel_name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">tmp_UQestimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># TO do :</span>
+        <span class="c1"># Specific save procedure for predict_KPI_processors and score_KPI_processors</span>
+        <span class="c1"># Specific save procedure for preprocessor object</span>
+        <span class="c1"># Hold currently by global __dict__ parameters save</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;storing&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;UQModel&quot;</span><span class="p">]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="o">=</span> <span class="n">tmp_predictor</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span> <span class="o">=</span> <span class="n">tmp_UQestimator</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_UQEstimator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator_initializer</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator_params</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="s2">&quot;factory&quot;</span><span class="p">):</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">only_fit_scaler</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">type_UQ</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="s2">&quot;type_UQ_params&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">type_UQ_params</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit_predict_KPI_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Auxiliar method that apply fit method of predict_KPI_processors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): Features</span>
+<span class="sd">            pred (np.array): Prediction from predictor or UQEstimator</span>
+<span class="sd">            y (np.array): Targets/observations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">processor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_predict_KPI_processors</span><span class="p">:</span>
+            <span class="n">processor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">,</span>
+                <span class="n">pred</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                <span class="n">type_UQ_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fit_score_KPI_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Auxiliar method that apply fit method of score_KPI_processors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): Features</span>
+<span class="sd">            pred (np.array): Prediction from predictor or UQEstimator</span>
+<span class="sd">            y (np.array): Targets/observations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">processor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_score_KPI_processors</span><span class="p">:</span>
+            <span class="n">processor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_UQ_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="UQModel.fit">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.UQModel.UQModel.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip_UQEstimator</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit method that apply fit method of (predictor), UQEstimators, predict_KPI_processors, score_KPI_processors</span>
+<span class="sd">        Args:</span>
+<span class="sd">            X (np.array): Features</span>
+<span class="sd">            y (np.array): Targets/observations</span>
+<span class="sd">            sample_weight (np.array or None, optional): sample_weight. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">y_bis</span> <span class="o">=</span> <span class="n">y</span>
+
+        <span class="c1"># --- Fit predictor if it&#39;s not direclty the UQEstimator</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="p">,</span> <span class="s2">&quot;is_fitted&quot;</span>
+            <span class="p">):</span>  <span class="c1"># To do replace with sklearn is_fitted check</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                <span class="n">y_bis</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">pred</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_models</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="s2">&quot;res&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">:</span>
+                <span class="n">y_bis</span> <span class="o">=</span> <span class="n">y</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning use predictor with non residual base UQestimator &gt; UQMeasure&quot;</span>
+                    <span class="s2">&quot; will not based on model output&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># Call to fit method of model to perform multivarite fiting.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_UQEstimator</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">)</span>
+
+        <span class="c1"># ------</span>
+        <span class="c1"># Format data</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="s2">&quot;factory&quot;</span><span class="p">):</span>  <span class="c1"># Apply factory to transform input</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="s2">&quot;training_parameters&quot;</span><span class="p">))</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;generator&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">training_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">])</span>
+            <span class="p">):</span>
+                <span class="c1"># Apply factory by batch during generator unfolding</span>
+                <span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">]</span>
+                <span class="n">X_norm</span><span class="p">,</span> <span class="n">y_bis_norm</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y_bis</span>
+
+                <span class="c1"># But recover totality of model target to provide it to KPI-Score-KPIProcessor</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Apply factory</span>
+                <span class="n">X_norm</span><span class="p">,</span> <span class="n">y_bis_norm</span><span class="p">,</span> <span class="n">w_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">)</span>
+                <span class="n">y_bis</span> <span class="o">=</span> <span class="n">y_bis_norm</span>
+
+            <span class="c1"># Unormalized model target that can be multi-horizon object</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">y_bis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Data normalised is row data</span>
+            <span class="n">X_norm</span><span class="p">,</span> <span class="n">y_bis_norm</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y_bis</span>
+        <span class="c1"># ---</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">skip_UQEstimator</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                <span class="n">X_norm</span><span class="p">,</span>
+                <span class="n">y_bis_norm</span><span class="p">,</span>
+                <span class="n">sample_weight</span><span class="p">,</span>
+                <span class="n">skip_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">pred</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="c1"># Call to &quot;fit&quot; function of processor</span>
+        <span class="n">pred_bis</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+            <span class="n">X_norm</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pred</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_bis</span>
+
+        <span class="c1"># Side effect fit KPI processor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_predict_KPI_processors</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fit_score_KPI_processors</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="UQModel.fit_with_generator">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.UQModel.UQModel.fit_with_generator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_with_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_generator</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Specific fit method that handle data_generator</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_generator (datagenerator): Iterative object that provide : X, y, sample_weight, x_split, context,</span>
+<span class="sd">                objective, source (see data_generator)</span>
+<span class="sd">            shuffle (bool, optional): use shuffle or not. Defaults to True.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">_n</span><span class="p">,</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_generator</span><span class="p">):</span>
+            <span class="c1"># Recovers data from data_generator</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="p">,</span> <span class="n">x_split</span><span class="p">,</span> <span class="n">_context</span><span class="p">,</span> <span class="n">_objective</span><span class="p">,</span> <span class="n">_source</span> <span class="o">=</span> <span class="n">dataset</span>
+            <span class="n">train</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">x_split</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">train</span> <span class="o">=</span> <span class="n">x_split</span> <span class="o">==</span> <span class="mi">1</span>
+                <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">train</span><span class="p">),</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">train</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">sample_weight</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">sample_weight</span> <span class="o">=</span> <span class="n">sample_weight</span><span class="p">[</span><span class="n">train</span><span class="p">]</span>
+            <span class="c1"># Called fit procedure for each dataset</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sample_weight</span><span class="o">=</span><span class="n">sample_weight</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_transform_predict_KPI_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Auxiliar method that apply transform method of predict_KPI_processors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure from an UQestimator</span>
+<span class="sd">            pred (np.array): Predictor from an predictor or an UQestimator</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list_KPI_output: list_KPI_output pr KPI if len(list==1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_KPI_output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">processor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_predict_KPI_processors</span><span class="p">:</span>
+            <span class="n">KPI_output</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                <span class="n">UQ</span><span class="o">=</span><span class="n">UQ</span><span class="p">,</span>
+                <span class="n">type_UQ</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">,</span>
+                <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">type_UQ_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+
+            <span class="n">list_KPI_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">KPI_output</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_KPI_output</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">list_KPI_output</span> <span class="o">=</span> <span class="n">list_KPI_output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">list_KPI_output</span>
+
+<div class="viewcode-block" id="UQModel.predict">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.UQModel.UQModel.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">name_save</span><span class="o">=</span><span class="s2">&quot;output.p&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict method that apply predictor and UQestimators predict method, then compute predict_KPIs by use</span>
+<span class="sd">        transform methods of predict_KPI_Processors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (np.array): feature</span>
+<span class="sd">            name_save (str, optional): file_name for (Predictor) and UQEstimator outputs save file.</span>
+<span class="sd">                Defaults to &quot;output.p&quot;.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pred, list_KPI_output : prediction and list of KPIs or KPI if len(list==1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># --- Run predictor if it&#39;s not direclty the UQEstimator</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_result</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name_save</span> <span class="o">+</span> <span class="s2">&quot;_predictor&quot;</span><span class="p">}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span>
+
+        <span class="c1"># --- Format data</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="s2">&quot;factory&quot;</span><span class="p">):</span>
+
+            <span class="n">X_norm</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="n">generator</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="s2">&quot;training_parameters&quot;</span><span class="p">))</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;generator&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">training_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">])</span>
+            <span class="p">):</span>
+                <span class="n">generator</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">X_norm</span> <span class="o">=</span> <span class="n">X</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">generator</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">X_norm</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X_norm</span> <span class="o">=</span> <span class="n">X</span>
+        <span class="c1"># ---</span>
+
+        <span class="n">pred_bis</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+            <span class="n">X_norm</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pred</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_bis</span>
+
+        <span class="n">list_KPI_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_predict_KPI_processors</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="o">=</span><span class="n">UQ</span><span class="p">,</span> <span class="n">pred</span><span class="o">=</span><span class="n">pred</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduc_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">apply_middledim_reduction</span><span class="p">(</span>
+                <span class="n">pred</span><span class="p">,</span> <span class="n">reduc_filter</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">reduc_filter</span><span class="p">,</span> <span class="n">roll</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">roll</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_result</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name_save</span> <span class="o">+</span> <span class="s2">&quot;_UQEstimator&quot;</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">))</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name_save</span> <span class="o">+</span> <span class="s2">&quot;_predict_KPI_processors&quot;</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">list_KPI_output</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pred</span><span class="p">,</span> <span class="n">list_KPI_output</span></div>
+
+
+<div class="viewcode-block" id="UQModel.predict_with_generator">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.UQModel.UQModel.predict_with_generator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_with_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_generator</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;specific predict method that handle data_generator</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_generator (datagenerator): Iterative object that provide : X, y, sample_weight, x_split, context,</span>
+<span class="sd">                objective, source (see data_generator)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">             list of (pred, UQ)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_pred</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_n</span><span class="p">,</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_generator</span><span class="p">):</span>
+            <span class="c1"># Recovers data from data_generator</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">_y</span><span class="p">,</span> <span class="n">_sample_weight</span><span class="p">,</span> <span class="n">_x_split</span><span class="p">,</span> <span class="n">_context</span><span class="p">,</span> <span class="n">_objective</span><span class="p">,</span> <span class="n">source</span> <span class="o">=</span> <span class="n">dataset</span>
+            <span class="n">list_pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">name_save</span><span class="o">=</span><span class="n">source</span> <span class="o">+</span> <span class="s2">&quot;_output.p&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">list_pred</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_transform_score_KPI_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;auxilliair method that apply transform method of the score_KPI_processors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            UQ (np.array): UQmeasure from an UQestimator</span>
+<span class="sd">            pred (np.array): Prediction for an predictot or UQestimator</span>
+<span class="sd">            y (np.array): Targets/Observation</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list_KPI_output: list_KPI_output or KPI_ouput if len(list)==1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">list_KPI_output</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">processor</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_score_KPI_processors</span><span class="p">:</span>
+            <span class="n">list_KPI_output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">processor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span>
+                    <span class="n">UQ</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">,</span>
+                    <span class="n">pred</span><span class="p">,</span>
+                    <span class="n">y</span><span class="p">,</span>
+                    <span class="n">type_UQ_params</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_KPI_output</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">list_KPI_output</span> <span class="o">=</span> <span class="n">list_KPI_output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">list_KPI_output</span>
+
+<div class="viewcode-block" id="UQModel.score">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.UQModel.UQModel.score">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">score</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name_save</span><span class="o">=</span><span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Score method that produce score KPI that transform y observation and (pred,UQ) UQestimator outputs</span>
+<span class="sd">        into a KPI according to score_KPI_processors</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (np.array): Features</span>
+<span class="sd">            y (np.array): Targets/obserbations</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list_KPI_output: list_KPI_output or KPI_ouput if len(list)==1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preprocessor</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">y_bis</span> <span class="o">=</span> <span class="n">y</span>
+
+        <span class="c1"># Run predictor if distinct of the UQEstimator</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># To do replace with sklearn is_fitted check</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="p">,</span> <span class="s2">&quot;is_fitted&quot;</span><span class="p">):</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                <span class="n">y_bis</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">pred</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_result</span><span class="p">:</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name_save</span> <span class="o">+</span> <span class="s2">&quot;_predictor&quot;</span><span class="p">}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="s2">&quot;res&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">:</span>
+                <span class="n">y_bis</span> <span class="o">=</span> <span class="n">y</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;Warning use predictor with non residual base UQestimator &gt; UQMeasure&quot;</span>
+                    <span class="s2">&quot; will not based on model output&quot;</span>
+                <span class="p">)</span>
+
+        <span class="c1"># ---</span>
+        <span class="c1"># Format data for UQEstimator distinct mode : With or without factory + with or without generator</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="s2">&quot;factory&quot;</span><span class="p">):</span>  <span class="c1"># Apply factory to transform input</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="p">,</span> <span class="s2">&quot;training_parameters&quot;</span><span class="p">))</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;generator&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">training_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">])</span>
+            <span class="p">):</span>
+                <span class="c1"># Apply factory by batch during generator unfolding</span>
+                <span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">]</span>
+                <span class="n">X_norm</span><span class="p">,</span> <span class="n">y_bis_norm</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+                <span class="c1"># But recover totality of model target to provide it to KPI-Score-KPIProcessor</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># Apply factory</span>
+                <span class="n">X_norm</span><span class="p">,</span> <span class="n">y_bis_norm</span><span class="p">,</span> <span class="n">w_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">)</span>
+                <span class="n">y_bis</span> <span class="o">=</span> <span class="n">y_bis_norm</span>
+
+            <span class="c1"># Unormalized model target that can be multi-horizon object</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">y_bis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Data normalised is row data</span>
+            <span class="n">X_norm</span><span class="p">,</span> <span class="n">y_bis_norm</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y_bis</span>
+        <span class="c1"># ---</span>
+
+        <span class="n">pred_bis</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>
+            <span class="n">X_norm</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">pred</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">pred_bis</span>
+
+        <span class="n">list_KPI_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_transform_score_KPI_processors</span><span class="p">(</span>
+            <span class="n">UQ</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">y_bis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_result</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name_save</span> <span class="o">+</span> <span class="s2">&quot;_UQEstimator&quot;</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">(</span><span class="n">pred_bis</span><span class="p">,</span> <span class="n">UQ</span><span class="p">))</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">name_save</span> <span class="o">+</span> <span class="s2">&quot;_score_KPI_processors&quot;</span><span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cache_manager</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">list_KPI_output</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">list_KPI_output</span></div>
+
+
+<div class="viewcode-block" id="UQModel.score_with_generator">
+<a class="viewcode-back" href="../../uqmodels.html#uqmodels.UQModel.UQModel.score_with_generator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">score_with_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_generator</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;specitic score method that handle data_generator</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data_generator (datagenerator): Iterative object that provide : X, y, sample_weight, x_split, context,</span>
+<span class="sd">                objective, source (see data_generator)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list of score_KPI or score_KPI if len(list)==1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">list_res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">n_req</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">_n</span><span class="p">,</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_source</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data_generator</span><span class="p">):</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">list_res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+            <span class="n">n_req</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">n_req</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">list_res</span> <span class="o">=</span> <span class="n">list_res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">list_res</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+uqmodels.postprocessing package
+===============================
+
+Submodules
+----------
+
+uqmodels.postprocessing.UQKPI\_Processor module
+-----------------------------------------------
+
+.. automodule:: uqmodels.postprocessing.UQKPI_Processor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+uqmodels.postprocessing.UQ\_processing module
+---------------------------------------------
+
+.. automodule:: uqmodels.postprocessing.UQ_processing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+uqmodels.postprocessing.anomaly\_processing module
+--------------------------------------------------
+
+.. automodule:: uqmodels.postprocessing.anomaly_processing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+uqmodels.postprocessing.custom\_UQKPI\_Processor module
+-------------------------------------------------------
+
+.. automodule:: uqmodels.postprocessing.custom_UQKPI_Processor
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: uqmodels.postprocessing
+   :members:
+   :undoc-members:
+   :show-inheritance:

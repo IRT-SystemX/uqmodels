@@ -1,0 +1,459 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Illustration on synthetic data of the impact of epistemic distinction for Anomaly considering uncertainty quantification. &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Illustration on synthetic data of the impact of epistemic distinction for Anomaly considering uncertainty quantification.</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/illustration_Anom_with_UQ_and_ML_risk_aversion.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Illustration-on-synthetic-data-of-the-impact-of-epistemic-distinction-for-Anomaly-considering-uncertainty-quantification.">
+<h1>Illustration on synthetic data of the impact of epistemic distinction for Anomaly considering uncertainty quantification.<a class="headerlink" href="#Illustration-on-synthetic-data-of-the-impact-of-epistemic-distinction-for-Anomaly-considering-uncertainty-quantification." title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
+%autoreload 2
+
+import numpy as np
+import pandas as pd
+import pickle
+import os
+import warnings
+import matplotlib.pyplot as plt
+warnings.filterwarnings(&quot;ignore&quot;)
+
+from IPython.display import display, HTML
+display(HTML(&quot;&lt;style&gt;.container { width:95% !important; }&lt;/style&gt;&quot;))
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<style>.container { width:95% !important; }</style></div>
+</div>
+</section>
+<section id="Generation-of-synthetic-data-with-global-&amp;-local-anomaly-and-OOD-behaviour">
+<h1>Generation of synthetic data with global &amp; local anomaly and OOD behaviour<a class="headerlink" href="#Generation-of-synthetic-data-with-global-&-local-anomaly-and-OOD-behaviour" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.utils import cut
+
+# Generation of synthetic data
+
+X = []
+y_mean = []
+std =[]
+X_noise = []
+Y_noise = []
+state = []
+
+N = 10000
+n_mod = 1
+
+#rng = np.random.RandomState(106)
+rng = np.random.RandomState(109)
+
+X = np.arange(0, 100,100/N)
+r1 = rng.uniform(-0.3,0.3)
+r2 = 4
+y_mean = np.cos(X+r1) + np.cos(r2*X)
+Y_noise = cut(rng.normal(0,1,N),0.02,0.98) * (0.02+np.abs(y_mean)/5)
+std = np.abs(y_mean)
+state = np.zeros(len(X))
+
+y = y_mean+Y_noise
+y_bis = np.copy(y)
+y_bis[9520:9550] = y[9715:9745]
+y_bis[-879] = y_bis[-879] + 0.3
+y_bis[-880] = y_bis[-880] + 0.3
+y_bis[-569] = y_bis[-569] - 2.2
+y_bis[-570] = y_bis[-570] - 1.5
+
+true_label = np.zeros((len(y),1))
+true_label[-879] = 1
+true_label[-880] = 1
+true_label[-570] = 2
+true_label[-569] = 2
+true_label[9520:9550] = 3
+
+y = y_bis.reshape(-1,1)
+
+
+Datasets=[] # X,y,ctx,train,name
+feature = X[:,None]
+from sklearn.preprocessing import StandardScaler
+from uqmodels.preprocessing.preprocessing import rolling_statistics
+
+mean_var_50 = rolling_statistics(pd.DataFrame(np.roll(y,1)),50,1,[&#39;mean&#39;,&#39;std&#39;],[&#39;mean&#39;,&#39;std&#39;]).replace(np.nan,0).values
+mean_var_25 = rolling_statistics(pd.DataFrame(np.roll(y,1)),25,1,[&#39;mean&#39;,&#39;std&#39;],[&#39;mean&#39;,&#39;std&#39;]).replace(np.nan,0).values
+mean_var_20 = rolling_statistics(pd.DataFrame(np.roll(y,1)),10,1,[&#39;mean&#39;,&#39;std&#39;],[&#39;mean&#39;,&#39;std&#39;]).replace(np.nan,0).values
+
+features = np.concatenate([mean_var_20,mean_var_25,mean_var_50,np.array(X%(np.pi))[:,None],np.array(X%(r2*np.pi))[:,None]],axis=1)
+features = StandardScaler().fit_transform(features)
+Datasets.append([features,y,state,np.arange(10000)&lt;7000,&#39;Unnoised ML-task&#39;])
+
+X,y,ctx,train,name = Datasets[0]
+
+test = np.invert(train)
+
+f_obs = (np.arange(len(y))&gt;9050) &amp; (np.arange(len(y))&lt;9600)
+plt.figure(figsize=(18,4))
+plt.title(&#39;Observed data &#39;)
+plt.scatter(np.arange(len(X))[f_obs],y[f_obs],s=2,marker=&quot;x&quot;,label=&#39;observed data&#39;)
+plt.xlabel(&#39;X : Feature&#39;)
+plt.ylabel(&#39;Y : Target&#39;)
+mask_anom_1 = true_label[:,0]==1
+mask_anom_2 = true_label[:,0]==2
+mask_anom_3 = true_label[:,0]==3
+plt.scatter(np.arange(len(X))[mask_anom_1&amp;f_obs],y[mask_anom_1&amp;f_obs],color=&#39;orange&#39;,marker=&#39;X&#39;,label=&#39;Local anomaly&#39;)
+plt.scatter(np.arange(len(X))[mask_anom_2&amp;f_obs],y[mask_anom_2&amp;f_obs],color=&#39;red&#39;,marker=&#39;X&#39;,label=&#39;Gobal anomaly&#39;)
+plt.scatter(np.arange(len(X))[mask_anom_3&amp;f_obs],y[mask_anom_3&amp;f_obs],color=&#39;purple&#39;,marker=&#39;X&#39;,label=&#39;OOD data&#39;)
+plt.legend(loc=9)
+plt.xlim(9050,9600)
+plt.tight_layout()
+plt.show()
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_3_0.png" src="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_3_0.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Train and inference of and UQModels based on a Random forest regressor UQ-estimators
+
+from uqmodels.modelization.ML_estimator.random_forest_UQ import RF_UQEstimator,get_params_dict
+from uqmodels.custom_UQModel import UQModel_KPI
+# We can also create a more complexe UQmodel that hanUQKPI_ProcessorPI_Processor to build at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
+
+# Specification of the UQestimator &amp; Instanciation in a UQmodels wrapper that include post-processing
+RF_UQ_paramaters = get_params_dict(var_min=0.00001,type_UQ=&#39;var_A&amp;E&#39;,rescale=True,
+                                   ccp_alpha=1e-06, max_depth=15, max_features=0.9,
+                                   max_samples=0.9, min_impurity_decrease=0.00001,
+                                   min_samples_leaf=8,min_samples_split=8, n_estimators=125,random_state=0)
+
+RF_UQModel = UQModel_KPI(RF_UQEstimator,
+                         RF_UQ_paramaters,
+                         name=&#39;UQModels&#39;,
+                         reduc_filter_KPI = None,
+                         reduc_filter_pred= None,
+                         anom_with_born=True,
+                         cache_manager=None)
+
+RF_UQModel.list_score_KPI_processors[1].KPI_parameters = {&#39;beta&#39;: 0.001,&#39;type_norm&#39;:&#39;Nsigma_global&#39;,&#39;with_born&#39;: True,&#39;d&#39;:2, &#39;reduc_filter&#39;: None,&#39;q_var&#39;:1,&#39;q_var_e&#39;:1,&#39;k_var_e&#39;:1,&#39;q_Eratio&#39;:3,&#39;filt&#39;:[0.05,0.15,0.8,0,0]}
+
+RF_UQModel.fit(X[train],y[train])
+pred,((_,UQ),PIs,Elvl) = RF_UQModel.predict(X,y)
+(pred,UQ),(KPI_anom,born_model),PIs,Escore = RF_UQModel.score(X,y)
+
+from uqmodels.evaluation.metrics import Generic_metric, rmse, UQ_average_coverage, UQ_sharpness, UQ_Gaussian_NLL, UQ_dEI, UQ_absolute_residu_score
+from uqmodels.evaluation.evaluation import evaluate
+
+if(True):
+    list_metrics=[Generic_metric(rmse,&#39;Root mean square&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;),
+                  Generic_metric(UQ_average_coverage,&#39;Root mean square&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;)]
+    output = pred,UQ
+    metrics_val = evaluate(y,output,list_metrics,list_sets=[train,test],verbose=True)
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Root mean square [array([0.15826019]), array([0.22640534])]
+Root mean square [array([0.99842857]), array([0.954])]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib notebook
+%matplotlib inline
+import matplotlib.pyplot as plt
+import uqmodels.visualization.visualization as visu
+
+
+list_alpha = RF_UQModel.list_predict_KPI_processors[1].KPI_parameters[&#39;list_alpha&#39;]
+print(&#39;target&#39;, list_alpha, &#39;empirique&#39;, [(pi&gt;y).mean() for pi in PIs])
+list_percent =RF_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+print(&#39;target elvl&#39;,list_percent,&#39;empirique Elvl&#39;,[np.quantile(Elvl,q) for q in list_percent])
+
+f_obs = np.arange(len(y))[-950:-400]
+visu.uncertainty_plot(y,output,context=None,size=(18,6),f_obs=f_obs,name=&#39;Pred with UQmeasure&#39;,mode_res=False,dim=np.arange(y.shape[1]),confidence_lvl=Elvl,type_UQ=&#39;var_A&amp;E&#39;,list_percent=list_percent)
+visu.uncertainty_plot(y,output,context=None,size=(18,6),f_obs=f_obs,name=&#39;Pred with anom born considering UQ and ML-risk&#39;,mode_res=False,dim=np.arange(y.shape[1]),confidence_lvl=Elvl,type_UQ=&#39;var_A&amp;E&#39;,born=born_model,list_percent=list_percent)
+visu.plot_anom_matrice(score=KPI_anom,true_label=true_label,f_obs=f_obs,figsize=(18,3))
+
+from uqmodels.postprocessing.anomaly_processing import fit_anom_score,compute_anom_score
+from uqmodels.postprocessing.UQ_processing import process_UQmeasure_to_Epistemicscore
+from uqmodels.utils import propagate
+
+pred_ = pred*0
+f_obs = np.arange(9050,9600)
+x = np.arange(len(f_obs))
+
+escore = process_UQmeasure_to_Epistemicscore(UQ=UQ,type_UQ=&#39;var_A&amp;E&#39;,pred=pred,y=y)
+params_anom = {&#39;type_norm&#39;:&#39;quantiles_local&#39;,&#39;with_born&#39;:True,&#39;d&#39;:2,&#39;beta&#39;:0.001,&#39;q_var&#39;:0,&#39;k_var_e&#39;:0}
+
+params_ = fit_anom_score(UQ[:,train],&#39;var_A&amp;E&#39;,pred[train],y[train],**params_anom)
+(res,born),_ = compute_anom_score(UQ,&#39;var_A&amp;E&#39;,pred,y,**params_anom)
+print(&#39;b_no_UQ&#39;,((born[0] &gt; y) | (born[1] &lt; y)).mean(),(np.abs(res)&gt;1).mean())
+
+y_ = y[f_obs]-pred_[f_obs]
+born_row = born[0]-pred_,born[1]-pred_
+params_anom = {&#39;type_norm&#39;:&#39;quantiles_local&#39;,&#39;with_born&#39;:True,&#39;d&#39;:2,&#39;beta&#39;:0.001,&#39;q_var&#39;:0,&#39;q_var_e&#39;:1,&#39;k_var_e&#39;:4,&#39;q_Eratio&#39;:2}
+params_ = fit_anom_score(UQ[:,train],&#39;var_A&amp;E&#39;,pred[train],y[train],**params_anom)
+(res_e,born_e),_ = compute_anom_score(UQ,&#39;var_A&amp;E&#39;,pred,y,**params_anom)
+print(&#39;b_no_UQ_with_e&#39;,((born_e[0] &gt; y) | (born_e[1] &lt; y)).mean(),(np.abs(res_e)&gt;1).mean())
+born_e = born_e[0]-pred_,born_e[1]-pred_
+
+plt.figure(figsize=(18,14))
+
+plt.subplot(4,1,1)
+f_obs_bis = (np.arange(len(y))&gt;9050) &amp; (np.arange(len(y))&lt;9600)
+plt.title(&#39;Observed data &#39;,fontsize=20)
+plt.scatter(np.arange(len(X))[f_obs_bis],y[f_obs_bis],s=2,marker=&quot;x&quot;,label=&#39;observed data&#39;)
+plt.ylabel(&#39;Y : Target&#39;)
+mask_anom_1 = true_label[:,0]==1
+mask_anom_2 = true_label[:,0]==2
+mask_anom_3 = true_label[:,0]==3
+plt.scatter(np.arange(len(X))[mask_anom_1&amp;f_obs_bis],y[mask_anom_1&amp;f_obs_bis],color=&#39;orange&#39;,marker=&#39;X&#39;,label=&#39;Local anomaly&#39;)
+plt.scatter(np.arange(len(X))[mask_anom_2&amp;f_obs_bis],y[mask_anom_2&amp;f_obs_bis],color=&#39;red&#39;,marker=&#39;X&#39;,label=&#39;Gobal anomaly&#39;)
+plt.scatter(np.arange(len(X))[mask_anom_3&amp;f_obs_bis],y[mask_anom_3&amp;f_obs_bis],color=&#39;purple&#39;,marker=&#39;X&#39;,label=&#39;OOD data&#39;)
+plt.legend(ncol=2,fontsize=15)
+plt.xlim(9050,9600)
+
+plt.subplot(4,1,2)
+plt.title(&#39;Anom without considering UQ&#39;,fontsize=20)
+plt.plot(y_,color=&#39;black&#39;)
+plt.plot(born_row[0][f_obs],color=&#39;black&#39;,ls=&#39;:&#39;,label=&#39;Anomaly boundaries&#39;)
+plt.plot(born_row[1][f_obs],color=&#39;black&#39;,ls=&#39;:&#39;)
+mask_anom = ((y_ &lt;  born_row[0][f_obs])|(y_ &gt;  born_row[1][f_obs])).reshape(-1)
+plt.scatter(x[mask_anom],y_[mask_anom],color=&#39;red&#39;,marker=&#39;X&#39;,label=&#39;Anomaly_detected&#39;)
+plt.legend()
+plt.xlim(0,550)
+
+params_anom = {&#39;type_norm&#39;:&#39;quantiles_local&#39;,&#39;with_born&#39;:True,&#39;d&#39;:2,&#39;beta&#39;:0.001,&#39;q_var&#39;:1,&#39;q_var_e&#39;:0,&#39;k_var_e&#39;:0,&#39;q_Eratio&#39;:0}
+params_ = fit_anom_score(UQ[:,train],&#39;var_A&amp;E&#39;,pred[train],y[train],**params_anom)
+(res,born),_ = compute_anom_score(UQ,&#39;var_A&amp;E&#39;,pred,y,**params_anom)
+print(&#39;b_UQ&#39;,((born[0] &gt; y) | (born[1] &lt; y)).mean(),(np.abs(res)&gt;1).mean())
+born_UQ = born[0]-pred_,born[1]-pred_
+
+params_anom = {&#39;type_norm&#39;:&#39;quantiles_local&#39;,&#39;with_born&#39;:True,&#39;d&#39;:2,&#39;beta&#39;:0.001,&#39;q_var&#39;:1,&#39;q_var_e&#39;:1,&#39;k_var_e&#39;:1,&#39;q_Eratio&#39;:3}
+params_ = fit_anom_score(UQ[:,train],&#39;var_A&amp;E&#39;,pred[train],y[train],**params_anom)
+(res_e,born_e),_ = compute_anom_score(UQ,&#39;var_A&amp;E&#39;,pred,y,**params_anom)
+print(&#39;b_e&#39;,((born_e[0] &gt; y) | (born_e[1] &lt; y)).mean(),(np.abs(res_e)&gt;1).mean())
+born_e = born_e[0]-pred_,born_e[1]-pred_
+
+plt.subplot(4,1,3)
+plt.title(&#39;Residu anomaly considering UQ &#39;,fontsize=20)
+plt.plot(y_,color=&#39;black&#39;)
+plt.plot(born_UQ[0][f_obs],color=&#39;black&#39;,ls=&#39;:&#39;,label=&#39;UQ-Anomaly boundary&#39;)
+plt.plot(born_UQ[1][f_obs],color=&#39;black&#39;,ls=&#39;:&#39;)
+plt.fill_between(x,born_UQ[1][f_obs,0],born_row[1][f_obs,0],where=born_UQ[1][f_obs,0]&lt;born_row[1][f_obs,0],color=&#39;red&#39;,alpha=0.3,label=&#39;UQ-Anomaly&#39;)
+plt.fill_between(x,born_UQ[1][f_obs,0],born_row[1][f_obs,0],where=born_UQ[1][f_obs,0]&gt;born_row[1][f_obs,0],color=&#39;green&#39;,alpha=0.3,label=&#39;UQ-relaxation&#39;)
+plt.fill_between(x,born_UQ[0][f_obs,0],born_row[0][f_obs,0],where=born_UQ[0][f_obs,0]&gt;born_row[0][f_obs,0],color=&#39;red&#39;,alpha=0.3)
+plt.fill_between(x,born_UQ[0][f_obs,0],born_row[0][f_obs,0],where=born_UQ[0][f_obs,0]&lt;born_row[0][f_obs,0],color=&#39;green&#39;,alpha=0.3)
+mask_anom = ((y_ &lt;  born_UQ[0][f_obs])|(y_ &gt;  born_UQ[1][f_obs])).reshape(-1)
+plt.scatter(x[mask_anom],y_[mask_anom],color=&#39;red&#39;,marker=&#39;X&#39;,label=&#39;Anomaly_detected&#39;)
+plt.legend(ncol=2,fontsize=15)
+plt.xlim(0,550)
+
+plt.subplot(4,1,4)
+plt.title(&#39;Residu anomaly considering UQ and ML-Risk awarness&#39;,fontsize=20)
+plt.plot(y_,color=&#39;black&#39;)
+plt.plot(born_e[0][f_obs],color=&#39;black&#39;,ls=&#39;:&#39;,label=&#39;ML-Risk-awarness-UQ-Anomaly boundary&#39;)
+plt.plot(born_e[1][f_obs],color=&#39;black&#39;,ls=&#39;:&#39;)
+plt.fill_between(x,born_e[1][f_obs,0],born_UQ[1][f_obs,0],where=born_e[1][f_obs,0]&lt;born_UQ[1][f_obs,0],color=&#39;purple&#39;,alpha=0.3,label=&#39;ML-Risk-Anomaly&#39;)
+plt.fill_between(x,born_e[1][f_obs,0],born_UQ[1][f_obs,0],where=born_e[1][f_obs,0]&gt;born_UQ[1][f_obs,0],color=&#39;cyan&#39;,alpha=0.3,label=&#39;ML-Risk_relaxation&#39;)
+plt.fill_between(x,born_e[0][f_obs,0],born_UQ[0][f_obs,0],where=born_e[0][f_obs,0]&gt;born_UQ[0][f_obs,0],color=&#39;purple&#39;,alpha=0.3)
+plt.fill_between(x,born_e[0][f_obs,0],born_UQ[0][f_obs,0],where=born_e[0][f_obs,0]&lt;born_UQ[0][f_obs,0],color=&#39;cyan&#39;,alpha=0.3)
+mask_anom = ((y_ &lt;  born_e[0][f_obs])|(y_ &gt;  born_e[1][f_obs])).reshape(-1)
+plt.scatter(x[mask_anom],y_[mask_anom],color=&#39;red&#39;,marker=&#39;X&#39;,label=&#39;Anomaly_detected&#39;)
+plt.legend(ncol=2,fontsize=15)
+plt.tight_layout()
+plt.xlim(0,550)
+plt.show()
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+target [0.025, 0.16, 0.84, 0.975] empirique [0.0081, 0.1086, 0.886, 0.9914]
+target elvl [0.5, 0.8, 0.95, 0.98, 0.995, 1] empirique Elvl [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_1.png" src="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_2.png" src="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_2.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_3.png" src="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_3.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+b_no_UQ 0.001 0.001
+b_no_UQ_with_e 0.001 0.001
+b_UQ 0.001 0.001
+b_e 0.001 0.001
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_5.png" src="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_5.png" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,1177 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.visualization.visualization_mutisource &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.visualization.visualization_mutisource</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.visualization.visualization_mutisource</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Visualization_multisource module.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mpl</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdates</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.structure</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_regular_step_scale</span><span class="p">,</span>
+    <span class="n">get_step_mask</span><span class="p">,</span>
+    <span class="n">step_to_date</span><span class="p">,</span>
+    <span class="n">window_expansion</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">read</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extract_dict</span><span class="p">,</span> <span class="n">compute_born</span><span class="p">,</span> <span class="n">expand_flag</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.visualization.visualization</span><span class="w"> </span><span class="kn">import</span> <span class="n">provide_cmap</span>
+
+<span class="n">mpl_date_format</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/%m %H:%M&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="load_from_metadata">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.visualization_mutisource.load_from_metadata">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_from_metadata</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">str_keys_metadata</span><span class="p">):</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;metadata.json&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">Extract_dict</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">str_keys_metadata</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_and_select">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.visualization_mutisource.load_and_select">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_and_select</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">):</span>
+    <span class="n">str_keys_metadata</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;sources_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;range_&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;time_offset&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dtype&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date_init&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_time_factor&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="p">(</span>
+        <span class="n">sources_name</span><span class="p">,</span>
+        <span class="n">shift</span><span class="p">,</span>
+        <span class="n">range_</span><span class="p">,</span>
+        <span class="n">time_offset</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">,</span>
+        <span class="n">date_init</span><span class="p">,</span>
+        <span class="n">list_time_factor</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">load_from_metadata</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">str_keys_metadata</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;raw_series&quot;</span><span class="p">:</span>
+        <span class="n">serie</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span>
+        <span class="n">time_mask</span> <span class="o">=</span> <span class="n">get_step_mask</span><span class="p">(</span><span class="n">serie</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">out_of_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">time_mask</span><span class="p">]</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">time_mask</span><span class="p">]</span> <span class="o">/</span> <span class="n">shift</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">time_mask</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;interpolated&quot;</span><span class="p">:</span>
+        <span class="n">serie</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span>
+        <span class="n">time_mask</span> <span class="o">=</span> <span class="n">get_step_mask</span><span class="p">(</span><span class="n">serie</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">out_of_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">serie</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">time_mask</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">serie</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">time_mask</span><span class="p">]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">step_to_date</span><span class="p">(</span>
+            <span class="n">serie</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">time_mask</span><span class="p">],</span> <span class="n">delta</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;regular_date&quot;</span><span class="p">:</span>
+        <span class="n">raw_id</span> <span class="o">=</span> <span class="n">sources_name</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">t_scale</span> <span class="o">=</span> <span class="n">list_time_factor</span><span class="p">[</span><span class="n">raw_id</span><span class="p">]</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">get_regular_step_scale</span><span class="p">(</span><span class="n">shift</span> <span class="o">*</span> <span class="n">t_scale</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">time_offset</span><span class="p">)</span>
+        <span class="n">time_mask</span> <span class="o">=</span> <span class="n">get_step_mask</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">out_of_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="n">time_mask</span><span class="p">]</span> <span class="o">/</span> <span class="n">shift</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">step_to_date</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">keys</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;channels&quot;</span><span class="p">:</span>
+        <span class="n">serie</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span>
+        <span class="c1"># Size plateau affichage</span>
+        <span class="n">n_point</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="c1"># Data recovering</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span>
+        <span class="c1"># Time-scale recovering</span>
+        <span class="n">raw_id</span> <span class="o">=</span> <span class="n">sources_name</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">t_scale</span> <span class="o">=</span> <span class="n">list_time_factor</span><span class="p">[</span><span class="n">raw_id</span><span class="p">]</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">get_regular_step_scale</span><span class="p">(</span><span class="n">shift</span> <span class="o">*</span> <span class="n">t_scale</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">time_offset</span><span class="o">=</span><span class="n">time_offset</span><span class="p">)</span>
+        <span class="n">mask_time</span> <span class="o">=</span> <span class="n">get_step_mask</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">out_of_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">times</span> <span class="o">/</span> <span class="n">shift</span><span class="p">)[</span><span class="n">mask_time</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">channels</span><span class="p">[</span><span class="n">mask_time</span><span class="p">],</span> <span class="n">n_point</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">step_to_date</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dates</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Auxiliar minor-processing</span>
+
+
+<div class="viewcode-block" id="apply_cmap">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.visualization_mutisource.apply_cmap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_cmap</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">cmap</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform valyes array into color values array using cmap and considering bound [vmin,vmax]</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        val (array): Values to turn to color</span>
+<span class="sd">        vmin (float): min_val</span>
+<span class="sd">        vmax (float): max_val</span>
+<span class="sd">        cmap (cmap): matplotlib cmap</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        _type_: Array of color</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">vmin</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">vmax</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="p">(</span><span class="n">val</span> <span class="o">-</span> <span class="n">vmin</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">vmax</span> <span class="o">-</span> <span class="n">vmin</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">cmap</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">val</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="compute_dev_score">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.visualization_mutisource.compute_dev_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_dev_score</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute signed relative errors</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        val (array): Prediction</span>
+<span class="sd">        y (array): Target</span>
+<span class="sd">        vmin (float): negative minimum sensitivité</span>
+<span class="sd">        vmax (float): positive minimun sensitivity</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        r: signed relative errors.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">val</span>
+    <span class="n">flag_res_neg</span> <span class="o">=</span> <span class="n">r</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">flag_res_pos</span> <span class="o">=</span> <span class="n">r</span> <span class="o">&lt;</span> <span class="mi">0</span>
+
+    <span class="n">r</span><span class="p">[</span><span class="n">flag_res_neg</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">flag_res_neg</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">flag_res_neg</span><span class="p">]</span> <span class="o">-</span> <span class="n">vmin</span><span class="p">[</span><span class="n">flag_res_neg</span><span class="p">])</span>
+    <span class="n">r</span><span class="p">[</span><span class="n">flag_res_pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="n">flag_res_pos</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">vmax</span><span class="p">[</span><span class="n">flag_res_pos</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">flag_res_pos</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">r</span></div>
+
+
+
+<span class="c1"># Main plot function</span>
+
+
+<div class="viewcode-block" id="plot_row_series">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.visualization_mutisource.plot_row_series">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_row_series</span><span class="p">(</span>
+    <span class="n">storing</span><span class="p">,</span> <span class="n">sensors_mask</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">date_init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">anom</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">):</span>
+    <span class="c1"># Load metadata</span>
+
+    <span class="n">str_keys_metadata</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;sources_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;step&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;range_&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dtype&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date_init&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_time_factor&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="p">(</span>
+        <span class="n">sensors_name</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">,</span>
+        <span class="n">shift</span><span class="p">,</span>
+        <span class="n">range_</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">,</span>
+        <span class="n">date_init</span><span class="p">,</span>
+        <span class="n">list_step_target</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">load_from_metadata</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">str_keys_metadata</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">sensor_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sensors_mask</span><span class="p">):</span>
+        <span class="c1"># Load data</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">sensors_name</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">],</span> <span class="s2">&quot;raw_series&quot;</span><span class="p">]</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dates</span> <span class="o">=</span> <span class="n">load_and_select</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">)</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sensors_mask</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span>
+            <span class="n">step_to_date</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">),</span>
+            <span class="n">step_to_date</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">sensors_name</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sensors_mask</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([])</span>
+
+        <span class="k">if</span> <span class="n">anom</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">anom</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                <span class="n">anom</span> <span class="o">=</span> <span class="p">[</span><span class="n">anom</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">anom_</span> <span class="ow">in</span> <span class="n">anom</span><span class="p">:</span>
+                <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">sensors_name</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">],</span> <span class="s2">&quot;regular_date&quot;</span><span class="p">]</span>
+                <span class="n">x_anom</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">dates_anom</span> <span class="o">=</span> <span class="n">load_and_select</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">)</span>
+                <span class="n">flag_anom</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">anom_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">&lt;</span> <span class="n">anom_</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">dates_anom</span><span class="p">,</span>
+                    <span class="n">y1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">x_anom</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+                    <span class="n">y2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">x_anom</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">+</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+                    <span class="n">where</span><span class="o">=</span><span class="n">expand_flag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">flag_anom</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+                    <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                    <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Zone d&#39;anomalie&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl_date_format</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">w_pad</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">h_pad</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># plt.subplots_adjust(wspace=-0.5)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="plot_row_series_statistics">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.visualization_mutisource.plot_row_series_statistics">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_row_series_statistics</span><span class="p">(</span>
+    <span class="n">storing</span><span class="p">,</span>
+    <span class="n">sensors_mask</span><span class="p">,</span>
+    <span class="n">x_min</span><span class="p">,</span>
+    <span class="n">x_max</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="n">interpolate_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">date_init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="c1"># Load metadata</span>
+    <span class="n">str_keys_metadata</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;sources_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;step&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;range_&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dtype&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date_init&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_time_factor&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="p">(</span>
+        <span class="n">sensors_name</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">,</span>
+        <span class="n">shift</span><span class="p">,</span>
+        <span class="n">range_</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">,</span>
+        <span class="n">date_init</span><span class="p">,</span>
+        <span class="n">list_step_target</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">load_from_metadata</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">str_keys_metadata</span><span class="p">)</span>
+
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">x_min</span> <span class="o">*</span> <span class="n">time_step</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">*</span> <span class="n">time_step</span>
+
+    <span class="k">for</span> <span class="n">sensor_id</span> <span class="ow">in</span> <span class="n">sensors_mask</span><span class="p">:</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">list_plt</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+            <span class="mi">4</span><span class="p">,</span>
+            <span class="mi">1</span><span class="p">,</span>
+            <span class="n">gridspec_kw</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;height_ratios&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]},</span>
+            <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+            <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">interpolate_data</span><span class="p">:</span>
+            <span class="n">raw_id</span> <span class="o">=</span> <span class="n">sensor_id</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">sensors_name</span><span class="p">[</span><span class="n">raw_id</span><span class="p">],</span> <span class="s2">&quot;interpolated&quot;</span><span class="p">]</span>
+            <span class="n">x_inter</span><span class="p">,</span> <span class="n">y_inter</span><span class="p">,</span> <span class="n">dates_inter</span> <span class="o">=</span> <span class="n">load_and_select</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">)</span>
+
+            <span class="n">list_plt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">dates_inter</span><span class="p">,</span>
+                <span class="n">y_inter</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+                <span class="n">lw</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Données interpolées&quot;</span><span class="p">,</span>
+                <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">sensors_name</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">],</span> <span class="s2">&quot;raw_series&quot;</span><span class="p">]</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">dates</span> <span class="o">=</span> <span class="n">load_and_select</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">)</span>
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">dates</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Observations brutes&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span>
+            <span class="n">step_to_date</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">),</span>
+            <span class="n">step_to_date</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Time scale information recovering</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">sensors_name</span><span class="p">[</span><span class="n">raw_id</span><span class="p">],</span> <span class="s2">&quot;channels&quot;</span><span class="p">]</span>
+        <span class="n">x_chan</span><span class="p">,</span> <span class="n">y_chan</span><span class="p">,</span> <span class="n">dates_chan</span> <span class="o">=</span> <span class="n">load_and_select</span><span class="p">(</span><span class="n">storing</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">)</span>
+
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">dates_chan</span><span class="p">,</span>
+            <span class="n">y_chan</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Moyenne&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;Gold&quot;</span><span class="p">,</span>
+            <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">dates_chan</span><span class="p">,</span>
+            <span class="n">y_chan</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Standard deviation&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;purple&quot;</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">dates_chan</span><span class="p">,</span>
+            <span class="n">y_chan</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Extremum&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+            <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">list_plt</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">dates_chan</span><span class="p">,</span>
+                <span class="n">y_chan</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Etat d&#39;activité&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkgreen&quot;</span><span class="p">,</span>
+                <span class="n">lw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="n">list_plt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="c1"># list_plt[4].legend()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">w_pad</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">h_pad</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="plot_channel">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.visualization_mutisource.plot_channel">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_channel</span><span class="p">(</span>
+    <span class="n">storing_data</span><span class="p">,</span>
+    <span class="n">storing_res</span><span class="p">,</span>
+    <span class="n">sensors_mask</span><span class="p">,</span>
+    <span class="n">x_min</span><span class="p">,</span>
+    <span class="n">x_max</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="n">canal_nature</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Mean&quot;</span><span class="p">,</span> <span class="s2">&quot;Std&quot;</span><span class="p">,</span> <span class="s2">&quot;ExT&quot;</span><span class="p">],</span>
+<span class="p">):</span>
+    <span class="c1"># Recovering row data</span>
+    <span class="n">str_keys_metadata</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;sources_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;step&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;range_&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;time_offset&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dtype&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date_init&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_time_factor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_sensors_primaire&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="p">(</span>
+        <span class="n">sensors_name</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">,</span>
+        <span class="n">shift</span><span class="p">,</span>
+        <span class="n">range_</span><span class="p">,</span>
+        <span class="n">time_offset</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">,</span>
+        <span class="n">date_init</span><span class="p">,</span>
+        <span class="n">list_step_target</span><span class="p">,</span>
+        <span class="n">list_sensors_primaire</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">load_from_metadata</span><span class="p">(</span><span class="n">storing_data</span><span class="p">,</span> <span class="n">str_keys_metadata</span><span class="p">)</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">x_min</span> <span class="o">*</span> <span class="n">time_step</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">*</span> <span class="n">time_step</span>
+
+    <span class="c1"># recovering anomalies</span>
+    <span class="n">dict_res_anom</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_res</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;dict_res_anom&quot;</span><span class="p">])</span>
+
+    <span class="n">str_keys_data</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;S_anom_chan&quot;</span><span class="p">,</span> <span class="s2">&quot;S_anom_sensor&quot;</span><span class="p">,</span> <span class="s2">&quot;list_bot&quot;</span><span class="p">,</span> <span class="s2">&quot;list_top&quot;</span><span class="p">]</span>
+    <span class="n">S_anom_chan</span><span class="p">,</span> <span class="n">S_anom_sensor</span><span class="p">,</span> <span class="n">list_bot</span><span class="p">,</span> <span class="n">list_top</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span>
+        <span class="n">dict_res_anom</span><span class="p">,</span> <span class="n">str_keys_data</span>
+    <span class="p">)</span>
+    <span class="n">n_chan</span> <span class="o">=</span> <span class="n">list_bot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">channel_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_sensors_primaire</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_chan</span><span class="p">)[</span>
+        <span class="p">[</span>
+            <span class="n">i</span> <span class="o">//</span> <span class="n">n_chan</span> <span class="ow">in</span> <span class="n">sensors_mask</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_sensors_primaire</span><span class="p">)</span> <span class="o">*</span> <span class="n">n_chan</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">]</span>
+
+    <span class="n">f</span><span class="p">,</span> <span class="n">plot_list</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">channel_mask</span><span class="p">),</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_mask</span><span class="p">)),</span>
+        <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n_ind</span><span class="p">,</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">channel_mask</span><span class="p">):</span>
+        <span class="n">sensor_id</span> <span class="o">=</span> <span class="n">ind</span> <span class="o">//</span> <span class="n">n_chan</span>
+        <span class="n">channel_id</span> <span class="o">=</span> <span class="n">ind</span> <span class="o">%</span> <span class="n">n_chan</span>
+        <span class="n">raw_id</span> <span class="o">=</span> <span class="n">list_sensors_primaire</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">]</span>
+
+        <span class="c1"># Time scale information recovering</span>
+        <span class="n">t_scale</span> <span class="o">=</span> <span class="n">list_step_target</span><span class="p">[</span><span class="n">raw_id</span><span class="p">]</span>
+
+        <span class="n">times</span> <span class="o">=</span> <span class="n">get_regular_step_scale</span><span class="p">(</span><span class="n">shift</span> <span class="o">*</span> <span class="n">t_scale</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">time_offset</span><span class="o">=</span><span class="n">time_offset</span><span class="p">)</span>
+
+        <span class="n">mask_time</span> <span class="o">=</span> <span class="n">get_step_mask</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">out_of_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_data</span><span class="p">,</span> <span class="p">[</span><span class="n">sensors_name</span><span class="p">[</span><span class="n">raw_id</span><span class="p">],</span> <span class="s2">&quot;channels.p&quot;</span><span class="p">])</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_res</span><span class="p">,</span> <span class="p">[</span><span class="n">sensors_name</span><span class="p">[</span><span class="n">raw_id</span><span class="p">],</span> <span class="s2">&quot;output.p&quot;</span><span class="p">])</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">x_new</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="n">mask_time</span><span class="p">]</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">step_to_date</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">mask_time</span><span class="p">],</span> <span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">)</span>
+
+        <span class="n">Y_spline</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">]</span>
+        <span class="n">pred_spline</span> <span class="o">=</span> <span class="n">pred</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">]</span>
+        <span class="n">name_sensor</span> <span class="o">=</span> <span class="n">sensors_name</span><span class="p">[</span><span class="n">raw_id</span><span class="p">]</span>
+        <span class="n">top_spline</span> <span class="o">=</span> <span class="n">list_top</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">][</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">]</span>
+        <span class="n">bot_spline</span> <span class="o">=</span> <span class="n">list_bot</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">][</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">]</span>
+
+        <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">dates</span><span class="p">,</span> <span class="n">Y_spline</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">Y_spline</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">)</span>
+
+        <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">pred_spline</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkgreen&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">var_A</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">var_E</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="n">bot_A</span><span class="p">,</span> <span class="n">top_A</span> <span class="o">=</span> <span class="n">compute_born</span><span class="p">(</span>
+                <span class="n">y_pred</span><span class="o">=</span><span class="n">pred</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">],</span>
+                <span class="n">sigma</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_A</span><span class="p">)[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">],</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">bot_E</span><span class="p">,</span> <span class="n">top_E</span> <span class="o">=</span> <span class="n">compute_born</span><span class="p">(</span>
+                <span class="n">y_pred</span><span class="o">=</span><span class="n">pred</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">],</span>
+                <span class="n">sigma</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_E</span><span class="p">)[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">],</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">bot_spline1</span> <span class="o">=</span> <span class="n">bot_A</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_E</span><span class="p">)[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">]</span>
+            <span class="n">top_spline1</span> <span class="o">=</span> <span class="n">top_A</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_E</span><span class="p">)[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">]</span>
+
+            <span class="n">bot</span><span class="p">,</span> <span class="n">top</span> <span class="o">=</span> <span class="n">compute_born</span><span class="p">(</span>
+                <span class="n">y_pred</span><span class="o">=</span><span class="n">pred</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">],</span>
+                <span class="n">sigma</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_E</span> <span class="o">+</span> <span class="n">var_A</span><span class="p">)[</span><span class="n">mask_time</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">],</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">dates</span><span class="p">,</span> <span class="n">bot_A</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;var_A&quot;</span>
+            <span class="p">)</span>
+            <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">top_A</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+            <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">bot_E</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkorange&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">)</span>
+            <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">dates</span><span class="p">,</span> <span class="n">top_E</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkorange&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;dotted&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;var_E&quot;</span>
+            <span class="p">)</span>
+
+            <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span>
+                <span class="n">y1</span><span class="o">=</span><span class="n">bot</span><span class="p">,</span>
+                <span class="n">y2</span><span class="o">=</span><span class="n">top</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+                <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;lime&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;incertitude_total&quot;</span><span class="p">,</span>
+                <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>  <span class="c1"># ,label=&#39;Estimate IC&#39;</span>
+
+            <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span>
+                <span class="n">y1</span><span class="o">=</span><span class="n">bot_spline1</span><span class="p">,</span>
+                <span class="n">y2</span><span class="o">=</span><span class="n">top_spline1</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+                <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+                <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="s2">&quot;IC_epistemic_penalized&quot;</span><span class="p">,</span>
+                <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>  <span class="c1"># ,label=&#39;Estimate IC&#39;</span>
+
+        <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span>
+            <span class="n">y1</span><span class="o">=</span><span class="n">top_spline</span><span class="p">,</span>
+            <span class="n">y2</span><span class="o">=</span><span class="n">bot_spline</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+            <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;IC-99%&quot;</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># ,label=&#39;Estimate IC&#39;</span>
+
+        <span class="n">dates_</span> <span class="o">=</span> <span class="n">step_to_date</span><span class="p">(</span>
+            <span class="n">window_expansion</span><span class="p">(</span><span class="n">x_new</span><span class="p">,</span> <span class="n">n_expand</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="n">shift</span> <span class="o">/</span> <span class="mi">5</span><span class="p">),</span>
+            <span class="n">delta</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">dates_</span><span class="p">,</span>
+            <span class="n">y1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">bot_spline</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">y2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">Y_spline</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">where</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">top_spline</span> <span class="o">&lt;</span> <span class="n">Y_spline</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=-</span><span class="mi">1000</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">dates_</span><span class="p">,</span>
+            <span class="n">y1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">Y_spline</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">y2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">top_spline</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">where</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">Y_spline</span> <span class="o">&lt;</span> <span class="n">bot_spline</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;alerte&quot;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=-</span><span class="mi">1000</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+            <span class="n">title</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; : &quot;</span> <span class="o">+</span> <span class="n">name_sensor</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">canal_nature</span><span class="p">[</span><span class="n">ind</span> <span class="o">%</span> <span class="n">n_chan</span><span class="p">],</span>
+            <span class="n">loc</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span>
+            <span class="n">step_to_date</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">),</span>
+            <span class="n">step_to_date</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">plot_list</span><span class="p">[</span><span class="n">n_ind</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span>
+            <span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/%m %H:%M&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">pad</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">w_pad</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">h_pad</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="plot_anom_mat">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.visualization_mutisource.plot_anom_mat">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_anom_mat</span><span class="p">(</span>
+    <span class="n">storing_data</span><span class="p">,</span>
+    <span class="n">storing_res</span><span class="p">,</span>
+    <span class="n">sensors_mask</span><span class="p">,</span>
+    <span class="n">x_min</span><span class="p">,</span>
+    <span class="n">x_max</span><span class="p">,</span>
+    <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+    <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="n">dict_res_anom</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_res</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;dict_res_anom&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_data</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;metadata.json&quot;</span><span class="p">])</span>
+        <span class="n">str_keys_metadata</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;step&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;range_&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;time_offset&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;date_init&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;list_time_factor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;list_sensors_primaire&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="p">(</span>
+            <span class="n">time_step</span><span class="p">,</span>
+            <span class="n">shift</span><span class="p">,</span>
+            <span class="n">range_</span><span class="p">,</span>
+            <span class="n">time_offset</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="p">,</span>
+            <span class="n">date_init</span><span class="p">,</span>
+            <span class="n">list_time_factor</span><span class="p">,</span>
+            <span class="n">list_sensors_primaire</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">load_from_metadata</span><span class="p">(</span><span class="n">storing_data</span><span class="p">,</span> <span class="n">str_keys_metadata</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">str_keys_metadata</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;step&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;range_&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;time_offset&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dtype&quot;</span> <span class="s2">&quot;date_init&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;list_time_factor&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;list_sensors_primaire&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="p">(</span>
+            <span class="n">time_step</span><span class="p">,</span>
+            <span class="n">shift</span><span class="p">,</span>
+            <span class="n">range_</span><span class="p">,</span>
+            <span class="n">time_offset</span><span class="p">,</span>
+            <span class="n">date_init</span><span class="p">,</span>
+            <span class="n">list_time_factor</span><span class="p">,</span>
+            <span class="n">list_sensors_primaire</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span><span class="n">dict_res_anom</span><span class="p">,</span> <span class="n">str_keys_metadata</span><span class="p">)</span>
+
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">x_min</span> <span class="o">*</span> <span class="n">shift</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">*</span> <span class="n">shift</span>
+
+    <span class="c1"># recovering anomalies</span>
+    <span class="n">dict_res_anom</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_res</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;dict_res_anom&quot;</span><span class="p">])</span>
+
+    <span class="n">str_keys_data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;S_anom_chan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;S_anom_sensor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;S_anom_agg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_bot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_top&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">S_anom_channels</span><span class="p">,</span> <span class="n">S_anom_sources</span><span class="p">,</span> <span class="n">S_anom_agg</span><span class="p">,</span> <span class="n">list_bot</span><span class="p">,</span> <span class="n">list_top</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span>
+        <span class="n">dict_res_anom</span><span class="p">,</span> <span class="n">str_keys_data</span>
+    <span class="p">)</span>
+
+    <span class="n">n_sensor</span> <span class="o">=</span> <span class="n">S_anom_sources</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">n_chan</span> <span class="o">=</span> <span class="n">list_bot</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">channel_mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_sensor</span> <span class="o">*</span> <span class="n">n_chan</span><span class="p">)[</span>
+        <span class="p">[</span><span class="n">i</span> <span class="o">//</span> <span class="n">n_chan</span> <span class="ow">in</span> <span class="n">sensors_mask</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n_sensor</span> <span class="o">*</span> <span class="n">n_chan</span><span class="p">)]</span>
+    <span class="p">]</span>
+
+    <span class="n">f</span><span class="p">,</span> <span class="p">(</span><span class="n">a0</span><span class="p">,</span> <span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+        <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">gridspec_kw</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;height_ratios&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">]},</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+
+    <span class="n">times</span> <span class="o">=</span> <span class="n">get_regular_step_scale</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">time_offset</span><span class="p">)</span>
+    <span class="n">mask_time</span> <span class="o">=</span> <span class="n">get_step_mask</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">out_of_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">times</span> <span class="o">/</span> <span class="n">shift</span><span class="p">)[</span><span class="n">mask_time</span><span class="p">]</span>
+    <span class="n">dates</span> <span class="o">=</span> <span class="n">step_to_date</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">delta</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">)</span>
+
+    <span class="n">d0</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">dates</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">())</span>
+    <span class="n">d1</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">dates</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">())</span>
+    <span class="n">a0</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">S_anom_channels</span><span class="o">.</span><span class="n">T</span><span class="p">)[</span><span class="n">channel_mask</span><span class="p">][:,</span> <span class="n">mask_time</span><span class="p">],</span>
+        <span class="n">vmin</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">provide_cmap</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bluetored&quot;</span><span class="p">),</span>
+        <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="n">d0</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_mask</span><span class="p">)],</span>
+        <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channel_mask</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channel_mask</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sensors_mask</span><span class="p">)):</span>
+        <span class="n">a0</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">d0</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sensors_mask</span><span class="p">)):</span>
+        <span class="n">a0</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">n_chan</span><span class="p">,</span> <span class="n">d0</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">a1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">S_anom_sources</span><span class="o">.</span><span class="n">T</span><span class="p">)[</span><span class="n">sensors_mask</span><span class="p">][:,</span> <span class="n">mask_time</span><span class="p">],</span>
+        <span class="n">vmin</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;seismic&quot;</span><span class="p">),</span>
+        <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="n">d0</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">sensors_mask</span><span class="p">)],</span>
+        <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sensors_mask</span><span class="p">))[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">a1</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">d0</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">a2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">S_anom_agg</span><span class="o">.</span><span class="n">T</span><span class="p">)[:,</span> <span class="n">mask_time</span><span class="p">],</span>
+        <span class="n">vmin</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;seismic&quot;</span><span class="p">),</span>
+        <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="n">d0</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">a2</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">S_anom_agg</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">a1</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">S_anom_sources</span><span class="p">[:,</span> <span class="n">sensors_mask</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">a0</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">S_anom_channels</span><span class="p">[:,</span> <span class="n">channel_mask</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">a0</span><span class="o">.</span><span class="n">xaxis_date</span><span class="p">()</span>
+    <span class="n">a0</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl_date_format</span><span class="p">)</span>
+
+    <span class="n">a1</span><span class="o">.</span><span class="n">xaxis_date</span><span class="p">()</span>
+    <span class="n">a1</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl_date_format</span><span class="p">)</span>
+
+    <span class="n">a2</span><span class="o">.</span><span class="n">xaxis_date</span><span class="p">()</span>
+    <span class="n">a2</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl_date_format</span><span class="p">)</span>
+    <span class="c1"># a2.set_yticks()</span>
+
+    <span class="n">a0</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Score par statistiques&quot;</span><span class="p">)</span>
+    <span class="n">a1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Aggrégation par capteurs&quot;</span><span class="p">)</span>
+    <span class="n">a2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Aggégations globale&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="plot_analysis">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.visualization_mutisource.plot_analysis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_analysis</span><span class="p">(</span>
+    <span class="n">storing_data</span><span class="p">,</span> <span class="n">storing_res</span><span class="p">,</span> <span class="n">sensors_mask</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">matplot</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">):</span>
+    <span class="c1"># Recovering row data</span>
+
+    <span class="n">read</span><span class="p">(</span><span class="n">storing_data</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;metadata.json&quot;</span><span class="p">])</span>
+    <span class="n">str_keys_metadata</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;sources_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;step&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;shift&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;range_&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;time_offset&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;dtype&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date_init&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_time_factor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_sensors_primaire&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="p">(</span>
+        <span class="n">sources_name</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">,</span>
+        <span class="n">shift</span><span class="p">,</span>
+        <span class="n">range_</span><span class="p">,</span>
+        <span class="n">time_offset</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">,</span>
+        <span class="n">date_init</span><span class="p">,</span>
+        <span class="n">list_time_factor</span><span class="p">,</span>
+        <span class="n">list_sensors_primaire</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">load_from_metadata</span><span class="p">(</span><span class="n">storing_data</span><span class="p">,</span> <span class="n">str_keys_metadata</span><span class="p">)</span>
+    <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">x_min</span> <span class="o">*</span> <span class="n">shift</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">*</span> <span class="n">shift</span>
+
+    <span class="c1"># recovering anomalies</span>
+    <span class="n">dict_res_anom</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_res</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;dict_res_anom&quot;</span><span class="p">])</span>
+
+    <span class="n">str_keys_data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;S_anom_chan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;S_anom_sensor&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;S_anom_agg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_bot&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;list_top&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+
+    <span class="n">S_anom_channels</span><span class="p">,</span> <span class="n">S_anom_sources</span><span class="p">,</span> <span class="n">S_anom_agg</span><span class="p">,</span> <span class="n">list_bot</span><span class="p">,</span> <span class="n">list_top</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span>
+        <span class="n">dict_res_anom</span><span class="p">,</span> <span class="n">str_keys_data</span>
+    <span class="p">)</span>
+
+    <span class="n">n_chan</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">S_anom_channels</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">S_anom_sources</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">sensors_mask_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sensors_mask</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">figsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">sensors_mask_length</span><span class="p">))</span>
+
+    <span class="n">times_s_anom</span> <span class="o">=</span> <span class="n">get_regular_step_scale</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">mask_time_s_anom</span> <span class="o">=</span> <span class="n">get_step_mask</span><span class="p">(</span><span class="n">times_s_anom</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">out_of_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">sensor_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sensors_mask</span><span class="p">):</span>
+        <span class="n">raw_id</span> <span class="o">=</span> <span class="n">list_sensors_primaire</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">]</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">sources_name</span><span class="p">[</span><span class="n">raw_id</span><span class="p">]</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">sensors_mask_length</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">time_factor</span> <span class="o">=</span> <span class="n">list_time_factor</span><span class="p">[</span><span class="n">raw_id</span><span class="p">]</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_data</span><span class="p">,</span> <span class="p">[</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;channels&quot;</span><span class="p">])</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_res</span><span class="p">,</span> <span class="p">[</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;output&quot;</span><span class="p">])</span>
+
+        <span class="n">serie</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">storing_data</span><span class="p">,</span> <span class="p">[</span><span class="n">source</span><span class="p">,</span> <span class="s2">&quot;raw_series&quot;</span><span class="p">])</span>
+
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">bot</span> <span class="o">=</span> <span class="n">list_bot</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">]</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">list_top</span><span class="p">[</span><span class="n">sensor_id</span><span class="p">]</span>
+
+        <span class="n">times_row</span> <span class="o">=</span> <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">mask_time_serie</span> <span class="o">=</span> <span class="n">get_step_mask</span><span class="p">(</span><span class="n">times_row</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">out_of_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">v_freq</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ind_time_reg</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Compute Freq anom indicator only if chan = 4 ie the 4&#39;th chan is freq.</span>
+
+        <span class="k">if</span> <span class="n">n_chan</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">][</span><span class="n">mask_time_serie</span><span class="p">]:</span>
+                <span class="k">while</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">times_s_anom</span><span class="p">[</span><span class="n">mask_time_s_anom</span><span class="p">][</span><span class="n">ind_time_reg</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">ind_time_reg</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">mask_time_s_anom</span><span class="o">.</span><span class="n">sum</span><span class="p">():</span>
+                        <span class="n">ind_time_reg</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">break</span>
+                <span class="n">v_freq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">S_anom_channels</span><span class="p">[</span><span class="n">mask_time_s_anom</span><span class="p">,</span> <span class="n">sensor_id</span> <span class="o">*</span> <span class="n">n_chan</span> <span class="o">+</span> <span class="mi">4</span><span class="p">][</span>
+                        <span class="n">ind_time_reg</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+            <span class="n">c_freq</span> <span class="o">=</span> <span class="n">apply_cmap</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v_freq</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.7</span><span class="p">,</span> <span class="mf">1.7</span><span class="p">,</span> <span class="n">provide_cmap</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;cyantopurple&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">c_freq</span> <span class="o">=</span> <span class="s2">&quot;black&quot;</span>
+
+        <span class="n">v_deviation</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">times</span> <span class="o">=</span> <span class="n">get_regular_step_scale</span><span class="p">(</span><span class="n">shift</span> <span class="o">*</span> <span class="n">time_factor</span><span class="p">,</span> <span class="n">range_</span><span class="p">,</span> <span class="n">time_offset</span><span class="p">)</span>
+        <span class="n">mask_time</span> <span class="o">=</span> <span class="n">get_step_mask</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">out_of_mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">ind_time_reg</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">loc</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">serie</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">][</span><span class="n">mask_time_serie</span><span class="p">]):</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">mask_time</span><span class="p">][</span><span class="n">ind_time_reg</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">ind_time_reg</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">mask_time</span><span class="o">.</span><span class="n">sum</span><span class="p">():</span>
+                    <span class="n">ind_time_reg</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="n">v</span> <span class="o">=</span> <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">mask_time_serie</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">loc</span><span class="p">]</span>
+            <span class="n">yval</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask_time</span><span class="p">][</span><span class="n">ind_time_reg</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">vmin</span> <span class="o">=</span> <span class="n">yval</span> <span class="o">-</span> <span class="n">top</span><span class="p">[</span><span class="n">mask_time</span><span class="p">][</span><span class="n">ind_time_reg</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># ExT apply on bot</span>
+            <span class="n">vmax</span> <span class="o">=</span> <span class="n">yval</span> <span class="o">+</span> <span class="n">top</span><span class="p">[</span><span class="n">mask_time</span><span class="p">][</span><span class="n">ind_time_reg</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># ExT apply on top</span>
+            <span class="n">v_deviation</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">v</span><span class="p">,</span> <span class="n">yval</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">])</span>
+
+        <span class="n">v_deviation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v_deviation</span><span class="p">)</span>
+        <span class="n">v_deviation</span> <span class="o">=</span> <span class="n">compute_dev_score</span><span class="p">(</span>
+            <span class="n">v_deviation</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v_deviation</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v_deviation</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v_deviation</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">c_deviation</span> <span class="o">=</span> <span class="n">apply_cmap</span><span class="p">(</span>
+            <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v_deviation</span><span class="p">),</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">provide_cmap</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bluetored&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># plot row series : dates = str_array_to_date(serie[&quot;timestamp&quot;].values[time_mask])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">][</span><span class="n">mask_time_serie</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">mask_time_serie</span><span class="p">],</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;real_serie&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">][</span><span class="n">mask_time_serie</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">mask_time_serie</span><span class="p">],</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+            <span class="n">s</span><span class="o">=</span><span class="mi">70</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="mi">50</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">serie</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">mask_time_serie</span><span class="p">])</span> <span class="o">/</span> <span class="mi">400</span><span class="p">),</span> <span class="mi">50</span><span class="p">),</span>
+            <span class="n">c</span><span class="o">=</span><span class="n">c_deviation</span><span class="p">,</span>
+            <span class="n">edgecolors</span><span class="o">=</span><span class="n">c_freq</span><span class="p">,</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.8</span>
+            <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.3</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">serie</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">mask_time_serie</span><span class="p">])</span> <span class="o">/</span> <span class="mi">800</span><span class="p">),</span> <span class="mf">1.3</span><span class="p">),</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">)</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">provide_cmap</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bluetored&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">cbar1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
+            <span class="n">mpl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">provide_cmap</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bluetored&quot;</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">),</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Val_anom&quot;</span><span class="p">,</span>
+            <span class="n">fraction</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
+            <span class="n">pad</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">shrink</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+            <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.80</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">),</span>
+            <span class="n">aspect</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">cbar1</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">([</span><span class="o">-</span><span class="mi">4</span> <span class="o">/</span> <span class="mi">5</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span> <span class="o">/</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span> <span class="o">/</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="n">cbar1</span><span class="o">.</span><span class="n">set_ticklabels</span><span class="p">([</span><span class="s2">&quot;-2&quot;</span><span class="p">,</span> <span class="s2">&quot;-1&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">])</span>
+
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">mpl</span><span class="o">.</span><span class="n">colors</span><span class="o">.</span><span class="n">BoundaryNorm</span><span class="p">(</span><span class="n">bounds</span><span class="p">,</span> <span class="n">provide_cmap</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bluetored&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">N</span><span class="p">)</span>
+        <span class="n">cbar2</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
+            <span class="n">mpl</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">cmap</span><span class="o">=</span><span class="n">provide_cmap</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bluetored&quot;</span><span class="p">),</span> <span class="n">norm</span><span class="o">=</span><span class="n">norm</span><span class="p">),</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Freq_anom&quot;</span><span class="p">,</span>
+            <span class="n">fraction</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
+            <span class="n">pad</span><span class="o">=</span><span class="mf">0.14</span><span class="p">,</span>
+            <span class="n">shrink</span><span class="o">=</span><span class="mf">0.30</span><span class="p">,</span>
+            <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.20</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">),</span>
+            <span class="n">aspect</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">cbar2</span><span class="o">.</span><span class="n">set_ticks</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">cbar2</span><span class="o">.</span><span class="n">set_ticklabels</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="s2">&quot;-1&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># flag_no_obs = pred[:, 3] &lt; -100</span>
+        <span class="n">flag_no_obs</span> <span class="o">=</span> <span class="n">pred</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+        <span class="c1"># Remove estimation when  predicted no observation</span>
+        <span class="n">bot</span><span class="p">[</span><span class="n">flag_no_obs</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">top</span><span class="p">[</span><span class="n">flag_no_obs</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">times</span><span class="p">[</span><span class="n">mask_time</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">time_step</span><span class="p">)</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="n">get_regular_step_scale</span><span class="p">(</span>
+            <span class="n">shift</span><span class="p">,</span>
+            <span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">shift</span><span class="p">,</span>
+            <span class="n">time_offset</span><span class="p">,</span>
+            <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">dates_w</span> <span class="o">=</span> <span class="n">step_to_date</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">shift</span><span class="p">,</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">shift</span> <span class="o">/</span> <span class="mi">5</span><span class="p">),</span>
+            <span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">shift</span><span class="p">,</span>
+            <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">dates</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">flag_no_obs</span><span class="p">)[</span><span class="n">mask_time</span><span class="p">]],</span>
+            <span class="n">pred</span><span class="p">[</span><span class="n">mask_time</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">flag_no_obs</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="n">edgecolors</span><span class="o">=</span><span class="s2">&quot;olive&quot;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">dates</span><span class="p">[</span><span class="n">flag_no_obs</span><span class="p">[</span><span class="n">mask_time</span><span class="p">]],</span>
+            <span class="n">pred</span><span class="p">[</span><span class="n">flag_no_obs</span> <span class="o">&amp;</span> <span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;purple&quot;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dates</span><span class="p">,</span> <span class="n">pred</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">)</span>
+
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">bot</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># IC_bot</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">top</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># IC_top</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">dates_w</span><span class="p">,</span>
+            <span class="n">y1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">y2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>
+            <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;yellow&quot;</span><span class="p">,</span>
+            <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">dates_w</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;mean_boundary&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">dates_w</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+            <span class="n">markersize</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gold&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Plot Std_range</span>
+        <span class="c1"># IC_bot = -2*val_max_std</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">top</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">top</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># IC_top = *2*val_max_std</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">top</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">dates_w</span><span class="p">,</span>
+            <span class="n">y1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">y2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span>
+            <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Std-dev_range&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Plot Min/Max boundary</span>
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">top</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># Ext estimation on bot</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">top</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>  <span class="c1"># Ext estimation on top</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">dates_w</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+            <span class="n">dates_w</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;orange&quot;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Extremum boundary&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Plot anom_area</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">times_s_anom</span><span class="p">[</span><span class="n">mask_time_s_anom</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">time_step</span><span class="p">)</span>
+        <span class="n">dates_anom</span> <span class="o">=</span> <span class="n">step_to_date</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">shift</span><span class="p">,</span>
+            <span class="nb">int</span><span class="p">(</span><span class="n">shift</span> <span class="o">/</span> <span class="mi">5</span><span class="p">),</span>
+            <span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">shift</span><span class="p">,</span>
+            <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">*</span> <span class="nb">min</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span>
+        <span class="n">y2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">y2</span><span class="p">)</span>
+
+        <span class="n">flag_anom</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+                    <span class="n">S_anom_channels</span><span class="p">[</span><span class="n">mask_time_s_anom</span><span class="p">][</span>
+                        <span class="p">:,</span> <span class="n">sensor_id</span> <span class="o">*</span> <span class="n">n_chan</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_chan</span><span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">&gt;</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+        <span class="n">flag_anom</span> <span class="o">=</span> <span class="n">flag_anom</span> <span class="o">|</span> <span class="p">(</span><span class="n">S_anom_sources</span><span class="p">[</span><span class="n">mask_time_s_anom</span><span class="p">][:,</span> <span class="n">sensor_id</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">dates_anom</span><span class="p">,</span>
+            <span class="n">y1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">y2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">y2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span>
+            <span class="n">where</span><span class="o">=</span><span class="n">expand_flag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">flag_anom</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+            <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+            <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">bot_env</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">bot</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">top_env</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">top</span><span class="p">[</span><span class="n">mask_time</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">inter</span> <span class="o">=</span> <span class="p">(</span><span class="n">top_env</span> <span class="o">-</span> <span class="n">bot_env</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">*</span> <span class="mf">0.2</span>
+        <span class="n">min_th</span> <span class="o">=</span> <span class="n">bot_env</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">inter</span>
+        <span class="n">max_th</span> <span class="o">=</span> <span class="n">top_env</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">inter</span>
+        <span class="n">min_emp</span> <span class="o">=</span> <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">mask_time_serie</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">inter</span>
+        <span class="n">max_emp</span> <span class="o">=</span> <span class="n">serie</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">mask_time_serie</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">inter</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">min_th</span><span class="p">,</span> <span class="n">min_emp</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">max_th</span><span class="p">,</span> <span class="n">max_emp</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span>
+            <span class="n">step_to_date</span><span class="p">(</span><span class="n">x_min</span> <span class="o">/</span> <span class="n">time_step</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">),</span>
+            <span class="n">step_to_date</span><span class="p">(</span><span class="n">x_max</span> <span class="o">/</span> <span class="n">time_step</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">date_init</span><span class="o">=</span><span class="n">date_init</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">dates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/%m %Hh&quot;</span><span class="p">))</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+            <span class="n">fontsize</span><span class="o">=</span><span class="mi">15</span> <span class="o">*</span> <span class="n">figsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">7</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">sources_name</span><span class="p">[</span><span class="n">raw_id</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;cur.svg&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,821 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.modelization package &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=fc837d61"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="uqmodels.modelization.DL_estimator package" href="uqmodels.modelization.DL_estimator.html" />
+    <link rel="prev" title="uqmodels.evaluation package" href="uqmodels.evaluation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">🔎 Package uqmodels</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="uqmodels.html">uqmodels package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="uqmodels.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.evaluation.html">uqmodels.evaluation package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">uqmodels.modelization package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.postprocessing.html">uqmodels.postprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.preprocessing.html">uqmodels.preprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.visualization.html">uqmodels.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.UQModel">uqmodels.UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.custom_UQModel">uqmodels.custom_UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.processing">uqmodels.processing module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.utils">uqmodels.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">🔎 Package uqmodels</a></li>
+          <li class="breadcrumb-item"><a href="uqmodels.html">uqmodels package</a></li>
+      <li class="breadcrumb-item active">uqmodels.modelization package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/uqmodels.modelization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="uqmodels-modelization-package">
+<h1>uqmodels.modelization package<a class="headerlink" href="#uqmodels-modelization-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html">uqmodels.modelization.DL_estimator package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.Lstm_WS_ED">uqmodels.modelization.DL_estimator.Lstm_WS_ED module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator"><code class="docutils literal notranslate"><span class="pre">LSTM_ED_Generator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator.load"><code class="docutils literal notranslate"><span class="pre">LSTM_ED_Generator.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator.on_epoch_end"><code class="docutils literal notranslate"><span class="pre">LSTM_ED_Generator.on_epoch_end()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm"><code class="docutils literal notranslate"><span class="pre">Lstm</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.Build_generator"><code class="docutils literal notranslate"><span class="pre">Lstm.Build_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.delete"><code class="docutils literal notranslate"><span class="pre">Lstm.delete()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.factory"><code class="docutils literal notranslate"><span class="pre">Lstm.factory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.fit"><code class="docutils literal notranslate"><span class="pre">Lstm.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.get_params"><code class="docutils literal notranslate"><span class="pre">Lstm.get_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.load"><code class="docutils literal notranslate"><span class="pre">Lstm.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.model_initializer"><code class="docutils literal notranslate"><span class="pre">Lstm.model_initializer()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.modify_dropout"><code class="docutils literal notranslate"><span class="pre">Lstm.modify_dropout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.plot_metrics"><code class="docutils literal notranslate"><span class="pre">Lstm.plot_metrics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.predict"><code class="docutils literal notranslate"><span class="pre">Lstm.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.reset"><code class="docutils literal notranslate"><span class="pre">Lstm.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.save"><code class="docutils literal notranslate"><span class="pre">Lstm.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.set_fit_request"><code class="docutils literal notranslate"><span class="pre">Lstm.set_fit_request()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.set_predict_request"><code class="docutils literal notranslate"><span class="pre">Lstm.set_predict_request()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.double_roll"><code class="docutils literal notranslate"><span class="pre">double_roll()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.baseline_models">uqmodels.modelization.DL_estimator.baseline_models module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.baseline_models.cnn_mlp"><code class="docutils literal notranslate"><span class="pre">cnn_mlp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.data_embedding">uqmodels.modelization.DL_estimator.data_embedding module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Conv1D"><code class="docutils literal notranslate"><span class="pre">Conv1D</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Conv2D"><code class="docutils literal notranslate"><span class="pre">Conv2D</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.DataEmbedding_ITS"><code class="docutils literal notranslate"><span class="pre">DataEmbedding_ITS</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.DataEmbedding_ITS.call"><code class="docutils literal notranslate"><span class="pre">DataEmbedding_ITS.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Data_embedding_TS"><code class="docutils literal notranslate"><span class="pre">Data_embedding_TS</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Data_embedding_TS.call"><code class="docutils literal notranslate"><span class="pre">Data_embedding_TS.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Dropout"><code class="docutils literal notranslate"><span class="pre">Dropout</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Factice_Time_Extension"><code class="docutils literal notranslate"><span class="pre">Factice_Time_Extension</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Factice_Time_Extension.call"><code class="docutils literal notranslate"><span class="pre">Factice_Time_Extension.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Factice_Time_Extension.get_config"><code class="docutils literal notranslate"><span class="pre">Factice_Time_Extension.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.FixedEmbedding"><code class="docutils literal notranslate"><span class="pre">FixedEmbedding</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.FixedEmbedding.call"><code class="docutils literal notranslate"><span class="pre">FixedEmbedding.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Mouving_Window_Embedding"><code class="docutils literal notranslate"><span class="pre">Mouving_Window_Embedding</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Mouving_Window_Embedding.call"><code class="docutils literal notranslate"><span class="pre">Mouving_Window_Embedding.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Mouving_Windows_Embedding"><code class="docutils literal notranslate"><span class="pre">Mouving_Windows_Embedding</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Mouving_Windows_Embedding.call"><code class="docutils literal notranslate"><span class="pre">Mouving_Windows_Embedding.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Mouving_conv_Embedding"><code class="docutils literal notranslate"><span class="pre">Mouving_conv_Embedding</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Mouving_conv_Embedding.call"><code class="docutils literal notranslate"><span class="pre">Mouving_conv_Embedding.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Mouving_conv_Embedding.from_config"><code class="docutils literal notranslate"><span class="pre">Mouving_conv_Embedding.from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.Mouving_conv_Embedding.get_config"><code class="docutils literal notranslate"><span class="pre">Mouving_conv_Embedding.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.PositionalEmbedding"><code class="docutils literal notranslate"><span class="pre">PositionalEmbedding</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.PositionalEmbedding.call"><code class="docutils literal notranslate"><span class="pre">PositionalEmbedding.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.TemporalEmbedding"><code class="docutils literal notranslate"><span class="pre">TemporalEmbedding</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.TemporalEmbedding.call"><code class="docutils literal notranslate"><span class="pre">TemporalEmbedding.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.ValuesEmbedding"><code class="docutils literal notranslate"><span class="pre">ValuesEmbedding</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_embedding.ValuesEmbedding.call"><code class="docutils literal notranslate"><span class="pre">ValuesEmbedding.call()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.loss">uqmodels.modelization.DL_estimator.loss module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.BNN_loss_edl"><code class="docutils literal notranslate"><span class="pre">BNN_loss_edl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.BNN_loss_gaussian"><code class="docutils literal notranslate"><span class="pre">BNN_loss_gaussian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.BNN_metric_edl"><code class="docutils literal notranslate"><span class="pre">BNN_metric_edl()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.BNN_metric_gaussian"><code class="docutils literal notranslate"><span class="pre">BNN_metric_gaussian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.build_BNN_loss"><code class="docutils literal notranslate"><span class="pre">build_BNN_loss()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.build_CCE_loss"><code class="docutils literal notranslate"><span class="pre">build_CCE_loss()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.build_EDL_loss"><code class="docutils literal notranslate"><span class="pre">build_EDL_loss()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.build_MSE_loss"><code class="docutils literal notranslate"><span class="pre">build_MSE_loss()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.default_callbacks"><code class="docutils literal notranslate"><span class="pre">default_callbacks()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.lstm_ed">uqmodels.modelization.DL_estimator.lstm_ed module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.lstm_ed.Lstm_ED_UQ"><code class="docutils literal notranslate"><span class="pre">Lstm_ED_UQ</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.lstm_ed.Lstm_ED_UQ.Build_generator"><code class="docutils literal notranslate"><span class="pre">Lstm_ED_UQ.Build_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.lstm_ed.Lstm_ED_UQ.factory"><code class="docutils literal notranslate"><span class="pre">Lstm_ED_UQ.factory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.lstm_ed.Lstm_ED_UQ.set_fit_request"><code class="docutils literal notranslate"><span class="pre">Lstm_ED_UQ.set_fit_request()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.lstm_ed.Lstm_ED_UQ.set_predict_request"><code class="docutils literal notranslate"><span class="pre">Lstm_ED_UQ.set_predict_request()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.lstm_ed.build_lstm_stacked"><code class="docutils literal notranslate"><span class="pre">build_lstm_stacked()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.lstm_ed.get_params_dict"><code class="docutils literal notranslate"><span class="pre">get_params_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.metalayers">uqmodels.modelization.DL_estimator.metalayers module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Add_query_to_Z_Processing_with_state"><code class="docutils literal notranslate"><span class="pre">Add_query_to_Z_Processing_with_state</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Add_query_to_Z_Processing_with_state.call"><code class="docutils literal notranslate"><span class="pre">Add_query_to_Z_Processing_with_state.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Add_query_to_Z_Processing_with_state.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">Add_query_to_Z_Processing_with_state.compute_output_shape()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer"><code class="docutils literal notranslate"><span class="pre">Double_Moving_slice_layer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.build"><code class="docutils literal notranslate"><span class="pre">Double_Moving_slice_layer.build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.call"><code class="docutils literal notranslate"><span class="pre">Double_Moving_slice_layer.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">Double_Moving_slice_layer.compute_output_shape()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing"><code class="docutils literal notranslate"><span class="pre">EDLProcessing</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.call"><code class="docutils literal notranslate"><span class="pre">EDLProcessing.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">EDLProcessing.compute_output_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.get_config"><code class="docutils literal notranslate"><span class="pre">EDLProcessing.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTMCellMidsize"><code class="docutils literal notranslate"><span class="pre">LSTMCellMidsize</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTMCellMidsize.build"><code class="docutils literal notranslate"><span class="pre">LSTMCellMidsize.build()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTMCellReturnCellState"><code class="docutils literal notranslate"><span class="pre">LSTMCellReturnCellState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTMCellReturnCellState.call"><code class="docutils literal notranslate"><span class="pre">LSTMCellReturnCellState.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTM_DProcessing"><code class="docutils literal notranslate"><span class="pre">LSTM_DProcessing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.LSTM_EProcessing"><code class="docutils literal notranslate"><span class="pre">LSTM_EProcessing()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer"><code class="docutils literal notranslate"><span class="pre">Moving_slice_layer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.build"><code class="docutils literal notranslate"><span class="pre">Moving_slice_layer.build()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.call"><code class="docutils literal notranslate"><span class="pre">Moving_slice_layer.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">Moving_slice_layer.compute_output_shape()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing"><code class="docutils literal notranslate"><span class="pre">ProbabilisticProcessing</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.call"><code class="docutils literal notranslate"><span class="pre">ProbabilisticProcessing.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.compute_output_shape"><code class="docutils literal notranslate"><span class="pre">ProbabilisticProcessing.compute_output_shape()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.get_config"><code class="docutils literal notranslate"><span class="pre">ProbabilisticProcessing.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.RNN_states_in_inputs"><code class="docutils literal notranslate"><span class="pre">RNN_states_in_inputs</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.RNN_states_in_inputs.call"><code class="docutils literal notranslate"><span class="pre">RNN_states_in_inputs.call()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Tconv_block_1D"><code class="docutils literal notranslate"><span class="pre">Tconv_block_1D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.Tconv_block_2D"><code class="docutils literal notranslate"><span class="pre">Tconv_block_2D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_dec"><code class="docutils literal notranslate"><span class="pre">cnn_dec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_dec_1D"><code class="docutils literal notranslate"><span class="pre">cnn_dec_1D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_dec_bis"><code class="docutils literal notranslate"><span class="pre">cnn_dec_bis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_enc"><code class="docutils literal notranslate"><span class="pre">cnn_enc()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_enc_1D"><code class="docutils literal notranslate"><span class="pre">cnn_enc_1D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.cnn_enc_bis"><code class="docutils literal notranslate"><span class="pre">cnn_enc_bis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.conv_block_1D"><code class="docutils literal notranslate"><span class="pre">conv_block_1D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.conv_block_2D"><code class="docutils literal notranslate"><span class="pre">conv_block_2D()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.dense2D_enc_dec"><code class="docutils literal notranslate"><span class="pre">dense2D_enc_dec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.get_cnn_dec_params"><code class="docutils literal notranslate"><span class="pre">get_cnn_dec_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.get_cnn_enc_params"><code class="docutils literal notranslate"><span class="pre">get_cnn_enc_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.mlp"><code class="docutils literal notranslate"><span class="pre">mlp()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.moving_slice_map"><code class="docutils literal notranslate"><span class="pre">moving_slice_map()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.metalayers.stack_and_roll_layer"><code class="docutils literal notranslate"><span class="pre">stack_and_roll_layer()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.neural_network_UQ">uqmodels.modelization.DL_estimator.neural_network_UQ module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.Deterministic_prediction"><code class="docutils literal notranslate"><span class="pre">Deterministic_prediction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.Drawn_based_prediction"><code class="docutils literal notranslate"><span class="pre">Drawn_based_prediction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.Ensemble_based_prediction"><code class="docutils literal notranslate"><span class="pre">Ensemble_based_prediction()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.Identity_factory"><code class="docutils literal notranslate"><span class="pre">Identity_factory()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ"><code class="docutils literal notranslate"><span class="pre">NN_UQ</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.Build_generator"><code class="docutils literal notranslate"><span class="pre">NN_UQ.Build_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.basic_fit"><code class="docutils literal notranslate"><span class="pre">NN_UQ.basic_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.basic_predict"><code class="docutils literal notranslate"><span class="pre">NN_UQ.basic_predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.build_loss"><code class="docutils literal notranslate"><span class="pre">NN_UQ.build_loss()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.build_metrics"><code class="docutils literal notranslate"><span class="pre">NN_UQ.build_metrics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.compile"><code class="docutils literal notranslate"><span class="pre">NN_UQ.compile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.dataset_generator"><code class="docutils literal notranslate"><span class="pre">NN_UQ.dataset_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.factory"><code class="docutils literal notranslate"><span class="pre">NN_UQ.factory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.fit"><code class="docutils literal notranslate"><span class="pre">NN_UQ.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.init_neural_network"><code class="docutils literal notranslate"><span class="pre">NN_UQ.init_neural_network()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.load"><code class="docutils literal notranslate"><span class="pre">NN_UQ.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.modify_dropout"><code class="docutils literal notranslate"><span class="pre">NN_UQ.modify_dropout()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.predict"><code class="docutils literal notranslate"><span class="pre">NN_UQ.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.reset"><code class="docutils literal notranslate"><span class="pre">NN_UQ.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.save"><code class="docutils literal notranslate"><span class="pre">NN_UQ.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.set_fit_request"><code class="docutils literal notranslate"><span class="pre">NN_UQ.set_fit_request()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.set_predict_request"><code class="docutils literal notranslate"><span class="pre">NN_UQ.set_predict_request()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator"><code class="docutils literal notranslate"><span class="pre">default_Generator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.load"><code class="docutils literal notranslate"><span class="pre">default_Generator.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.on_epoch_end"><code class="docutils literal notranslate"><span class="pre">default_Generator.on_epoch_end()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.generate_K_fold_removing_index"><code class="docutils literal notranslate"><span class="pre">generate_K_fold_removing_index()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.generate_train_test"><code class="docutils literal notranslate"><span class="pre">generate_train_test()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.get_params_dict"><code class="docutils literal notranslate"><span class="pre">get_params_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.get_training_parameters"><code class="docutils literal notranslate"><span class="pre">get_training_parameters()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.transformer_ed">uqmodels.modelization.DL_estimator.transformer_ed module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Dense"><code class="docutils literal notranslate"><span class="pre">Dense</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Dropout"><code class="docutils literal notranslate"><span class="pre">Dropout</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.LayerNormalization"><code class="docutils literal notranslate"><span class="pre">LayerNormalization</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.MultiHeadAttention"><code class="docutils literal notranslate"><span class="pre">MultiHeadAttention</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder"><code class="docutils literal notranslate"><span class="pre">TransformerDecoder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.call"><code class="docutils literal notranslate"><span class="pre">TransformerDecoder.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.causal_attention_mask"><code class="docutils literal notranslate"><span class="pre">TransformerDecoder.causal_attention_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.from_config"><code class="docutils literal notranslate"><span class="pre">TransformerDecoder.from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.get_config"><code class="docutils literal notranslate"><span class="pre">TransformerDecoder.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder"><code class="docutils literal notranslate"><span class="pre">TransformerEncoder</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.call"><code class="docutils literal notranslate"><span class="pre">TransformerEncoder.call()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.from_config"><code class="docutils literal notranslate"><span class="pre">TransformerEncoder.from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.get_config"><code class="docutils literal notranslate"><span class="pre">TransformerEncoder.get_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Transformer_ED_UQ"><code class="docutils literal notranslate"><span class="pre">Transformer_ED_UQ</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Transformer_ED_UQ.Build_generator"><code class="docutils literal notranslate"><span class="pre">Transformer_ED_UQ.Build_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Transformer_ED_UQ.factory"><code class="docutils literal notranslate"><span class="pre">Transformer_ED_UQ.factory()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Transformer_ED_UQ.set_fit_request"><code class="docutils literal notranslate"><span class="pre">Transformer_ED_UQ.set_fit_request()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.Transformer_ED_UQ.set_predict_request"><code class="docutils literal notranslate"><span class="pre">Transformer_ED_UQ.set_predict_request()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.build_transformer"><code class="docutils literal notranslate"><span class="pre">build_transformer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.transformer_ed.get_params_dict"><code class="docutils literal notranslate"><span class="pre">get_params_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.utils">uqmodels.modelization.DL_estimator.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Folder_Generator"><code class="docutils literal notranslate"><span class="pre">Folder_Generator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Folder_Generator.load"><code class="docutils literal notranslate"><span class="pre">Folder_Generator.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Folder_Generator.on_epoch_end"><code class="docutils literal notranslate"><span class="pre">Folder_Generator.on_epoch_end()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Generator"><code class="docutils literal notranslate"><span class="pre">Generator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Generator.load"><code class="docutils literal notranslate"><span class="pre">Generator.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Generator.on_epoch_end"><code class="docutils literal notranslate"><span class="pre">Generator.on_epoch_end()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.find_conv_kernel"><code class="docutils literal notranslate"><span class="pre">find_conv_kernel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.set_global_determinism"><code class="docutils literal notranslate"><span class="pre">set_global_determinism()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.set_seeds"><code class="docutils literal notranslate"><span class="pre">set_seeds()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.size_post_conv"><code class="docutils literal notranslate"><span class="pre">size_post_conv()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.sum_part_prod"><code class="docutils literal notranslate"><span class="pre">sum_part_prod()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html">uqmodels.modelization.ML_estimator package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#module-uqmodels.modelization.ML_estimator.baseline">uqmodels.modelization.ML_estimator.baseline module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GBRQ_UQEstimator"><code class="docutils literal notranslate"><span class="pre">GBRQ_UQEstimator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GBRQ_UQEstimator.fit"><code class="docutils literal notranslate"><span class="pre">GBRQ_UQEstimator.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GBRQ_UQEstimator.predict"><code class="docutils literal notranslate"><span class="pre">GBRQ_UQEstimator.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GBRQ_UQEstimator.set_fit_request"><code class="docutils literal notranslate"><span class="pre">GBRQ_UQEstimator.set_fit_request()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GBRQ_UQEstimator.set_predict_request"><code class="docutils literal notranslate"><span class="pre">GBRQ_UQEstimator.set_predict_request()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GPR_UQEstimator"><code class="docutils literal notranslate"><span class="pre">GPR_UQEstimator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GPR_UQEstimator.fit"><code class="docutils literal notranslate"><span class="pre">GPR_UQEstimator.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GPR_UQEstimator.predict"><code class="docutils literal notranslate"><span class="pre">GPR_UQEstimator.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GPR_UQEstimator.set_fit_request"><code class="docutils literal notranslate"><span class="pre">GPR_UQEstimator.set_fit_request()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.GPR_UQEstimator.set_predict_request"><code class="docutils literal notranslate"><span class="pre">GPR_UQEstimator.set_predict_request()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator"><code class="docutils literal notranslate"><span class="pre">REGML_UQEstimator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator.fit"><code class="docutils literal notranslate"><span class="pre">REGML_UQEstimator.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator.get_params"><code class="docutils literal notranslate"><span class="pre">REGML_UQEstimator.get_params()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator.predict"><code class="docutils literal notranslate"><span class="pre">REGML_UQEstimator.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator.set_fit_request"><code class="docutils literal notranslate"><span class="pre">REGML_UQEstimator.set_fit_request()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.baseline.REGML_UQEstimator.set_predict_request"><code class="docutils literal notranslate"><span class="pre">REGML_UQEstimator.set_predict_request()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#module-uqmodels.modelization.ML_estimator.random_forest_UQ">uqmodels.modelization.ML_estimator.random_forest_UQ module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.random_forest_UQ.RF_UQEstimator"><code class="docutils literal notranslate"><span class="pre">RF_UQEstimator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.random_forest_UQ.RF_UQEstimator.RF_extraction"><code class="docutils literal notranslate"><span class="pre">RF_UQEstimator.RF_extraction()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.random_forest_UQ.RF_UQEstimator.fit"><code class="docutils literal notranslate"><span class="pre">RF_UQEstimator.fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.random_forest_UQ.RF_UQEstimator.predict"><code class="docutils literal notranslate"><span class="pre">RF_UQEstimator.predict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.random_forest_UQ.RF_UQEstimator.set_fit_request"><code class="docutils literal notranslate"><span class="pre">RF_UQEstimator.set_fit_request()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.random_forest_UQ.RF_UQEstimator.set_predict_request"><code class="docutils literal notranslate"><span class="pre">RF_UQEstimator.set_predict_request()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#uqmodels.modelization.ML_estimator.random_forest_UQ.get_params_dict"><code class="docutils literal notranslate"><span class="pre">get_params_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.ML_estimator.html#module-uqmodels.modelization.ML_estimator">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-uqmodels.modelization.UQEstimator">
+<span id="uqmodels-modelization-uqestimator-module"></span><h2>uqmodels.modelization.UQEstimator module<a class="headerlink" href="#module-uqmodels.modelization.UQEstimator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.MeanVarUQEstimator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.UQEstimator.</span></span><span class="sig-name descname"><span class="pre">MeanVarUQEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'var'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'MeanVarUQEstimator'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#MeanVarUQEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.MeanVarUQEstimator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#uqmodels.modelization.UQEstimator.UQEstimator" title="uqmodels.modelization.UQEstimator.UQEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">UQEstimator</span></code></a></p>
+<p>Mean var UQ Estimator that estimate a mean values and estimate irreductible</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.MeanVarUQEstimator.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#MeanVarUQEstimator.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.MeanVarUQEstimator.fit" title="Link to this definition"></a></dt>
+<dd><p>Fit UQestimator using training data.
+:param X: train features
+:param y: train targets/observations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.MeanVarUQEstimator.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#MeanVarUQEstimator.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.MeanVarUQEstimator.predict" title="Link to this definition"></a></dt>
+<dd><p>Compute prediction (or provide None) and UQ-measure
+:param X: features</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pred, UQ_measure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.MeanVarUQEstimator.set_fit_request">
+<span class="sig-name descname"><span class="pre">set_fit_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#uqmodels.modelization.UQEstimator.MeanVarUQEstimator" title="uqmodels.modelization.UQEstimator.MeanVarUQEstimator"><span class="pre">MeanVarUQEstimator</span></a></span></span><a class="headerlink" href="#uqmodels.modelization.UQEstimator.MeanVarUQEstimator.set_fit_request" title="Link to this definition"></a></dt>
+<dd><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p>
+<p>Note that this method is only relevant if
+<code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code>).
+Please see <span class="xref std std-ref">User Guide</span> on how the routing
+mechanism works.</p>
+<p>The options for each parameter are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: metadata is requested, and passed to <code class="docutils literal notranslate"><span class="pre">fit</span></code> if provided. The request is ignored if metadata is not provided.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: metadata is not requested and the meta-estimator will not pass it to <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: metadata is not requested, and the meta-estimator will raise an error if the user provides it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">str</span></code>: metadata should be passed to the meta-estimator with this given alias instead of the original name.</p></li>
+</ul>
+<p>The default (<code class="docutils literal notranslate"><span class="pre">sklearn.utils.metadata_routing.UNCHANGED</span></code>) retains the
+existing request. This allows you to change the request for some
+parameters and not others.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.</span></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is only relevant if this estimator is used as a
+sub-estimator of a meta-estimator, e.g. used inside a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip_format</strong> (<em>str</em><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">skip_format</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.MeanVarUQEstimator.set_predict_request">
+<span class="sig-name descname"><span class="pre">set_predict_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#uqmodels.modelization.UQEstimator.MeanVarUQEstimator" title="uqmodels.modelization.UQEstimator.MeanVarUQEstimator"><span class="pre">MeanVarUQEstimator</span></a></span></span><a class="headerlink" href="#uqmodels.modelization.UQEstimator.MeanVarUQEstimator.set_predict_request" title="Link to this definition"></a></dt>
+<dd><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">predict</span></code> method.</p>
+<p>Note that this method is only relevant if
+<code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code>).
+Please see <span class="xref std std-ref">User Guide</span> on how the routing
+mechanism works.</p>
+<p>The options for each parameter are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: metadata is requested, and passed to <code class="docutils literal notranslate"><span class="pre">predict</span></code> if provided. The request is ignored if metadata is not provided.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: metadata is not requested and the meta-estimator will not pass it to <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: metadata is not requested, and the meta-estimator will raise an error if the user provides it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">str</span></code>: metadata should be passed to the meta-estimator with this given alias instead of the original name.</p></li>
+</ul>
+<p>The default (<code class="docutils literal notranslate"><span class="pre">sklearn.utils.metadata_routing.UNCHANGED</span></code>) retains the
+existing request. This allows you to change the request for some
+parameters and not others.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.</span></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is only relevant if this estimator is used as a
+sub-estimator of a meta-estimator, e.g. used inside a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip_format</strong> (<em>str</em><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">skip_format</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.QuantileUQEstimator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.UQEstimator.</span></span><span class="sig-name descname"><span class="pre">QuantileUQEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_estimators</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_alpha</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[0.025,</span> <span class="pre">0.5,</span> <span class="pre">0.975]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'quantile'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'QuantileUQEstimator'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#QuantileUQEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.QuantileUQEstimator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#uqmodels.modelization.UQEstimator.UQEstimator" title="uqmodels.modelization.UQEstimator.UQEstimator"><code class="xref py py-class docutils literal notranslate"><span class="pre">UQEstimator</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.QuantileUQEstimator.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#QuantileUQEstimator.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.QuantileUQEstimator.fit" title="Link to this definition"></a></dt>
+<dd><p>Fit UQestimator using training data.
+:param X: train features
+:param y: train targets/observations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.QuantileUQEstimator.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#QuantileUQEstimator.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.QuantileUQEstimator.predict" title="Link to this definition"></a></dt>
+<dd><p>Compute prediction (or provide None) and UQ-measure
+:param X: features</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pred, UQ_measure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.QuantileUQEstimator.set_fit_request">
+<span class="sig-name descname"><span class="pre">set_fit_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#uqmodels.modelization.UQEstimator.QuantileUQEstimator" title="uqmodels.modelization.UQEstimator.QuantileUQEstimator"><span class="pre">QuantileUQEstimator</span></a></span></span><a class="headerlink" href="#uqmodels.modelization.UQEstimator.QuantileUQEstimator.set_fit_request" title="Link to this definition"></a></dt>
+<dd><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p>
+<p>Note that this method is only relevant if
+<code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code>).
+Please see <span class="xref std std-ref">User Guide</span> on how the routing
+mechanism works.</p>
+<p>The options for each parameter are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: metadata is requested, and passed to <code class="docutils literal notranslate"><span class="pre">fit</span></code> if provided. The request is ignored if metadata is not provided.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: metadata is not requested and the meta-estimator will not pass it to <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: metadata is not requested, and the meta-estimator will raise an error if the user provides it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">str</span></code>: metadata should be passed to the meta-estimator with this given alias instead of the original name.</p></li>
+</ul>
+<p>The default (<code class="docutils literal notranslate"><span class="pre">sklearn.utils.metadata_routing.UNCHANGED</span></code>) retains the
+existing request. This allows you to change the request for some
+parameters and not others.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.</span></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is only relevant if this estimator is used as a
+sub-estimator of a meta-estimator, e.g. used inside a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip_format</strong> (<em>str</em><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">skip_format</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.QuantileUQEstimator.set_predict_request">
+<span class="sig-name descname"><span class="pre">set_predict_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#uqmodels.modelization.UQEstimator.QuantileUQEstimator" title="uqmodels.modelization.UQEstimator.QuantileUQEstimator"><span class="pre">QuantileUQEstimator</span></a></span></span><a class="headerlink" href="#uqmodels.modelization.UQEstimator.QuantileUQEstimator.set_predict_request" title="Link to this definition"></a></dt>
+<dd><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">predict</span></code> method.</p>
+<p>Note that this method is only relevant if
+<code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code>).
+Please see <span class="xref std std-ref">User Guide</span> on how the routing
+mechanism works.</p>
+<p>The options for each parameter are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: metadata is requested, and passed to <code class="docutils literal notranslate"><span class="pre">predict</span></code> if provided. The request is ignored if metadata is not provided.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: metadata is not requested and the meta-estimator will not pass it to <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: metadata is not requested, and the meta-estimator will raise an error if the user provides it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">str</span></code>: metadata should be passed to the meta-estimator with this given alias instead of the original name.</p></li>
+</ul>
+<p>The default (<code class="docutils literal notranslate"><span class="pre">sklearn.utils.metadata_routing.UNCHANGED</span></code>) retains the
+existing request. This allows you to change the request for some
+parameters and not others.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.</span></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is only relevant if this estimator is used as a
+sub-estimator of a meta-estimator, e.g. used inside a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip_format</strong> (<em>str</em><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">skip_format</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.UQEstimator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.UQEstimator.</span></span><span class="sig-name descname"><span class="pre">UQEstimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'UQEstimator'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#UQEstimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.UQEstimator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseEstimator</span></code></p>
+<p>Abstract structure of a UQEstimator : Estimator (fit/predict) that
+perform prediction(optionaly) and UQmeasure estimation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.UQEstimator.factory">
+<span class="sig-name descname"><span class="pre">factory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'transform'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_fit_scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#UQEstimator.factory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.UQEstimator.factory" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.UQEstimator.fit">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#UQEstimator.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.UQEstimator.fit" title="Link to this definition"></a></dt>
+<dd><p>Fit UQestimator using training data.
+:param X: train features
+:param y: train targets/observations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.UQEstimator.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#UQEstimator.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.UQEstimator.get_params" title="Link to this definition"></a></dt>
+<dd><p>Get parameters for this estimator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>deep</strong> (<em>bool</em><em>, </em><em>default=True</em>) – If True, will return the parameters for this estimator and
+contained subobjects that are estimators.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>params</strong> – Parameter names mapped to their values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.UQEstimator.predict">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#UQEstimator.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.UQEstimator.predict" title="Link to this definition"></a></dt>
+<dd><p>Compute prediction (or provide None) and UQ-measure
+:param X: features</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pred, UQ_measure</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.UQEstimator.set_fit_request">
+<span class="sig-name descname"><span class="pre">set_fit_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#uqmodels.modelization.UQEstimator.UQEstimator" title="uqmodels.modelization.UQEstimator.UQEstimator"><span class="pre">UQEstimator</span></a></span></span><a class="headerlink" href="#uqmodels.modelization.UQEstimator.UQEstimator.set_fit_request" title="Link to this definition"></a></dt>
+<dd><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">fit</span></code> method.</p>
+<p>Note that this method is only relevant if
+<code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code>).
+Please see <span class="xref std std-ref">User Guide</span> on how the routing
+mechanism works.</p>
+<p>The options for each parameter are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: metadata is requested, and passed to <code class="docutils literal notranslate"><span class="pre">fit</span></code> if provided. The request is ignored if metadata is not provided.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: metadata is not requested and the meta-estimator will not pass it to <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: metadata is not requested, and the meta-estimator will raise an error if the user provides it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">str</span></code>: metadata should be passed to the meta-estimator with this given alias instead of the original name.</p></li>
+</ul>
+<p>The default (<code class="docutils literal notranslate"><span class="pre">sklearn.utils.metadata_routing.UNCHANGED</span></code>) retains the
+existing request. This allows you to change the request for some
+parameters and not others.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.</span></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is only relevant if this estimator is used as a
+sub-estimator of a meta-estimator, e.g. used inside a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip_format</strong> (<em>str</em><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">skip_format</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">fit</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.UQEstimator.set_predict_request">
+<span class="sig-name descname"><span class="pre">set_predict_request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'$UNCHANGED$'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#uqmodels.modelization.UQEstimator.UQEstimator" title="uqmodels.modelization.UQEstimator.UQEstimator"><span class="pre">UQEstimator</span></a></span></span><a class="headerlink" href="#uqmodels.modelization.UQEstimator.UQEstimator.set_predict_request" title="Link to this definition"></a></dt>
+<dd><p>Request metadata passed to the <code class="docutils literal notranslate"><span class="pre">predict</span></code> method.</p>
+<p>Note that this method is only relevant if
+<code class="docutils literal notranslate"><span class="pre">enable_metadata_routing=True</span></code> (see <code class="xref py py-func docutils literal notranslate"><span class="pre">sklearn.set_config()</span></code>).
+Please see <span class="xref std std-ref">User Guide</span> on how the routing
+mechanism works.</p>
+<p>The options for each parameter are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: metadata is requested, and passed to <code class="docutils literal notranslate"><span class="pre">predict</span></code> if provided. The request is ignored if metadata is not provided.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: metadata is not requested and the meta-estimator will not pass it to <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code>: metadata is not requested, and the meta-estimator will raise an error if the user provides it.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">str</span></code>: metadata should be passed to the meta-estimator with this given alias instead of the original name.</p></li>
+</ul>
+<p>The default (<code class="docutils literal notranslate"><span class="pre">sklearn.utils.metadata_routing.UNCHANGED</span></code>) retains the
+existing request. This allows you to change the request for some
+parameters and not others.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.3.</span></p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is only relevant if this estimator is used as a
+sub-estimator of a meta-estimator, e.g. used inside a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>skip_format</strong> (<em>str</em><em>, </em><em>True</em><em>, </em><em>False</em><em>, or </em><em>None</em><em>,                     </em><em>default=sklearn.utils.metadata_routing.UNCHANGED</em>) – Metadata routing for <code class="docutils literal notranslate"><span class="pre">skip_format</span></code> parameter in <code class="docutils literal notranslate"><span class="pre">predict</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>self</strong> – The updated object.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.check_type_UQ">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.UQEstimator.</span></span><span class="sig-name descname"><span class="pre">check_type_UQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#check_type_UQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.check_type_UQ" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.modelization.UQEstimator.get_UQEstimator_parameters">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.UQEstimator.</span></span><span class="sig-name descname"><span class="pre">get_UQEstimator_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factory_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/UQEstimator.html#get_UQEstimator_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.UQEstimator.get_UQEstimator_parameters" title="Link to this definition"></a></dt>
+<dd><p>Generate dict object containing UQEstimators parameters to provide to init().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_parameters</strong> (<em>dict</em><em>, </em><em>optional</em>) – UQestimators parameters. Defaults to {}.</p></li>
+<li><p><strong>factory_parameters</strong> (<em>dict</em><em>, </em><em>optional</em>) – Factory parameters, to data preprocessing. Defaults to {}.</p></li>
+<li><p><strong>training_parameters</strong> (<em>_type_</em><em>, </em><em>optional</em>) – Model training parameters for DEEP estimators. Defaults to None.</p></li>
+<li><p><strong>type_output</strong> (<em>_type_</em><em>, </em><em>optional</em>) – Specification of deep learning output. Defaults to None.</p></li>
+<li><p><strong>rescale</strong> (<em>bool</em><em>, </em><em>optional</em>) – Use or not internal rescale function  Defaults to False.</p></li>
+<li><p><strong>random_state</strong> (<em>bool</em>) – handle experimental random using seed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>UQEstimators parameters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-uqmodels.modelization">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-uqmodels.modelization" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="uqmodels.evaluation.html" class="btn btn-neutral float-left" title="uqmodels.evaluation package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="uqmodels.modelization.DL_estimator.html" class="btn btn-neutral float-right" title="uqmodels.modelization.DL_estimator package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

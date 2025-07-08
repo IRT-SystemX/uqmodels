@@ -1,0 +1,1110 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.postprocessing package &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=fc837d61"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="uqmodels.preprocessing package" href="uqmodels.preprocessing.html" />
+    <link rel="prev" title="uqmodels.modelization.ML_estimator package" href="uqmodels.modelization.ML_estimator.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">🔎 Package uqmodels</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="uqmodels.html">uqmodels package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="uqmodels.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.evaluation.html">uqmodels.evaluation package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.html">uqmodels.modelization package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">uqmodels.postprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.preprocessing.html">uqmodels.preprocessing package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.visualization.html">uqmodels.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.UQModel">uqmodels.UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.custom_UQModel">uqmodels.custom_UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.processing">uqmodels.processing module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.utils">uqmodels.utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">🔎 Package uqmodels</a></li>
+          <li class="breadcrumb-item"><a href="uqmodels.html">uqmodels package</a></li>
+      <li class="breadcrumb-item active">uqmodels.postprocessing package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/uqmodels.postprocessing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="uqmodels-postprocessing-package">
+<h1>uqmodels.postprocessing package<a class="headerlink" href="#uqmodels-postprocessing-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-uqmodels.postprocessing.UQKPI_Processor">
+<span id="uqmodels-postprocessing-uqkpi-processor-module"></span><h2>uqmodels.postprocessing.UQKPI_Processor module<a class="headerlink" href="#module-uqmodels.postprocessing.UQKPI_Processor" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.Anomscore_processor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQKPI_Processor.</span></span><span class="sig-name descname"><span class="pre">Anomscore_processor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Anomscore'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KPI_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#Anomscore_processor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.Anomscore_processor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor" title="uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor"><code class="xref py py-class docutils literal notranslate"><span class="pre">UQKPI_Processor</span></code></a></p>
+<p>Processor aiming to produce an contextual deviation anomaly score from UQmeasure prediction and observation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.Anomscore_processor.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#Anomscore_processor.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.Anomscore_processor.fit" title="Link to this definition"></a></dt>
+<dd><p>Fitting procedure aim to estimate and store Anomscore_processor params for Anomscore computation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provide by the UQestiamtor.</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type_UQ of the UQestimators.</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction of the predictor or the UQestimator.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Targets/Observations, can be None if processor does’t need y to fit</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>type_UQ_params</em><em>, </em><em>optional</em>) – Additional information about type_UQ parameters.
+Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.Anomscore_processor.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#Anomscore_processor.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.Anomscore_processor.transform" title="Link to this definition"></a></dt>
+<dd><p>Transform procedure aim to transform (predictor) &amp; UQestimator output into a Epistemic_scorelvl
+according Episticscore quantile fitted during training procedure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provide by the UQestimator.</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type_UQ of the UQestimators.</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction of the predictor or the UQestimator.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Targets/Observations, can be None if processor does’t need y to fit</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>type_UQ_params</em><em>, </em><em>optional</em>) – Additional information about type_UQ parameters.
+Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: anom_score : Deviation score (pred-y) process by anom_proc.compute_anom_score</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.Epistemicscorelvl_processor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQKPI_Processor.</span></span><span class="sig-name descname"><span class="pre">Epistemicscorelvl_processor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Epistemicscorelvl'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KPI_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#Epistemicscorelvl_processor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.Epistemicscorelvl_processor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor" title="uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor"><code class="xref py py-class docutils literal notranslate"><span class="pre">UQKPI_Processor</span></code></a></p>
+<p>Processor aiming to transform UQmeasure (containing epistemic measure) into Epistemic_score_lvl (ADD link)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.Epistemicscorelvl_processor.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#Epistemicscorelvl_processor.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.Epistemicscorelvl_processor.fit" title="Link to this definition"></a></dt>
+<dd><p>Fitting procedure aim to estimate and store KPI_processor params for Epistemicscorelvl computation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provide by the UQestiamtor.</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type_UQ of the UQestimators.</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction of the predictor or the UQestimator.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Targets/Observations, can be None if processor does’t need y to fit</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>type_UQ_params</em><em>, </em><em>optional</em>) – Additional information about type_UQ parameters.
+Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.Epistemicscorelvl_processor.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#Epistemicscorelvl_processor.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.Epistemicscorelvl_processor.transform" title="Link to this definition"></a></dt>
+<dd><p>Transform procedure aim to transform (predictor) &amp; UQestimator output into a Epistemic_scorelvl
+according Episticscore quantile fitted during training procedure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provide by the UQestiamtor.</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type_UQ of the UQestimators.</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction of the predictor or the UQestimator.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Targets/Observations, can be None if processor does’t need y to fit</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>type_UQ_params</em><em>, </em><em>optional</em>) – Additional information about type_UQ parameters.
+Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns: Epistemic_scorelvl<span class="classifier">Epistemic_scorelvl that express the quantile class of Epistemic values</span></dt><dd><p>amoung quantile [0.50, 0.80, 0.90, 0.95, 0.975, 0.99, 0.999]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.NormalPIs_processor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQKPI_Processor.</span></span><span class="sig-name descname"><span class="pre">NormalPIs_processor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Normal_PIs_processor'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KPI_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'list_alpha':</span> <span class="pre">[0.05,</span> <span class="pre">0.95],</span> <span class="pre">'with_epistemic':</span> <span class="pre">True}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#NormalPIs_processor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.NormalPIs_processor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor" title="uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor"><code class="xref py py-class docutils literal notranslate"><span class="pre">UQKPI_Processor</span></code></a></p>
+<p>Processor aiming to transform UQmeasure in Normal predictive intervals</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.NormalPIs_processor.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#NormalPIs_processor.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.NormalPIs_processor.fit" title="Link to this definition"></a></dt>
+<dd><p>fitting procedure aim to estimate and store KPI_processor params for NormalPIs computation
+:param UQ: UQmeasure provide by the UQestiamtor.
+:type UQ: np.array
+:param type_UQ: Type_UQ of the UQestimators.
+:type type_UQ: str
+:param pred: Prediction of the predictor or the UQestimator.
+:type pred: np.array
+:param y: Targets/Observations, can be None if processor does’t need y to fit
+:type y: np.array, optional
+:param type_UQ_params: Additional information about type_UQ parameters.</p>
+<blockquote>
+<div><p>Defaults to None.</p>
+</div></blockquote>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.NormalPIs_processor.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#NormalPIs_processor.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.NormalPIs_processor.transform" title="Link to this definition"></a></dt>
+<dd><p>Transform procedure aim to transform (predictor) &amp; UQestimator output into normal predictive intervales
+according to the list_alpha stored parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provide by the UQestiamtor.</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type_UQ of the UQestimators.</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction of the predictor or the UQestimator.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Targets/Observations, can be None if processor does’t need y to fit</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>type_UQ_params</em><em>, </em><em>optional</em>) – Additional information about type_UQ parameters.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Quantiles parametrized by list_alpha provided in the init procedure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list_PIs</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQKPI_Processor.</span></span><span class="sig-name descname"><span class="pre">UQKPI_Processor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name='UQ_processor'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KPI_parameters={}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache=&lt;uqmodels.processing.Cache_manager</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#UQKPI_Processor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="uqmodels.html#uqmodels.processing.Processor" title="uqmodels.processing.Processor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Processor</span></code></a></p>
+<p>KPI processor that aim to process (predictor) &amp; UQestimator output into a KPI.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#UQKPI_Processor.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor.fit" title="Link to this definition"></a></dt>
+<dd><p>fitting procedure aim to estimate and store KPI_processor params</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provide by the UQestiamtor.</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type_UQ of the UQestimators.</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction of the predictor or the UQestimator.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Targets/Observations, can be None if processor does’t need y to fit</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>type_UQ_params</em><em>, </em><em>optional</em>) – Additional information about type_UQ parameters.
+Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQKPI_Processor.html#UQKPI_Processor.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor.transform" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Transform procedure aim to transform (predictor) &amp; UQestimator output into a KPI using fitted parameters.</dt><dd><p>by default return row UQ provided by UQEstimators.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provide by the UQestiamtor.</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type_UQ of the UQestimators.</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction of the predictor or the UQestimator.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Targets/Observations, can be None if processor does’t need y to fit</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>type_UQ_params</em><em>, </em><em>optional</em>) – Additional information about type_UQ parameters.
+Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-uqmodels.postprocessing.UQ_processing">
+<span id="uqmodels-postprocessing-uq-processing-module"></span><h2>uqmodels.postprocessing.UQ_processing module<a class="headerlink" href="#module-uqmodels.postprocessing.UQ_processing" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.check_UQ">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">check_UQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#check_UQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.check_UQ" title="Link to this definition"></a></dt>
+<dd><p>Check if UQ and type_UQ are compatible.
+:param UQ: UQ object
+:type UQ: _type_
+:param type_UQ: type_UQ specification
+:type type_UQ: _type_</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.check_y_vs_pred_and_UQ_shape">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">check_y_vs_pred_and_UQ_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UQ</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#check_y_vs_pred_and_UQ_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.check_y_vs_pred_and_UQ_shape" title="Link to this definition"></a></dt>
+<dd><p>Check if y, pred and UQ have compatible shape</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>pred</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>UQ</strong> (<em>_type_</em>) – _description_</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reshaped if needed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>y,pred,UQ</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.compute_Epistemic_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">compute_Epistemic_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.8,</span> <span class="pre">0.9,</span> <span class="pre">0.99,</span> <span class="pre">0.999,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_Eratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'levels'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#compute_Epistemic_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.compute_Epistemic_score" title="Link to this definition"></a></dt>
+<dd><p>Function that compute Epistemic_score_lvl from (predictor) &amp; UQEstimor outputs &amp;
+fitted parameters provided by fit_Epistemic_score</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pred</strong> (<em>_type_</em>) – Mean prediction</p></li>
+<li><p><strong>UQ</strong> (<em>_type_</em>) – UQmeasure</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – UQmeasure hypothesis</p></li>
+<li><p><strong>list_percent</strong> (<em>list</em><em>, </em><em>optional</em>) – Quantile values. Defaults to [0.025, 0.975].</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – UQmeasure params. Defaults to None.</p></li>
+<li><p><strong>params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – May use externally fit_Epistemic_score to obtain it. If None, internal called to fit</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Epistemic_score_lvl : Quantile class values of Epistemic score
+params : Parameters provided or computed</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Epistemic_scorelvl</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.compute_PI">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">compute_PI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.025,</span> <span class="pre">0.975]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#compute_PI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.compute_PI" title="Link to this definition"></a></dt>
+<dd><p>Compute according to normal assumption a list of quantile parametrized by list alpha from the UQmeasre</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pred</strong> (<em>_type_</em>) – Mean prediction</p></li>
+<li><p><strong>UQ</strong> (<em>_type_</em>) – UQmeasure</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – UQmeasure hypothesis</p></li>
+<li><p><strong>list_alpha</strong> (<em>list</em><em>, </em><em>optional</em>) – Quantile values. Defaults to [0.025, 0.975].</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – UQmeasure params. Defaults to None.</p></li>
+<li><p><strong>params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – params : May use externally fit_PIs to obtain it.
+If None, fit_PIs is used internally.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – type_UQ not covered</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of computed quantiles
+params : Params provided or computed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list_PIs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.fit_Epistemic_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">fit_Epistemic_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.5,</span> <span class="pre">0.8,</span> <span class="pre">0.95,</span> <span class="pre">0.98,</span> <span class="pre">0.995,</span> <span class="pre">1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.97</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_Eratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'score'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#fit_Epistemic_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.fit_Epistemic_score" title="Link to this definition"></a></dt>
+<dd><p>Function that estimate parameters link to Epistemic_score_normalisation based on quantile lvl</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pred</strong> (<em>_type_</em>) – Mean prediction</p></li>
+<li><p><strong>UQ</strong> (<em>_type_</em>) – UQmeasure</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – UQmeasure hypothesis</p></li>
+<li><p><strong>list_percent</strong> (<em>list</em><em>, </em><em>optional</em>) – Quantile values to normalise.
+Defaults to [0.50, 0.80, 0.90, 0.95, 0.975, 0.99, 0.999].</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – UQmeasure params. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Params needed by compute_Epistemic_score</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>params</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.fit_PI">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">fit_PI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.025,</span> <span class="pre">0.975]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#fit_PI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.fit_PI" title="Link to this definition"></a></dt>
+<dd><p>Function that estimate PIs parameters according to normal assumption a list of quantile parametrized
+by list alpha from the UQmeasure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pred</strong> (<em>_type_</em>) – Mean prediction</p></li>
+<li><p><strong>UQ</strong> (<em>_type_</em>) – UQmeasure</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – UQmeasure hypothesis</p></li>
+<li><p><strong>list_alpha</strong> (<em>list</em><em>, </em><em>optional</em>) – Quantile values. Defaults to [0.025, 0.975].</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – UQmeasure params. Defaults to None.</p></li>
+<li><p><strong>PIs_params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – PIs_params : May use externally fit_PIs to obtain it.
+If None, fit_PIs is used internally.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – type_UQ not covered</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of computed quantiles</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list_PIs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.get_extremum_var">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">get_extremum_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_multidim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#get_extremum_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.get_extremum_var" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.get_extremum_var_TOT_and_ndUQ_ratio">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">get_extremum_var_TOT_and_ndUQ_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_Eratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode_multidim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_cut_in_var_nominal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A_res_in_var_atypic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs_process_TOT</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#get_extremum_var_TOT_and_ndUQ_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.get_extremum_var_TOT_and_ndUQ_ratio" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Estimate parameters use to seperate from var_A &amp; var_E theirs</dt><dd><p>Respective nominal part (Affected in TOT,ATYPIC) et atypical part
+using empirical threeshold</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>pred</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>y</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>min_cut</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 0.</p></li>
+<li><p><strong>max_cut</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.</p></li>
+<li><p><strong>var_min</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 0.</p></li>
+<li><p><strong>var_max</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>factor</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 2.</p></li>
+<li><p><strong>q_var</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.</p></li>
+<li><p><strong>q_Eratio</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 2.</p></li>
+<li><p><strong>mode_multidim</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_. Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.get_nominal_disentangled_UQ_ratio">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">get_nominal_disentangled_UQ_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_Eratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#get_nominal_disentangled_UQ_ratio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.get_nominal_disentangled_UQ_ratio" title="Link to this definition"></a></dt>
+<dd><p>Compute nominal_disentangled_UQ_ration form set of data and k_var_e</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>k_var_e</strong> (<em>_type_</em>) – nominal considerate ratio (high-pass filters)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>nominal disentangled_UQ_ratio</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ndUQ_ratio</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.norm_var">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">norm_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-08</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#norm_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.norm_var" title="Link to this definition"></a></dt>
+<dd><p>variance normalisation
+:param var: variance to normalise
+:type var: np.array
+:param min_cut: Bottom extremun percentile : [0,1].
+:type min_cut: float
+:param max_cut: Bottom upper percentile: [0,1].
+:type max_cut: float
+:param var_min: minimal variance assumption. Defaults to 0.
+:type var_min: float, optional
+:param q_var: Power coefficent
+:type q_var: float</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>normalised variance</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>var</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_Epistemicscore">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">process_UQmeasure_to_Epistemicscore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'relative_likelihood'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#process_UQmeasure_to_Epistemicscore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_Epistemicscore" title="Link to this definition"></a></dt>
+<dd><p>Process UQ measure to epistemicvalues according UQmeasure</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em><em> or </em><em>list</em>) – UQ measure obtain from UQ-estimator</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – Type UQ that caracterise UQ measre</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – prediction unused</p></li>
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/Observation unused</p></li>
+<li><p><strong>type_UQ_params</strong> – additional parameters unused</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Epistemic unconfidence score.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Eval</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_TOT_and_E_sigma">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">process_UQmeasure_to_TOT_and_E_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_Eratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndUQ_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extremum_var_TOT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(None,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#process_UQmeasure_to_TOT_and_E_sigma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_TOT_and_E_sigma" title="Link to this definition"></a></dt>
+<dd><p>Process UQ measure into sigma_tot &amp; sigma_E (sqrt(varirance)) according prediction, UQmeasure and observation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em><em> or </em><em>list</em>) – UQmeasure obtain from UQEstimator</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – Type UQ that the nature of UQmeasure</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – prediction provide by a predictor or an UQEstimator</p></li>
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/Observation</p></li>
+<li><p><strong>type_UQ_params</strong> – additional parameters link to type paradigm (ex : alpha for quantile)</p></li>
+<li><p><strong>min_cut</strong> (<em>_type_</em>) – Bottom extremun percentile.</p></li>
+<li><p><strong>max_cut</strong> (<em>_type_</em>) – Bottom upper percentile.</p></li>
+<li><p><strong>q_var</strong> (<em>_type_</em>) – Power coefficent</p></li>
+<li><p><strong>sigma_min</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum values of UQ considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>standards deviation estimation link to ML-uncertainty</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sigma</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_quantile">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">process_UQmeasure_to_quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#process_UQmeasure_to_quantile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_quantile" title="Link to this definition"></a></dt>
+<dd><p>Process UQ measure into gaussian_quantile according prediction, UQmeasure and observation
+and a alpha quantile lvl</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em><em> or </em><em>list</em>) – UQmeasure obtain from UQEstimator</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – Type UQ that the nature of UQmeasure</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – prediction provide by a predictor or an UQEstimator</p></li>
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/Observation</p></li>
+<li><p><strong>type_UQ_params</strong> – additional parameters link to type paradigm (ex : alpha for quantile)</p></li>
+<li><p><strong>min_cut</strong> (<em>_type_</em>) – Bottom extremun percentile.</p></li>
+<li><p><strong>max_cut</strong> (<em>_type_</em>) – Bottom upper percentile.</p></li>
+<li><p><strong>q_var</strong> (<em>_type_</em>) – Power coefficent</p></li>
+<li><p><strong>sigma_min</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum values of UQ considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>alpha quantile lvl based on gaussian assumption</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>gaussian_quantile</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_residu">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">process_UQmeasure_to_residu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_born</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_Eratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extremum_var_TOT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(None,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndUQ_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#process_UQmeasure_to_residu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_residu" title="Link to this definition"></a></dt>
+<dd><p>Process UQ measure to residu according prediction, UQmeasure and observation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em><em> or </em><em>list</em>) – UQ measure obtain from UQ-estimator</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – Type UQ that caracterise UQ measre</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – prediction</p></li>
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/Observation</p></li>
+<li><p><strong>type_UQ_params</strong> – additional parameters link to type paradigm (ex : alpha for quantile)</p></li>
+<li><p><strong>min_cut</strong> (<em>_type_</em>) – Bottom extremun percentile.</p></li>
+<li><p><strong>max_cut</strong> (<em>_type_</em>) – Bottom upper percentile.</p></li>
+<li><p><strong>min_cut</strong> – Bottom extremun percentile.</p></li>
+<li><p><strong>max_cut</strong> – Bottom upper percentile.</p></li>
+<li><p><strong>q_var</strong> (<em>_type_</em>) – Power coefficent</p></li>
+<li><p><strong>sigma_min</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum values of UQ considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>residu</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>res</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_sigma">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">process_UQmeasure_to_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#process_UQmeasure_to_sigma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.process_UQmeasure_to_sigma" title="Link to this definition"></a></dt>
+<dd><p>Process UQ measure into sigma (sqrt(varirance)) according prediction, UQmeasure and observation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em><em> or </em><em>list</em>) – UQmeasure obtain from UQEstimator</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – Type UQ that the nature of UQmeasure</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – prediction provide by a predictor or an UQEstimator</p></li>
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/Observation</p></li>
+<li><p><strong>type_UQ_params</strong> – additional parameters link to type paradigm (ex : alpha for quantile)</p></li>
+<li><p><strong>min_cut</strong> (<em>_type_</em>) – Bottom extremun percentile.</p></li>
+<li><p><strong>max_cut</strong> (<em>_type_</em>) – Bottom upper percentile.</p></li>
+<li><p><strong>q_var</strong> (<em>_type_</em>) – Power coefficent</p></li>
+<li><p><strong>sigma_min</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum values of UQ considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>standards deviation estimation link to ML-uncertainty</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sigma</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.renormalise_UQ">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">renormalise_UQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#renormalise_UQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.renormalise_UQ" title="Link to this definition"></a></dt>
+<dd><p>UQmeasure to normalised</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provided by an UQEstimator</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – nature of the UQeeasure</p></li>
+<li><p><strong>rescale_val</strong> (<em>np.array</em>) – rescale variance term (may be obtain by scikilearn Standard normalizer)</p></li>
+<li><p><strong>var_min</strong> (<em>float</em><em>, </em><em>optional</em>) – minimal variance assumption. Defaults to 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>normalised UQmeasure</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>UQ</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.UQ_processing.split_var_dUQ">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.UQ_processing.</span></span><span class="sig-name descname"><span class="pre">split_var_dUQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ndUQ_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extremum_var_TOT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(None,</span> <span class="pre">None)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">E_cut_in_var_nominal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">A_res_in_var_atypic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/UQ_processing.html#split_var_dUQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.UQ_processing.split_var_dUQ" title="Link to this definition"></a></dt>
+<dd><p>split var_A&amp;E into var_nominal &amp; var_atypique based threshold</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>q_var</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.</p></li>
+<li><p><strong>k_var_e</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.</p></li>
+<li><p><strong>q_var_e</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.</p></li>
+<li><p><strong>ndUQ_ratio</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 0.</p></li>
+<li><p><strong>extremum_var_TOT</strong> (<em>tuple</em><em>, </em><em>optional</em>) – _description_. Defaults to (None, None).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-uqmodels.postprocessing.anomaly_processing">
+<span id="uqmodels-postprocessing-anomaly-processing-module"></span><h2>uqmodels.postprocessing.anomaly_processing module<a class="headerlink" href="#module-uqmodels.postprocessing.anomaly_processing" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.anomaly_processing.compute_anom_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.anomaly_processing.</span></span><span class="sig-name descname"><span class="pre">compute_anom_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.005</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_seuil</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9995</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.97</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'quantiles_local'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empiric_rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_median_normalization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_Eratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">with_born</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/anomaly_processing.html#compute_anom_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.anomaly_processing.compute_anom_score" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Compute contextual deviation score from observation, Prediction and UQ measure.</dt><dd><p>Then apply normalise considering threeshold based on beta miss_covered target</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>UQ-measure</em>) – UQ measure from UQ estimateurs</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to “sigma”.</p></li>
+<li><p><strong>pred</strong> (<em>array</em>) – prediction</p></li>
+<li><p><strong>y</strong> (<em>array</em>) – Real values</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to “sigma”.</p></li>
+<li><p><strong>beta</strong> (<em>float</em><em>, </em><em>optional</em>) – Anom target Defaults to 0.05.</p></li>
+<li><p><strong>per_seuil</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold Defaults to 0.995.</p></li>
+<li><p><strong>min_cut</strong> (<em>float</em><em>, </em><em>optional</em>) – extremum cut Defaults to 0.005.</p></li>
+<li><p><strong>max_cut</strong> (<em>float</em><em>, </em><em>optional</em>) – extremum cut Defaults to 0.995.</p></li>
+<li><p><strong>var_min</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold of minimum var, Default to 0</p></li>
+<li><p><strong>d</strong> (<em>int</em><em>, </em><em>optional</em>) – residual power Defaults to 2.</p></li>
+<li><p><strong>type_norm</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of normalisation see norm Defaults to “quantiles_local”.</p></li>
+<li><p><strong>empiric_rescale</strong> (<em>bool</em><em>,</em><em>optional</em>) – Force empiric rescale based on train percentile</p></li>
+<li><p><strong>global_median_normalization</strong> (<em>bool</em><em>,</em><em>optional</em>) – Normalisation of residu by each step
+by the median residu of all dimension.</p></li>
+<li><p><strong>filt</strong> (<em>list</em><em>, </em><em>optional</em>) – fitler applied to the score . Defaults to [0, 1, 0].</p></li>
+<li><p><strong>q_var</strong> (<em>int</em><em>, </em><em>optional</em>) – power coefficent apply to the score. Defaults to 1.</p></li>
+<li><p><strong>params</strong> – params provide by fit function. Defaults to None imply internal call to fit</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Type_norm :</dt><dd><dl class="simple">
+<dt>“Nsigma_local”<span class="classifier">Fexible anomalie thresold (N-sgima) by dimension | Hypothesis :</span></dt><dd><p>Anomaly distributed homegeneously by dimension.</p>
+</dd>
+</dl>
+<p>“Nsigma_global” : Fexible anomalie thresold (N-sgima) global :  homogeneous anomaly distribution by dimension.
+“Chi2”: Theorical Chi2 correction
+“quantiles_local” : rigid anomalie thresold (quantiles) by dimension :</p>
+<blockquote>
+<div><p>heterogeneos anomaly distrubtion by dimension.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>“quantiles_global”<span class="classifier">(Default) rigid anomalie thresold (quantiles) global :</span></dt><dd><p>homogeneous anomaly distribution by dimension.</p>
+</dd>
+</dl>
+<p>“None” : No normalisation</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>2D anomaly score matrix
+params : parameters provided or computed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>anom_score</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.anomaly_processing.compute_born_calibrated">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.anomaly_processing.</span></span><span class="sig-name descname"><span class="pre">compute_born_calibrated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'res'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/anomaly_processing.html#compute_born_calibrated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.anomaly_processing.compute_born_calibrated" title="Link to this definition"></a></dt>
+<dd><p>!!!!Depreciated !!! Compute_UQ_calibration from UQ measure, pred, observation and target</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em><em> or </em><em>list</em>) – UQmeasure obtain from UQEstimator</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type UQ that the nature of UQmeasure</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – prediction provide by a predictor or an UQEstimator</p></li>
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/Observation</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – additional parameters link to type paradigm (ex : alpha for quantile)</p></li>
+<li><p><strong>beta</strong> (<em>float</em><em>, </em><em>optional</em>) – target miss-coverage of the borns</p></li>
+<li><p><strong>type_res</strong> – “no_calib : No calibration
+“res” : Calibration based on mean residuals
+“w_res” : Calibration based on weigthed mean residuals
+“cqr” : Calibration based on quantile residuals</p></li>
+<li><p><strong>ctx_mask</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>params</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – _description_</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(upper &amp; lower calibrated bound) &amp; compute params</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>(y_pred_lower, y_pred_upper), params</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.anomaly_processing.compute_calibrate">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.anomaly_processing.</span></span><span class="sig-name descname"><span class="pre">compute_calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residuals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empiric_rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'score'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/anomaly_processing.html#compute_calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.anomaly_processing.compute_calibrate" title="Link to this definition"></a></dt>
+<dd><p>Function that apply calibration on residu based on some hypothesis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>res</strong> (<em>_type_</em>) – residu to calibrate</p></li>
+<li><p><strong>ctx_mask</strong> (<em>None</em>) – mask for ctx calib</p></li>
+<li><p><strong>beta</strong> (<em>_type_</em>) – Anomaly target ratio</p></li>
+<li><p><strong>type_norm</strong> (<em>_type_</em><em>, </em><em>optional</em>) – assymption</p></li>
+<li><p><strong>empiric_rescale</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_. Defaults to True.</p></li>
+<li><p><strong>deg</strong> (<em>int</em><em>, </em><em>optional</em>) – Power to apply to the residu. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>type_norm assymption :</dt><dd><dl class="simple">
+<dt>“Nsigma_local”<span class="classifier">Fexible anomalie thresold (N-sgima) by dimension | Hypothesis :</span></dt><dd><p>Anomaly distributed homegeneously by dimension.</p>
+</dd>
+</dl>
+<p>“Nsigma_global” : Fexible anomalie thresold (N-sgima) global :  homogeneous anomaly distribution by dimension.
+“Chi2”: Theorical Chi2 correction
+“quantiles_local” : rigid anomalie thresold (quantiles) by dimension :</p>
+<blockquote>
+<div><p>heterogeneos anomaly distrubtion by dimension.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>“quantiles_global”<span class="classifier">(Default) rigid anomalie thresold (quantiles) global :</span></dt><dd><p>homogeneous anomaly distribution by dimension.</p>
+</dd>
+</dl>
+<p>“None” : No normalisation</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>calibrated residu
+params: Params provided or computed</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>res</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.anomaly_processing.compute_score_fusion">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.anomaly_processing.</span></span><span class="sig-name descname"><span class="pre">compute_score_fusion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_fusion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mahalanobis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'quantiles_global'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_seuil</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.995</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fusion_reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fusion_debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/anomaly_processing.html#compute_score_fusion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.anomaly_processing.compute_score_fusion" title="Link to this definition"></a></dt>
+<dd><p>Compute and aggregate and 2D anomaly score matrix into an aggregated 1D</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>score</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>ctx_mask</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>type_fusion</strong> (<em>str</em><em>, </em><em>optional</em>) – mahalanobis or mean. Defaults to “mahalanobis”.</p></li>
+<li><p><strong>type_norm</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to “quantiles_global”.</p></li>
+<li><p><strong>beta</strong> (<em>float</em><em>, </em><em>optional</em>) – anom ratio target. Defaults to 0.95.</p></li>
+<li><p><strong>per_seuil</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_. Defaults to 0.995.</p></li>
+<li><p><strong>filt</strong> (<em>list</em><em>, </em><em>optional</em>) – _description_. Defaults to [0, 1, 0].</p></li>
+<li><p><strong>d</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 2.</p></li>
+<li><p><strong>list_norm_val</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>list_ctx_val</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>params</strong> – params provided by fit function. Defaults to None imply interal call to fit</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>1D anomaly score matrix</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>score_agg</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.anomaly_processing.fit_anom_score">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.anomaly_processing.</span></span><span class="sig-name descname"><span class="pre">fit_anom_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_seuil</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.9995</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.97</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_Eratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'quantiles_local'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empiric_rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_median_normalization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roll</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/anomaly_processing.html#fit_anom_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.anomaly_processing.fit_anom_score" title="Link to this definition"></a></dt>
+<dd><p>Fit parameters link to anomaly score calibration using Prediction and UQ measure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>UQ-measure</em>) – UQ measure from UQ estimateurs</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em><em>, </em><em>optional</em>) – _description_. Defaults to “sigma”.</p></li>
+<li><p><strong>pred</strong> (<em>array</em>) – prediction</p></li>
+<li><p><strong>y</strong> (<em>array</em>) – Real values</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>str</em><em>, </em><em>optional</em>) – additional information about UQ. Defaults to None.</p></li>
+<li><p><strong>ctx_mask</strong> – mask for ctx_calib</p></li>
+<li><p><strong>beta</strong> (<em>float</em><em>, </em><em>optional</em>) – Anom target Defaults to 0.05.</p></li>
+<li><p><strong>per_seuil</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold Defaults to 0.995.</p></li>
+<li><p><strong>min_cut</strong> (<em>float</em><em>, </em><em>optional</em>) – extremum cut Defaults to 0.005.</p></li>
+<li><p><strong>max_cut</strong> (<em>float</em><em>, </em><em>optional</em>) – extremum cut Defaults to 0.995.</p></li>
+<li><p><strong>var_min</strong> (<em>float</em><em>, </em><em>optional</em>) – Threshold of minimum var, Default to 0</p></li>
+<li><p><strong>d</strong> (<em>int</em><em>, </em><em>optional</em>) – residual power Defaults to 2.</p></li>
+<li><p><strong>type_norm</strong> (<em>str</em><em>, </em><em>optional</em>) – Type of normalisation see  Defaults to “quantiles_local”.</p></li>
+<li><p><strong>global_median_normalization</strong> (<em>bool</em><em>,</em><em>optional</em>) – Normalisation of residu by each step
+by the median residu of all dimension.</p></li>
+<li><p><strong>filt</strong> (<em>list</em><em>, </em><em>optional</em>) – _description_. Defaults to [0, 1, 0].</p></li>
+<li><p><strong>q_var</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>parameters to calibrate anomaly score</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>params</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.anomaly_processing.fit_born_calibrated">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.anomaly_processing.</span></span><span class="sig-name descname"><span class="pre">fit_born_calibrated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_res</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'res'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_cut</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empiric_rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/anomaly_processing.html#fit_born_calibrated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.anomaly_processing.fit_born_calibrated" title="Link to this definition"></a></dt>
+<dd><p>!!!!Depreciated !!! Estimate calibration parameters in order to calibrate born from UQ measure, pred, observation and target</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em><em> or </em><em>list</em>) – UQmeasure obtain from UQEstimator</p></li>
+<li><p><strong>type_UQ</strong> (<em>_type_</em>) – Type UQ that the nature of UQmeasure</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – prediction provide by a predictor or an UQEstimator</p></li>
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/Observation</p></li>
+<li><p><strong>type_UQ_params</strong> – additional parameters link to type paradigm (ex : alpha for quantile)</p></li>
+<li><p><strong>beta</strong> – target miss-coverage of the borns</p></li>
+<li><p><strong>min_cut</strong> (<em>_type_</em>) – Bottom extremun percentile.</p></li>
+<li><p><strong>max_cut</strong> (<em>_type_</em>) – Bottom upper percentile.</p></li>
+<li><p><strong>q_var</strong> (<em>_type_</em>) – Power coefficent</p></li>
+<li><p><strong>sigma_min</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum values of UQ considered.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>list of calibration term for each ctx_values,</dt><dd><p>list_ctx_id : list of ctx_values)</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>params = (list_norm_val,</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.anomaly_processing.fit_calibrate">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.anomaly_processing.</span></span><span class="sig-name descname"><span class="pre">fit_calibrate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residuals</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">empiric_rescale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/anomaly_processing.html#fit_calibrate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.anomaly_processing.fit_calibrate" title="Link to this definition"></a></dt>
+<dd><p>Function that estimate calibrate parameters form residu link to some hypothesis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>_type_</em>) – score</p></li>
+<li><p><strong>ctx_mask</strong> – mask for ctx calib</p></li>
+<li><p><strong>beta</strong> (<em>_type_</em>) – Anomaly target ratio</p></li>
+<li><p><strong>type_norm</strong> (<em>_type_</em><em>, </em><em>optional</em>) – assymption</p></li>
+<li><p><strong>empiric_rescale</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_. Defaults to True.</p></li>
+<li><p><strong>deg</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Type_norm :</dt><dd><dl class="simple">
+<dt>“Nsigma_local”<span class="classifier">Fexible anomalie thresold (N-sgima) by dimension | Hypothesis :</span></dt><dd><p>Anomaly distributed homegeneously by dimension.</p>
+</dd>
+</dl>
+<p>“Nsigma_global” : Fexible anomalie thresold (N-sgima) global :  homogeneous anomaly distribution by dimension.
+“Chi2”: Theorical Chi2 correction
+“quantiles_local” : rigid anomalie thresold (quantiles) by dimension :</p>
+<blockquote>
+<div><p>heterogeneos anomaly distrubtion by dimension.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>“quantiles_global”<span class="classifier">(Default) rigid anomalie thresold (quantiles) global :</span></dt><dd><p>homogeneous anomaly distribution by dimension.</p>
+</dd>
+</dl>
+<p>“None” : No normalisation</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>(list_norm_val<span class="classifier">calibration coeficient for each ctx_values</span></dt><dd><p>list_ctx_id : list of ctx_values)</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>params</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.anomaly_processing.fit_score_fusion">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.anomaly_processing.</span></span><span class="sig-name descname"><span class="pre">fit_score_fusion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_fusion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mahalanobis'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'quantiles_global'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_seuil</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.995</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fusion_reduc_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fusion_debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/anomaly_processing.html#fit_score_fusion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.anomaly_processing.fit_score_fusion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.anomaly_processing.score_seuil">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.anomaly_processing.</span></span><span class="sig-name descname"><span class="pre">score_seuil</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">per_seuil</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.995</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/anomaly_processing.html#score_seuil"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.anomaly_processing.score_seuil" title="Link to this definition"></a></dt>
+<dd><p>Thresholding of extrem values by percentile by dimension if local = True or globally else.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> (<em>_type_</em>) – _description_</p></li>
+<li><p><strong>per_seuil</strong> (<em>float</em><em>, </em><em>optional</em>) – _description_. Defaults to 0.995.</p></li>
+<li><p><strong>local</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>_description_</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-uqmodels.postprocessing.custom_UQKPI_Processor">
+<span id="uqmodels-postprocessing-custom-uqkpi-processor-module"></span><h2>uqmodels.postprocessing.custom_UQKPI_Processor module<a class="headerlink" href="#module-uqmodels.postprocessing.custom_UQKPI_Processor" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.custom_UQKPI_Processor.Multiscale_Anomscore_processor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.postprocessing.custom_UQKPI_Processor.</span></span><span class="sig-name descname"><span class="pre">Multiscale_Anomscore_processor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Multiscale_anomscore'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">KPI_parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/custom_UQKPI_Processor.html#Multiscale_Anomscore_processor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.custom_UQKPI_Processor.Multiscale_Anomscore_processor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor" title="uqmodels.postprocessing.UQKPI_Processor.UQKPI_Processor"><code class="xref py py-class docutils literal notranslate"><span class="pre">UQKPI_Processor</span></code></a></p>
+<p>Processor aiming to produce an contextual deviation anomaly score from UQmeasure prediction and observation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.custom_UQKPI_Processor.Multiscale_Anomscore_processor.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/custom_UQKPI_Processor.html#Multiscale_Anomscore_processor.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.custom_UQKPI_Processor.Multiscale_Anomscore_processor.fit" title="Link to this definition"></a></dt>
+<dd><p>Fitting procedure aim to estimate and store Multiscale_Anomscore_processor params for
+Multiscale_Anomscore computation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provide by the UQestiamtor.</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type_UQ of the UQestimators.</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction of the predictor or the UQestimator.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Targets/Observations, can be None if processor does’t need y to fit</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>type_UQ_params</em><em>, </em><em>optional</em>) – Additional information about type_UQ parameters.
+Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.postprocessing.custom_UQKPI_Processor.Multiscale_Anomscore_processor.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_UQ_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ctx_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/postprocessing/custom_UQKPI_Processor.html#Multiscale_Anomscore_processor.transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.postprocessing.custom_UQKPI_Processor.Multiscale_Anomscore_processor.transform" title="Link to this definition"></a></dt>
+<dd><p>Transform procedure aim to transform (predictor) &amp; UQestimator output into a Multiscale_Anomscore
+according to Multiscale_Anomscore_params</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UQ</strong> (<em>np.array</em>) – UQmeasure provide by the UQestiamtor.</p></li>
+<li><p><strong>type_UQ</strong> (<em>str</em>) – Type_UQ of the UQestimators.</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction of the predictor or the UQestimator.</p></li>
+<li><p><strong>y</strong> (<em>np.array</em><em>, </em><em>optional</em>) – Targets/Observations, can be None if processor does’t need y to fit</p></li>
+<li><p><strong>type_UQ_params</strong> (<em>type_UQ_params</em><em>, </em><em>optional</em>) – Additional information about type_UQ parameters.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple (S_anom_chan, S_anom_agg, S_anom_source, list_bot, list_top)
+where S_anom_chan is a mutli-dimensional providing Anom score for each channels of each source
+on compute_anom_score,
+S_anom_source is an aggregated score providing Anom score at source lvl on compute_score_fusion,
+S_anom_agg is an aggregated score providing 1D Anom score based on compute_score_fusion,
+list_bot is an anomalie lower threeshold for each chan of each sensors provided by compute_anom_score
+and list_top is an anomalie upper threeshold for each chan of each sensors provided by compute_anom_score</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-uqmodels.postprocessing">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-uqmodels.postprocessing" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="uqmodels.modelization.ML_estimator.html" class="btn btn-neutral float-left" title="uqmodels.modelization.ML_estimator package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="uqmodels.preprocessing.html" class="btn btn-neutral float-right" title="uqmodels.preprocessing package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

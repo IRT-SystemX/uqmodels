@@ -1,0 +1,2625 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RF-UQ &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">RF-UQ</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/examples/example_complex_UQModels.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
+%autoreload 2
+
+import os
+import numpy as np
+import tensorflow as tf
+os.environ[&#39;TF_CPP_MIN_LOG_LEVEL&#39;] = &#39;3&#39;
+import keras
+import keras.backend as K
+import sys
+import uqmodels as uqmodels
+
+path = &#39;.&#39;
+storing = path + &#39;/data/&#39;
+if(True):
+    from IPython.core.display import display, HTML
+    display(HTML(
+        &#39;&lt;style&gt;&#39;
+            &#39;#notebook { padding-top:0px !important; } &#39;
+            &#39;.container { width:85% !important; } &#39;
+            &#39;.end_space { min-height:0px !important; } &#39;
+        &#39;&lt;/style&gt;&#39;
+    ))
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+C:\Users\josquin.foulliaron\AppData\Local\Temp\ipykernel_5156\1152516282.py:16: DeprecationWarning: Importing display from IPython.core.display is deprecated since IPython 7.14, please import from IPython.display
+  from IPython.core.display import display, HTML
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area rendered_html docutils container">
+<style>#notebook { padding-top:0px !important; } .container { width:85% !important; } .end_space { min-height:0px !important; } </style></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import uqmodels.processing as proc
+import uqmodels.preprocessing.Preprocessor as preproc
+from uqmodels.processing import Data_loader
+from uqmodels.processing import Pipeline
+from uqmodels.preprocessing.Custom_Preprocessor import dict_to_TS_Dataset
+import pandas as pd
+
+#Data loading &amp; Preprocessing
+storing = &#39;data/&#39;
+filename = &#39;synthetic_dataset_multivariate.p&#39;
+
+# Instanciate Data_loader
+data_loader = Data_loader()
+
+# Apply data_loader to get rowdata
+dict_data = data_loader.load({&#39;storing&#39;:storing,&#39;keys&#39;:[filename]})
+preprocessor = dict_to_TS_Dataset()
+pipeline = Pipeline(data_loader=data_loader,list_processors=[preprocessor])
+#Define query link to load api and add a &#39;name&#39; key which is recover by the preprocessor to provide a name to the dataset
+list_query = [{&#39;storing&#39;:storing,&#39;keys&#39;:[filename],&#39;name&#39;:&#39;Synthetic_data&#39;}]
+
+#It provide a data_generator (yield) that provide each processed data one by one.
+dataset_generator = pipeline.transform(list_query)
+
+# Execute preprocessing pipeline :
+X, y, sample_weight, x_split, context, objective, name = next(dataset_generator)
+train = x_split==1
+test = np.invert(train)
+print(&#39;X shape:&#39;,X.shape,&#39;y: yshape&#39;,y.shape,&#39;Name:&#39;,name)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\tsfresh\__init__.py:12: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools&lt;81.
+  import pkg_resources
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Pipeline : No cache data found : load data and execute the whole pipeline
+X shape: (12000, 19) y: yshape (12000, 3) Name: Synthetic_data
+</pre></div></div>
+</div>
+<section id="RF-UQ">
+<h1>RF-UQ<a class="headerlink" href="#RF-UQ" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.modelization.ML_estimator.random_forest_UQ import RF_UQEstimator,get_params_dict
+from uqmodels.processing import Cache_manager
+from uqmodels.custom_UQModel import UQModel_KPI,UQModel
+# We can also create a more complexe UQmodel that handle several UQKPI_Processor to build at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
+
+# Specification of the UQestimator &amp; Instanciation in a UQmodels wrapper that include post-processing
+RF_UQ_parameters = get_params_dict()
+RF_UQModel = UQModel_KPI(RF_UQEstimator,
+                         RF_UQ_parameters,
+                         name=&#39;RF_UQ&#39;,
+                         beta=0.005,
+                         reduc_filter_KPI=None,
+                         reduc_filter_pred=None,
+                         cache_manager=Cache_manager(storing=&#39;model/&#39;),
+                         random_state=0)
+
+RF_UQModel.fit(X[train],y[train])
+if(True): # Test load save UQModels wrapper procedure
+    # Save fitted UQEstimator and KPI-Processors
+    RF_UQModel.save(&#39;model/&#39;)
+    del RF_UQModel
+    # New model
+    RF_UQModel = UQModel()
+
+    # Load fitted UQEstimator and KPI-Processors
+    RF_UQModel.load(&#39;model/RF_UQ&#39;)
+
+#pred,((pred,UQ),PIs,Elvl) = RF_UQModel.predict(X,y)
+(pred,UQ),KPI_anom,PIs,Elvl = RF_UQModel.score(X,y)
+
+from uqmodels.evaluation.metrics import Generic_metric, rmse, UQ_average_coverage, UQ_sharpness, UQ_Gaussian_NLL, UQ_dEI, UQ_absolute_residu_score
+from uqmodels.evaluation.evaluation import evaluate
+
+if(True):
+    list_metrics=[Generic_metric(rmse,&#39;Root mean square&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;),
+                  Generic_metric(UQ_average_coverage,&#39;UQ_average_coverage&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;)]
+    output = pred,UQ
+    metrics_val = evaluate(y,output,list_metrics,list_sets=[train,test],verbose=True)
+
+%matplotlib notebook
+%matplotlib inline
+import matplotlib.pyplot as plt
+import uqmodels.visualization.visualization as visu
+
+f_obs = np.arange(len(train))[-1000:]
+list_percent = RF_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+visu.uncertainty_plot(y,output,context=None,size=(20,8),f_obs=f_obs,name=&#39;UQplot&#39;,mode_res=False,dim=np.arange(y.shape[1]),type_UQ=RF_UQModel.type_UQ,list_percent=list_percent)
+visu.plot_anom_matrice(score=KPI_anom,true_label=dict_data[&#39;aux&#39;][&#39;anom&#39;][:,None],f_obs=f_obs)
+
+list_alpha = RF_UQModel.list_predict_KPI_processors[1].KPI_parameters[&#39;list_alpha&#39;]
+print(&#39;target&#39;, list_alpha, &#39;empirique&#39;, [(pi&gt;y).mean() for pi in PIs])
+list_percent = RF_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+print(&#39;target elvl&#39;,list_percent,&#39;empirique Elvl&#39;,[np.quantile(Elvl,q) for q in list_percent])
+del RF_UQModel
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Root mean square [array([0.35454324, 0.30451329, 0.31963972]), array([0.46449333, 0.40585166, 0.43980308])]
+UQ_average_coverage [array([0.994   , 0.9955  , 0.995375]), array([0.97825, 0.97675, 0.97675])]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_3_1.png" src="../_images/examples_example_complex_UQModels_3_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_3_2.png" src="../_images/examples_example_complex_UQModels_3_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+target [0.025, 0.16, 0.84, 0.975] empirique [0.006027777777777778, 0.07030555555555555, 0.9316666666666666, 0.9941388888888889]
+target elvl [0.5, 0.8, 0.95, 0.98, 0.995, 1] empirique Elvl [0.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+</pre></div></div>
+</div>
+</section>
+<section id="NN_UQ-for-multi-meta-moddeling-paradigm">
+<h1>NN_UQ for multi meta-moddeling paradigm<a class="headerlink" href="#NN_UQ-for-multi-meta-moddeling-paradigm" title="Link to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>#tf.keras.utils.get_custom_objects().clear()
+from uqmodels.modelization.DL_estimator.neural_network_UQ import NN_UQ,get_params_dict,get_training_parameters,get_UQEstimator_parameters
+from uqmodels.modelization.DL_estimator.metalayers import mlp
+from uqmodels.processing import Cache_manager
+from uqmodels.UQModel import UQModel
+from uqmodels.custom_UQModel import UQModel_KPI
+# We can also create a more complexe UQmodel that handle several UQKPI_Processor to build at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
+
+# Specification of the UQestimator &amp; Instanciation in a UQmodels wrapper that include post-processing
+
+def run_mlp(type_output=&#39;MC_Dropout&#39;):
+    name = &#39;MLP_&#39;+type_output
+    print(type_output)
+    mlp_params = get_params_dict(X.shape[1],y.shape[1],type_output=type_output)
+    training_params = get_training_parameters(epochs=[20,10],b_s=[128,64],l_r=[0.001,0.0005],type_output=type_output)
+
+    UQEstimator_parameters = get_UQEstimator_parameters(model_parameters=mlp_params,
+                                                    training_parameters=training_params,
+                                                    type_output=type_output,
+                                                    rescale=True,
+                                                    model_initializer=mlp)
+
+    MLP_UQModel = UQModel_KPI(UQEstimator_initializer=NN_UQ,
+                             UQEstimator_params=UQEstimator_parameters,
+                             name=name,
+                             beta=0.005,
+                             reduc_filter_KPI=None,
+                             reduc_filter_pred=None,
+                             cache_manager=Cache_manager(storing=&#39;model/&#39;),
+                             random_state=0)
+
+
+    MLP_UQModel.fit(X[train],y[train],verbose=1)
+
+    if(True): # Test save load procedure
+        MLP_UQModel.save(&#39;model/&#39;)
+        del MLP_UQModel
+        MLP_UQModel = UQModel()
+        MLP_UQModel.load(&#39;model/&#39;+name)
+
+    #pred,((pred,UQ),PIs,Elvl) = RF_UQModel.predict(X,y)
+    (pred,UQ),KPI_anom,PIs,Elvl = MLP_UQModel.score(X,y)
+
+    from uqmodels.evaluation.metrics import Generic_metric, rmse, UQ_average_coverage, UQ_sharpness, UQ_Gaussian_NLL, UQ_dEI, UQ_absolute_residu_score
+    from uqmodels.evaluation.evaluation import evaluate
+
+    if(True):
+        list_metrics=[Generic_metric(rmse,&#39;Root mean square&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;),
+                      Generic_metric(UQ_average_coverage,&#39;UQ_average_coverage&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;)]
+        output = pred,UQ
+        metrics_val = evaluate(y,output,list_metrics,list_sets=[train,test],verbose=True)
+
+    %matplotlib notebook
+    %matplotlib inline
+    import matplotlib.pyplot as plt
+    import uqmodels.visualization.visualization as visu
+
+    f_obs = np.arange(len(train))[-1000:]
+    list_percent = MLP_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+    visu.uncertainty_plot(y,output,context=None,size=(20,8),f_obs=f_obs,name=&#39;UQplot&#39;,mode_res=False,dim=np.arange(y.shape[1]),type_UQ=MLP_UQModel.type_UQ,list_percent=list_percent,confidence_lvl=Elvl)
+    visu.plot_anom_matrice(score=KPI_anom,true_label=dict_data[&#39;aux&#39;][&#39;anom&#39;][:,None],f_obs=f_obs)
+
+    list_alpha = MLP_UQModel.list_predict_KPI_processors[1].KPI_parameters[&#39;list_alpha&#39;]
+    print(&#39;target&#39;, list_alpha, &#39;empirique&#39;, [(pi&gt;y).mean() for pi in PIs])
+    list_percent = MLP_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+    print(&#39;target elvl&#39;,list_percent,&#39;empirique Elvl&#39;,[np.quantile(Elvl,q) for q in list_percent])
+    del MLP_UQModel
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># MLP_UQ_MC_Dropout
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>run_mlp(type_output=&#39;MC_Dropout&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+MC_Dropout
+start_fit
+Epoch 1/20
+57/57 [==============================] - 2s 7ms/step - loss: 0.4175 - MSE_loss: 0.5904 - BNN_loss: 0.9849 - val_loss: 0.2387 - val_MSE_loss: 0.4459 - val_BNN_loss: 0.9974 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.2220 - MSE_loss: 0.4284 - BNN_loss: 0.9975 - val_loss: 0.2048 - val_MSE_loss: 0.4044 - val_BNN_loss: 0.9985 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.2003 - MSE_loss: 0.4046 - BNN_loss: 0.9976 - val_loss: 0.1817 - val_MSE_loss: 0.3779 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1887 - MSE_loss: 0.3900 - BNN_loss: 0.9981 - val_loss: 0.1846 - val_MSE_loss: 0.3822 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1782 - MSE_loss: 0.3757 - BNN_loss: 0.9986 - val_loss: 0.1781 - val_MSE_loss: 0.3717 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1725 - MSE_loss: 0.3689 - BNN_loss: 0.9984 - val_loss: 0.1682 - val_MSE_loss: 0.3600 - val_BNN_loss: 0.9985 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1681 - MSE_loss: 0.3635 - BNN_loss: 0.9985 - val_loss: 0.1641 - val_MSE_loss: 0.3539 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1629 - MSE_loss: 0.3556 - BNN_loss: 0.9987 - val_loss: 0.1635 - val_MSE_loss: 0.3564 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1577 - MSE_loss: 0.3491 - BNN_loss: 0.9992 - val_loss: 0.1561 - val_MSE_loss: 0.3458 - val_BNN_loss: 0.9986 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1546 - MSE_loss: 0.3456 - BNN_loss: 0.9989 - val_loss: 0.1540 - val_MSE_loss: 0.3429 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1533 - MSE_loss: 0.3443 - BNN_loss: 0.9987 - val_loss: 0.1503 - val_MSE_loss: 0.3360 - val_BNN_loss: 0.9985 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1480 - MSE_loss: 0.3364 - BNN_loss: 0.9989 - val_loss: 0.1469 - val_MSE_loss: 0.3336 - val_BNN_loss: 0.9996 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1459 - MSE_loss: 0.3340 - BNN_loss: 0.9989 - val_loss: 0.1466 - val_MSE_loss: 0.3298 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1448 - MSE_loss: 0.3331 - BNN_loss: 0.9988 - val_loss: 0.1481 - val_MSE_loss: 0.3338 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1415 - MSE_loss: 0.3301 - BNN_loss: 0.9991 - val_loss: 0.1433 - val_MSE_loss: 0.3290 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1416 - MSE_loss: 0.3286 - BNN_loss: 0.9990 - val_loss: 0.1409 - val_MSE_loss: 0.3257 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1394 - MSE_loss: 0.3263 - BNN_loss: 0.9990 - val_loss: 0.1441 - val_MSE_loss: 0.3308 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1373 - MSE_loss: 0.3239 - BNN_loss: 0.9990 - val_loss: 0.1384 - val_MSE_loss: 0.3191 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1384 - MSE_loss: 0.3264 - BNN_loss: 0.9992 - val_loss: 0.1394 - val_MSE_loss: 0.3266 - val_BNN_loss: 0.9971 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1349 - MSE_loss: 0.3214 - BNN_loss: 0.9988 - val_loss: 0.1373 - val_MSE_loss: 0.3190 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 7ms/step - loss: 0.1343 - MSE_loss: 0.3195 - BNN_loss: 0.9986 - val_loss: 0.1376 - val_MSE_loss: 0.3234 - val_BNN_loss: 0.9976 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1321 - MSE_loss: 0.3169 - BNN_loss: 0.9988 - val_loss: 0.1355 - val_MSE_loss: 0.3217 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1307 - MSE_loss: 0.3156 - BNN_loss: 0.9991 - val_loss: 0.1333 - val_MSE_loss: 0.3173 - val_BNN_loss: 0.9984 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.1276 - MSE_loss: 0.3118 - BNN_loss: 0.9994 - val_loss: 0.1342 - val_MSE_loss: 0.3212 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.1282 - MSE_loss: 0.3124 - BNN_loss: 0.9992 - val_loss: 0.1339 - val_MSE_loss: 0.3202 - val_BNN_loss: 0.9984 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1276 - MSE_loss: 0.3116 - BNN_loss: 0.9990 - val_loss: 0.1291 - val_MSE_loss: 0.3129 - val_BNN_loss: 0.9996 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1274 - MSE_loss: 0.3127 - BNN_loss: 0.9991 - val_loss: 0.1319 - val_MSE_loss: 0.3184 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1264 - MSE_loss: 0.3109 - BNN_loss: 0.9989 - val_loss: 0.1289 - val_MSE_loss: 0.3127 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1261 - MSE_loss: 0.3114 - BNN_loss: 0.9992 - val_loss: 0.1296 - val_MSE_loss: 0.3161 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1225 - MSE_loss: 0.3060 - BNN_loss: 0.9993 - val_loss: 0.1340 - val_MSE_loss: 0.3239 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 1s 7ms/step - loss: -0.6508 - MSE_loss: 0.3396 - BNN_loss: 0.9824 - val_loss: -0.9185 - val_MSE_loss: 0.3441 - val_BNN_loss: 0.9674 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.9987 - MSE_loss: 0.3333 - BNN_loss: 0.9708 - val_loss: -1.0194 - val_MSE_loss: 0.3273 - val_BNN_loss: 0.9713 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.0646 - MSE_loss: 0.3272 - BNN_loss: 0.9684 - val_loss: -1.0244 - val_MSE_loss: 0.3328 - val_BNN_loss: 0.9677 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.1023 - MSE_loss: 0.3234 - BNN_loss: 0.9689 - val_loss: -1.0315 - val_MSE_loss: 0.3291 - val_BNN_loss: 0.9577 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.1432 - MSE_loss: 0.3174 - BNN_loss: 0.9668 - val_loss: -1.0933 - val_MSE_loss: 0.3233 - val_BNN_loss: 0.9702 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.1625 - MSE_loss: 0.3145 - BNN_loss: 0.9662 - val_loss: -1.1130 - val_MSE_loss: 0.3162 - val_BNN_loss: 0.9652 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.1795 - MSE_loss: 0.3143 - BNN_loss: 0.9645 - val_loss: -1.1291 - val_MSE_loss: 0.3162 - val_BNN_loss: 0.9700 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.1831 - MSE_loss: 0.3132 - BNN_loss: 0.9664 - val_loss: -1.1400 - val_MSE_loss: 0.3183 - val_BNN_loss: 0.9631 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2022 - MSE_loss: 0.3100 - BNN_loss: 0.9665 - val_loss: -1.1424 - val_MSE_loss: 0.3158 - val_BNN_loss: 0.9527 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2121 - MSE_loss: 0.3102 - BNN_loss: 0.9634 - val_loss: -1.1220 - val_MSE_loss: 0.3187 - val_BNN_loss: 0.9613 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2191 - MSE_loss: 0.3084 - BNN_loss: 0.9664 - val_loss: -1.1699 - val_MSE_loss: 0.3120 - val_BNN_loss: 0.9635 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2386 - MSE_loss: 0.3050 - BNN_loss: 0.9652 - val_loss: -1.1535 - val_MSE_loss: 0.3154 - val_BNN_loss: 0.9652 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2459 - MSE_loss: 0.3057 - BNN_loss: 0.9653 - val_loss: -1.2120 - val_MSE_loss: 0.3046 - val_BNN_loss: 0.9610 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.2451 - MSE_loss: 0.3063 - BNN_loss: 0.9647 - val_loss: -1.1792 - val_MSE_loss: 0.3086 - val_BNN_loss: 0.9582 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2568 - MSE_loss: 0.3066 - BNN_loss: 0.9639 - val_loss: -1.1918 - val_MSE_loss: 0.3080 - val_BNN_loss: 0.9671 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2781 - MSE_loss: 0.3019 - BNN_loss: 0.9651 - val_loss: -1.2154 - val_MSE_loss: 0.3034 - val_BNN_loss: 0.9626 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2757 - MSE_loss: 0.3031 - BNN_loss: 0.9652 - val_loss: -1.2289 - val_MSE_loss: 0.3074 - val_BNN_loss: 0.9603 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2813 - MSE_loss: 0.3010 - BNN_loss: 0.9642 - val_loss: -1.1884 - val_MSE_loss: 0.3112 - val_BNN_loss: 0.9605 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.2924 - MSE_loss: 0.3002 - BNN_loss: 0.9648 - val_loss: -1.1910 - val_MSE_loss: 0.3094 - val_BNN_loss: 0.9529 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.3072 - MSE_loss: 0.3002 - BNN_loss: 0.9631 - val_loss: -1.2476 - val_MSE_loss: 0.3057 - val_BNN_loss: 0.9633 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 5ms/step - loss: -1.3137 - MSE_loss: 0.2977 - BNN_loss: 0.9618 - val_loss: -1.2185 - val_MSE_loss: 0.3130 - val_BNN_loss: 0.9566 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.3128 - MSE_loss: 0.2975 - BNN_loss: 0.9639 - val_loss: -1.2284 - val_MSE_loss: 0.3092 - val_BNN_loss: 0.9563 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.3218 - MSE_loss: 0.2971 - BNN_loss: 0.9649 - val_loss: -1.1828 - val_MSE_loss: 0.3118 - val_BNN_loss: 0.9538 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.3303 - MSE_loss: 0.2964 - BNN_loss: 0.9645 - val_loss: -1.2051 - val_MSE_loss: 0.3074 - val_BNN_loss: 0.9523 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.3332 - MSE_loss: 0.2951 - BNN_loss: 0.9642 - val_loss: -1.2230 - val_MSE_loss: 0.3056 - val_BNN_loss: 0.9545 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.3431 - MSE_loss: 0.2941 - BNN_loss: 0.9628 - val_loss: -1.2195 - val_MSE_loss: 0.3078 - val_BNN_loss: 0.9543 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.3232 - MSE_loss: 0.2974 - BNN_loss: 0.9645 - val_loss: -1.2228 - val_MSE_loss: 0.3081 - val_BNN_loss: 0.9592 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.3515 - MSE_loss: 0.2941 - BNN_loss: 0.9642 - val_loss: -1.2431 - val_MSE_loss: 0.3052 - val_BNN_loss: 0.9518 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.3470 - MSE_loss: 0.2937 - BNN_loss: 0.9654 - val_loss: -1.2494 - val_MSE_loss: 0.3063 - val_BNN_loss: 0.9521 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.3400 - MSE_loss: 0.2948 - BNN_loss: 0.9640 - val_loss: -1.2156 - val_MSE_loss: 0.3077 - val_BNN_loss: 0.9660 - lr: 5.0000e-04
+250/250 [==============================] - 0s 1ms/step
+250/250 [==============================] - 0s 1ms/step
+250/250 [==============================] - 0s 1ms/step
+250/250 [==============================] - 0s 819us/step
+250/250 [==============================] - 0s 868us/step
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:absl:Skipping variable loading for optimizer &#39;RMSprop&#39;, because it has 9 variables whereas the saved optimizer has 1 variables.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+375/375 [==============================] - 0s 798us/step
+375/375 [==============================] - 0s 845us/step
+375/375 [==============================] - 0s 849us/step
+375/375 [==============================] - 0s 785us/step
+375/375 [==============================] - 0s 761us/step
+Root mean square [array([0.42787481, 0.37754824, 0.40463593]), array([0.46128409, 0.40653305, 0.44483479])]
+UQ_average_coverage [array([0.986125, 0.987125, 0.984375]), array([0.97825, 0.98275, 0.98175])]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_7_3.png" src="../_images/examples_example_complex_UQModels_7_3.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_7_4.png" src="../_images/examples_example_complex_UQModels_7_4.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+target [0.025, 0.16, 0.84, 0.975] empirique [0.008944444444444444, 0.08547222222222223, 0.9146388888888889, 0.9915555555555555]
+target elvl [0.5, 0.8, 0.95, 0.98, 0.995, 1] empirique Elvl [0.0, 1.0, 2.0, 4.0, 5.0, 6.0]
+</pre></div></div>
+</div>
+</section>
+<section id="MLP_UQ_Deep_ensemble">
+<h1>MLP_UQ_Deep_ensemble<a class="headerlink" href="#MLP_UQ_Deep_ensemble" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>run_mlp(type_output=&#39;Deep_ensemble&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Deep_ensemble
+start_fit
+Epoch 1/20
+57/57 [==============================] - 1s 8ms/step - loss: 0.3336 - MSE_loss: 0.5091 - BNN_loss: 0.9898 - val_loss: 0.1744 - val_MSE_loss: 0.3661 - val_BNN_loss: 0.9978 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1644 - MSE_loss: 0.3549 - BNN_loss: 0.9979 - val_loss: 0.1544 - val_MSE_loss: 0.3381 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1484 - MSE_loss: 0.3340 - BNN_loss: 0.9985 - val_loss: 0.1439 - val_MSE_loss: 0.3248 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1401 - MSE_loss: 0.3220 - BNN_loss: 0.9988 - val_loss: 0.1485 - val_MSE_loss: 0.3315 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1341 - MSE_loss: 0.3115 - BNN_loss: 0.9990 - val_loss: 0.1387 - val_MSE_loss: 0.3165 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1295 - MSE_loss: 0.3051 - BNN_loss: 0.9991 - val_loss: 0.1301 - val_MSE_loss: 0.3038 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1267 - MSE_loss: 0.3014 - BNN_loss: 0.9993 - val_loss: 0.1297 - val_MSE_loss: 0.3051 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1223 - MSE_loss: 0.2937 - BNN_loss: 0.9994 - val_loss: 0.1261 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9985 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1197 - MSE_loss: 0.2899 - BNN_loss: 0.9993 - val_loss: 0.1226 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1178 - MSE_loss: 0.2876 - BNN_loss: 0.9995 - val_loss: 0.1264 - val_MSE_loss: 0.2995 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1163 - MSE_loss: 0.2857 - BNN_loss: 0.9995 - val_loss: 0.1218 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1140 - MSE_loss: 0.2817 - BNN_loss: 0.9995 - val_loss: 0.1242 - val_MSE_loss: 0.2963 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1126 - MSE_loss: 0.2801 - BNN_loss: 0.9996 - val_loss: 0.1193 - val_MSE_loss: 0.2877 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1116 - MSE_loss: 0.2786 - BNN_loss: 0.9995 - val_loss: 0.1189 - val_MSE_loss: 0.2900 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1099 - MSE_loss: 0.2781 - BNN_loss: 0.9995 - val_loss: 0.1240 - val_MSE_loss: 0.2992 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1094 - MSE_loss: 0.2761 - BNN_loss: 0.9995 - val_loss: 0.1171 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1082 - MSE_loss: 0.2743 - BNN_loss: 0.9995 - val_loss: 0.1191 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1065 - MSE_loss: 0.2719 - BNN_loss: 0.9996 - val_loss: 0.1149 - val_MSE_loss: 0.2847 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1052 - MSE_loss: 0.2705 - BNN_loss: 0.9995 - val_loss: 0.1147 - val_MSE_loss: 0.2851 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1047 - MSE_loss: 0.2704 - BNN_loss: 0.9996 - val_loss: 0.1162 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 5ms/step - loss: 0.1037 - MSE_loss: 0.2675 - BNN_loss: 0.9994 - val_loss: 0.1130 - val_MSE_loss: 0.2831 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.1024 - MSE_loss: 0.2660 - BNN_loss: 0.9995 - val_loss: 0.1126 - val_MSE_loss: 0.2835 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.1025 - MSE_loss: 0.2669 - BNN_loss: 0.9995 - val_loss: 0.1107 - val_MSE_loss: 0.2805 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.1004 - MSE_loss: 0.2637 - BNN_loss: 0.9996 - val_loss: 0.1147 - val_MSE_loss: 0.2881 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1005 - MSE_loss: 0.2639 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0996 - MSE_loss: 0.2624 - BNN_loss: 0.9995 - val_loss: 0.1117 - val_MSE_loss: 0.2842 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0991 - MSE_loss: 0.2626 - BNN_loss: 0.9995 - val_loss: 0.1105 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0981 - MSE_loss: 0.2605 - BNN_loss: 0.9995 - val_loss: 0.1123 - val_MSE_loss: 0.2859 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0981 - MSE_loss: 0.2616 - BNN_loss: 0.9995 - val_loss: 0.1101 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0971 - MSE_loss: 0.2601 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2892 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 1/20
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+57/57 [==============================] - 2s 6ms/step - loss: -0.9447 - MSE_loss: 0.2931 - BNN_loss: 0.9796 - val_loss: -1.2141 - val_MSE_loss: 0.3022 - val_BNN_loss: 0.9619 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.3362 - MSE_loss: 0.2857 - BNN_loss: 0.9697 - val_loss: -1.2858 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9636 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.4103 - MSE_loss: 0.2787 - BNN_loss: 0.9677 - val_loss: -1.3209 - val_MSE_loss: 0.2936 - val_BNN_loss: 0.9657 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.4424 - MSE_loss: 0.2762 - BNN_loss: 0.9679 - val_loss: -1.3486 - val_MSE_loss: 0.2916 - val_BNN_loss: 0.9599 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.4844 - MSE_loss: 0.2717 - BNN_loss: 0.9676 - val_loss: -1.3513 - val_MSE_loss: 0.2901 - val_BNN_loss: 0.9607 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.4936 - MSE_loss: 0.2704 - BNN_loss: 0.9669 - val_loss: -1.3847 - val_MSE_loss: 0.2873 - val_BNN_loss: 0.9577 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.5221 - MSE_loss: 0.2674 - BNN_loss: 0.9655 - val_loss: -1.3799 - val_MSE_loss: 0.2861 - val_BNN_loss: 0.9579 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5452 - MSE_loss: 0.2649 - BNN_loss: 0.9676 - val_loss: -1.3069 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9408 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.5412 - MSE_loss: 0.2662 - BNN_loss: 0.9658 - val_loss: -1.3910 - val_MSE_loss: 0.2871 - val_BNN_loss: 0.9415 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.5693 - MSE_loss: 0.2637 - BNN_loss: 0.9672 - val_loss: -1.3447 - val_MSE_loss: 0.2898 - val_BNN_loss: 0.9458 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.5796 - MSE_loss: 0.2613 - BNN_loss: 0.9667 - val_loss: -1.3559 - val_MSE_loss: 0.2849 - val_BNN_loss: 0.9335 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 6ms/step - loss: -1.5891 - MSE_loss: 0.2615 - BNN_loss: 0.9662 - val_loss: -1.3814 - val_MSE_loss: 0.2819 - val_BNN_loss: 0.9555 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6020 - MSE_loss: 0.2598 - BNN_loss: 0.9663 - val_loss: -1.4021 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9447 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6053 - MSE_loss: 0.2600 - BNN_loss: 0.9651 - val_loss: -1.3080 - val_MSE_loss: 0.2910 - val_BNN_loss: 0.9347 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6137 - MSE_loss: 0.2607 - BNN_loss: 0.9640 - val_loss: -1.3562 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9551 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6278 - MSE_loss: 0.2572 - BNN_loss: 0.9652 - val_loss: -1.3586 - val_MSE_loss: 0.2858 - val_BNN_loss: 0.9336 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6440 - MSE_loss: 0.2558 - BNN_loss: 0.9642 - val_loss: -1.3881 - val_MSE_loss: 0.2829 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6473 - MSE_loss: 0.2553 - BNN_loss: 0.9648 - val_loss: -1.3997 - val_MSE_loss: 0.2800 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6446 - MSE_loss: 0.2565 - BNN_loss: 0.9636 - val_loss: -1.3767 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9451 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6662 - MSE_loss: 0.2547 - BNN_loss: 0.9643 - val_loss: -1.3371 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9389 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 5ms/step - loss: -1.6728 - MSE_loss: 0.2520 - BNN_loss: 0.9644 - val_loss: -1.4123 - val_MSE_loss: 0.2828 - val_BNN_loss: 0.9490 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.6911 - MSE_loss: 0.2508 - BNN_loss: 0.9649 - val_loss: -1.4330 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9450 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.6935 - MSE_loss: 0.2507 - BNN_loss: 0.9639 - val_loss: -1.3814 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9410 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.7012 - MSE_loss: 0.2491 - BNN_loss: 0.9647 - val_loss: -1.4001 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9466 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7045 - MSE_loss: 0.2494 - BNN_loss: 0.9633 - val_loss: -1.3993 - val_MSE_loss: 0.2823 - val_BNN_loss: 0.9446 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.7095 - MSE_loss: 0.2491 - BNN_loss: 0.9648 - val_loss: -1.3616 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9334 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.7152 - MSE_loss: 0.2492 - BNN_loss: 0.9630 - val_loss: -1.3965 - val_MSE_loss: 0.2815 - val_BNN_loss: 0.9451 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.7198 - MSE_loss: 0.2478 - BNN_loss: 0.9656 - val_loss: -1.3028 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9311 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.7228 - MSE_loss: 0.2479 - BNN_loss: 0.9631 - val_loss: -1.3406 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9259 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.7353 - MSE_loss: 0.2466 - BNN_loss: 0.9632 - val_loss: -1.3455 - val_MSE_loss: 0.2848 - val_BNN_loss: 0.9340 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 1s 6ms/step - loss: 0.3336 - MSE_loss: 0.5091 - BNN_loss: 0.9898 - val_loss: 0.1744 - val_MSE_loss: 0.3661 - val_BNN_loss: 0.9978 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1644 - MSE_loss: 0.3549 - BNN_loss: 0.9979 - val_loss: 0.1544 - val_MSE_loss: 0.3381 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1484 - MSE_loss: 0.3340 - BNN_loss: 0.9985 - val_loss: 0.1439 - val_MSE_loss: 0.3248 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1401 - MSE_loss: 0.3220 - BNN_loss: 0.9988 - val_loss: 0.1485 - val_MSE_loss: 0.3315 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1341 - MSE_loss: 0.3115 - BNN_loss: 0.9990 - val_loss: 0.1387 - val_MSE_loss: 0.3165 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1295 - MSE_loss: 0.3051 - BNN_loss: 0.9991 - val_loss: 0.1301 - val_MSE_loss: 0.3038 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1267 - MSE_loss: 0.3014 - BNN_loss: 0.9993 - val_loss: 0.1297 - val_MSE_loss: 0.3051 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1223 - MSE_loss: 0.2937 - BNN_loss: 0.9994 - val_loss: 0.1261 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9985 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1197 - MSE_loss: 0.2899 - BNN_loss: 0.9993 - val_loss: 0.1226 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1178 - MSE_loss: 0.2876 - BNN_loss: 0.9995 - val_loss: 0.1264 - val_MSE_loss: 0.2995 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1163 - MSE_loss: 0.2857 - BNN_loss: 0.9995 - val_loss: 0.1218 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1140 - MSE_loss: 0.2817 - BNN_loss: 0.9995 - val_loss: 0.1242 - val_MSE_loss: 0.2963 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1126 - MSE_loss: 0.2801 - BNN_loss: 0.9996 - val_loss: 0.1193 - val_MSE_loss: 0.2877 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1116 - MSE_loss: 0.2786 - BNN_loss: 0.9995 - val_loss: 0.1189 - val_MSE_loss: 0.2900 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1099 - MSE_loss: 0.2781 - BNN_loss: 0.9995 - val_loss: 0.1240 - val_MSE_loss: 0.2992 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1094 - MSE_loss: 0.2761 - BNN_loss: 0.9995 - val_loss: 0.1171 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1082 - MSE_loss: 0.2743 - BNN_loss: 0.9995 - val_loss: 0.1191 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1065 - MSE_loss: 0.2719 - BNN_loss: 0.9996 - val_loss: 0.1149 - val_MSE_loss: 0.2847 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1052 - MSE_loss: 0.2705 - BNN_loss: 0.9995 - val_loss: 0.1147 - val_MSE_loss: 0.2851 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1047 - MSE_loss: 0.2704 - BNN_loss: 0.9996 - val_loss: 0.1162 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 6ms/step - loss: 0.1037 - MSE_loss: 0.2675 - BNN_loss: 0.9994 - val_loss: 0.1130 - val_MSE_loss: 0.2831 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1024 - MSE_loss: 0.2660 - BNN_loss: 0.9995 - val_loss: 0.1126 - val_MSE_loss: 0.2835 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1025 - MSE_loss: 0.2669 - BNN_loss: 0.9995 - val_loss: 0.1107 - val_MSE_loss: 0.2805 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.1004 - MSE_loss: 0.2637 - BNN_loss: 0.9996 - val_loss: 0.1147 - val_MSE_loss: 0.2881 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.1005 - MSE_loss: 0.2639 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0996 - MSE_loss: 0.2624 - BNN_loss: 0.9995 - val_loss: 0.1117 - val_MSE_loss: 0.2842 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0991 - MSE_loss: 0.2626 - BNN_loss: 0.9995 - val_loss: 0.1105 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0981 - MSE_loss: 0.2605 - BNN_loss: 0.9995 - val_loss: 0.1123 - val_MSE_loss: 0.2859 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0981 - MSE_loss: 0.2616 - BNN_loss: 0.9995 - val_loss: 0.1101 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0971 - MSE_loss: 0.2601 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2892 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 1s 6ms/step - loss: -0.9447 - MSE_loss: 0.2931 - BNN_loss: 0.9796 - val_loss: -1.2141 - val_MSE_loss: 0.3022 - val_BNN_loss: 0.9619 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.3362 - MSE_loss: 0.2857 - BNN_loss: 0.9697 - val_loss: -1.2858 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9636 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4103 - MSE_loss: 0.2787 - BNN_loss: 0.9677 - val_loss: -1.3209 - val_MSE_loss: 0.2936 - val_BNN_loss: 0.9657 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.4424 - MSE_loss: 0.2762 - BNN_loss: 0.9679 - val_loss: -1.3486 - val_MSE_loss: 0.2916 - val_BNN_loss: 0.9599 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4844 - MSE_loss: 0.2717 - BNN_loss: 0.9676 - val_loss: -1.3513 - val_MSE_loss: 0.2901 - val_BNN_loss: 0.9607 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4936 - MSE_loss: 0.2704 - BNN_loss: 0.9669 - val_loss: -1.3847 - val_MSE_loss: 0.2873 - val_BNN_loss: 0.9577 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.5221 - MSE_loss: 0.2674 - BNN_loss: 0.9655 - val_loss: -1.3799 - val_MSE_loss: 0.2861 - val_BNN_loss: 0.9579 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.5452 - MSE_loss: 0.2649 - BNN_loss: 0.9676 - val_loss: -1.3069 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9408 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.5412 - MSE_loss: 0.2662 - BNN_loss: 0.9658 - val_loss: -1.3910 - val_MSE_loss: 0.2871 - val_BNN_loss: 0.9415 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 3ms/step - loss: -1.5693 - MSE_loss: 0.2637 - BNN_loss: 0.9672 - val_loss: -1.3447 - val_MSE_loss: 0.2898 - val_BNN_loss: 0.9458 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5796 - MSE_loss: 0.2613 - BNN_loss: 0.9667 - val_loss: -1.3559 - val_MSE_loss: 0.2849 - val_BNN_loss: 0.9335 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5891 - MSE_loss: 0.2615 - BNN_loss: 0.9662 - val_loss: -1.3814 - val_MSE_loss: 0.2819 - val_BNN_loss: 0.9555 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6020 - MSE_loss: 0.2598 - BNN_loss: 0.9663 - val_loss: -1.4021 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9447 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6053 - MSE_loss: 0.2600 - BNN_loss: 0.9651 - val_loss: -1.3080 - val_MSE_loss: 0.2910 - val_BNN_loss: 0.9347 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6137 - MSE_loss: 0.2607 - BNN_loss: 0.9640 - val_loss: -1.3562 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9551 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6278 - MSE_loss: 0.2572 - BNN_loss: 0.9652 - val_loss: -1.3586 - val_MSE_loss: 0.2858 - val_BNN_loss: 0.9336 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6440 - MSE_loss: 0.2558 - BNN_loss: 0.9642 - val_loss: -1.3881 - val_MSE_loss: 0.2829 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6473 - MSE_loss: 0.2553 - BNN_loss: 0.9648 - val_loss: -1.3997 - val_MSE_loss: 0.2800 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6446 - MSE_loss: 0.2565 - BNN_loss: 0.9636 - val_loss: -1.3767 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9451 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6662 - MSE_loss: 0.2547 - BNN_loss: 0.9643 - val_loss: -1.3371 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9389 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 5ms/step - loss: -1.6728 - MSE_loss: 0.2520 - BNN_loss: 0.9644 - val_loss: -1.4123 - val_MSE_loss: 0.2828 - val_BNN_loss: 0.9490 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.6911 - MSE_loss: 0.2508 - BNN_loss: 0.9649 - val_loss: -1.4330 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9450 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.6935 - MSE_loss: 0.2507 - BNN_loss: 0.9639 - val_loss: -1.3814 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9410 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7012 - MSE_loss: 0.2491 - BNN_loss: 0.9647 - val_loss: -1.4001 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9466 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7045 - MSE_loss: 0.2494 - BNN_loss: 0.9633 - val_loss: -1.3993 - val_MSE_loss: 0.2823 - val_BNN_loss: 0.9446 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7095 - MSE_loss: 0.2491 - BNN_loss: 0.9648 - val_loss: -1.3616 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9334 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7152 - MSE_loss: 0.2492 - BNN_loss: 0.9630 - val_loss: -1.3965 - val_MSE_loss: 0.2815 - val_BNN_loss: 0.9451 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7198 - MSE_loss: 0.2478 - BNN_loss: 0.9656 - val_loss: -1.3028 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9311 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.7228 - MSE_loss: 0.2479 - BNN_loss: 0.9631 - val_loss: -1.3406 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9259 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 3ms/step - loss: -1.7353 - MSE_loss: 0.2466 - BNN_loss: 0.9632 - val_loss: -1.3455 - val_MSE_loss: 0.2848 - val_BNN_loss: 0.9340 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 1s 6ms/step - loss: 0.3336 - MSE_loss: 0.5091 - BNN_loss: 0.9898 - val_loss: 0.1744 - val_MSE_loss: 0.3661 - val_BNN_loss: 0.9978 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1644 - MSE_loss: 0.3549 - BNN_loss: 0.9979 - val_loss: 0.1544 - val_MSE_loss: 0.3381 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1484 - MSE_loss: 0.3340 - BNN_loss: 0.9985 - val_loss: 0.1439 - val_MSE_loss: 0.3248 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1401 - MSE_loss: 0.3220 - BNN_loss: 0.9988 - val_loss: 0.1485 - val_MSE_loss: 0.3315 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1341 - MSE_loss: 0.3115 - BNN_loss: 0.9990 - val_loss: 0.1387 - val_MSE_loss: 0.3165 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1295 - MSE_loss: 0.3051 - BNN_loss: 0.9991 - val_loss: 0.1301 - val_MSE_loss: 0.3038 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1267 - MSE_loss: 0.3014 - BNN_loss: 0.9993 - val_loss: 0.1297 - val_MSE_loss: 0.3051 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1223 - MSE_loss: 0.2937 - BNN_loss: 0.9994 - val_loss: 0.1261 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9985 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1197 - MSE_loss: 0.2899 - BNN_loss: 0.9993 - val_loss: 0.1226 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1178 - MSE_loss: 0.2876 - BNN_loss: 0.9995 - val_loss: 0.1264 - val_MSE_loss: 0.2995 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1163 - MSE_loss: 0.2857 - BNN_loss: 0.9995 - val_loss: 0.1218 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1140 - MSE_loss: 0.2817 - BNN_loss: 0.9995 - val_loss: 0.1242 - val_MSE_loss: 0.2963 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1126 - MSE_loss: 0.2801 - BNN_loss: 0.9996 - val_loss: 0.1193 - val_MSE_loss: 0.2877 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1116 - MSE_loss: 0.2786 - BNN_loss: 0.9995 - val_loss: 0.1189 - val_MSE_loss: 0.2900 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1099 - MSE_loss: 0.2781 - BNN_loss: 0.9995 - val_loss: 0.1240 - val_MSE_loss: 0.2992 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1094 - MSE_loss: 0.2761 - BNN_loss: 0.9995 - val_loss: 0.1171 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1082 - MSE_loss: 0.2743 - BNN_loss: 0.9995 - val_loss: 0.1191 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1065 - MSE_loss: 0.2719 - BNN_loss: 0.9996 - val_loss: 0.1149 - val_MSE_loss: 0.2847 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1052 - MSE_loss: 0.2705 - BNN_loss: 0.9995 - val_loss: 0.1147 - val_MSE_loss: 0.2851 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1047 - MSE_loss: 0.2704 - BNN_loss: 0.9996 - val_loss: 0.1162 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 6ms/step - loss: 0.1037 - MSE_loss: 0.2675 - BNN_loss: 0.9994 - val_loss: 0.1130 - val_MSE_loss: 0.2831 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1024 - MSE_loss: 0.2660 - BNN_loss: 0.9995 - val_loss: 0.1126 - val_MSE_loss: 0.2835 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1025 - MSE_loss: 0.2669 - BNN_loss: 0.9995 - val_loss: 0.1107 - val_MSE_loss: 0.2805 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1004 - MSE_loss: 0.2637 - BNN_loss: 0.9996 - val_loss: 0.1147 - val_MSE_loss: 0.2881 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1005 - MSE_loss: 0.2639 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0996 - MSE_loss: 0.2624 - BNN_loss: 0.9995 - val_loss: 0.1117 - val_MSE_loss: 0.2842 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0991 - MSE_loss: 0.2626 - BNN_loss: 0.9995 - val_loss: 0.1105 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0981 - MSE_loss: 0.2605 - BNN_loss: 0.9995 - val_loss: 0.1123 - val_MSE_loss: 0.2859 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0981 - MSE_loss: 0.2616 - BNN_loss: 0.9995 - val_loss: 0.1101 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0971 - MSE_loss: 0.2601 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2892 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 1s 6ms/step - loss: -0.9447 - MSE_loss: 0.2931 - BNN_loss: 0.9796 - val_loss: -1.2141 - val_MSE_loss: 0.3022 - val_BNN_loss: 0.9619 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.3362 - MSE_loss: 0.2857 - BNN_loss: 0.9697 - val_loss: -1.2858 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9636 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4103 - MSE_loss: 0.2787 - BNN_loss: 0.9677 - val_loss: -1.3209 - val_MSE_loss: 0.2936 - val_BNN_loss: 0.9657 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4424 - MSE_loss: 0.2762 - BNN_loss: 0.9679 - val_loss: -1.3486 - val_MSE_loss: 0.2916 - val_BNN_loss: 0.9599 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4844 - MSE_loss: 0.2717 - BNN_loss: 0.9676 - val_loss: -1.3513 - val_MSE_loss: 0.2901 - val_BNN_loss: 0.9607 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4936 - MSE_loss: 0.2704 - BNN_loss: 0.9669 - val_loss: -1.3847 - val_MSE_loss: 0.2873 - val_BNN_loss: 0.9577 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5221 - MSE_loss: 0.2674 - BNN_loss: 0.9655 - val_loss: -1.3799 - val_MSE_loss: 0.2861 - val_BNN_loss: 0.9579 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5452 - MSE_loss: 0.2649 - BNN_loss: 0.9676 - val_loss: -1.3069 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9408 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5412 - MSE_loss: 0.2662 - BNN_loss: 0.9658 - val_loss: -1.3910 - val_MSE_loss: 0.2871 - val_BNN_loss: 0.9415 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5693 - MSE_loss: 0.2637 - BNN_loss: 0.9672 - val_loss: -1.3447 - val_MSE_loss: 0.2898 - val_BNN_loss: 0.9458 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5796 - MSE_loss: 0.2613 - BNN_loss: 0.9667 - val_loss: -1.3559 - val_MSE_loss: 0.2849 - val_BNN_loss: 0.9335 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5891 - MSE_loss: 0.2615 - BNN_loss: 0.9662 - val_loss: -1.3814 - val_MSE_loss: 0.2819 - val_BNN_loss: 0.9555 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6020 - MSE_loss: 0.2598 - BNN_loss: 0.9663 - val_loss: -1.4021 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9447 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6053 - MSE_loss: 0.2600 - BNN_loss: 0.9651 - val_loss: -1.3080 - val_MSE_loss: 0.2910 - val_BNN_loss: 0.9347 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6137 - MSE_loss: 0.2607 - BNN_loss: 0.9640 - val_loss: -1.3562 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9551 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6278 - MSE_loss: 0.2572 - BNN_loss: 0.9652 - val_loss: -1.3586 - val_MSE_loss: 0.2858 - val_BNN_loss: 0.9336 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6440 - MSE_loss: 0.2558 - BNN_loss: 0.9642 - val_loss: -1.3881 - val_MSE_loss: 0.2829 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6473 - MSE_loss: 0.2553 - BNN_loss: 0.9648 - val_loss: -1.3997 - val_MSE_loss: 0.2800 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6446 - MSE_loss: 0.2565 - BNN_loss: 0.9636 - val_loss: -1.3767 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9451 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6662 - MSE_loss: 0.2547 - BNN_loss: 0.9643 - val_loss: -1.3371 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9389 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 5ms/step - loss: -1.6728 - MSE_loss: 0.2520 - BNN_loss: 0.9644 - val_loss: -1.4123 - val_MSE_loss: 0.2828 - val_BNN_loss: 0.9490 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.6911 - MSE_loss: 0.2508 - BNN_loss: 0.9649 - val_loss: -1.4330 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9450 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.6935 - MSE_loss: 0.2507 - BNN_loss: 0.9639 - val_loss: -1.3814 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9410 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7012 - MSE_loss: 0.2491 - BNN_loss: 0.9647 - val_loss: -1.4001 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9466 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7045 - MSE_loss: 0.2494 - BNN_loss: 0.9633 - val_loss: -1.3993 - val_MSE_loss: 0.2823 - val_BNN_loss: 0.9446 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7095 - MSE_loss: 0.2491 - BNN_loss: 0.9648 - val_loss: -1.3616 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9334 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7152 - MSE_loss: 0.2492 - BNN_loss: 0.9630 - val_loss: -1.3965 - val_MSE_loss: 0.2815 - val_BNN_loss: 0.9451 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7198 - MSE_loss: 0.2478 - BNN_loss: 0.9656 - val_loss: -1.3028 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9311 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7228 - MSE_loss: 0.2479 - BNN_loss: 0.9631 - val_loss: -1.3406 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9259 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 1s 6ms/step - loss: -1.7353 - MSE_loss: 0.2466 - BNN_loss: 0.9632 - val_loss: -1.3455 - val_MSE_loss: 0.2848 - val_BNN_loss: 0.9340 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 2s 10ms/step - loss: 0.3336 - MSE_loss: 0.5091 - BNN_loss: 0.9898 - val_loss: 0.1744 - val_MSE_loss: 0.3661 - val_BNN_loss: 0.9978 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1644 - MSE_loss: 0.3549 - BNN_loss: 0.9979 - val_loss: 0.1544 - val_MSE_loss: 0.3381 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1484 - MSE_loss: 0.3340 - BNN_loss: 0.9985 - val_loss: 0.1439 - val_MSE_loss: 0.3248 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1401 - MSE_loss: 0.3220 - BNN_loss: 0.9988 - val_loss: 0.1485 - val_MSE_loss: 0.3315 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1341 - MSE_loss: 0.3115 - BNN_loss: 0.9990 - val_loss: 0.1387 - val_MSE_loss: 0.3165 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1295 - MSE_loss: 0.3051 - BNN_loss: 0.9991 - val_loss: 0.1301 - val_MSE_loss: 0.3038 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1267 - MSE_loss: 0.3014 - BNN_loss: 0.9993 - val_loss: 0.1297 - val_MSE_loss: 0.3051 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1223 - MSE_loss: 0.2937 - BNN_loss: 0.9994 - val_loss: 0.1261 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9985 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1197 - MSE_loss: 0.2899 - BNN_loss: 0.9993 - val_loss: 0.1226 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 7ms/step - loss: 0.1178 - MSE_loss: 0.2876 - BNN_loss: 0.9995 - val_loss: 0.1264 - val_MSE_loss: 0.2995 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1163 - MSE_loss: 0.2857 - BNN_loss: 0.9995 - val_loss: 0.1218 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1140 - MSE_loss: 0.2817 - BNN_loss: 0.9995 - val_loss: 0.1242 - val_MSE_loss: 0.2963 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1126 - MSE_loss: 0.2801 - BNN_loss: 0.9996 - val_loss: 0.1193 - val_MSE_loss: 0.2877 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1116 - MSE_loss: 0.2786 - BNN_loss: 0.9995 - val_loss: 0.1189 - val_MSE_loss: 0.2900 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1099 - MSE_loss: 0.2781 - BNN_loss: 0.9995 - val_loss: 0.1240 - val_MSE_loss: 0.2992 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1094 - MSE_loss: 0.2761 - BNN_loss: 0.9995 - val_loss: 0.1171 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1082 - MSE_loss: 0.2743 - BNN_loss: 0.9995 - val_loss: 0.1191 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1065 - MSE_loss: 0.2719 - BNN_loss: 0.9996 - val_loss: 0.1149 - val_MSE_loss: 0.2847 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1052 - MSE_loss: 0.2705 - BNN_loss: 0.9995 - val_loss: 0.1147 - val_MSE_loss: 0.2851 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1047 - MSE_loss: 0.2704 - BNN_loss: 0.9996 - val_loss: 0.1162 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 6ms/step - loss: 0.1037 - MSE_loss: 0.2675 - BNN_loss: 0.9994 - val_loss: 0.1130 - val_MSE_loss: 0.2831 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1024 - MSE_loss: 0.2660 - BNN_loss: 0.9995 - val_loss: 0.1126 - val_MSE_loss: 0.2835 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1025 - MSE_loss: 0.2669 - BNN_loss: 0.9995 - val_loss: 0.1107 - val_MSE_loss: 0.2805 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1004 - MSE_loss: 0.2637 - BNN_loss: 0.9996 - val_loss: 0.1147 - val_MSE_loss: 0.2881 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1005 - MSE_loss: 0.2639 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0996 - MSE_loss: 0.2624 - BNN_loss: 0.9995 - val_loss: 0.1117 - val_MSE_loss: 0.2842 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0991 - MSE_loss: 0.2626 - BNN_loss: 0.9995 - val_loss: 0.1105 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0981 - MSE_loss: 0.2605 - BNN_loss: 0.9995 - val_loss: 0.1123 - val_MSE_loss: 0.2859 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0981 - MSE_loss: 0.2616 - BNN_loss: 0.9995 - val_loss: 0.1101 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.0971 - MSE_loss: 0.2601 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2892 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 1s 6ms/step - loss: -0.9447 - MSE_loss: 0.2931 - BNN_loss: 0.9796 - val_loss: -1.2141 - val_MSE_loss: 0.3022 - val_BNN_loss: 0.9619 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.3362 - MSE_loss: 0.2857 - BNN_loss: 0.9697 - val_loss: -1.2858 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9636 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4103 - MSE_loss: 0.2787 - BNN_loss: 0.9677 - val_loss: -1.3209 - val_MSE_loss: 0.2936 - val_BNN_loss: 0.9657 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4424 - MSE_loss: 0.2762 - BNN_loss: 0.9679 - val_loss: -1.3486 - val_MSE_loss: 0.2916 - val_BNN_loss: 0.9599 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4844 - MSE_loss: 0.2717 - BNN_loss: 0.9676 - val_loss: -1.3513 - val_MSE_loss: 0.2901 - val_BNN_loss: 0.9607 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4936 - MSE_loss: 0.2704 - BNN_loss: 0.9669 - val_loss: -1.3847 - val_MSE_loss: 0.2873 - val_BNN_loss: 0.9577 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5221 - MSE_loss: 0.2674 - BNN_loss: 0.9655 - val_loss: -1.3799 - val_MSE_loss: 0.2861 - val_BNN_loss: 0.9579 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5452 - MSE_loss: 0.2649 - BNN_loss: 0.9676 - val_loss: -1.3069 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9408 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5412 - MSE_loss: 0.2662 - BNN_loss: 0.9658 - val_loss: -1.3910 - val_MSE_loss: 0.2871 - val_BNN_loss: 0.9415 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5693 - MSE_loss: 0.2637 - BNN_loss: 0.9672 - val_loss: -1.3447 - val_MSE_loss: 0.2898 - val_BNN_loss: 0.9458 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5796 - MSE_loss: 0.2613 - BNN_loss: 0.9667 - val_loss: -1.3559 - val_MSE_loss: 0.2849 - val_BNN_loss: 0.9335 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5891 - MSE_loss: 0.2615 - BNN_loss: 0.9662 - val_loss: -1.3814 - val_MSE_loss: 0.2819 - val_BNN_loss: 0.9555 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6020 - MSE_loss: 0.2598 - BNN_loss: 0.9663 - val_loss: -1.4021 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9447 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6053 - MSE_loss: 0.2600 - BNN_loss: 0.9651 - val_loss: -1.3080 - val_MSE_loss: 0.2910 - val_BNN_loss: 0.9347 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6137 - MSE_loss: 0.2607 - BNN_loss: 0.9640 - val_loss: -1.3562 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9551 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6278 - MSE_loss: 0.2572 - BNN_loss: 0.9652 - val_loss: -1.3586 - val_MSE_loss: 0.2858 - val_BNN_loss: 0.9336 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6440 - MSE_loss: 0.2558 - BNN_loss: 0.9642 - val_loss: -1.3881 - val_MSE_loss: 0.2829 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6473 - MSE_loss: 0.2553 - BNN_loss: 0.9648 - val_loss: -1.3997 - val_MSE_loss: 0.2800 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.6446 - MSE_loss: 0.2565 - BNN_loss: 0.9636 - val_loss: -1.3767 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9451 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6662 - MSE_loss: 0.2547 - BNN_loss: 0.9643 - val_loss: -1.3371 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9389 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 6ms/step - loss: -1.6728 - MSE_loss: 0.2520 - BNN_loss: 0.9644 - val_loss: -1.4123 - val_MSE_loss: 0.2828 - val_BNN_loss: 0.9490 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.6911 - MSE_loss: 0.2508 - BNN_loss: 0.9649 - val_loss: -1.4330 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9450 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.6935 - MSE_loss: 0.2507 - BNN_loss: 0.9639 - val_loss: -1.3814 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9410 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7012 - MSE_loss: 0.2491 - BNN_loss: 0.9647 - val_loss: -1.4001 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9466 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7045 - MSE_loss: 0.2494 - BNN_loss: 0.9633 - val_loss: -1.3993 - val_MSE_loss: 0.2823 - val_BNN_loss: 0.9446 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7095 - MSE_loss: 0.2491 - BNN_loss: 0.9648 - val_loss: -1.3616 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9334 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7152 - MSE_loss: 0.2492 - BNN_loss: 0.9630 - val_loss: -1.3965 - val_MSE_loss: 0.2815 - val_BNN_loss: 0.9451 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7198 - MSE_loss: 0.2478 - BNN_loss: 0.9656 - val_loss: -1.3028 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9311 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7228 - MSE_loss: 0.2479 - BNN_loss: 0.9631 - val_loss: -1.3406 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9259 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 4ms/step - loss: -1.7353 - MSE_loss: 0.2466 - BNN_loss: 0.9632 - val_loss: -1.3455 - val_MSE_loss: 0.2848 - val_BNN_loss: 0.9340 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 2s 8ms/step - loss: 0.3336 - MSE_loss: 0.5091 - BNN_loss: 0.9898 - val_loss: 0.1744 - val_MSE_loss: 0.3661 - val_BNN_loss: 0.9978 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1644 - MSE_loss: 0.3549 - BNN_loss: 0.9979 - val_loss: 0.1544 - val_MSE_loss: 0.3381 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1484 - MSE_loss: 0.3340 - BNN_loss: 0.9985 - val_loss: 0.1439 - val_MSE_loss: 0.3248 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1401 - MSE_loss: 0.3220 - BNN_loss: 0.9988 - val_loss: 0.1485 - val_MSE_loss: 0.3315 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1341 - MSE_loss: 0.3115 - BNN_loss: 0.9990 - val_loss: 0.1387 - val_MSE_loss: 0.3165 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1295 - MSE_loss: 0.3051 - BNN_loss: 0.9991 - val_loss: 0.1301 - val_MSE_loss: 0.3038 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1267 - MSE_loss: 0.3014 - BNN_loss: 0.9993 - val_loss: 0.1297 - val_MSE_loss: 0.3051 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1223 - MSE_loss: 0.2937 - BNN_loss: 0.9994 - val_loss: 0.1261 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9985 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1197 - MSE_loss: 0.2899 - BNN_loss: 0.9993 - val_loss: 0.1226 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1178 - MSE_loss: 0.2876 - BNN_loss: 0.9995 - val_loss: 0.1264 - val_MSE_loss: 0.2995 - val_BNN_loss: 0.9975 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1163 - MSE_loss: 0.2857 - BNN_loss: 0.9995 - val_loss: 0.1218 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1140 - MSE_loss: 0.2817 - BNN_loss: 0.9995 - val_loss: 0.1242 - val_MSE_loss: 0.2963 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1126 - MSE_loss: 0.2801 - BNN_loss: 0.9996 - val_loss: 0.1193 - val_MSE_loss: 0.2877 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1116 - MSE_loss: 0.2786 - BNN_loss: 0.9995 - val_loss: 0.1189 - val_MSE_loss: 0.2900 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1099 - MSE_loss: 0.2781 - BNN_loss: 0.9995 - val_loss: 0.1240 - val_MSE_loss: 0.2992 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1094 - MSE_loss: 0.2761 - BNN_loss: 0.9995 - val_loss: 0.1171 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9979 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 3ms/step - loss: 0.1082 - MSE_loss: 0.2743 - BNN_loss: 0.9995 - val_loss: 0.1191 - val_MSE_loss: 0.2911 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1065 - MSE_loss: 0.2719 - BNN_loss: 0.9996 - val_loss: 0.1149 - val_MSE_loss: 0.2847 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1052 - MSE_loss: 0.2705 - BNN_loss: 0.9995 - val_loss: 0.1147 - val_MSE_loss: 0.2851 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1047 - MSE_loss: 0.2704 - BNN_loss: 0.9996 - val_loss: 0.1162 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 6ms/step - loss: 0.1037 - MSE_loss: 0.2675 - BNN_loss: 0.9994 - val_loss: 0.1130 - val_MSE_loss: 0.2831 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1024 - MSE_loss: 0.2660 - BNN_loss: 0.9995 - val_loss: 0.1126 - val_MSE_loss: 0.2835 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1025 - MSE_loss: 0.2669 - BNN_loss: 0.9995 - val_loss: 0.1107 - val_MSE_loss: 0.2805 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1004 - MSE_loss: 0.2637 - BNN_loss: 0.9996 - val_loss: 0.1147 - val_MSE_loss: 0.2881 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1005 - MSE_loss: 0.2639 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0996 - MSE_loss: 0.2624 - BNN_loss: 0.9995 - val_loss: 0.1117 - val_MSE_loss: 0.2842 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0991 - MSE_loss: 0.2626 - BNN_loss: 0.9995 - val_loss: 0.1105 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0981 - MSE_loss: 0.2605 - BNN_loss: 0.9995 - val_loss: 0.1123 - val_MSE_loss: 0.2859 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0981 - MSE_loss: 0.2616 - BNN_loss: 0.9995 - val_loss: 0.1101 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0971 - MSE_loss: 0.2601 - BNN_loss: 0.9996 - val_loss: 0.1138 - val_MSE_loss: 0.2892 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 1s 7ms/step - loss: -0.9447 - MSE_loss: 0.2931 - BNN_loss: 0.9796 - val_loss: -1.2141 - val_MSE_loss: 0.3022 - val_BNN_loss: 0.9619 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.3362 - MSE_loss: 0.2857 - BNN_loss: 0.9697 - val_loss: -1.2858 - val_MSE_loss: 0.2972 - val_BNN_loss: 0.9636 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4103 - MSE_loss: 0.2787 - BNN_loss: 0.9677 - val_loss: -1.3209 - val_MSE_loss: 0.2936 - val_BNN_loss: 0.9657 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4424 - MSE_loss: 0.2762 - BNN_loss: 0.9679 - val_loss: -1.3486 - val_MSE_loss: 0.2916 - val_BNN_loss: 0.9599 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4844 - MSE_loss: 0.2717 - BNN_loss: 0.9676 - val_loss: -1.3513 - val_MSE_loss: 0.2901 - val_BNN_loss: 0.9607 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.4936 - MSE_loss: 0.2704 - BNN_loss: 0.9669 - val_loss: -1.3847 - val_MSE_loss: 0.2873 - val_BNN_loss: 0.9577 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5221 - MSE_loss: 0.2674 - BNN_loss: 0.9655 - val_loss: -1.3799 - val_MSE_loss: 0.2861 - val_BNN_loss: 0.9579 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5452 - MSE_loss: 0.2649 - BNN_loss: 0.9676 - val_loss: -1.3069 - val_MSE_loss: 0.2915 - val_BNN_loss: 0.9408 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5412 - MSE_loss: 0.2662 - BNN_loss: 0.9658 - val_loss: -1.3910 - val_MSE_loss: 0.2871 - val_BNN_loss: 0.9415 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5693 - MSE_loss: 0.2637 - BNN_loss: 0.9672 - val_loss: -1.3447 - val_MSE_loss: 0.2898 - val_BNN_loss: 0.9458 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 4ms/step - loss: -1.5796 - MSE_loss: 0.2613 - BNN_loss: 0.9667 - val_loss: -1.3559 - val_MSE_loss: 0.2849 - val_BNN_loss: 0.9335 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.5891 - MSE_loss: 0.2615 - BNN_loss: 0.9662 - val_loss: -1.3814 - val_MSE_loss: 0.2819 - val_BNN_loss: 0.9555 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6020 - MSE_loss: 0.2598 - BNN_loss: 0.9663 - val_loss: -1.4021 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9447 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6053 - MSE_loss: 0.2600 - BNN_loss: 0.9651 - val_loss: -1.3080 - val_MSE_loss: 0.2910 - val_BNN_loss: 0.9347 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 5ms/step - loss: -1.6137 - MSE_loss: 0.2607 - BNN_loss: 0.9640 - val_loss: -1.3562 - val_MSE_loss: 0.2880 - val_BNN_loss: 0.9551 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 6ms/step - loss: -1.6278 - MSE_loss: 0.2572 - BNN_loss: 0.9652 - val_loss: -1.3586 - val_MSE_loss: 0.2858 - val_BNN_loss: 0.9336 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 6ms/step - loss: -1.6440 - MSE_loss: 0.2558 - BNN_loss: 0.9642 - val_loss: -1.3881 - val_MSE_loss: 0.2829 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 6ms/step - loss: -1.6473 - MSE_loss: 0.2553 - BNN_loss: 0.9648 - val_loss: -1.3997 - val_MSE_loss: 0.2800 - val_BNN_loss: 0.9423 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 8ms/step - loss: -1.6446 - MSE_loss: 0.2565 - BNN_loss: 0.9636 - val_loss: -1.3767 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9451 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 7ms/step - loss: -1.6662 - MSE_loss: 0.2547 - BNN_loss: 0.9643 - val_loss: -1.3371 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9389 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 4s 12ms/step - loss: -1.6728 - MSE_loss: 0.2520 - BNN_loss: 0.9644 - val_loss: -1.4123 - val_MSE_loss: 0.2828 - val_BNN_loss: 0.9490 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 1s 7ms/step - loss: -1.6911 - MSE_loss: 0.2508 - BNN_loss: 0.9649 - val_loss: -1.4330 - val_MSE_loss: 0.2818 - val_BNN_loss: 0.9450 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 1s 8ms/step - loss: -1.6935 - MSE_loss: 0.2507 - BNN_loss: 0.9639 - val_loss: -1.3814 - val_MSE_loss: 0.2826 - val_BNN_loss: 0.9410 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 1s 7ms/step - loss: -1.7012 - MSE_loss: 0.2491 - BNN_loss: 0.9647 - val_loss: -1.4001 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9466 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 1s 6ms/step - loss: -1.7045 - MSE_loss: 0.2494 - BNN_loss: 0.9633 - val_loss: -1.3993 - val_MSE_loss: 0.2823 - val_BNN_loss: 0.9446 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 1s 6ms/step - loss: -1.7095 - MSE_loss: 0.2491 - BNN_loss: 0.9648 - val_loss: -1.3616 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9334 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7152 - MSE_loss: 0.2492 - BNN_loss: 0.9630 - val_loss: -1.3965 - val_MSE_loss: 0.2815 - val_BNN_loss: 0.9451 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7198 - MSE_loss: 0.2478 - BNN_loss: 0.9656 - val_loss: -1.3028 - val_MSE_loss: 0.2863 - val_BNN_loss: 0.9311 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7228 - MSE_loss: 0.2479 - BNN_loss: 0.9631 - val_loss: -1.3406 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.9259 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 1s 5ms/step - loss: -1.7353 - MSE_loss: 0.2466 - BNN_loss: 0.9632 - val_loss: -1.3455 - val_MSE_loss: 0.2848 - val_BNN_loss: 0.9340 - lr: 5.0000e-04
+250/250 [==============================] - 0s 1ms/step
+250/250 [==============================] - 0s 1ms/step
+250/250 [==============================] - 0s 986us/step
+250/250 [==============================] - 0s 1ms/step
+250/250 [==============================] - 0s 992us/step
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:absl:Skipping variable loading for optimizer &#39;RMSprop&#39;, because it has 9 variables whereas the saved optimizer has 1 variables.
+WARNING:absl:Skipping variable loading for optimizer &#39;RMSprop&#39;, because it has 9 variables whereas the saved optimizer has 1 variables.
+WARNING:absl:Skipping variable loading for optimizer &#39;RMSprop&#39;, because it has 9 variables whereas the saved optimizer has 1 variables.
+WARNING:absl:Skipping variable loading for optimizer &#39;RMSprop&#39;, because it has 9 variables whereas the saved optimizer has 1 variables.
+WARNING:absl:Skipping variable loading for optimizer &#39;RMSprop&#39;, because it has 9 variables whereas the saved optimizer has 1 variables.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+375/375 [==============================] - 1s 1ms/step
+375/375 [==============================] - 0s 843us/step
+375/375 [==============================] - 1s 1ms/step
+375/375 [==============================] - 1s 1ms/step
+375/375 [==============================] - 0s 1ms/step
+Root mean square [array([0.40659671, 0.35111176, 0.37674285]), array([0.48073047, 0.39789082, 0.46199978])]
+UQ_average_coverage [array([0.959375, 0.9645  , 0.965125]), array([0.92675, 0.934  , 0.92825])]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_9_9.png" src="../_images/examples_example_complex_UQModels_9_9.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_9_10.png" src="../_images/examples_example_complex_UQModels_9_10.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+target [0.025, 0.16, 0.84, 0.975] empirique [0.030722222222222224, 0.16752777777777778, 0.8661111111111112, 0.9781944444444445]
+target elvl [0.5, 0.8, 0.95, 0.98, 0.995, 1] empirique Elvl [0.0, 1.0, 2.0, 3.0, 4.0, 6.0]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># MLP_UQ_Deep_ensemble
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>run_mlp(type_output=&#39;EDL&#39;)
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+EDL
+start_fit
+Epoch 1/20
+57/57 [==============================] - 2s 8ms/step - loss: 0.3401 - MSE_loss: 0.5116 - BNN_loss: 0.9939 - val_loss: 0.1743 - val_MSE_loss: 0.3664 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1608 - MSE_loss: 0.3498 - BNN_loss: 0.9985 - val_loss: 0.1495 - val_MSE_loss: 0.3293 - val_BNN_loss: 0.9985 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1476 - MSE_loss: 0.3328 - BNN_loss: 0.9985 - val_loss: 0.1440 - val_MSE_loss: 0.3240 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1388 - MSE_loss: 0.3195 - BNN_loss: 0.9986 - val_loss: 0.1442 - val_MSE_loss: 0.3231 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1332 - MSE_loss: 0.3100 - BNN_loss: 0.9989 - val_loss: 0.1368 - val_MSE_loss: 0.3128 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1292 - MSE_loss: 0.3045 - BNN_loss: 0.9990 - val_loss: 0.1289 - val_MSE_loss: 0.3021 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1260 - MSE_loss: 0.3001 - BNN_loss: 0.9990 - val_loss: 0.1273 - val_MSE_loss: 0.2997 - val_BNN_loss: 0.9996 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 7ms/step - loss: 0.1221 - MSE_loss: 0.2932 - BNN_loss: 0.9991 - val_loss: 0.1266 - val_MSE_loss: 0.2970 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 7ms/step - loss: 0.1204 - MSE_loss: 0.2914 - BNN_loss: 0.9992 - val_loss: 0.1254 - val_MSE_loss: 0.2949 - val_BNN_loss: 0.9996 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1172 - MSE_loss: 0.2867 - BNN_loss: 0.9993 - val_loss: 0.1265 - val_MSE_loss: 0.2983 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 6ms/step - loss: 0.1163 - MSE_loss: 0.2856 - BNN_loss: 0.9992 - val_loss: 0.1214 - val_MSE_loss: 0.2909 - val_BNN_loss: 0.9996 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1137 - MSE_loss: 0.2811 - BNN_loss: 0.9995 - val_loss: 0.1246 - val_MSE_loss: 0.2962 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1128 - MSE_loss: 0.2807 - BNN_loss: 0.9994 - val_loss: 0.1195 - val_MSE_loss: 0.2877 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1122 - MSE_loss: 0.2796 - BNN_loss: 0.9992 - val_loss: 0.1187 - val_MSE_loss: 0.2891 - val_BNN_loss: 0.9989 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1102 - MSE_loss: 0.2786 - BNN_loss: 0.9990 - val_loss: 0.1243 - val_MSE_loss: 0.3001 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1090 - MSE_loss: 0.2754 - BNN_loss: 0.9993 - val_loss: 0.1169 - val_MSE_loss: 0.2872 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.1081 - MSE_loss: 0.2743 - BNN_loss: 0.9991 - val_loss: 0.1192 - val_MSE_loss: 0.2912 - val_BNN_loss: 0.9996 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1071 - MSE_loss: 0.2729 - BNN_loss: 0.9994 - val_loss: 0.1154 - val_MSE_loss: 0.2878 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1058 - MSE_loss: 0.2717 - BNN_loss: 0.9993 - val_loss: 0.1138 - val_MSE_loss: 0.2837 - val_BNN_loss: 0.9996 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1050 - MSE_loss: 0.2714 - BNN_loss: 0.9994 - val_loss: 0.1146 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9993 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 5ms/step - loss: 0.1038 - MSE_loss: 0.2677 - BNN_loss: 0.9994 - val_loss: 0.1127 - val_MSE_loss: 0.2824 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 3ms/step - loss: 0.1030 - MSE_loss: 0.2674 - BNN_loss: 0.9995 - val_loss: 0.1123 - val_MSE_loss: 0.2833 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1019 - MSE_loss: 0.2665 - BNN_loss: 0.9993 - val_loss: 0.1115 - val_MSE_loss: 0.2827 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1010 - MSE_loss: 0.2652 - BNN_loss: 0.9994 - val_loss: 0.1150 - val_MSE_loss: 0.2889 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1004 - MSE_loss: 0.2642 - BNN_loss: 0.9994 - val_loss: 0.1131 - val_MSE_loss: 0.2852 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.1000 - MSE_loss: 0.2638 - BNN_loss: 0.9994 - val_loss: 0.1108 - val_MSE_loss: 0.2825 - val_BNN_loss: 0.9996 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0989 - MSE_loss: 0.2629 - BNN_loss: 0.9995 - val_loss: 0.1116 - val_MSE_loss: 0.2849 - val_BNN_loss: 0.9996 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0981 - MSE_loss: 0.2610 - BNN_loss: 0.9994 - val_loss: 0.1120 - val_MSE_loss: 0.2854 - val_BNN_loss: 0.9996 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0980 - MSE_loss: 0.2618 - BNN_loss: 0.9995 - val_loss: 0.1117 - val_MSE_loss: 0.2850 - val_BNN_loss: 0.9988 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 4ms/step - loss: 0.0972 - MSE_loss: 0.2608 - BNN_loss: 0.9994 - val_loss: 0.1159 - val_MSE_loss: 0.2928 - val_BNN_loss: 0.9992 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 2s 9ms/step - loss: 0.4022 - MSE_loss: 0.2972 - BNN_loss: 0.9396 - val_loss: 0.2341 - val_MSE_loss: 0.3069 - val_BNN_loss: 0.8930 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.1363 - MSE_loss: 0.2865 - BNN_loss: 0.9113 - val_loss: 0.1687 - val_MSE_loss: 0.2988 - val_BNN_loss: 0.9019 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.0849 - MSE_loss: 0.2773 - BNN_loss: 0.9070 - val_loss: 0.1520 - val_MSE_loss: 0.2936 - val_BNN_loss: 0.8864 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.0632 - MSE_loss: 0.2745 - BNN_loss: 0.9024 - val_loss: 0.1397 - val_MSE_loss: 0.2895 - val_BNN_loss: 0.8952 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.0477 - MSE_loss: 0.2709 - BNN_loss: 0.9008 - val_loss: 0.1059 - val_MSE_loss: 0.2816 - val_BNN_loss: 0.8740 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 5ms/step - loss: 0.0326 - MSE_loss: 0.2682 - BNN_loss: 0.8955 - val_loss: 0.0962 - val_MSE_loss: 0.2838 - val_BNN_loss: 0.8749 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.0264 - MSE_loss: 0.2679 - BNN_loss: 0.8944 - val_loss: 0.0778 - val_MSE_loss: 0.2794 - val_BNN_loss: 0.8755 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.0088 - MSE_loss: 0.2646 - BNN_loss: 0.8970 - val_loss: 0.1212 - val_MSE_loss: 0.2889 - val_BNN_loss: 0.8397 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 4ms/step - loss: 0.0063 - MSE_loss: 0.2645 - BNN_loss: 0.8907 - val_loss: 0.0931 - val_MSE_loss: 0.2822 - val_BNN_loss: 0.8393 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0012 - MSE_loss: 0.2636 - BNN_loss: 0.8867 - val_loss: 0.1078 - val_MSE_loss: 0.2859 - val_BNN_loss: 0.8455 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0095 - MSE_loss: 0.2618 - BNN_loss: 0.8869 - val_loss: 0.0977 - val_MSE_loss: 0.2844 - val_BNN_loss: 0.8526 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0158 - MSE_loss: 0.2604 - BNN_loss: 0.8810 - val_loss: 0.1200 - val_MSE_loss: 0.2858 - val_BNN_loss: 0.8419 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0178 - MSE_loss: 0.2600 - BNN_loss: 0.8816 - val_loss: 0.0787 - val_MSE_loss: 0.2803 - val_BNN_loss: 0.8512 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0211 - MSE_loss: 0.2612 - BNN_loss: 0.8757 - val_loss: 0.0966 - val_MSE_loss: 0.2816 - val_BNN_loss: 0.8225 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0251 - MSE_loss: 0.2611 - BNN_loss: 0.8741 - val_loss: 0.0881 - val_MSE_loss: 0.2832 - val_BNN_loss: 0.8572 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0339 - MSE_loss: 0.2580 - BNN_loss: 0.8725 - val_loss: 0.0807 - val_MSE_loss: 0.2779 - val_BNN_loss: 0.8407 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0432 - MSE_loss: 0.2560 - BNN_loss: 0.8738 - val_loss: 0.0728 - val_MSE_loss: 0.2787 - val_BNN_loss: 0.8244 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0495 - MSE_loss: 0.2557 - BNN_loss: 0.8665 - val_loss: 0.0650 - val_MSE_loss: 0.2748 - val_BNN_loss: 0.8258 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0497 - MSE_loss: 0.2560 - BNN_loss: 0.8652 - val_loss: 0.0857 - val_MSE_loss: 0.2783 - val_BNN_loss: 0.8077 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 0s 4ms/step - loss: -0.0526 - MSE_loss: 0.2560 - BNN_loss: 0.8636 - val_loss: 0.0834 - val_MSE_loss: 0.2777 - val_BNN_loss: 0.8278 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 1s 4ms/step - loss: -0.0649 - MSE_loss: 0.2511 - BNN_loss: 0.8613 - val_loss: 0.0655 - val_MSE_loss: 0.2786 - val_BNN_loss: 0.8130 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 0s 3ms/step - loss: -0.0639 - MSE_loss: 0.2526 - BNN_loss: 0.8609 - val_loss: 0.0652 - val_MSE_loss: 0.2799 - val_BNN_loss: 0.8165 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 0s 3ms/step - loss: -0.0687 - MSE_loss: 0.2510 - BNN_loss: 0.8585 - val_loss: 0.0733 - val_MSE_loss: 0.2791 - val_BNN_loss: 0.7955 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 0s 4ms/step - loss: -0.0767 - MSE_loss: 0.2510 - BNN_loss: 0.8569 - val_loss: 0.0831 - val_MSE_loss: 0.2810 - val_BNN_loss: 0.8102 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 0s 4ms/step - loss: -0.0722 - MSE_loss: 0.2511 - BNN_loss: 0.8534 - val_loss: 0.0716 - val_MSE_loss: 0.2793 - val_BNN_loss: 0.8035 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 0s 4ms/step - loss: -0.0735 - MSE_loss: 0.2516 - BNN_loss: 0.8509 - val_loss: 0.0654 - val_MSE_loss: 0.2782 - val_BNN_loss: 0.7982 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 0s 4ms/step - loss: -0.0805 - MSE_loss: 0.2504 - BNN_loss: 0.8508 - val_loss: 0.0656 - val_MSE_loss: 0.2787 - val_BNN_loss: 0.8034 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 0s 4ms/step - loss: -0.0903 - MSE_loss: 0.2481 - BNN_loss: 0.8506 - val_loss: 0.1081 - val_MSE_loss: 0.2816 - val_BNN_loss: 0.7619 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 0s 4ms/step - loss: -0.0824 - MSE_loss: 0.2498 - BNN_loss: 0.8451 - val_loss: 0.0957 - val_MSE_loss: 0.2814 - val_BNN_loss: 0.7687 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 0s 4ms/step - loss: -0.0876 - MSE_loss: 0.2489 - BNN_loss: 0.8444 - val_loss: 0.0654 - val_MSE_loss: 0.2785 - val_BNN_loss: 0.7734 - lr: 5.0000e-04
+Epoch 1/20
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+57/57 [==============================] - 3s 11ms/step - loss: -0.0064 - MSE_loss: 0.2511 - BNN_loss: 0.8406 - val_loss: 0.1434 - val_MSE_loss: 0.2791 - val_BNN_loss: 0.7647 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 1s 9ms/step - loss: -0.0256 - MSE_loss: 0.2505 - BNN_loss: 0.8246 - val_loss: 0.1583 - val_MSE_loss: 0.2815 - val_BNN_loss: 0.7410 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 1s 10ms/step - loss: -0.0252 - MSE_loss: 0.2509 - BNN_loss: 0.8054 - val_loss: 0.1463 - val_MSE_loss: 0.2771 - val_BNN_loss: 0.7340 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 0s 8ms/step - loss: -0.0296 - MSE_loss: 0.2512 - BNN_loss: 0.7919 - val_loss: 0.1463 - val_MSE_loss: 0.2804 - val_BNN_loss: 0.7123 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 0s 8ms/step - loss: -0.0392 - MSE_loss: 0.2495 - BNN_loss: 0.7743 - val_loss: 0.1469 - val_MSE_loss: 0.2773 - val_BNN_loss: 0.6904 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 0s 8ms/step - loss: -0.0478 - MSE_loss: 0.2492 - BNN_loss: 0.7584 - val_loss: 0.1319 - val_MSE_loss: 0.2745 - val_BNN_loss: 0.6889 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 0s 8ms/step - loss: -0.0501 - MSE_loss: 0.2483 - BNN_loss: 0.7464 - val_loss: 0.1081 - val_MSE_loss: 0.2757 - val_BNN_loss: 0.6943 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 0s 8ms/step - loss: -0.0526 - MSE_loss: 0.2475 - BNN_loss: 0.7345 - val_loss: 0.1508 - val_MSE_loss: 0.2795 - val_BNN_loss: 0.6164 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 0s 8ms/step - loss: -0.0573 - MSE_loss: 0.2486 - BNN_loss: 0.7175 - val_loss: 0.1475 - val_MSE_loss: 0.2829 - val_BNN_loss: 0.6235 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 0s 8ms/step - loss: -0.0573 - MSE_loss: 0.2490 - BNN_loss: 0.7131 - val_loss: 0.1459 - val_MSE_loss: 0.2772 - val_BNN_loss: 0.6030 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 0s 8ms/step - loss: -0.0665 - MSE_loss: 0.2465 - BNN_loss: 0.6991 - val_loss: 0.1348 - val_MSE_loss: 0.2809 - val_BNN_loss: 0.5801 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 0s 8ms/step - loss: -0.0664 - MSE_loss: 0.2471 - BNN_loss: 0.6877 - val_loss: 0.1353 - val_MSE_loss: 0.2777 - val_BNN_loss: 0.6068 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 1s 11ms/step - loss: -0.0737 - MSE_loss: 0.2465 - BNN_loss: 0.6757 - val_loss: 0.1214 - val_MSE_loss: 0.2779 - val_BNN_loss: 0.5832 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 1s 10ms/step - loss: -0.0723 - MSE_loss: 0.2463 - BNN_loss: 0.6679 - val_loss: 0.1408 - val_MSE_loss: 0.2757 - val_BNN_loss: 0.5574 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 1s 12ms/step - loss: -0.0756 - MSE_loss: 0.2470 - BNN_loss: 0.6538 - val_loss: 0.1430 - val_MSE_loss: 0.2816 - val_BNN_loss: 0.5559 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 1s 12ms/step - loss: -0.0763 - MSE_loss: 0.2463 - BNN_loss: 0.6439 - val_loss: 0.1255 - val_MSE_loss: 0.2761 - val_BNN_loss: 0.5659 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 1s 11ms/step - loss: -0.0786 - MSE_loss: 0.2450 - BNN_loss: 0.6362 - val_loss: 0.1355 - val_MSE_loss: 0.2792 - val_BNN_loss: 0.5335 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 1s 13ms/step - loss: -0.0834 - MSE_loss: 0.2445 - BNN_loss: 0.6290 - val_loss: 0.1333 - val_MSE_loss: 0.2763 - val_BNN_loss: 0.5306 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 1s 12ms/step - loss: -0.0904 - MSE_loss: 0.2448 - BNN_loss: 0.6206 - val_loss: 0.1518 - val_MSE_loss: 0.2819 - val_BNN_loss: 0.5044 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 1s 12ms/step - loss: -0.0877 - MSE_loss: 0.2446 - BNN_loss: 0.6140 - val_loss: 0.1346 - val_MSE_loss: 0.2791 - val_BNN_loss: 0.5418 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 2s 10ms/step - loss: -0.1006 - MSE_loss: 0.2413 - BNN_loss: 0.6121 - val_loss: 0.1255 - val_MSE_loss: 0.2774 - val_BNN_loss: 0.5018 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 1s 8ms/step - loss: -0.1106 - MSE_loss: 0.2413 - BNN_loss: 0.6056 - val_loss: 0.1533 - val_MSE_loss: 0.2806 - val_BNN_loss: 0.4983 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 1s 6ms/step - loss: -0.1025 - MSE_loss: 0.2424 - BNN_loss: 0.6021 - val_loss: 0.1227 - val_MSE_loss: 0.2767 - val_BNN_loss: 0.5107 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 1s 7ms/step - loss: -0.1134 - MSE_loss: 0.2407 - BNN_loss: 0.5952 - val_loss: 0.1554 - val_MSE_loss: 0.2784 - val_BNN_loss: 0.4806 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 1s 6ms/step - loss: -0.1110 - MSE_loss: 0.2396 - BNN_loss: 0.5913 - val_loss: 0.1365 - val_MSE_loss: 0.2772 - val_BNN_loss: 0.4869 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 1s 6ms/step - loss: -0.1079 - MSE_loss: 0.2403 - BNN_loss: 0.5890 - val_loss: 0.1587 - val_MSE_loss: 0.2822 - val_BNN_loss: 0.4605 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 1s 6ms/step - loss: -0.1161 - MSE_loss: 0.2398 - BNN_loss: 0.5843 - val_loss: 0.1461 - val_MSE_loss: 0.2827 - val_BNN_loss: 0.4775 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 1s 6ms/step - loss: -0.1211 - MSE_loss: 0.2378 - BNN_loss: 0.5818 - val_loss: 0.1588 - val_MSE_loss: 0.2801 - val_BNN_loss: 0.4412 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 1s 6ms/step - loss: -0.1199 - MSE_loss: 0.2391 - BNN_loss: 0.5706 - val_loss: 0.1370 - val_MSE_loss: 0.2765 - val_BNN_loss: 0.4613 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 1s 9ms/step - loss: -0.1174 - MSE_loss: 0.2391 - BNN_loss: 0.5692 - val_loss: 0.1348 - val_MSE_loss: 0.2790 - val_BNN_loss: 0.4731 - lr: 5.0000e-04
+250/250 [==============================] - 1s 2ms/step
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:absl:Skipping variable loading for optimizer &#39;RMSprop&#39;, because it has 9 variables whereas the saved optimizer has 1 variables.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+375/375 [==============================] - 1s 3ms/step
+Root mean square [array([0.3903552 , 0.34398838, 0.36658131]), array([0.46743913, 0.40148191, 0.45289349])]
+UQ_average_coverage [array([0.96675 , 0.971125, 0.969   ]), array([0.93675, 0.9285 , 0.92625])]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_11_33.png" src="../_images/examples_example_complex_UQModels_11_33.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_11_34.png" src="../_images/examples_example_complex_UQModels_11_34.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+target [0.025, 0.16, 0.84, 0.975] empirique [0.02263888888888889, 0.12883333333333333, 0.8626388888888888, 0.9752222222222222]
+target elvl [0.5, 0.8, 0.95, 0.98, 0.995, 1] empirique Elvl [0.0, 1.0, 2.0, 3.0, 4.0, 6.0]
+</pre></div></div>
+</div>
+</section>
+<section id="LSTM_ED_UQ-mutlihorizon-forecast-as-UQEstimator">
+<h1>LSTM_ED_UQ mutlihorizon forecast as UQEstimator<a class="headerlink" href="#LSTM_ED_UQ-mutlihorizon-forecast-as-UQEstimator" title="Link to this heading"></a></h1>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.modelization.DL_estimator.lstm_ed import Lstm_ED_UQ,get_training_parameters,get_UQEstimator_parameters,get_params_dict
+from uqmodels.custom_UQModel import UQModel, UQModel_KPI
+
+name = &#39;LSTM_ED&#39;
+type_output = &#39;MC_Dropout&#39;
+model_params = get_params_dict(dim_ctx=X.shape[-1], dim_dyn=y.shape[-1],dim_target=y.shape[-1],size_window=40,n_windows=10,dim_horizon=5,dim_chan=1,type_output=&#39;MC_Dropout&#39;)
+training_param = get_training_parameters(epochs=[20,10],b_s=[128,64],l_r=[0.001,0.0005],list_loss=[&#39;MSE&#39;,&#39;BNN&#39;],metrics=[&#39;MSE&#39;,&#39;BNN&#39;],param_loss=[2,0.9])
+UQEstimator_initializer = Lstm_ED_UQ
+
+UQEstimator_parameters = get_UQEstimator_parameters(model_parameters=model_params,
+                                                    training_parameters=training_param,
+                                                    type_output=type_output,
+                                                    factory_parameters= {&#39;factory_lag_st&#39;:0,&#39;factory_lag_lt&#39;:0},
+                                                    rescale=False)
+
+
+# We can also create a more complexe UQmodel that handle several UQKPI_Processor to build at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
+
+# Specification of the UQestimator
+UQEstimator_initializer = UQEstimator_initializer
+UQEstimator_parameters = UQEstimator_parameters
+
+# Instanciation of the UQmodel modeling pipeline
+DEEP_UQModel = UQModel_KPI(UQEstimator_initializer,
+                           UQEstimator_parameters,
+                           name=name,
+                           predictor=None,
+                           beta=0.001,reduc_filter_KPI=[1,1,1,1,1],
+                           reduc_filter_pred=[1,0,0,0,0],
+                           random_state=0)
+
+# Fit procedure
+
+# Apply factory at begin on all sub-sequences, then learning using folded representation : lot of space memory / less time consuming
+DEEP_UQModel._init_UQEstimator((X[train],y[train]),y[train])
+
+# Afactory function turn sequence in Window with mutli-horizon prediction
+# Manipulate sequence and apply factory on each batch : Less space memory / more time consuming
+if True : # For test purpose run both mode
+    DEEP_UQModel.UQEstimator.training_parameters[&#39;generator&#39;]=True
+    DEEP_UQModel.fit([X[train],y[train]],y[train],verbose=1)
+    pred,(UQ,PIs,Elvl) = DEEP_UQModel.predict((X,y))
+    (pred,UQ),KPI_anom,PIs,Elvl = DEEP_UQModel.score((X,y),y)
+
+# Apply factory on all sub-sequences, then learning on batch representation : lot of space memory / less time consuming
+if True :
+    DEEP_UQModel.UQEstimator.training_parameters[&#39;generator&#39;]=False
+    DEEP_UQModel._init_UQEstimator((X[train],y[train]),y[train])
+    DEEP_UQModel.fit([X[train],y[train]],y[train],verbose=1)
+    if(True): # Test save load procedure
+        DEEP_UQModel.save(&#39;model/&#39;)
+        del DEEP_UQModel
+        DEEP_UQModel = UQModel()
+        DEEP_UQModel.load(&#39;model/&#39;+name)
+    pred,(UQ,PIs,Elvl) = DEEP_UQModel.predict((X,y))
+    (pred,UQ),KPI_anom,PIs,Elvl = DEEP_UQModel.score((X,y),y)
+# Inference procedure that provide prediction plus the specified UQKPIs
+
+
+from uqmodels.evaluation.metrics import Generic_metric, rmse, UQ_average_coverage, UQ_sharpness, UQ_Gaussian_NLL, UQ_dEI, UQ_absolute_residu_score
+from uqmodels.evaluation.evaluation import evaluate
+if(True):
+    list_metrics=[Generic_metric(rmse,&#39;Root mean square&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;),
+                  Generic_metric(UQ_average_coverage,&#39;UQ_average_coverage&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;)]
+    output = pred,UQ
+    metrics_val = evaluate(y,output,list_metrics,list_sets=[train,test],verbose=True)
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Warning : issues non-deterministic behaviour even with random state
+start_fit
+Epoch 1/20
+57/57 [==============================] - 21s 265ms/step - loss: 2.9993 - MSE_loss: 1.6813 - BNN_loss: 0.6388 - val_loss: 2.2305 - val_MSE_loss: 1.4730 - val_BNN_loss: 0.6734 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 14s 242ms/step - loss: 2.3591 - MSE_loss: 1.5238 - BNN_loss: 0.6900 - val_loss: 1.7144 - val_MSE_loss: 1.3283 - val_BNN_loss: 0.7685 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 14s 244ms/step - loss: 1.4721 - MSE_loss: 1.2532 - BNN_loss: 0.8191 - val_loss: 1.1771 - val_MSE_loss: 1.1396 - val_BNN_loss: 0.8653 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 14s 241ms/step - loss: 1.2346 - MSE_loss: 1.1740 - BNN_loss: 0.8569 - val_loss: 0.9951 - val_MSE_loss: 1.0583 - val_BNN_loss: 0.9003 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 14s 249ms/step - loss: 1.0054 - MSE_loss: 1.0540 - BNN_loss: 0.8871 - val_loss: 0.8356 - val_MSE_loss: 0.9316 - val_BNN_loss: 0.9162 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 15s 260ms/step - loss: 0.8171 - MSE_loss: 0.9143 - BNN_loss: 0.9069 - val_loss: 0.6481 - val_MSE_loss: 0.7872 - val_BNN_loss: 0.9393 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 13s 234ms/step - loss: 0.7138 - MSE_loss: 0.8333 - BNN_loss: 0.9224 - val_loss: 0.5830 - val_MSE_loss: 0.7507 - val_BNN_loss: 0.9492 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 12s 217ms/step - loss: 0.6498 - MSE_loss: 0.7832 - BNN_loss: 0.9336 - val_loss: 0.5860 - val_MSE_loss: 0.7525 - val_BNN_loss: 0.9371 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 12s 207ms/step - loss: 0.6111 - MSE_loss: 0.7582 - BNN_loss: 0.9416 - val_loss: 0.5024 - val_MSE_loss: 0.6959 - val_BNN_loss: 0.9629 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 12s 211ms/step - loss: 0.5543 - MSE_loss: 0.7183 - BNN_loss: 0.9539 - val_loss: 0.4735 - val_MSE_loss: 0.6527 - val_BNN_loss: 0.9644 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 12s 207ms/step - loss: 0.5430 - MSE_loss: 0.7085 - BNN_loss: 0.9503 - val_loss: 0.4596 - val_MSE_loss: 0.6486 - val_BNN_loss: 0.9714 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 12s 207ms/step - loss: 0.5153 - MSE_loss: 0.6891 - BNN_loss: 0.9587 - val_loss: 0.4425 - val_MSE_loss: 0.6154 - val_BNN_loss: 0.9746 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 12s 206ms/step - loss: 0.5057 - MSE_loss: 0.6790 - BNN_loss: 0.9609 - val_loss: 0.4292 - val_MSE_loss: 0.6257 - val_BNN_loss: 0.9754 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 12s 202ms/step - loss: 0.4941 - MSE_loss: 0.6661 - BNN_loss: 0.9636 - val_loss: 0.4246 - val_MSE_loss: 0.6049 - val_BNN_loss: 0.9767 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 12s 216ms/step - loss: 0.4835 - MSE_loss: 0.6617 - BNN_loss: 0.9671 - val_loss: 0.4166 - val_MSE_loss: 0.6195 - val_BNN_loss: 0.9758 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 12s 207ms/step - loss: 0.4597 - MSE_loss: 0.6474 - BNN_loss: 0.9699 - val_loss: 0.4036 - val_MSE_loss: 0.6040 - val_BNN_loss: 0.9786 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 13s 236ms/step - loss: 0.4531 - MSE_loss: 0.6365 - BNN_loss: 0.9692 - val_loss: 0.3912 - val_MSE_loss: 0.5881 - val_BNN_loss: 0.9811 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 13s 232ms/step - loss: 0.4465 - MSE_loss: 0.6362 - BNN_loss: 0.9717 - val_loss: 0.3807 - val_MSE_loss: 0.5811 - val_BNN_loss: 0.9842 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 12s 216ms/step - loss: 0.4227 - MSE_loss: 0.6122 - BNN_loss: 0.9765 - val_loss: 0.3778 - val_MSE_loss: 0.5811 - val_BNN_loss: 0.9818 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 12s 218ms/step - loss: 0.4155 - MSE_loss: 0.6078 - BNN_loss: 0.9787 - val_loss: 0.3748 - val_MSE_loss: 0.5690 - val_BNN_loss: 0.9835 - lr: 0.0010
+Epoch 1/10
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+113/113 [==============================] - 21s 123ms/step - loss: 0.4226 - MSE_loss: 0.6125 - BNN_loss: 0.9778 - val_loss: 0.3661 - val_MSE_loss: 0.5767 - val_BNN_loss: 0.9851 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 13s 116ms/step - loss: 0.4155 - MSE_loss: 0.6163 - BNN_loss: 0.9771 - val_loss: 0.3597 - val_MSE_loss: 0.5614 - val_BNN_loss: 0.9867 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 14s 123ms/step - loss: 0.4077 - MSE_loss: 0.6067 - BNN_loss: 0.9801 - val_loss: 0.3643 - val_MSE_loss: 0.5600 - val_BNN_loss: 0.9863 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 14s 123ms/step - loss: 0.4010 - MSE_loss: 0.6000 - BNN_loss: 0.9797 - val_loss: 0.3495 - val_MSE_loss: 0.5678 - val_BNN_loss: 0.9867 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 14s 120ms/step - loss: 0.3902 - MSE_loss: 0.5917 - BNN_loss: 0.9814 - val_loss: 0.3510 - val_MSE_loss: 0.5545 - val_BNN_loss: 0.9860 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 13s 116ms/step - loss: 0.3876 - MSE_loss: 0.5874 - BNN_loss: 0.9823 - val_loss: 0.3364 - val_MSE_loss: 0.5511 - val_BNN_loss: 0.9881 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 13s 115ms/step - loss: 0.3846 - MSE_loss: 0.5890 - BNN_loss: 0.9814 - val_loss: 0.3327 - val_MSE_loss: 0.5398 - val_BNN_loss: 0.9886 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 13s 112ms/step - loss: 0.3803 - MSE_loss: 0.5882 - BNN_loss: 0.9818 - val_loss: 0.3353 - val_MSE_loss: 0.5537 - val_BNN_loss: 0.9889 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 14s 121ms/step - loss: 0.3773 - MSE_loss: 0.5815 - BNN_loss: 0.9835 - val_loss: 0.3269 - val_MSE_loss: 0.5459 - val_BNN_loss: 0.9887 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 13s 113ms/step - loss: 0.3807 - MSE_loss: 0.5825 - BNN_loss: 0.9833 - val_loss: 0.3296 - val_MSE_loss: 0.5361 - val_BNN_loss: 0.9905 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 18s 225ms/step - loss: 0.1789 - MSE_loss: 0.5967 - BNN_loss: 0.9721 - val_loss: 0.0674 - val_MSE_loss: 0.5558 - val_BNN_loss: 0.9763 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 12s 218ms/step - loss: 0.0718 - MSE_loss: 0.5829 - BNN_loss: 0.9701 - val_loss: -0.0160 - val_MSE_loss: 0.5483 - val_BNN_loss: 0.9826 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 12s 211ms/step - loss: 0.0086 - MSE_loss: 0.5746 - BNN_loss: 0.9700 - val_loss: -0.0864 - val_MSE_loss: 0.5475 - val_BNN_loss: 0.9781 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 12s 214ms/step - loss: 0.0042 - MSE_loss: 0.5835 - BNN_loss: 0.9673 - val_loss: -0.1151 - val_MSE_loss: 0.5569 - val_BNN_loss: 0.9733 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 12s 206ms/step - loss: -0.0396 - MSE_loss: 0.5733 - BNN_loss: 0.9664 - val_loss: -0.1528 - val_MSE_loss: 0.5374 - val_BNN_loss: 0.9781 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 12s 203ms/step - loss: -0.0601 - MSE_loss: 0.5743 - BNN_loss: 0.9656 - val_loss: -0.0057 - val_MSE_loss: 0.5892 - val_BNN_loss: 0.9566 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 12s 212ms/step - loss: -0.0233 - MSE_loss: 0.5824 - BNN_loss: 0.9662 - val_loss: -0.1672 - val_MSE_loss: 0.5388 - val_BNN_loss: 0.9717 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 12s 208ms/step - loss: -0.0725 - MSE_loss: 0.5642 - BNN_loss: 0.9651 - val_loss: -0.1710 - val_MSE_loss: 0.5275 - val_BNN_loss: 0.9710 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 12s 203ms/step - loss: -0.0730 - MSE_loss: 0.5675 - BNN_loss: 0.9650 - val_loss: -0.1824 - val_MSE_loss: 0.5321 - val_BNN_loss: 0.9717 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 12s 201ms/step - loss: -0.0618 - MSE_loss: 0.5702 - BNN_loss: 0.9666 - val_loss: -0.2223 - val_MSE_loss: 0.5084 - val_BNN_loss: 0.9761 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 12s 208ms/step - loss: -0.1135 - MSE_loss: 0.5586 - BNN_loss: 0.9660 - val_loss: -0.2186 - val_MSE_loss: 0.5181 - val_BNN_loss: 0.9735 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 12s 205ms/step - loss: -0.0811 - MSE_loss: 0.5595 - BNN_loss: 0.9659 - val_loss: -0.2084 - val_MSE_loss: 0.5233 - val_BNN_loss: 0.9683 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 12s 205ms/step - loss: -0.1082 - MSE_loss: 0.5576 - BNN_loss: 0.9645 - val_loss: -0.2289 - val_MSE_loss: 0.5079 - val_BNN_loss: 0.9784 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 12s 207ms/step - loss: -0.1356 - MSE_loss: 0.5492 - BNN_loss: 0.9669 - val_loss: -0.2358 - val_MSE_loss: 0.5103 - val_BNN_loss: 0.9719 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 12s 207ms/step - loss: -0.1401 - MSE_loss: 0.5508 - BNN_loss: 0.9658 - val_loss: -0.2471 - val_MSE_loss: 0.5032 - val_BNN_loss: 0.9755 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 12s 206ms/step - loss: -0.1307 - MSE_loss: 0.5476 - BNN_loss: 0.9670 - val_loss: -0.2756 - val_MSE_loss: 0.5068 - val_BNN_loss: 0.9745 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 13s 224ms/step - loss: -0.1544 - MSE_loss: 0.5450 - BNN_loss: 0.9662 - val_loss: -0.2233 - val_MSE_loss: 0.5264 - val_BNN_loss: 0.9679 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 12s 218ms/step - loss: -0.1619 - MSE_loss: 0.5387 - BNN_loss: 0.9662 - val_loss: -0.2917 - val_MSE_loss: 0.4952 - val_BNN_loss: 0.9795 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 12s 205ms/step - loss: -0.1668 - MSE_loss: 0.5425 - BNN_loss: 0.9663 - val_loss: -0.2706 - val_MSE_loss: 0.5097 - val_BNN_loss: 0.9757 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 12s 202ms/step - loss: -0.2058 - MSE_loss: 0.5246 - BNN_loss: 0.9674 - val_loss: -0.2938 - val_MSE_loss: 0.4910 - val_BNN_loss: 0.9705 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 18s 110ms/step - loss: -0.1617 - MSE_loss: 0.5421 - BNN_loss: 0.9653 - val_loss: -0.3418 - val_MSE_loss: 0.4888 - val_BNN_loss: 0.9762 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 11s 99ms/step - loss: -0.1970 - MSE_loss: 0.5293 - BNN_loss: 0.9665 - val_loss: -0.3031 - val_MSE_loss: 0.4877 - val_BNN_loss: 0.9676 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 11s 99ms/step - loss: -0.2246 - MSE_loss: 0.5236 - BNN_loss: 0.9657 - val_loss: -0.2758 - val_MSE_loss: 0.5028 - val_BNN_loss: 0.9675 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 11s 98ms/step - loss: -0.2161 - MSE_loss: 0.5282 - BNN_loss: 0.9655 - val_loss: -0.3332 - val_MSE_loss: 0.4998 - val_BNN_loss: 0.9721 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 11s 98ms/step - loss: -0.1980 - MSE_loss: 0.5309 - BNN_loss: 0.9654 - val_loss: -0.3382 - val_MSE_loss: 0.4831 - val_BNN_loss: 0.9695 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 12s 108ms/step - loss: -0.2221 - MSE_loss: 0.5231 - BNN_loss: 0.9658 - val_loss: -0.3743 - val_MSE_loss: 0.4770 - val_BNN_loss: 0.9799 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 13s 111ms/step - loss: -0.2463 - MSE_loss: 0.5146 - BNN_loss: 0.9665 - val_loss: -0.3509 - val_MSE_loss: 0.4865 - val_BNN_loss: 0.9675 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 12s 103ms/step - loss: -0.2376 - MSE_loss: 0.5185 - BNN_loss: 0.9656 - val_loss: -0.3544 - val_MSE_loss: 0.4842 - val_BNN_loss: 0.9705 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 11s 98ms/step - loss: -0.2344 - MSE_loss: 0.5147 - BNN_loss: 0.9669 - val_loss: -0.3516 - val_MSE_loss: 0.4883 - val_BNN_loss: 0.9763 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 11s 97ms/step - loss: -0.2384 - MSE_loss: 0.5201 - BNN_loss: 0.9658 - val_loss: -0.3540 - val_MSE_loss: 0.4846 - val_BNN_loss: 0.9745 - lr: 5.0000e-04
+250/250 [==============================] - 5s 18ms/step
+250/250 [==============================] - 4s 15ms/step
+250/250 [==============================] - 4s 15ms/step
+375/375 [==============================] - 6s 16ms/step
+375/375 [==============================] - 6s 15ms/step
+375/375 [==============================] - 8s 20ms/step
+375/375 [==============================] - 6s 17ms/step
+375/375 [==============================] - 7s 17ms/step
+375/375 [==============================] - 5s 14ms/step
+start_fit
+Epoch 1/20
+57/57 [==============================] - 16s 177ms/step - loss: 0.3134 - MSE_loss: 0.5194 - BNN_loss: 0.9685 - val_loss: 0.2624 - val_MSE_loss: 0.4772 - val_BNN_loss: 0.9822 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 9s 156ms/step - loss: 0.3021 - MSE_loss: 0.5103 - BNN_loss: 0.9730 - val_loss: 0.2750 - val_MSE_loss: 0.4709 - val_BNN_loss: 0.9777 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 9s 161ms/step - loss: 0.3028 - MSE_loss: 0.5111 - BNN_loss: 0.9740 - val_loss: 0.2623 - val_MSE_loss: 0.4694 - val_BNN_loss: 0.9818 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 10s 172ms/step - loss: 0.2991 - MSE_loss: 0.5103 - BNN_loss: 0.9755 - val_loss: 0.2700 - val_MSE_loss: 0.4738 - val_BNN_loss: 0.9777 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 12s 209ms/step - loss: 0.2991 - MSE_loss: 0.5061 - BNN_loss: 0.9752 - val_loss: 0.2664 - val_MSE_loss: 0.4635 - val_BNN_loss: 0.9807 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 9s 163ms/step - loss: 0.2959 - MSE_loss: 0.5055 - BNN_loss: 0.9752 - val_loss: 0.2594 - val_MSE_loss: 0.4572 - val_BNN_loss: 0.9839 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 10s 172ms/step - loss: 0.2928 - MSE_loss: 0.5030 - BNN_loss: 0.9760 - val_loss: 0.2631 - val_MSE_loss: 0.4656 - val_BNN_loss: 0.9820 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 10s 179ms/step - loss: 0.2903 - MSE_loss: 0.5006 - BNN_loss: 0.9760 - val_loss: 0.2592 - val_MSE_loss: 0.4667 - val_BNN_loss: 0.9826 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 9s 163ms/step - loss: 0.2890 - MSE_loss: 0.4973 - BNN_loss: 0.9760 - val_loss: 0.2523 - val_MSE_loss: 0.4459 - val_BNN_loss: 0.9852 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 9s 160ms/step - loss: 0.2877 - MSE_loss: 0.4970 - BNN_loss: 0.9760 - val_loss: 0.2625 - val_MSE_loss: 0.4659 - val_BNN_loss: 0.9804 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 9s 161ms/step - loss: 0.2842 - MSE_loss: 0.4949 - BNN_loss: 0.9768 - val_loss: 0.2509 - val_MSE_loss: 0.4472 - val_BNN_loss: 0.9841 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 9s 165ms/step - loss: 0.2835 - MSE_loss: 0.4936 - BNN_loss: 0.9772 - val_loss: 0.2705 - val_MSE_loss: 0.4822 - val_BNN_loss: 0.9817 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 9s 159ms/step - loss: 0.2823 - MSE_loss: 0.4962 - BNN_loss: 0.9779 - val_loss: 0.2503 - val_MSE_loss: 0.4503 - val_BNN_loss: 0.9854 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 9s 159ms/step - loss: 0.2822 - MSE_loss: 0.4923 - BNN_loss: 0.9785 - val_loss: 0.2615 - val_MSE_loss: 0.4738 - val_BNN_loss: 0.9822 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 9s 157ms/step - loss: 0.2796 - MSE_loss: 0.4926 - BNN_loss: 0.9785 - val_loss: 0.2498 - val_MSE_loss: 0.4601 - val_BNN_loss: 0.9856 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 9s 160ms/step - loss: 0.2764 - MSE_loss: 0.4869 - BNN_loss: 0.9784 - val_loss: 0.2591 - val_MSE_loss: 0.4618 - val_BNN_loss: 0.9836 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 9s 158ms/step - loss: 0.2759 - MSE_loss: 0.4895 - BNN_loss: 0.9795 - val_loss: 0.2420 - val_MSE_loss: 0.4631 - val_BNN_loss: 0.9847 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 9s 155ms/step - loss: 0.2754 - MSE_loss: 0.4879 - BNN_loss: 0.9778 - val_loss: 0.2467 - val_MSE_loss: 0.4690 - val_BNN_loss: 0.9831 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 9s 159ms/step - loss: 0.2737 - MSE_loss: 0.4847 - BNN_loss: 0.9796 - val_loss: 0.2438 - val_MSE_loss: 0.4515 - val_BNN_loss: 0.9844 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 9s 157ms/step - loss: 0.2708 - MSE_loss: 0.4826 - BNN_loss: 0.9793 - val_loss: 0.2405 - val_MSE_loss: 0.4522 - val_BNN_loss: 0.9850 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 14s 80ms/step - loss: 0.2702 - MSE_loss: 0.4809 - BNN_loss: 0.9794 - val_loss: 0.2339 - val_MSE_loss: 0.4420 - val_BNN_loss: 0.9875 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 8s 75ms/step - loss: 0.2678 - MSE_loss: 0.4777 - BNN_loss: 0.9800 - val_loss: 0.2378 - val_MSE_loss: 0.4452 - val_BNN_loss: 0.9861 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 8s 71ms/step - loss: 0.2676 - MSE_loss: 0.4814 - BNN_loss: 0.9812 - val_loss: 0.2368 - val_MSE_loss: 0.4529 - val_BNN_loss: 0.9891 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 8s 70ms/step - loss: 0.2641 - MSE_loss: 0.4784 - BNN_loss: 0.9811 - val_loss: 0.2354 - val_MSE_loss: 0.4418 - val_BNN_loss: 0.9882 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 8s 71ms/step - loss: 0.2664 - MSE_loss: 0.4787 - BNN_loss: 0.9814 - val_loss: 0.2329 - val_MSE_loss: 0.4417 - val_BNN_loss: 0.9879 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 8s 73ms/step - loss: 0.2646 - MSE_loss: 0.4754 - BNN_loss: 0.9816 - val_loss: 0.2353 - val_MSE_loss: 0.4443 - val_BNN_loss: 0.9882 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 8s 73ms/step - loss: 0.2629 - MSE_loss: 0.4743 - BNN_loss: 0.9820 - val_loss: 0.2330 - val_MSE_loss: 0.4432 - val_BNN_loss: 0.9875 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 8s 71ms/step - loss: 0.2623 - MSE_loss: 0.4763 - BNN_loss: 0.9819 - val_loss: 0.2309 - val_MSE_loss: 0.4451 - val_BNN_loss: 0.9877 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 8s 71ms/step - loss: 0.2605 - MSE_loss: 0.4714 - BNN_loss: 0.9822 - val_loss: 0.2300 - val_MSE_loss: 0.4400 - val_BNN_loss: 0.9881 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 8s 71ms/step - loss: 0.2596 - MSE_loss: 0.4755 - BNN_loss: 0.9821 - val_loss: 0.2298 - val_MSE_loss: 0.4510 - val_BNN_loss: 0.9885 - lr: 5.0000e-04
+Epoch 1/20
+57/57 [==============================] - 15s 183ms/step - loss: -0.3229 - MSE_loss: 0.4782 - BNN_loss: 0.9703 - val_loss: -0.4716 - val_MSE_loss: 0.4410 - val_BNN_loss: 0.9776 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 10s 171ms/step - loss: -0.3980 - MSE_loss: 0.4745 - BNN_loss: 0.9668 - val_loss: -0.4683 - val_MSE_loss: 0.4517 - val_BNN_loss: 0.9693 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 10s 173ms/step - loss: -0.3993 - MSE_loss: 0.4750 - BNN_loss: 0.9671 - val_loss: -0.4584 - val_MSE_loss: 0.4518 - val_BNN_loss: 0.9673 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 10s 173ms/step - loss: -0.4074 - MSE_loss: 0.4739 - BNN_loss: 0.9662 - val_loss: -0.4196 - val_MSE_loss: 0.4547 - val_BNN_loss: 0.9653 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 10s 176ms/step - loss: -0.4118 - MSE_loss: 0.4710 - BNN_loss: 0.9652 - val_loss: -0.4870 - val_MSE_loss: 0.4429 - val_BNN_loss: 0.9719 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 10s 174ms/step - loss: -0.4246 - MSE_loss: 0.4729 - BNN_loss: 0.9664 - val_loss: -0.4271 - val_MSE_loss: 0.4502 - val_BNN_loss: 0.9647 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 10s 172ms/step - loss: -0.4208 - MSE_loss: 0.4710 - BNN_loss: 0.9657 - val_loss: -0.4768 - val_MSE_loss: 0.4509 - val_BNN_loss: 0.9615 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 10s 172ms/step - loss: -0.4322 - MSE_loss: 0.4729 - BNN_loss: 0.9654 - val_loss: -0.4855 - val_MSE_loss: 0.4486 - val_BNN_loss: 0.9699 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 10s 170ms/step - loss: -0.4349 - MSE_loss: 0.4709 - BNN_loss: 0.9664 - val_loss: -0.4902 - val_MSE_loss: 0.4494 - val_BNN_loss: 0.9660 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 10s 173ms/step - loss: -0.4403 - MSE_loss: 0.4688 - BNN_loss: 0.9653 - val_loss: -0.5055 - val_MSE_loss: 0.4446 - val_BNN_loss: 0.9692 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 10s 172ms/step - loss: -0.4477 - MSE_loss: 0.4686 - BNN_loss: 0.9650 - val_loss: -0.5137 - val_MSE_loss: 0.4274 - val_BNN_loss: 0.9705 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 10s 172ms/step - loss: -0.4524 - MSE_loss: 0.4670 - BNN_loss: 0.9656 - val_loss: -0.4854 - val_MSE_loss: 0.4477 - val_BNN_loss: 0.9729 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 10s 172ms/step - loss: -0.4527 - MSE_loss: 0.4704 - BNN_loss: 0.9664 - val_loss: -0.5157 - val_MSE_loss: 0.4296 - val_BNN_loss: 0.9649 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 10s 171ms/step - loss: -0.4621 - MSE_loss: 0.4640 - BNN_loss: 0.9659 - val_loss: -0.4704 - val_MSE_loss: 0.4418 - val_BNN_loss: 0.9642 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 10s 170ms/step - loss: -0.4618 - MSE_loss: 0.4651 - BNN_loss: 0.9658 - val_loss: -0.5273 - val_MSE_loss: 0.4304 - val_BNN_loss: 0.9657 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 10s 171ms/step - loss: -0.4727 - MSE_loss: 0.4596 - BNN_loss: 0.9657 - val_loss: -0.5096 - val_MSE_loss: 0.4352 - val_BNN_loss: 0.9671 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 10s 169ms/step - loss: -0.4738 - MSE_loss: 0.4635 - BNN_loss: 0.9658 - val_loss: -0.4870 - val_MSE_loss: 0.4511 - val_BNN_loss: 0.9689 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 10s 168ms/step - loss: -0.4716 - MSE_loss: 0.4628 - BNN_loss: 0.9667 - val_loss: -0.5243 - val_MSE_loss: 0.4489 - val_BNN_loss: 0.9693 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 10s 170ms/step - loss: -0.4761 - MSE_loss: 0.4611 - BNN_loss: 0.9652 - val_loss: -0.5043 - val_MSE_loss: 0.4320 - val_BNN_loss: 0.9617 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 10s 167ms/step - loss: -0.4827 - MSE_loss: 0.4582 - BNN_loss: 0.9661 - val_loss: -0.5332 - val_MSE_loss: 0.4408 - val_BNN_loss: 0.9661 - lr: 0.0010
+Epoch 1/10
+113/113 [==============================] - 16s 96ms/step - loss: -0.4960 - MSE_loss: 0.4548 - BNN_loss: 0.9657 - val_loss: -0.5349 - val_MSE_loss: 0.4327 - val_BNN_loss: 0.9688 - lr: 5.0000e-04
+Epoch 2/10
+113/113 [==============================] - 10s 87ms/step - loss: -0.4993 - MSE_loss: 0.4575 - BNN_loss: 0.9664 - val_loss: -0.5431 - val_MSE_loss: 0.4299 - val_BNN_loss: 0.9677 - lr: 5.0000e-04
+Epoch 3/10
+113/113 [==============================] - 10s 88ms/step - loss: -0.4962 - MSE_loss: 0.4568 - BNN_loss: 0.9648 - val_loss: -0.5354 - val_MSE_loss: 0.4418 - val_BNN_loss: 0.9647 - lr: 5.0000e-04
+Epoch 4/10
+113/113 [==============================] - 10s 86ms/step - loss: -0.5064 - MSE_loss: 0.4565 - BNN_loss: 0.9659 - val_loss: -0.5381 - val_MSE_loss: 0.4294 - val_BNN_loss: 0.9675 - lr: 5.0000e-04
+Epoch 5/10
+113/113 [==============================] - 10s 87ms/step - loss: -0.5068 - MSE_loss: 0.4570 - BNN_loss: 0.9651 - val_loss: -0.5541 - val_MSE_loss: 0.4372 - val_BNN_loss: 0.9703 - lr: 5.0000e-04
+Epoch 6/10
+113/113 [==============================] - 10s 85ms/step - loss: -0.5147 - MSE_loss: 0.4543 - BNN_loss: 0.9667 - val_loss: -0.5237 - val_MSE_loss: 0.4299 - val_BNN_loss: 0.9602 - lr: 5.0000e-04
+Epoch 7/10
+113/113 [==============================] - 10s 86ms/step - loss: -0.5144 - MSE_loss: 0.4531 - BNN_loss: 0.9662 - val_loss: -0.5506 - val_MSE_loss: 0.4373 - val_BNN_loss: 0.9615 - lr: 5.0000e-04
+Epoch 8/10
+113/113 [==============================] - 11s 96ms/step - loss: -0.5196 - MSE_loss: 0.4558 - BNN_loss: 0.9647 - val_loss: -0.5401 - val_MSE_loss: 0.4360 - val_BNN_loss: 0.9704 - lr: 5.0000e-04
+Epoch 9/10
+113/113 [==============================] - 10s 92ms/step - loss: -0.5209 - MSE_loss: 0.4545 - BNN_loss: 0.9657 - val_loss: -0.5392 - val_MSE_loss: 0.4332 - val_BNN_loss: 0.9639 - lr: 5.0000e-04
+Epoch 10/10
+113/113 [==============================] - 10s 87ms/step - loss: -0.5217 - MSE_loss: 0.4515 - BNN_loss: 0.9662 - val_loss: -0.5497 - val_MSE_loss: 0.4380 - val_BNN_loss: 0.9648 - lr: 5.0000e-04
+250/250 [==============================] - 4s 17ms/step
+250/250 [==============================] - 4s 16ms/step
+250/250 [==============================] - 4s 16ms/step
+Warning : issues non-deterministic behaviour even with random state
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:absl:Skipping variable loading for optimizer &#39;RMSprop&#39;, because it has 27 variables whereas the saved optimizer has 1 variables.
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+375/375 [==============================] - 6s 15ms/step
+375/375 [==============================] - 6s 16ms/step
+375/375 [==============================] - 6s 16ms/step
+375/375 [==============================] - 6s 15ms/step
+375/375 [==============================] - 6s 16ms/step
+375/375 [==============================] - 6s 16ms/step
+Root mean square [array([0.44089705, 0.38515591, 0.41475013]), array([0.46993094, 0.41022993, 0.44743962])]
+UQ_average_coverage [array([0.983625, 0.9845  , 0.98475 ]), array([0.97875, 0.97925, 0.97775])]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib notebook
+%matplotlib inline
+import matplotlib.pyplot as plt
+import uqmodels.visualization.visualization as visu
+
+f_obs = np.arange(len(train))[-1000:]
+
+list_percent = DEEP_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+visu.uncertainty_plot(y,output,context=None,size=(20,8),f_obs=f_obs,name=&#39;UQplot&#39;,mode_res=False,dim=np.arange(y.shape[1]),type_UQ=DEEP_UQModel.type_UQ,confidence_lvl=Elvl,list_percent=list_percent)
+visu.plot_anom_matrice(score=KPI_anom,true_label=dict_data[&#39;aux&#39;][&#39;anom&#39;][:,None],f_obs=f_obs)
+
+list_alpha = DEEP_UQModel.list_predict_KPI_processors[1].KPI_parameters[&#39;list_alpha&#39;]
+print(&#39;target&#39;, list_alpha, &#39;empirique&#39;, [(pi&gt;y).mean() for pi in PIs])
+list_percent = DEEP_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+print(&#39;target elvl&#39;,list_percent,&#39;empirique Elvl&#39;,[np.quantile(Elvl,q) for q in list_percent])
+del DEEP_UQModel
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_14_0.png" src="../_images/examples_example_complex_UQModels_14_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_14_1.png" src="../_images/examples_example_complex_UQModels_14_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+target [0.025, 0.16, 0.84, 0.975] empirique [0.010222222222222223, 0.09730555555555556, 0.9150833333333334, 0.9911944444444445]
+target elvl [0.5, 0.8, 0.95, 0.98, 0.995, 1] empirique Elvl [0.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># LSTM_ED_UQ mutlihorizon forecast as UQEstimator
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.modelization.DL_estimator.loss import build_BNN_loss, build_MSE_loss, default_callbacks
+from uqmodels.modelization.DL_estimator.transformer_ed import Transformer_ED_UQ,get_training_parameters,get_UQEstimator_parameters,get_params_dict
+from uqmodels.custom_UQModel import UQModel, UQModel_KPI
+
+name = &#39;Transformer_ED&#39;
+type_output = &#39;MC_Dropout&#39;
+model_params = get_params_dict(dim_ctx=X.shape[-1],dim_dyn=y.shape[-1],dim_target=y.shape[-1],size_window=40,n_windows=10,dim_horizon=5)
+training_param = get_training_parameters(epochs=[20,10],b_s=[128],l_r=[0.001,0.0005],list_loss=[&#39;MSE&#39;,&#39;BNN&#39;],metrics=[&#39;MSE&#39;,&#39;BNN&#39;],param_loss=[2,0.9])
+UQEstimator_initializer = Transformer_ED_UQ
+UQEstimator_parameters = get_UQEstimator_parameters(model_parameters=model_params,
+                                                    training_parameters=training_param,
+                                                    type_output=type_output,
+                                                    factory_parameters= {&#39;factory_lag_st&#39;:0,&#39;factory_lag_lt&#39;:0},
+                                                    rescale=False)
+
+
+from uqmodels.custom_UQModel import UQModel_KPI
+# We can also create a more complexe UQmodel that handle several UQKPI_Processor to build at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
+
+# Specification of the UQestimator
+UQEstimator_initializer = UQEstimator_initializer
+UQEstimator_parameters = UQEstimator_parameters
+
+# Instanciation of the UQmodel modeling pipeline
+DEEP_UQModel = UQModel_KPI(UQEstimator_initializer,
+                           UQEstimator_parameters,
+                           name=name,
+                           predictor=None,
+                           beta=0.001,
+                           reduc_filter_KPI=[1,1,1,1,1],
+                           reduc_filter_pred=[1,0,0,0,0],
+                           random_state=0)
+
+# Fit procedure
+
+# Apply factory at begin on all sub-sequences, then learning using folded representation : lot of space memory / less time consuming
+DEEP_UQModel._init_UQEstimator((X[train],y[train]),y[train])
+
+# Afactory function turn sequence in Window with mutli-horizon prediction
+# Manipulate sequence and apply factory on each batch : Less space memory / more time consuming
+if True : # For test purpose run both mode
+    DEEP_UQModel.UQEstimator.training_parameters[&#39;generator&#39;]=True
+    DEEP_UQModel.fit([X[train],y[train]],y[train],verbose=1)
+    pred,(UQ,PIs,Elvl) = DEEP_UQModel.predict((X,y))
+    (pred,UQ),KPI_anom,PIs,Elvl = DEEP_UQModel.score((X,y),y)
+
+# Apply factory on all sub-sequences, then learning on batch representation : lot of space memory / less time consuming
+if True :
+    DEEP_UQModel.UQEstimator.training_parameters[&#39;generator&#39;]=False
+    DEEP_UQModel.fit([X[train],y[train]],y[train],verbose=1)
+    if(False): # Test save load procedure : issues laading procedure run but doesn&#39;t load an operational model
+        DEEP_UQModel.save(&#39;model/&#39;)
+        DEEP_UQModel = UQModel()
+        DEEP_UQModel.load(&#39;model/&#39;+name+&#39;/&#39;)
+    pred,(UQ,PIs,Elvl) = DEEP_UQModel.predict((X,y))
+    (pred,UQ),KPI_anom,PIs,Elvl = DEEP_UQModel.score((X,y),y)
+
+# Inference procedure that provide prediction plus the specified UQKPIs
+#pred,((pred,UQ),PIs,Elvl) = DEEP_UQModel.predict([X[train],y[train]])
+# Score procedure that provide ANom-KPI
+
+from uqmodels.evaluation.metrics import Generic_metric, rmse, UQ_average_coverage, UQ_sharpness, UQ_Gaussian_NLL, UQ_dEI, UQ_absolute_residu_score
+from uqmodels.evaluation.evaluation import evaluate
+
+list_metrics=[Generic_metric(rmse,&#39;Root mean square&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;),
+              Generic_metric(UQ_average_coverage,&#39;UQ_average_coverage&#39;,mask=None,list_ctx_constraint=None,reduce=False,type_UQ=&#39;var_A&amp;E&#39;)]
+output = pred,UQ
+metrics_val = evaluate(y,output,list_metrics,list_sets=[train,test],verbose=True)
+<br/><br/><br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Warning : issues non-deterministic behaviour even with random state
+start_fit
+Epoch 1/20
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Detecting that an object or model or tf.train.Checkpoint is being deleted with unrestored values. See the following logs for the specific values in question. To silence these warnings, use `status.expect_partial()`. See https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint#restorefor details about the status object returned by the restore function.
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._iterations
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+WARNING:tensorflow:Value in checkpoint could not be found in the restored object: (root).optimizer._learning_rate
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+57/57 [==============================] - 31s 319ms/step - loss: 1.8776 - MSE_loss: 1.3552 - BNN_loss: 0.8121 - val_loss: 1.0053 - val_MSE_loss: 1.0569 - val_BNN_loss: 0.9019 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 17s 303ms/step - loss: 1.0342 - MSE_loss: 1.0910 - BNN_loss: 0.8861 - val_loss: 0.8300 - val_MSE_loss: 0.9529 - val_BNN_loss: 0.9117 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 17s 298ms/step - loss: 0.8160 - MSE_loss: 0.9010 - BNN_loss: 0.9175 - val_loss: 0.6566 - val_MSE_loss: 0.8147 - val_BNN_loss: 0.9485 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 17s 297ms/step - loss: 0.7263 - MSE_loss: 0.8442 - BNN_loss: 0.9241 - val_loss: 0.6330 - val_MSE_loss: 0.7826 - val_BNN_loss: 0.9440 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 17s 290ms/step - loss: 0.6692 - MSE_loss: 0.8044 - BNN_loss: 0.9337 - val_loss: 0.5952 - val_MSE_loss: 0.7384 - val_BNN_loss: 0.9597 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 17s 291ms/step - loss: 0.6111 - MSE_loss: 0.7632 - BNN_loss: 0.9426 - val_loss: 0.5638 - val_MSE_loss: 0.7205 - val_BNN_loss: 0.9572 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 17s 292ms/step - loss: 0.5777 - MSE_loss: 0.7250 - BNN_loss: 0.9435 - val_loss: 0.4872 - val_MSE_loss: 0.6358 - val_BNN_loss: 0.9592 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 17s 291ms/step - loss: 0.5213 - MSE_loss: 0.6764 - BNN_loss: 0.9505 - val_loss: 0.4657 - val_MSE_loss: 0.6448 - val_BNN_loss: 0.9557 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 16s 288ms/step - loss: 0.4941 - MSE_loss: 0.6477 - BNN_loss: 0.9540 - val_loss: 0.4211 - val_MSE_loss: 0.5766 - val_BNN_loss: 0.9668 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 17s 294ms/step - loss: 0.4483 - MSE_loss: 0.6129 - BNN_loss: 0.9645 - val_loss: 0.3893 - val_MSE_loss: 0.5541 - val_BNN_loss: 0.9732 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 17s 291ms/step - loss: 0.4404 - MSE_loss: 0.6014 - BNN_loss: 0.9602 - val_loss: 0.3986 - val_MSE_loss: 0.5559 - val_BNN_loss: 0.9768 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 17s 290ms/step - loss: 0.4188 - MSE_loss: 0.5806 - BNN_loss: 0.9665 - val_loss: 0.3772 - val_MSE_loss: 0.5341 - val_BNN_loss: 0.9774 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 17s 290ms/step - loss: 0.4100 - MSE_loss: 0.5756 - BNN_loss: 0.9683 - val_loss: 0.3693 - val_MSE_loss: 0.5369 - val_BNN_loss: 0.9767 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 17s 295ms/step - loss: 0.3976 - MSE_loss: 0.5634 - BNN_loss: 0.9704 - val_loss: 0.3805 - val_MSE_loss: 0.5357 - val_BNN_loss: 0.9777 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 17s 295ms/step - loss: 0.3986 - MSE_loss: 0.5625 - BNN_loss: 0.9697 - val_loss: 0.4074 - val_MSE_loss: 0.5733 - val_BNN_loss: 0.9592 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 17s 296ms/step - loss: 0.3701 - MSE_loss: 0.5403 - BNN_loss: 0.9738 - val_loss: 0.3517 - val_MSE_loss: 0.5105 - val_BNN_loss: 0.9806 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 17s 294ms/step - loss: 0.3646 - MSE_loss: 0.5250 - BNN_loss: 0.9734 - val_loss: 0.3581 - val_MSE_loss: 0.5228 - val_BNN_loss: 0.9789 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 17s 294ms/step - loss: 0.3590 - MSE_loss: 0.5289 - BNN_loss: 0.9762 - val_loss: 0.3170 - val_MSE_loss: 0.4910 - val_BNN_loss: 0.9830 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 17s 294ms/step - loss: 0.3349 - MSE_loss: 0.5067 - BNN_loss: 0.9794 - val_loss: 0.3284 - val_MSE_loss: 0.4987 - val_BNN_loss: 0.9831 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 17s 296ms/step - loss: 0.3377 - MSE_loss: 0.5098 - BNN_loss: 0.9804 - val_loss: 0.3089 - val_MSE_loss: 0.4814 - val_BNN_loss: 0.9836 - lr: 0.0010
+Epoch 1/20
+57/57 [==============================] - 30s 328ms/step - loss: 0.1155 - MSE_loss: 0.5486 - BNN_loss: 0.9695 - val_loss: -0.1904 - val_MSE_loss: 0.5070 - val_BNN_loss: 0.9715 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 17s 302ms/step - loss: -0.1434 - MSE_loss: 0.5162 - BNN_loss: 0.9669 - val_loss: -0.2414 - val_MSE_loss: 0.4922 - val_BNN_loss: 0.9732 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 17s 299ms/step - loss: -0.1860 - MSE_loss: 0.5116 - BNN_loss: 0.9666 - val_loss: -0.2175 - val_MSE_loss: 0.4857 - val_BNN_loss: 0.9688 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 17s 301ms/step - loss: -0.1614 - MSE_loss: 0.5190 - BNN_loss: 0.9657 - val_loss: -0.2248 - val_MSE_loss: 0.4956 - val_BNN_loss: 0.9621 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 17s 300ms/step - loss: -0.2024 - MSE_loss: 0.5111 - BNN_loss: 0.9668 - val_loss: -0.2546 - val_MSE_loss: 0.4869 - val_BNN_loss: 0.9674 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 17s 297ms/step - loss: -0.1584 - MSE_loss: 0.5123 - BNN_loss: 0.9661 - val_loss: -0.2552 - val_MSE_loss: 0.4837 - val_BNN_loss: 0.9680 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 17s 300ms/step - loss: -0.2065 - MSE_loss: 0.5067 - BNN_loss: 0.9660 - val_loss: -0.3043 - val_MSE_loss: 0.4747 - val_BNN_loss: 0.9770 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 17s 295ms/step - loss: -0.2201 - MSE_loss: 0.5034 - BNN_loss: 0.9659 - val_loss: -0.3166 - val_MSE_loss: 0.4637 - val_BNN_loss: 0.9737 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 17s 296ms/step - loss: -0.2496 - MSE_loss: 0.4996 - BNN_loss: 0.9658 - val_loss: -0.3631 - val_MSE_loss: 0.4684 - val_BNN_loss: 0.9709 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 17s 295ms/step - loss: -0.2501 - MSE_loss: 0.4940 - BNN_loss: 0.9664 - val_loss: -0.3378 - val_MSE_loss: 0.4533 - val_BNN_loss: 0.9726 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 17s 296ms/step - loss: -0.2800 - MSE_loss: 0.4900 - BNN_loss: 0.9663 - val_loss: -0.3159 - val_MSE_loss: 0.4605 - val_BNN_loss: 0.9788 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 17s 296ms/step - loss: -0.2992 - MSE_loss: 0.4874 - BNN_loss: 0.9659 - val_loss: -0.3189 - val_MSE_loss: 0.4746 - val_BNN_loss: 0.9725 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 17s 297ms/step - loss: -0.3148 - MSE_loss: 0.4846 - BNN_loss: 0.9664 - val_loss: -0.3608 - val_MSE_loss: 0.4660 - val_BNN_loss: 0.9717 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 17s 300ms/step - loss: -0.2810 - MSE_loss: 0.4895 - BNN_loss: 0.9656 - val_loss: -0.3562 - val_MSE_loss: 0.4603 - val_BNN_loss: 0.9782 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 22s 392ms/step - loss: -0.3365 - MSE_loss: 0.4773 - BNN_loss: 0.9666 - val_loss: -0.2614 - val_MSE_loss: 0.4917 - val_BNN_loss: 0.9578 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 19s 335ms/step - loss: -0.2827 - MSE_loss: 0.4867 - BNN_loss: 0.9642 - val_loss: -0.2659 - val_MSE_loss: 0.4849 - val_BNN_loss: 0.9836 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 17s 307ms/step - loss: -0.3008 - MSE_loss: 0.4854 - BNN_loss: 0.9675 - val_loss: -0.3336 - val_MSE_loss: 0.4640 - val_BNN_loss: 0.9587 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 17s 305ms/step - loss: -0.3838 - MSE_loss: 0.4695 - BNN_loss: 0.9667 - val_loss: -0.3511 - val_MSE_loss: 0.4796 - val_BNN_loss: 0.9664 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 17s 306ms/step - loss: -0.3479 - MSE_loss: 0.4752 - BNN_loss: 0.9663 - val_loss: -0.3868 - val_MSE_loss: 0.4602 - val_BNN_loss: 0.9690 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 17s 302ms/step - loss: -0.3240 - MSE_loss: 0.4842 - BNN_loss: 0.9656 - val_loss: -0.4144 - val_MSE_loss: 0.4467 - val_BNN_loss: 0.9773 - lr: 0.0010
+250/250 [==============================] - 8s 29ms/step
+250/250 [==============================] - 7s 28ms/step
+250/250 [==============================] - 8s 30ms/step
+375/375 [==============================] - 11s 29ms/step
+375/375 [==============================] - 11s 28ms/step
+375/375 [==============================] - 11s 28ms/step
+375/375 [==============================] - 11s 29ms/step
+375/375 [==============================] - 11s 29ms/step
+375/375 [==============================] - 11s 28ms/step
+start_fit
+Epoch 1/20
+57/57 [==============================] - 32s 321ms/step - loss: 0.3019 - MSE_loss: 0.4787 - BNN_loss: 0.9705 - val_loss: 0.2632 - val_MSE_loss: 0.4413 - val_BNN_loss: 0.9748 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 17s 303ms/step - loss: 0.2788 - MSE_loss: 0.4621 - BNN_loss: 0.9773 - val_loss: 0.2735 - val_MSE_loss: 0.4491 - val_BNN_loss: 0.9768 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 17s 302ms/step - loss: 0.2769 - MSE_loss: 0.4624 - BNN_loss: 0.9773 - val_loss: 0.2629 - val_MSE_loss: 0.4371 - val_BNN_loss: 0.9766 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 17s 299ms/step - loss: 0.2754 - MSE_loss: 0.4603 - BNN_loss: 0.9771 - val_loss: 0.2691 - val_MSE_loss: 0.4355 - val_BNN_loss: 0.9756 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 17s 300ms/step - loss: 0.2735 - MSE_loss: 0.4563 - BNN_loss: 0.9774 - val_loss: 0.2685 - val_MSE_loss: 0.4416 - val_BNN_loss: 0.9776 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 17s 302ms/step - loss: 0.2695 - MSE_loss: 0.4564 - BNN_loss: 0.9793 - val_loss: 0.2504 - val_MSE_loss: 0.4353 - val_BNN_loss: 0.9836 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 17s 296ms/step - loss: 0.2744 - MSE_loss: 0.4581 - BNN_loss: 0.9775 - val_loss: 0.2671 - val_MSE_loss: 0.4460 - val_BNN_loss: 0.9763 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 17s 303ms/step - loss: 0.2657 - MSE_loss: 0.4528 - BNN_loss: 0.9790 - val_loss: 0.2531 - val_MSE_loss: 0.4415 - val_BNN_loss: 0.9808 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 17s 300ms/step - loss: 0.2672 - MSE_loss: 0.4531 - BNN_loss: 0.9773 - val_loss: 0.2546 - val_MSE_loss: 0.4368 - val_BNN_loss: 0.9791 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 17s 294ms/step - loss: 0.2732 - MSE_loss: 0.4595 - BNN_loss: 0.9748 - val_loss: 0.2536 - val_MSE_loss: 0.4296 - val_BNN_loss: 0.9818 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 16s 289ms/step - loss: 0.2585 - MSE_loss: 0.4475 - BNN_loss: 0.9785 - val_loss: 0.2616 - val_MSE_loss: 0.4534 - val_BNN_loss: 0.9759 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 17s 291ms/step - loss: 0.2591 - MSE_loss: 0.4495 - BNN_loss: 0.9771 - val_loss: 0.2688 - val_MSE_loss: 0.4626 - val_BNN_loss: 0.9747 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 16s 289ms/step - loss: 0.2573 - MSE_loss: 0.4505 - BNN_loss: 0.9770 - val_loss: 0.2441 - val_MSE_loss: 0.4226 - val_BNN_loss: 0.9825 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 17s 293ms/step - loss: 0.2634 - MSE_loss: 0.4478 - BNN_loss: 0.9758 - val_loss: 0.2720 - val_MSE_loss: 0.4543 - val_BNN_loss: 0.9739 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 17s 293ms/step - loss: 0.2521 - MSE_loss: 0.4428 - BNN_loss: 0.9784 - val_loss: 0.2450 - val_MSE_loss: 0.4341 - val_BNN_loss: 0.9804 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 17s 295ms/step - loss: 0.2537 - MSE_loss: 0.4422 - BNN_loss: 0.9777 - val_loss: 0.2511 - val_MSE_loss: 0.4381 - val_BNN_loss: 0.9810 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 17s 293ms/step - loss: 0.2511 - MSE_loss: 0.4453 - BNN_loss: 0.9787 - val_loss: 0.2820 - val_MSE_loss: 0.4598 - val_BNN_loss: 0.9724 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 17s 299ms/step - loss: 0.2540 - MSE_loss: 0.4431 - BNN_loss: 0.9773 - val_loss: 0.2538 - val_MSE_loss: 0.4386 - val_BNN_loss: 0.9792 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 17s 302ms/step - loss: 0.2465 - MSE_loss: 0.4374 - BNN_loss: 0.9800 - val_loss: 0.2430 - val_MSE_loss: 0.4233 - val_BNN_loss: 0.9839 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 17s 302ms/step - loss: 0.2468 - MSE_loss: 0.4384 - BNN_loss: 0.9783 - val_loss: 0.2408 - val_MSE_loss: 0.4117 - val_BNN_loss: 0.9821 - lr: 0.0010
+Epoch 1/20
+57/57 [==============================] - 31s 324ms/step - loss: -0.4055 - MSE_loss: 0.4510 - BNN_loss: 0.9684 - val_loss: -0.5355 - val_MSE_loss: 0.4211 - val_BNN_loss: 0.9705 - lr: 0.0010
+Epoch 2/20
+57/57 [==============================] - 18s 312ms/step - loss: -0.5394 - MSE_loss: 0.4376 - BNN_loss: 0.9683 - val_loss: -0.4262 - val_MSE_loss: 0.4497 - val_BNN_loss: 0.9468 - lr: 0.0010
+Epoch 3/20
+57/57 [==============================] - 18s 309ms/step - loss: -0.5149 - MSE_loss: 0.4402 - BNN_loss: 0.9669 - val_loss: -0.5308 - val_MSE_loss: 0.4333 - val_BNN_loss: 0.9629 - lr: 0.0010
+Epoch 4/20
+57/57 [==============================] - 17s 307ms/step - loss: -0.5468 - MSE_loss: 0.4380 - BNN_loss: 0.9671 - val_loss: -0.5271 - val_MSE_loss: 0.4257 - val_BNN_loss: 0.9601 - lr: 0.0010
+Epoch 5/20
+57/57 [==============================] - 18s 307ms/step - loss: -0.5209 - MSE_loss: 0.4386 - BNN_loss: 0.9659 - val_loss: -0.4869 - val_MSE_loss: 0.4386 - val_BNN_loss: 0.9619 - lr: 0.0010
+Epoch 6/20
+57/57 [==============================] - 18s 311ms/step - loss: -0.5656 - MSE_loss: 0.4377 - BNN_loss: 0.9668 - val_loss: -0.4768 - val_MSE_loss: 0.4305 - val_BNN_loss: 0.9534 - lr: 0.0010
+Epoch 7/20
+57/57 [==============================] - 18s 315ms/step - loss: -0.5657 - MSE_loss: 0.4360 - BNN_loss: 0.9664 - val_loss: -0.3877 - val_MSE_loss: 0.4537 - val_BNN_loss: 0.9439 - lr: 0.0010
+Epoch 8/20
+57/57 [==============================] - 17s 304ms/step - loss: -0.5636 - MSE_loss: 0.4340 - BNN_loss: 0.9667 - val_loss: -0.5398 - val_MSE_loss: 0.4278 - val_BNN_loss: 0.9606 - lr: 0.0010
+Epoch 9/20
+57/57 [==============================] - 18s 311ms/step - loss: -0.5915 - MSE_loss: 0.4311 - BNN_loss: 0.9665 - val_loss: -0.5160 - val_MSE_loss: 0.4395 - val_BNN_loss: 0.9552 - lr: 0.0010
+Epoch 10/20
+57/57 [==============================] - 18s 310ms/step - loss: -0.5778 - MSE_loss: 0.4344 - BNN_loss: 0.9660 - val_loss: -0.5051 - val_MSE_loss: 0.4457 - val_BNN_loss: 0.9559 - lr: 0.0010
+Epoch 11/20
+57/57 [==============================] - 18s 308ms/step - loss: -0.6015 - MSE_loss: 0.4286 - BNN_loss: 0.9653 - val_loss: -0.5322 - val_MSE_loss: 0.4217 - val_BNN_loss: 0.9583 - lr: 0.0010
+Epoch 12/20
+57/57 [==============================] - 18s 313ms/step - loss: -0.5882 - MSE_loss: 0.4296 - BNN_loss: 0.9649 - val_loss: -0.5044 - val_MSE_loss: 0.4382 - val_BNN_loss: 0.9671 - lr: 0.0010
+Epoch 13/20
+57/57 [==============================] - 18s 313ms/step - loss: -0.6026 - MSE_loss: 0.4335 - BNN_loss: 0.9669 - val_loss: -0.5352 - val_MSE_loss: 0.4174 - val_BNN_loss: 0.9594 - lr: 0.0010
+Epoch 14/20
+57/57 [==============================] - 18s 313ms/step - loss: -0.5700 - MSE_loss: 0.4358 - BNN_loss: 0.9660 - val_loss: -0.4151 - val_MSE_loss: 0.4565 - val_BNN_loss: 0.9446 - lr: 0.0010
+Epoch 15/20
+57/57 [==============================] - 18s 308ms/step - loss: -0.6097 - MSE_loss: 0.4332 - BNN_loss: 0.9665 - val_loss: -0.3969 - val_MSE_loss: 0.4576 - val_BNN_loss: 0.9472 - lr: 0.0010
+Epoch 16/20
+57/57 [==============================] - 18s 310ms/step - loss: -0.5872 - MSE_loss: 0.4343 - BNN_loss: 0.9661 - val_loss: -0.5225 - val_MSE_loss: 0.4213 - val_BNN_loss: 0.9528 - lr: 0.0010
+Epoch 17/20
+57/57 [==============================] - 18s 309ms/step - loss: -0.6395 - MSE_loss: 0.4267 - BNN_loss: 0.9659 - val_loss: -0.4683 - val_MSE_loss: 0.4266 - val_BNN_loss: 0.9426 - lr: 0.0010
+Epoch 18/20
+57/57 [==============================] - 18s 308ms/step - loss: -0.6145 - MSE_loss: 0.4293 - BNN_loss: 0.9654 - val_loss: -0.5218 - val_MSE_loss: 0.4234 - val_BNN_loss: 0.9504 - lr: 0.0010
+Epoch 19/20
+57/57 [==============================] - 18s 316ms/step - loss: -0.6284 - MSE_loss: 0.4277 - BNN_loss: 0.9656 - val_loss: -0.3425 - val_MSE_loss: 0.4630 - val_BNN_loss: 0.9315 - lr: 0.0010
+Epoch 20/20
+57/57 [==============================] - 18s 312ms/step - loss: -0.6334 - MSE_loss: 0.4269 - BNN_loss: 0.9658 - val_loss: -0.5221 - val_MSE_loss: 0.4159 - val_BNN_loss: 0.9497 - lr: 0.0010
+250/250 [==============================] - 8s 30ms/step
+250/250 [==============================] - 8s 30ms/step
+250/250 [==============================] - 8s 31ms/step
+375/375 [==============================] - 11s 30ms/step
+375/375 [==============================] - 11s 30ms/step
+375/375 [==============================] - 12s 31ms/step
+375/375 [==============================] - 11s 29ms/step
+375/375 [==============================] - 11s 29ms/step
+375/375 [==============================] - 11s 30ms/step
+Root mean square [array([0.41646464, 0.36957769, 0.40439055]), array([0.45897667, 0.39815194, 0.4435126 ])]
+UQ_average_coverage [array([0.978   , 0.981625, 0.982625]), array([0.9655 , 0.97125, 0.96825])]
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib notebook
+%matplotlib inline
+import matplotlib.pyplot as plt
+import uqmodels.visualization.visualization as visu
+
+f_obs = np.arange(len(train))[-1000:]
+
+list_percent = DEEP_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+visu.uncertainty_plot(y,output,context=None,size=(20,8),f_obs=f_obs,name=&#39;UQplot&#39;,mode_res=False,dim=np.arange(y.shape[1]),type_UQ=DEEP_UQModel.type_UQ,confidence_lvl=Elvl,list_percent=list_percent)
+visu.plot_anom_matrice(score=KPI_anom,true_label=dict_data[&#39;aux&#39;][&#39;anom&#39;][:,None],f_obs=f_obs)
+
+list_alpha = DEEP_UQModel.list_predict_KPI_processors[1].KPI_parameters[&#39;list_alpha&#39;]
+print(&#39;target&#39;, list_alpha, &#39;empirique&#39;, [(pi&gt;y).mean() for pi in PIs])
+list_percent = DEEP_UQModel.list_predict_KPI_processors[2].KPI_parameters[&#39;list_percent&#39;]
+print(&#39;target elvl&#39;,list_percent,&#39;empirique Elvl&#39;,[np.quantile(Elvl,q) for q in list_percent])
+<br/></pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_17_0.png" src="../_images/examples_example_complex_UQModels_17_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_complex_UQModels_17_1.png" src="../_images/examples_example_complex_UQModels_17_1.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+target [0.025, 0.16, 0.84, 0.975] empirique [0.013583333333333333, 0.11327777777777778, 0.9014166666666666, 0.9883333333333333]
+target elvl [0.5, 0.8, 0.95, 0.98, 0.995, 1] empirique Elvl [1.0, 2.0, 3.0, 4.0, 4.0, 6.0]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>del DEEP_UQModel
+</pre></div>
+</div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

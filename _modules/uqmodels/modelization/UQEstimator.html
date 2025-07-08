@@ -1,0 +1,634 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.modelization.UQEstimator &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.modelization.UQEstimator</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.modelization.UQEstimator</h1><div class="highlight"><pre>
+<span></span><span class="c1">################################################################################</span>
+<span class="c1"># Source that specify UQEstimator class : Estimator performing Uncertainty</span>
+<span class="c1"># quantification according to serveral paradigms</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_scorer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.UQ_processing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">UQ_proc</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">aux_tuning</span>
+
+<span class="c1"># To do : Specify an UQmeasure object &amp; specify the type_UQ list</span>
+
+<span class="n">Array</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Array&quot;</span><span class="p">)</span>
+<span class="n">List_Estimators</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;List_Estimators&quot;</span><span class="p">)</span>
+<span class="n">Estimator</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Estimator&quot;</span><span class="p">)</span>
+<span class="n">Dict_params</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Dict_params&quot;</span><span class="p">)</span>
+
+<span class="c1"># Current support type :</span>
+<span class="n">list_type_UQ</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;None&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;var&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;res_var&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;2var&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;res_2var&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;quantile&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;res_quantile&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="c1"># To Do : add var_residuals, 2var_residuals, quantile_residuals</span>
+
+
+<div class="viewcode-block" id="check_type_UQ">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.check_type_UQ">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_type_UQ</span><span class="p">(</span><span class="n">type_UQ</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">type_UQ</span> <span class="ow">in</span> <span class="n">list_type_UQ</span><span class="p">:</span>
+        <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">type_UQ</span><span class="p">,</span> <span class="s2">&quot; not in &quot;</span><span class="p">,</span> <span class="n">list_type_UQ</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_UQEstimator_parameters">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.get_UQEstimator_parameters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_UQEstimator_parameters</span><span class="p">(</span>
+    <span class="n">model_parameters</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">factory_parameters</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">training_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate dict object containing UQEstimators parameters to provide to init().</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model_parameters (dict, optional): UQestimators parameters. Defaults to {}.</span>
+<span class="sd">        factory_parameters (dict, optional): Factory parameters, to data preprocessing. Defaults to {}.</span>
+<span class="sd">        training_parameters (_type_, optional): Model training parameters for DEEP estimators. Defaults to None.</span>
+<span class="sd">        type_output (_type_, optional): Specification of deep learning output. Defaults to None.</span>
+<span class="sd">        rescale (bool, optional): Use or not internal rescale function  Defaults to False.</span>
+<span class="sd">        random_state (bool): handle experimental random using seed.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: UQEstimators parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">UQEstimator_parameters</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;factory_parameters&quot;</span><span class="p">:</span> <span class="n">factory_parameters</span><span class="p">,</span>
+        <span class="s2">&quot;model_parameters&quot;</span><span class="p">:</span> <span class="n">model_parameters</span><span class="p">,</span>
+        <span class="s2">&quot;factory_parameters&quot;</span><span class="p">:</span> <span class="n">factory_parameters</span><span class="p">,</span>
+        <span class="s2">&quot;training_parameters&quot;</span><span class="p">:</span> <span class="n">training_parameters</span><span class="p">,</span>
+        <span class="s2">&quot;type_output&quot;</span><span class="p">:</span> <span class="n">type_output</span><span class="p">,</span>
+        <span class="s2">&quot;rescale&quot;</span><span class="p">:</span> <span class="n">rescale</span><span class="p">,</span>
+        <span class="s2">&quot;random_state&quot;</span><span class="p">:</span> <span class="n">random_state</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="n">key_arg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">UQEstimator_parameters</span><span class="p">[</span><span class="n">key_arg</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key_arg</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">UQEstimator_parameters</span></div>
+
+
+
+<div class="viewcode-block" id="UQEstimator">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.UQEstimator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">UQEstimator</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract structure of a UQEstimator : Estimator (fit/predict) that</span>
+<span class="sd">    perform prediction(optionaly) and UQmeasure estimation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;UQEstimator&quot;</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+        <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">type_UQ_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mf">0.000001</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;UQestimator that perform prediction(optionaly) and UQmeasure estimation</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str, optional): name. Defaults to &#39;UQEstimator&#39;.</span>
+<span class="sd">            type_UQ (str, optional): nature of UQmeasure. Defaults to &#39;None&#39;.</span>
+<span class="sd">            rescale (bool, optional): boolean flag that specify to use or not rescalling procedure. Defaults to False.</span>
+<span class="sd">            type_UQ_params (_type_, optional): additional information about UQMeasure parameters. Defaults to None.</span>
+<span class="sd">            random_state (bool): handle experimental random using seed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span> <span class="o">=</span> <span class="n">type_UQ</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span> <span class="o">=</span> <span class="n">type_UQ_params</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span> <span class="o">=</span> <span class="n">rescale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var_min</span> <span class="o">=</span> <span class="n">var_min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">len_y_shape</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">StandardScaler</span><span class="p">(</span><span class="n">with_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_std</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">StandardScaler</span><span class="p">(</span><span class="n">with_mean</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_std</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_state</span> <span class="o">=</span> <span class="n">random_state</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Data normalisation procedure (apply StandardScaler scikit learn) apply to features, target,</span>
+<span class="sd">        prediction and UQmeasure design to hold UQ for several type of UQ use renormalise_UQ function of UQ_processing</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (_type_): Features</span>
+<span class="sd">            y (_type_): Targets/Observation or prediction or UQmeasure)</span>
+<span class="sd">            type_transform: action : {fit_transform, : fit scaler and transform</span>
+<span class="sd">                                      transform, : use fitted scaler to transform</span>
+<span class="sd">                                      inverse_transform}</span>
+<span class="sd">            mode_UQ (bool, optional): true if format UQ measure</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            X,y: Normalised features, and targets (or prediction or UQmeasure)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">skip_format</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+        <span class="n">scalerX</span><span class="p">,</span> <span class="n">scalerY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">type_transform</span> <span class="o">==</span> <span class="s2">&quot;fit_transform&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">len_y_shape</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;len_y_shape&quot;</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">len_y_shape</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">type_transform</span> <span class="o">==</span> <span class="s2">&quot;fit_transform&quot;</span><span class="p">:</span>  <span class="c1"># Fit X&amp;Y Scaler</span>
+                <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">type_transform</span> <span class="o">==</span> <span class="s2">&quot;transform&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">type_transform</span> <span class="o">==</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">:</span>  <span class="c1"># Inverse Transform pred or UQ</span>
+                <span class="n">X_transformer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">inverse_transform</span>
+                <span class="n">Y_transformer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">inverse_transform</span>
+                <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">X</span> <span class="o">=</span> <span class="n">X_transformer</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">mode_UQ</span><span class="p">:</span>  <span class="c1"># UQ</span>
+                        <span class="n">y</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">renormalise_UQ</span><span class="p">(</span>
+                            <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaler</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">var_min</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">var_min</span>
+                        <span class="p">)</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">y</span> <span class="o">=</span> <span class="n">Y_transformer</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">len_y_shape</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UQEstimator.fit">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.UQEstimator.fit">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit UQestimator using training data.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            X: train features</span>
+<span class="sd">            y: train targets/observations</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="UQEstimator.predict">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.UQEstimator.predict">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute prediction (or provide None) and UQ-measure</span>
+<span class="sd">        Args:</span>
+<span class="sd">            X: features</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pred, UQ_measure</span>
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tuning</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="p">:</span> <span class="n">Estimator</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">n_esti</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">score</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;neg_mean_squared_error&quot;</span><span class="p">,</span>
+        <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fine-tune an estimator using a standards scikit learns gridsearch procedure on params (grid_parameters)</span>
+<span class="sd">        Args:</span>
+<span class="sd">            X: features</span>
+<span class="sd">            y: targets/observations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">aux_tuning</span><span class="p">(</span>
+            <span class="n">estimator</span><span class="p">,</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">params</span><span class="p">,</span>
+            <span class="n">score</span><span class="p">,</span>
+            <span class="n">n_esti</span><span class="p">,</span>
+            <span class="n">folds</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="UQEstimator.get_params">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.UQEstimator.get_params">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">dict_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="s2">&quot;get_params&quot;</span><span class="p">):</span>
+                <span class="n">dict_params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">get_params</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dict_params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dict_params</span></div>
+
+
+<div class="viewcode-block" id="UQEstimator.factory">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.UQEstimator.factory">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">factory</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="s2">&quot;transform&quot;</span><span class="p">,</span> <span class="n">only_fit_scaler</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">only_fit_scaler</span><span class="p">:</span>
+            <span class="n">type_transform</span> <span class="o">=</span> <span class="s2">&quot;fit_transform&quot;</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="n">type_transform</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="n">type_transform</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="MeanVarUQEstimator">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.MeanVarUQEstimator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MeanVarUQEstimator</span><span class="p">(</span><span class="n">UQEstimator</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mean var UQ Estimator that estimate a mean values and estimate irreductible&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">estimator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">estimator_var</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">type_UQ</span><span class="o">=</span><span class="s2">&quot;var&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;MeanVarUQEstimator&quot;</span><span class="p">,</span>
+        <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name</span>
+<span class="sd">            estimator (estimator): Target predictor</span>
+<span class="sd">            estimator_var (estimator): variance estimators</span>
+<span class="sd">            random_state (bool): handle experimental random using seed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">estimator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var</span> <span class="o">=</span> <span class="n">estimator_var</span>
+
+<div class="viewcode-block" id="MeanVarUQEstimator.fit">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.MeanVarUQEstimator.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit UQestimator using training data.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            X: train features</span>
+<span class="sd">            y: train targets/observations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;fit_transform&quot;</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">pred</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">residual</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">residual</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="MeanVarUQEstimator.predict">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.MeanVarUQEstimator.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute prediction (or provide None) and UQ-measure</span>
+<span class="sd">        Args:</span>
+<span class="sd">            X: features</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            pred, UQ_measure&quot;&quot;&quot;</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;fit&quot;</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span>
+
+        <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator_var</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">type_transform</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">mode_UQ</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Data normalisation procedure : see UQModels _gormat</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (np.array): _description_</span>
+<span class="sd">            y (np.array): _description_</span>
+<span class="sd">            type_transform (str): _description_</span>
+<span class="sd">            mode_UQ (bool, optional): _description_. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: _description_</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="QuantileUQEstimator">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.QuantileUQEstimator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">QuantileUQEstimator</span><span class="p">(</span><span class="n">UQEstimator</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">list_estimators</span><span class="p">,</span>
+        <span class="n">list_alpha</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">],</span>
+        <span class="n">type_UQ</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;quantile&quot;</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;QuantileUQEstimator&quot;</span><span class="p">,</span>
+        <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mf">0.00001</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise all attributes of the UQEstimatorGBRQ class.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            list_estimator: List of provided quatile estimators by default use GradientBoostingRegressor</span>
+<span class="sd">                as default estimator.</span>
+<span class="sd">            list_alpha: List of quantile values to estimates.</span>
+<span class="sd">            type_quantile : quantile or res_quantile : express if y provided is already a residual or None</span>
+<span class="sd">            list_alpha :list of alpha conf quantile to estimate</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">type_UQ</span><span class="o">=</span><span class="n">type_UQ</span><span class="p">,</span>
+            <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">,</span>
+            <span class="n">var_min</span><span class="o">=</span><span class="n">var_min</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_alpha</span> <span class="o">=</span> <span class="n">list_alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;list_alpha&quot;</span><span class="p">:</span> <span class="n">list_alpha</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_estimators</span> <span class="o">=</span> <span class="n">list_estimators</span>
+
+<div class="viewcode-block" id="QuantileUQEstimator.fit">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.QuantileUQEstimator.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;fit_transform&quot;</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_estimators</span><span class="p">:</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="QuantileUQEstimator.predict">
+<a class="viewcode-back" href="../../../uqmodels.modelization.html#uqmodels.modelization.UQEstimator.QuantileUQEstimator.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;fit&quot;</span><span class="p">,</span> <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="mf">0.5</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span><span class="p">[</span><span class="s2">&quot;list_alpha&quot;</span><span class="p">]:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_UQ_params</span><span class="p">[</span><span class="s2">&quot;list_alpha&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_estimators</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+        <span class="n">UQ</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_estimators</span><span class="p">):</span>
+            <span class="n">UQ</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">estimator</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">UQ</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+        <span class="n">type_transform</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">mode_UQ</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">skip_format</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Data normalisation procedure (apply StandardScaler scikit learn) apply to features, target,</span>
+<span class="sd">        prediction and UQmeasure.</span>
+<span class="sd">        Designed to hold UQ for several type of UQ use renormalise_UQ function of UQ_processing</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (_type_): Features</span>
+<span class="sd">            y (_type_): Targets/Observation or prediction or UQmeasure)</span>
+<span class="sd">            type_transform: action : {fit_transform, : fit scaler and transform</span>
+<span class="sd">                                      transform, : use fitted scaler to transform</span>
+<span class="sd">                                      inverse_transform}</span>
+<span class="sd">            mode_UQ (bool, optional): true if format UQ measure</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            X,y: Normalised features, and targets (or prediction or UQmeasure)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span>
+            <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">type_transform</span><span class="o">=</span><span class="n">type_transform</span><span class="p">,</span>
+            <span class="n">mode_UQ</span><span class="o">=</span><span class="n">mode_UQ</span><span class="p">,</span>
+            <span class="n">skip_format</span><span class="o">=</span><span class="n">skip_format</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_tuning</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span>
+        <span class="n">n_esti</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">folds</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Dict_params</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Perform a random search tuning using a parameter grid.&quot;&quot;&quot;</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;fit_transform&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">make_q_loss</span><span class="p">(</span><span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Build the quantile loss calculation function.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                beta: Must be between 0 and 1. Miss-coverage rate.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                The quantile loss function.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">quantile_loss</span><span class="p">(</span><span class="n">y_true</span><span class="p">:</span> <span class="n">Array</span><span class="p">,</span> <span class="n">pred</span><span class="p">:</span> <span class="n">Array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Compute the quantile loss between a vector of</span>
+<span class="sd">                predicted values and one of ground truth values for y.</span>
+
+<span class="sd">                The beta parameter is set outside the function (as an</span>
+<span class="sd">                    argument to the maker function).</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    y_true: vector of ground truth values</span>
+<span class="sd">                    pred: vector of predicted values</span>
+
+<span class="sd">                Returns:</span>
+<span class="sd">                    The loss score.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">y_true</span> <span class="o">-</span> <span class="n">pred</span>
+                <span class="n">score</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">beta</span> <span class="o">-</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">delta</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">score</span>
+
+            <span class="k">return</span> <span class="n">quantile_loss</span>
+
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_estimators</span><span class="p">):</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_alpha</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Mean estimator tuning</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;pretuned&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pretuned</span><span class="p">:</span>
+                        <span class="n">score</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span>
+                            <span class="n">make_q_loss</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span>
+                            <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">list_estimators</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_tuning</span><span class="p">(</span>
+                            <span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">,</span>
+                            <span class="n">X</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+                            <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                            <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
+                            <span class="n">score</span><span class="o">=</span><span class="n">score</span><span class="p">,</span>
+                            <span class="n">n_esti</span><span class="o">=</span><span class="n">n_esti</span><span class="p">,</span>
+                            <span class="n">folds</span><span class="o">=</span><span class="n">folds</span><span class="p">,</span>
+                        <span class="p">)</span></div>
+
+
+        <span class="c1"># else no tuning</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

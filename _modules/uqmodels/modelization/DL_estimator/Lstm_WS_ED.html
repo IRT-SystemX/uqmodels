@@ -1,0 +1,1251 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.modelization.DL_estimator.Lstm_WS_ED &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.modelization.DL_estimator.Lstm_WS_ED</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.modelization.DL_estimator.Lstm_WS_ED</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">keras.backend</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">K</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">keras.layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Input</span><span class="p">,</span> <span class="n">Lambda</span><span class="p">,</span> <span class="n">TimeDistributed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">keras.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.metalayers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Add_query_to_Z_Processing_with_state</span><span class="p">,</span>
+    <span class="n">Double_Moving_slice_layer</span><span class="p">,</span>
+    <span class="n">LSTM_DProcessing</span><span class="p">,</span>
+    <span class="n">LSTM_EProcessing</span><span class="p">,</span>
+    <span class="n">Moving_slice_layer</span><span class="p">,</span>
+    <span class="n">mlp</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.UQEstimator</span><span class="w"> </span><span class="kn">import</span> <span class="n">UQEstimator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extract_dict</span><span class="p">,</span> <span class="n">apply_mask</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">get_fold_nstep</span><span class="p">,</span> <span class="n">stack_and_roll</span>
+
+<span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">set_floatx</span><span class="p">(</span><span class="s2">&quot;float32&quot;</span><span class="p">)</span>
+
+<span class="c1"># Dev : Prototype of DEEP Neural network for dynamic capture</span>
+
+
+<span class="c1"># LSTM ED class : Faire hériter LSTM ED de NNvar</span>
+
+
+<div class="viewcode-block" id="Lstm">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Lstm</span><span class="p">(</span><span class="n">UQEstimator</span><span class="p">):</span>
+    <span class="c1"># LSTM E-D forecast on a sequence ensemble (day) of element (time step) multidimensional (station).</span>
+    <span class="c1"># Model learning on daily sequence object by reccurent process.</span>
+    <span class="c1"># y_encoder : (batch_size,dim_z)</span>
+    <span class="c1"># y_decoder : (batch_size,size_subseq_dec,dim_target*n_parameters)</span>
+
+    <span class="c1"># Init that not instanciate the NN (just store parameters&amp;instanciator needed for instanciation)</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_parameters</span><span class="p">,</span>
+        <span class="n">model_specifications</span><span class="p">,</span>
+        <span class="n">architecture_parameters</span><span class="p">,</span>
+        <span class="n">training_parameters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span>
+    <span class="p">):</span>
+        <span class="c1"># State variable</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">model_specifications</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="s2">&quot;var_A&amp;E&quot;</span><span class="p">,</span> <span class="n">model_specifications</span><span class="p">[</span><span class="s2">&quot;rescale&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">=</span> <span class="n">model_specifications</span><span class="p">[</span><span class="s2">&quot;type_output&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_specifications</span> <span class="o">=</span> <span class="n">model_specifications</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span> <span class="o">=</span> <span class="n">model_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;epochs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">],</span>
+            <span class="s2">&quot;b_s&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
+            <span class="s2">&quot;l_r&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">],</span>
+            <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;list_loss&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mse&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;param_loss&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;redundancy&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">training_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">training_parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="n">list_keys</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;size_window_past&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;size_window_futur&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;size_subseq_dec&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;size_subseq_enc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;padding_past&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;padding_futur&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="p">(</span>
+            <span class="n">size_window_past</span><span class="p">,</span>
+            <span class="n">size_window_futur</span><span class="p">,</span>
+            <span class="n">size_subseq_dec</span><span class="p">,</span>
+            <span class="n">size_subseq_enc</span><span class="p">,</span>
+            <span class="n">padding_past</span><span class="p">,</span>
+            <span class="n">padding_futur</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span><span class="n">model_parameters</span><span class="p">,</span> <span class="n">list_keys</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="p">((</span><span class="n">size_window_past</span><span class="p">)</span> <span class="o">%</span> <span class="n">padding_past</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="o">&amp;</span> <span class="p">((</span><span class="n">size_window_futur</span> <span class="o">-</span> <span class="n">size_subseq_dec</span><span class="p">)</span> <span class="o">%</span> <span class="n">padding_futur</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;size window, subsequence &amp; padding incompatible&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;epochs&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span><span class="p">],</span>
+            <span class="s2">&quot;b_s&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">20</span><span class="p">],</span>
+            <span class="s2">&quot;l_r&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">],</span>
+            <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;list_loss&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;mse&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;param_loss&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;generator&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">training_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">training_parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="c1"># Parameter variable</span>
+
+        <span class="n">list_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;dim_lt&quot;</span><span class="p">,</span> <span class="s2">&quot;dim_target&quot;</span><span class="p">,</span> <span class="s2">&quot;dim_target_in&quot;</span><span class="p">,</span> <span class="s2">&quot;dim_z&quot;</span><span class="p">,</span> <span class="s2">&quot;dp&quot;</span><span class="p">,</span> <span class="s2">&quot;dp_r&quot;</span><span class="p">]</span>
+
+        <span class="n">dim_lt</span><span class="p">,</span> <span class="n">dim_target</span><span class="p">,</span> <span class="n">dim_target_in</span><span class="p">,</span> <span class="n">dim_z</span><span class="p">,</span> <span class="n">dp</span><span class="p">,</span> <span class="n">dp_r</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">,</span> <span class="n">list_keys</span>
+        <span class="p">)</span>
+
+        <span class="n">dict_to_add</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;dyn_encoder&quot;</span><span class="p">:</span> <span class="p">{},</span>
+            <span class="s2">&quot;ctx_decoder&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;dim_in&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span>  <span class="c1"># Unused for the moment</span>
+            <span class="s2">&quot;ctx_encoder&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;dim_in&quot;</span><span class="p">:</span> <span class="n">dim_lt</span><span class="p">,</span>
+                <span class="s2">&quot;dp&quot;</span><span class="p">:</span> <span class="n">dp</span><span class="p">,</span>
+                <span class="s2">&quot;type_output&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;dim_out&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;y_encoder&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;dp&quot;</span><span class="p">:</span> <span class="n">dp</span><span class="p">,</span>
+                <span class="s2">&quot;type_output&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="s2">&quot;dim_out&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;y_decoder&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;dim_in&quot;</span><span class="p">:</span> <span class="n">dim_z</span><span class="p">,</span>
+                <span class="s2">&quot;dp&quot;</span><span class="p">:</span> <span class="n">dp</span><span class="p">,</span>
+                <span class="s2">&quot;type_output&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span><span class="p">,</span>
+                <span class="s2">&quot;dim_out&quot;</span><span class="p">:</span> <span class="n">size_subseq_dec</span> <span class="o">*</span> <span class="n">dim_target</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+        <span class="c1"># filling missing subpart</span>
+        <span class="k">for</span> <span class="n">subpart</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ctx_encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;y_encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;dyn_encoder&quot;</span><span class="p">,</span> <span class="s2">&quot;y_decoder&quot;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">subpart</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">architecture_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">architecture_parameters</span><span class="p">[</span><span class="n">subpart</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;builder&quot;</span><span class="p">:</span> <span class="n">mlp</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">subpart</span><span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">subpart</span> <span class="ow">in</span> <span class="n">architecture_parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">add_key</span> <span class="ow">in</span> <span class="n">dict_to_add</span><span class="p">[</span><span class="n">subpart</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">add_values</span> <span class="o">=</span> <span class="n">dict_to_add</span><span class="p">[</span><span class="n">subpart</span><span class="p">][</span><span class="n">add_key</span><span class="p">]</span>
+                <span class="n">architecture_parameters</span><span class="p">[</span><span class="n">subpart</span><span class="p">][</span><span class="n">add_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_values</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span> <span class="o">=</span> <span class="n">architecture_parameters</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_enc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_pred</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Model instantiation from parameters&amp;instanciator.</span>
+<div class="viewcode-block" id="Lstm.model_initializer">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.model_initializer">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">model_initializer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># New functionality disabled : preform ctx + dynamic pred.</span>
+        <span class="n">with_ctx_predictor</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">list_keys</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;dim_lt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dim_target_in&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dim_target&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dim_z&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dim_st&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dp_r&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">flag_mc</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MCDP&quot;</span><span class="p">):</span>
+            <span class="n">flag_mc</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">dim_lt</span><span class="p">,</span> <span class="n">dim_target_in</span><span class="p">,</span> <span class="n">_dim_target</span><span class="p">,</span> <span class="n">dim_z</span><span class="p">,</span> <span class="n">dim_st</span><span class="p">,</span> <span class="n">dp</span><span class="p">,</span> <span class="n">dp_r</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">,</span> <span class="n">list_keys</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">dp_r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dp</span> <span class="o">=</span> <span class="n">dp_r</span>
+
+        <span class="n">list_keys</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;with_loop&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;only_futur&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;with_dyn_feature&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;with_static_feature&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;with_query&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="p">(</span>
+            <span class="n">with_loop</span><span class="p">,</span>
+            <span class="n">only_futur</span><span class="p">,</span>
+            <span class="n">with_dyn_feature</span><span class="p">,</span>
+            <span class="n">with_static_feature</span><span class="p">,</span>
+            <span class="n">with_query</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_specifications</span><span class="p">,</span> <span class="n">list_keys</span><span class="p">)</span>
+
+        <span class="n">list_keys</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;size_window_past&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;size_window_futur&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;size_subseq_dec&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;size_subseq_enc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;padding_past&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;padding_futur&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="p">(</span>
+            <span class="n">size_window_past</span><span class="p">,</span>
+            <span class="n">size_window_futur</span><span class="p">,</span>
+            <span class="n">size_subseq_dec</span><span class="p">,</span>
+            <span class="n">size_subseq_enc</span><span class="p">,</span>
+            <span class="n">padding_past</span><span class="p">,</span>
+            <span class="n">padding_futur</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">,</span> <span class="n">list_keys</span><span class="p">)</span>
+
+        <span class="c1"># Instanciation of the y_encoder subpart</span>
+        <span class="n">y_encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">[</span><span class="s2">&quot;y_encoder&quot;</span><span class="p">][</span><span class="s2">&quot;builder&quot;</span><span class="p">](</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">[</span><span class="s2">&quot;y_encoder&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="c1"># Instanciation of the y_decoder subpart</span>
+        <span class="n">y_decoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">[</span><span class="s2">&quot;y_decoder&quot;</span><span class="p">][</span><span class="s2">&quot;builder&quot;</span><span class="p">](</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">[</span><span class="s2">&quot;y_decoder&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">n_step_futur</span> <span class="o">=</span> <span class="n">get_fold_nstep</span><span class="p">(</span><span class="n">size_window_futur</span><span class="p">,</span> <span class="n">size_subseq_dec</span><span class="p">,</span> <span class="n">padding_futur</span><span class="p">)</span>
+
+        <span class="n">n_step_past</span> <span class="o">=</span> <span class="n">get_fold_nstep</span><span class="p">(</span>
+            <span class="n">size_window_past</span> <span class="o">+</span> <span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">padding_past</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">with_ctx_predictor</span><span class="p">:</span>
+            <span class="c1"># ctx_decoder = self.architecture_parameters[&quot;ctx_decoder&quot;][&quot;builder&quot;](</span>
+            <span class="c1">#     **self.architecture_parameters[&quot;ctx_decoder&quot;]</span>
+            <span class="c1"># )</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">[</span><span class="s2">&quot;dim_in&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dim_z</span>
+
+        <span class="c1"># Main layer definition.</span>
+        <span class="c1"># Factory : Contextual preprocessing layers.</span>
+
+        <span class="n">z_embedding_past</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">list_input</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Contextual features (dim_t,dim_lt,dim_n) -&gt; (dim_t,dim_lt,batch size).</span>
+        <span class="k">if</span> <span class="n">with_static_feature</span> <span class="ow">or</span> <span class="n">with_query</span><span class="p">:</span>
+            <span class="c1"># Instanciation of the ctx_encoder subpart</span>
+            <span class="n">ctx_encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">[</span><span class="s2">&quot;ctx_encoder&quot;</span><span class="p">][</span><span class="s2">&quot;builder&quot;</span><span class="p">](</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">[</span><span class="s2">&quot;ctx_encoder&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="n">full_query</span> <span class="o">=</span> <span class="n">size_window_past</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">ignore_futur</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">with_query</span><span class="p">:</span>
+                <span class="n">ignore_futur</span> <span class="o">=</span> <span class="n">full_query</span>
+                <span class="n">full_query</span> <span class="o">=</span> <span class="n">full_query</span> <span class="o">+</span> <span class="n">size_window_futur</span>
+
+            <span class="n">Input_query</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">full_query</span><span class="p">,</span> <span class="n">dim_lt</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;f_static_past&quot;</span><span class="p">)</span>
+
+            <span class="n">list_input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Input_query</span><span class="p">)</span>
+            <span class="c1"># Defintiion of static encoder part</span>
+            <span class="k">if</span> <span class="n">with_static_feature</span><span class="p">:</span>
+                <span class="c1"># Select and fold pastZ_futur_query</span>
+                <span class="n">past_selected_query</span> <span class="o">=</span> <span class="n">Moving_slice_layer</span><span class="p">(</span>
+                    <span class="n">n_step_past</span><span class="p">,</span> <span class="n">padding_past</span><span class="p">,</span> <span class="n">ignore_futur</span><span class="o">=</span><span class="n">ignore_futur</span>
+                <span class="p">)(</span><span class="n">Input_query</span><span class="p">)</span>
+                <span class="c1"># Encode pastZ_futur_query</span>
+                <span class="n">Z_past_query</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">ctx_encoder</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TD_ctx_encoder&quot;</span><span class="p">)(</span>
+                    <span class="n">past_selected_query</span>
+                <span class="p">)</span>
+                <span class="n">z_embedding_past</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Z_past_query</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">with_query</span><span class="p">:</span>
+                <span class="c1"># Select and double fold &quot;futur&quot;Z_futur_query for prediction</span>
+                <span class="n">futur_query</span> <span class="o">=</span> <span class="n">Double_Moving_slice_layer</span><span class="p">(</span>
+                    <span class="n">n_step_past</span><span class="p">,</span>
+                    <span class="n">n_step_futur</span><span class="p">,</span>
+                    <span class="n">padding_past</span><span class="p">,</span>
+                    <span class="n">padding_futur</span><span class="p">,</span>
+                    <span class="n">depth_slice</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="p">)(</span><span class="n">Input_query</span><span class="p">)</span>
+
+                <span class="n">Z_futur_query</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span>
+                    <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">ctx_encoder</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TD2_futur_query_encoder&quot;</span>
+                <span class="p">)(</span><span class="n">futur_query</span><span class="p">)</span>
+
+        <span class="c1"># Dynamic features -&gt; (dim_t,size_window_futur,dim_target,dim_n) -&gt;</span>
+        <span class="c1"># (dim_t,size_window_futur,dim_target, batch size)</span>
+        <span class="k">if</span> <span class="n">with_dyn_feature</span><span class="p">:</span>
+            <span class="n">dyn_encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">[</span><span class="s2">&quot;dyn_encoder&quot;</span><span class="p">][</span><span class="s2">&quot;builder&quot;</span><span class="p">](</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">[</span><span class="s2">&quot;dyn_encoder&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+            <span class="n">x_dyn_past</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size_window_past</span><span class="p">,</span> <span class="n">dim_st</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;f_dyn_past&quot;</span><span class="p">)</span>
+            <span class="n">list_input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_dyn_past</span><span class="p">)</span>
+            <span class="c1"># Reformatting as a 3D tensor : (sequence of subsequence)</span>
+            <span class="n">T_dyn_past</span> <span class="o">=</span> <span class="n">Moving_slice_layer</span><span class="p">(</span>
+                <span class="n">n_step_past</span><span class="p">,</span> <span class="n">padding_past</span><span class="p">,</span> <span class="n">depth_slice</span><span class="o">=</span><span class="n">size_subseq_enc</span>
+            <span class="p">)(</span><span class="n">x_dyn_past</span><span class="p">)</span>
+
+            <span class="c1"># Dynamic futur embedding</span>
+            <span class="n">z_dyn_past</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">dyn_encoder</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TD_dyn_encoder&quot;</span><span class="p">)(</span><span class="n">T_dyn_past</span><span class="p">)</span>
+            <span class="n">z_embedding_past</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z_dyn_past</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span> <span class="p">:])</span>
+
+        <span class="n">x_lag_past</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span>
+            <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">size_window_past</span> <span class="o">+</span> <span class="n">size_subseq_enc</span><span class="p">,</span> <span class="n">dim_target_in</span><span class="p">),</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;f_lag_past&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">list_input</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_lag_past</span><span class="p">)</span>
+        <span class="c1"># Reformatting as a 3D tensor : (sequence of subsequence)</span>
+
+        <span class="n">x_lag_stacked</span> <span class="o">=</span> <span class="n">Moving_slice_layer</span><span class="p">(</span>
+            <span class="n">n_step_past</span><span class="p">,</span> <span class="n">padding_past</span><span class="p">,</span> <span class="n">depth_slice</span><span class="o">=</span><span class="n">size_subseq_enc</span>
+        <span class="p">)(</span><span class="n">x_lag_past</span><span class="p">)</span>
+        <span class="n">z_lag_past</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">y_encoder</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TD_y_encoder&quot;</span><span class="p">)(</span><span class="n">x_lag_stacked</span><span class="p">)</span>
+
+        <span class="n">z_embedding_past</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z_lag_past</span><span class="p">)</span>
+        <span class="n">z_lag_futur</span> <span class="o">=</span> <span class="n">z_lag_past</span>
+
+        <span class="c1"># Dynamic features -&gt; (dim_t,size_window_futur,dim_target,dim_n) -&gt;</span>
+        <span class="c1"># (dim_t,size_window_futur,dim_target, batch size)</span>
+
+        <span class="c1"># Preprocessing interconnexion Concatenate Past ctx+dyn representation</span>
+        <span class="n">input_Processing</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Concat_past_z&quot;</span><span class="p">)(</span>
+            <span class="n">z_embedding_past</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Instanciation of the Encoder block</span>
+        <span class="n">EProcessing</span> <span class="o">=</span> <span class="n">LSTM_EProcessing</span><span class="p">(</span>
+            <span class="n">n_step_past</span><span class="p">,</span>
+            <span class="n">input_Processing</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">dim_z</span><span class="p">,</span>
+            <span class="n">flag_mc</span><span class="p">,</span>
+            <span class="n">dp</span><span class="o">=</span><span class="n">dp</span><span class="p">,</span>
+            <span class="n">dp_r</span><span class="o">=</span><span class="n">dp_r</span><span class="p">,</span>
+            <span class="n">l1_l2_reg</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0000001</span><span class="p">,</span> <span class="mf">0.0000001</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Instanciation of the Decoder block</span>
+        <span class="n">DProcessing</span> <span class="o">=</span> <span class="n">LSTM_DProcessing</span><span class="p">(</span>
+            <span class="n">n_step_futur</span><span class="p">,</span>
+            <span class="n">dim_z</span><span class="p">,</span>
+            <span class="n">flag_mc</span><span class="p">,</span>
+            <span class="n">dp</span><span class="o">=</span><span class="n">dp</span><span class="p">,</span>
+            <span class="n">dp_r</span><span class="o">=</span><span class="n">dp_r</span><span class="p">,</span>
+            <span class="n">l1_l2_reg</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0000001</span><span class="p">,</span> <span class="mf">0.0000001</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Improvement : Better Fusion / Attention mecanisme between feature type.</span>
+        <span class="c1"># Actually : Done be Fusion are realized using basic dense layers</span>
+
+        <span class="c1"># Encoding</span>
+        <span class="n">Z_processing</span> <span class="o">=</span> <span class="n">EProcessing</span><span class="p">(</span><span class="n">input_Processing</span><span class="p">)</span>
+
+        <span class="c1"># If mode with-out explicit loop</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">with_loop</span><span class="p">:</span>
+            <span class="c1"># Duplication of Z_processing to feed DPprocessing block</span>
+            <span class="n">T_lstm_enc</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">repeat_elements</span><span class="p">(</span><span class="n">x</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">n_step_futur</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;repeat_h1&quot;</span><span class="p">,</span>
+            <span class="p">)(</span><span class="n">Z_processing</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;log : mode_init&quot;</span><span class="p">,</span> <span class="n">T_lstm_enc</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">Z_futur_query</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+            <span class="c1"># Add Z_query_information for each futur prediction</span>
+            <span class="k">if</span> <span class="n">with_query</span><span class="p">:</span>
+                <span class="n">T_enc_futur</span> <span class="o">=</span> <span class="n">Add_query_to_Z_Processing_with_state</span><span class="p">(</span><span class="n">dim_z</span><span class="p">)(</span>
+                    <span class="n">T_lstm_enc</span><span class="p">,</span> <span class="n">Z_futur_query</span>
+                <span class="p">)</span>
+
+            <span class="c1"># No Z_query_information</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">T_enc_futur</span> <span class="o">=</span> <span class="n">T_lstm_enc</span>
+
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;log : mode_init&quot;</span><span class="p">,</span>
+                <span class="n">T_lstm_enc</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="n">Z_futur_query</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                <span class="n">T_enc_futur</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Apply DProcessing block : For each step_representation (including present-step)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">only_futur</span><span class="p">:</span>
+                <span class="n">z_lstm_dec</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">DProcessing</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TD_lstm_dec&quot;</span><span class="p">)(</span>
+                    <span class="n">T_enc_futur</span>
+                <span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;z_lstm_dec&quot;</span><span class="p">,</span> <span class="n">z_lstm_dec</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="c1"># Interpret Z_DProcessing for past windows and futur window</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span>
+                    <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">y_decoder</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;TD_TD_y_decoder&quot;</span>
+                <span class="p">)(</span><span class="n">z_lstm_dec</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;TD_TD_y_decoder&quot;</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="c1"># if with_ctx_predictor:</span>
+                <span class="c1">#    print(Z_futur_query.shape)</span>
+                <span class="c1">#    output_ctx = TimeDistributed(TimeDistributed(</span>
+                <span class="c1">#        ctx_decoder), name=&#39;TD_TD_ctx_decoder&#39;)(Z_futur_query)</span>
+                <span class="c1">#    output = output_ctx+output</span>
+
+            <span class="c1"># Apply &amp; DProcessing &amp; y_decoder only for present-step_representation</span>
+
+            <span class="n">z_lstm_dec_futur</span> <span class="o">=</span> <span class="n">DProcessing</span><span class="p">(</span><span class="n">T_enc_futur</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;z_lstm_dec_futur&quot;</span><span class="p">,</span> <span class="n">z_lstm_dec_futur</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">output_pred_NN</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">y_decoder</span><span class="p">)(</span><span class="n">z_lstm_dec_futur</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;output_pred_NN&quot;</span><span class="p">,</span> <span class="n">output_pred_NN</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="c1"># if with_ctx_predictor:</span>
+            <span class="c1">#    output_pred_NN_bis = TimeDistributed(</span>
+            <span class="c1">#        ctx_decoder)(Z_futur_query[:, -1, :, :])</span>
+            <span class="c1">#    output_pred_NN = output_pred_NN+output_pred_NN_bis</span>
+
+        <span class="c1"># Loop learning</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prediction</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># Init loop</span>
+                <span class="k">if</span> <span class="n">with_query</span><span class="p">:</span>
+                    <span class="n">T_enc_futur_next</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Concat_T_futur&quot;</span>
+                    <span class="p">)(</span>
+                        <span class="p">[</span>
+                            <span class="n">Z_processing</span><span class="p">,</span>
+                            <span class="n">Z_futur_query</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">],</span>
+                            <span class="n">z_lag_futur</span><span class="p">[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">T_enc_futur_next</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Concat_T_futur&quot;</span>
+                    <span class="p">)([</span><span class="n">Z_processing</span><span class="p">,</span> <span class="n">z_lag_futur</span><span class="p">[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+
+                <span class="n">z_lstm_dec</span> <span class="o">=</span> <span class="n">DProcessing</span><span class="p">(</span><span class="n">T_enc_futur_next</span><span class="p">)</span>
+                <span class="n">pred_temp</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">y_decoder</span><span class="p">)(</span><span class="n">z_lstm_dec</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">prediction</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred_temp</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">])</span>
+                <span class="n">z_lag_futur</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">y_encoder</span><span class="p">)(</span><span class="n">pred_temp</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_step_futur</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">with_query</span><span class="p">:</span>
+                    <span class="n">T_enc_futur_next</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Concat_T_futur&quot;</span>
+                    <span class="p">)(</span>
+                        <span class="p">[</span>
+                            <span class="n">Z_processing</span><span class="p">[:,</span> <span class="n">i</span> <span class="p">:</span> <span class="n">n_step_past</span> <span class="o">+</span> <span class="n">i</span><span class="p">],</span>
+                            <span class="n">z_lag_futur</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
+                            <span class="n">z_lstm_dec</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:],</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">T_enc_futur_next</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Concat_T_futur&quot;</span>
+                    <span class="p">)([</span><span class="n">z_lag_futur</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">z_lstm_dec</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]])</span>
+
+                <span class="n">z_lstm_dec</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">DProcessing</span><span class="p">)(</span><span class="n">T_enc_futur_next</span><span class="p">)</span>
+                <span class="n">pred_temp</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">y_decoder</span><span class="p">)(</span><span class="n">z_lstm_dec</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">])</span>
+                <span class="n">prediction</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pred_temp</span><span class="p">[:,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">])</span>
+                <span class="n">z_lag_futur</span> <span class="o">=</span> <span class="n">TimeDistributed</span><span class="p">(</span><span class="n">y_encoder</span><span class="p">)(</span><span class="n">pred_temp</span><span class="p">)</span>
+
+            <span class="n">output</span> <span class="o">=</span> <span class="n">Lambda</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span> <span class="p">:,</span> <span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Concat_output&quot;</span>
+            <span class="p">)(</span><span class="n">prediction</span><span class="p">)</span>
+
+        <span class="c1"># M : FULL model</span>
+
+        <span class="k">if</span> <span class="n">size_subseq_dec</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
+            <span class="n">output_pred_NN</span> <span class="o">=</span> <span class="n">output_pred_NN</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">only_futur</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">list_input</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_pred</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">list_input</span><span class="p">,</span> <span class="n">output_pred_NN</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">list_input</span><span class="p">,</span> <span class="n">output_pred_NN</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_enc</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">list_input</span><span class="p">,</span> <span class="n">Z_processing</span><span class="p">)</span></div>
+
+
+        <span class="c1"># Mcut Partial model : Encoded embedding recovering.</span>
+        <span class="c1"># self.modelcut = Model(inputs, c_h1)</span>
+
+    <span class="c1"># Fit procedure Maybe partly redundant to NN fiting procedure : Refactoring needed</span>
+<div class="viewcode-block" id="Lstm.fit">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">Inputs</span><span class="p">,</span>
+        <span class="n">Targets</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">validation_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">epochs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">steps_per_epoch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">b_s</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">l_r</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">list_loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">param_loss</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">sample_weight</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">callbacks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">generator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">validation_freq</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">generator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">epochs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">epochs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">callbacks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">callbacks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;callbacks&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">b_s</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">b_s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;b_s&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">l_r</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">l_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;l_r&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">list_loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">list_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;list_loss&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">param_loss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">param_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;param_loss&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">metrics</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">verbose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;verbose&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">initialized</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_initializer</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Training function</span>
+        <span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">validation_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">&lt;</span> <span class="mf">0.9</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Inputs</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">0.9</span>
+
+            <span class="n">test</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">invert</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+            <span class="n">validation_data</span> <span class="o">=</span> <span class="p">(</span><span class="n">apply_mask</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">test</span><span class="p">),</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">Targets</span><span class="p">,</span> <span class="n">test</span><span class="p">))</span>
+            <span class="n">Targets</span> <span class="o">=</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">Targets</span><span class="p">,</span> <span class="n">train</span><span class="p">)</span>
+            <span class="n">Inputs</span> <span class="o">=</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">train</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;scaler&quot;</span><span class="p">)):</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">Targets</span><span class="p">,</span> <span class="n">only_fit_scaler</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">loss</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_loss</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">batch_size</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">b_s</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">param_loss</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">loss_</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">param_loss</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">loss_</span> <span class="o">=</span> <span class="n">loss</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;l_r&quot;</span><span class="p">,</span> <span class="n">l_r</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                    <span class="n">optimizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Nadam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="n">l_r</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                    <span class="n">loss</span><span class="o">=</span><span class="n">loss_</span><span class="p">,</span>
+                    <span class="n">metrics</span><span class="o">=</span><span class="n">metrics</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="c1"># Instanciate generator</span>
+
+                <span class="k">if</span> <span class="n">generator</span><span class="p">:</span>
+                    <span class="n">In_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Build_generator</span><span class="p">(</span>
+                        <span class="n">Inputs</span><span class="p">,</span>
+                        <span class="n">Targets</span><span class="p">,</span>
+                        <span class="n">batch_min</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                        <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
+                        <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">Tar_</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">validation_data_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Build_generator</span><span class="p">(</span>
+                        <span class="n">validation_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">validation_data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">batch_min</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                        <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">train</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">steps_per_epoch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">In_</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                    <span class="n">validation_steps</span> <span class="o">=</span> <span class="n">validation_data_</span><span class="o">.</span><span class="fm">__len__</span><span class="p">()</span>
+                    <span class="n">batch_size</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">In_</span> <span class="o">=</span> <span class="n">Inputs</span>
+                    <span class="n">Tar_</span> <span class="o">=</span> <span class="n">Targets</span>
+                    <span class="n">validation_data_</span> <span class="o">=</span> <span class="n">validation_data</span>
+                    <span class="n">validation_steps</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+                        <span class="n">In_</span><span class="p">,</span>
+                        <span class="n">Tar_</span><span class="p">,</span>
+                        <span class="n">validation_data</span><span class="o">=</span><span class="n">validation_data_</span><span class="p">,</span>
+                        <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">steps_per_epoch</span><span class="o">=</span><span class="n">steps_per_epoch</span><span class="p">,</span>
+                        <span class="n">validation_steps</span><span class="o">=</span><span class="n">validation_steps</span><span class="p">,</span>
+                        <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+                        <span class="c1"># sample_weight=sample_weight,</span>
+                        <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span>
+                        <span class="n">callbacks</span><span class="o">=</span><span class="n">callbacks</span><span class="p">,</span>
+                        <span class="n">validation_freq</span><span class="o">=</span><span class="n">validation_freq</span><span class="p">,</span>
+                        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;lstm_tmp&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">history</span></div>
+
+
+<div class="viewcode-block" id="Lstm.predict">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Inputs</span><span class="p">,</span> <span class="n">n_ech</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">mask_h</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mask_m</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">generator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict procedure Maybe partly redundant to NN fiting procedure : Refactoring needed</span>
+<span class="sd">        Args:</span>
+<span class="sd">            Inputs (List of NN features): Model inputs</span>
+<span class="sd">            n_ech (int, optional): Number of MC-DP inferences.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            output: Meta-model output tuple of (Prediction,Var_A,Var_E)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">generator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;generator&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">generator</span><span class="p">:</span>
+            <span class="n">Inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Build_generator</span><span class="p">(</span>
+                <span class="n">Inputs</span><span class="p">,</span> <span class="n">Inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">batch_min</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+        <span class="n">dim_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;dim_target&quot;</span><span class="p">]</span>
+        <span class="n">only_futur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_specifications</span><span class="p">[</span><span class="s2">&quot;only_futur&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">only_futur</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_pred</span>
+
+        <span class="n">var_a</span><span class="p">,</span> <span class="n">var_e</span><span class="p">,</span> <span class="n">output</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs</span><span class="p">)[:,</span> <span class="n">mask_h</span><span class="p">,</span> <span class="n">mask_m</span><span class="p">]</span>
+            <span class="n">var_a</span><span class="p">,</span> <span class="n">var_e</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">*</span> <span class="mi">0</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pred</span> <span class="o">*</span> <span class="mi">0</span>
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">var_a</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">var_e</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;EDL&quot;</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs</span><span class="p">)[:,</span> <span class="n">mask_h</span><span class="p">,</span> <span class="n">mask_m</span><span class="p">]</span>
+            <span class="n">gamma</span><span class="p">,</span> <span class="n">vu</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">beta</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="s2">&quot;numpy&quot;</span><span class="p">):</span>
+                <span class="n">gamma</span> <span class="o">=</span> <span class="n">gamma</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">gamma</span>
+            <span class="n">var_a</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">/</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">var_e</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">/</span> <span class="p">(</span><span class="n">vu</span> <span class="o">*</span> <span class="p">(</span><span class="n">alpha</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">var_a</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">var_e</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_output</span> <span class="o">==</span> <span class="s2">&quot;MC_Dropout&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">generator</span><span class="p">:</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">var_a</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">var_e</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">Inputs_gen</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">Inputs</span><span class="p">:</span>  <span class="c1"># by batch do n inf and aggreagate results</span>
+                    <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ech</span><span class="p">):</span>
+                        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs_gen</span><span class="p">)[:,</span> <span class="n">mask_h</span><span class="p">,</span> <span class="n">mask_m</span><span class="p">])</span>
+
+                    <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+                    <span class="n">pred</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">dim_out</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+                    <span class="n">var_a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">output</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">dim_out</span><span class="p">:])</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+                    <span class="n">var_e</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">dim_out</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">var_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">var_a</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">var_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">var_e</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">var_a</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">var_e</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_ech</span><span class="p">):</span>
+                    <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Inputs</span><span class="p">)[:,</span> <span class="n">mask_h</span><span class="p">,</span> <span class="n">mask_m</span><span class="p">])</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+                <span class="n">pred</span> <span class="o">=</span> <span class="n">output</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">dim_out</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">var_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">output</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="n">dim_out</span><span class="p">:])</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">var_e</span> <span class="o">=</span> <span class="n">output</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:</span><span class="n">dim_out</span><span class="p">]</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">var_a</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:],</span> <span class="n">var_e</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">UQ</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">UQ</span><span class="p">,</span> <span class="s2">&quot;inverse_transform&quot;</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">UQ</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Formatting features : Rework needed be : would be call to supermethod of NN_UQ</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (_type_): Input to reformate</span>
+<span class="sd">            y (_type_): Target or output (Pred or var) to reforma</span>
+<span class="sd">            fit (bool, optional): True -&gt; fit scaler</span>
+<span class="sd">            mode (_type_, optional): Specify the nature of y than impact reformatting (if pred or var)</span>
+<span class="sd">            flag_inverse (bool, optional): Specify if normalisation or inverse_normalisation</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: tupple (X,y)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;log format : strange_reshape :&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                <span class="n">size_motif</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">y_new</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="nb">super</span><span class="p">(</span><span class="n">Lstm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:],</span> <span class="n">type_transform</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="p">)[</span>
+                        <span class="mi">1</span>
+                    <span class="p">][:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size_motif</span><span class="p">)</span>
+                <span class="p">]</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">y_new</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Lstm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">type_transform</span><span class="p">,</span> <span class="n">mode_UQ</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">shape</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+
+<div class="viewcode-block" id="Lstm.factory">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.factory">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">factory</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">,</span>
+        <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cut_param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fit_rescale</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">causality_remove</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">redundancy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">only_fit_scaler</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Feature factory Reshape and redundundization (Moving window embedding representation)</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            X (_type_): X list contains (X_ctx, X_seq)</span>
+<span class="sd">            y (_type_): Raw Y</span>
+<span class="sd">            mask (_type_, optional): Mask of non-data</span>
+<span class="sd">            cut_param (_type_, optional): cut paramaters on y distrubution</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (Inputs,targets,mask): model Inputs, Targets and mask.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">X_ctx</span><span class="p">,</span> <span class="n">X_seq</span> <span class="o">=</span> <span class="n">X</span>
+
+        <span class="n">with_static_feature</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_specifications</span><span class="p">[</span><span class="s2">&quot;with_static_feature&quot;</span><span class="p">]</span>
+        <span class="n">only_futur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_specifications</span><span class="p">[</span><span class="s2">&quot;only_futur&quot;</span><span class="p">]</span>
+        <span class="n">with_query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_specifications</span><span class="p">[</span><span class="s2">&quot;with_query&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">redundancy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">redundancy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;redundancy&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Factory log : Predict mode&quot;</span><span class="p">)</span>
+            <span class="n">redundancy</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">cut_param</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">y_cut</span> <span class="o">=</span> <span class="n">y</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span> <span class="o">=</span> <span class="n">cut_param</span>
+            <span class="n">y_cut</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">)</span>
+            <span class="n">X_seq</span> <span class="o">=</span> <span class="n">cut</span><span class="p">(</span><span class="n">X_seq</span><span class="p">,</span> <span class="n">min_cut</span><span class="p">,</span> <span class="n">max_cut</span><span class="p">)</span>
+
+        <span class="n">X_ctx</span><span class="p">,</span> <span class="n">y_cut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X_ctx</span><span class="p">,</span> <span class="n">y_cut</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="s2">&quot;fit_transform&quot;</span><span class="p">)</span>
+        <span class="n">X_ctx</span><span class="p">,</span> <span class="n">X_seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">(</span><span class="n">X_ctx</span><span class="p">,</span> <span class="n">X_seq</span><span class="p">,</span> <span class="n">type_transform</span><span class="o">=</span><span class="s2">&quot;fit_transform&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">only_fit_scaler</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">([</span><span class="n">X_ctx</span><span class="p">,</span> <span class="n">X_seq</span><span class="p">],</span> <span class="n">y_cut</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">list_keys</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;size_window_past&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;size_window_futur&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;size_subseq_dec&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;size_subseq_enc&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;padding_past&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;padding_futur&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+
+        <span class="p">(</span>
+            <span class="n">size_window_past</span><span class="p">,</span>
+            <span class="n">size_window_futur</span><span class="p">,</span>
+            <span class="n">size_subseq_dec</span><span class="p">,</span>
+            <span class="n">size_subseq_enc</span><span class="p">,</span>
+            <span class="n">padding_past</span><span class="p">,</span>
+            <span class="n">padding_futur</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">Extract_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">,</span> <span class="n">list_keys</span><span class="p">)</span>
+
+        <span class="n">paramaters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span>
+
+        <span class="c1"># Factory ctx_features !</span>
+        <span class="n">horizon</span> <span class="o">=</span> <span class="n">size_window_past</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">Inputs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">with_static_feature</span><span class="p">:</span>
+            <span class="n">lag</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="s2">&quot;factory_lag_lt&quot;</span> <span class="ow">in</span> <span class="n">paramaters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">lag</span> <span class="o">=</span> <span class="n">paramaters</span><span class="p">[</span><span class="s2">&quot;factory_lag_lt&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;factory_lag_target&quot;</span> <span class="ow">in</span> <span class="n">paramaters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">lag</span> <span class="o">=</span> <span class="o">+</span><span class="n">paramaters</span><span class="p">[</span><span class="s2">&quot;factory_lag_target&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">with_query</span><span class="p">):</span>
+                <span class="n">horizon</span> <span class="o">=</span> <span class="n">size_window_past</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">x_lt</span> <span class="o">=</span> <span class="n">stack_and_roll</span><span class="p">(</span><span class="n">X_ctx</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="n">lag</span><span class="p">)</span>
+                <span class="n">Inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_lt</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">horizon_f</span> <span class="o">=</span> <span class="n">size_window_futur</span>
+                <span class="n">x_query</span> <span class="o">=</span> <span class="n">stack_and_roll</span><span class="p">(</span>
+                    <span class="n">X_ctx</span><span class="p">,</span> <span class="n">horizon</span> <span class="o">+</span> <span class="n">horizon_f</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="n">lag</span> <span class="o">+</span> <span class="n">horizon_f</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">causality_remove</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">horizon_f</span><span class="p">):</span>
+                        <span class="n">x_query</span><span class="p">[:,</span> <span class="n">horizon</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">causality_remove</span><span class="p">]</span> <span class="o">=</span> <span class="n">x_query</span><span class="p">[</span>
+                            <span class="p">:,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">causality_remove</span>
+                        <span class="p">]</span>
+
+                <span class="n">Inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_query</span><span class="p">)</span>
+
+        <span class="c1"># Factory lag_features :</span>
+        <span class="n">horizon</span> <span class="o">=</span> <span class="n">size_window_past</span> <span class="o">+</span> <span class="n">size_subseq_enc</span>
+        <span class="n">lag</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="s2">&quot;factory_lag_st&quot;</span> <span class="ow">in</span> <span class="n">paramaters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">lag</span> <span class="o">=</span> <span class="n">paramaters</span><span class="p">[</span><span class="s2">&quot;factory_lag_st&quot;</span><span class="p">]</span>
+
+        <span class="n">x_lag_lstm</span> <span class="o">=</span> <span class="n">stack_and_roll</span><span class="p">(</span><span class="n">X_seq</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="n">lag</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">Inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_lag_lstm</span><span class="p">)</span>
+
+        <span class="c1"># Factory Target :</span>
+        <span class="n">lag</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="s2">&quot;factory_lag_target&quot;</span> <span class="ow">in</span> <span class="n">paramaters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">lag</span> <span class="o">=</span> <span class="n">paramaters</span><span class="p">[</span><span class="s2">&quot;factory_lag_target&quot;</span><span class="p">]</span>
+
+        <span class="n">horizon</span> <span class="o">=</span> <span class="n">size_window_past</span> <span class="o">+</span> <span class="n">size_window_futur</span>
+
+        <span class="n">y_lstm</span> <span class="o">=</span> <span class="n">stack_and_roll</span><span class="p">(</span><span class="n">y_cut</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">lag</span><span class="o">=</span><span class="n">size_window_futur</span> <span class="o">-</span> <span class="n">lag</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">y_deep</span> <span class="o">=</span> <span class="n">double_roll</span><span class="p">(</span>
+            <span class="n">y_lstm</span><span class="p">,</span>
+            <span class="n">size_window_past</span><span class="p">,</span>
+            <span class="n">size_window_futur</span><span class="p">,</span>
+            <span class="n">size_subseq_dec</span><span class="p">,</span>
+            <span class="n">padding_past</span><span class="p">,</span>
+            <span class="n">padding_futur</span><span class="p">,</span>
+            <span class="n">only_futur</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">Targets</span> <span class="o">=</span> <span class="p">[</span><span class="n">y_deep</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="n">redundancy</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="n">removed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">selection</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">redundancy</span><span class="p">)),</span>
+                <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">selection</span><span class="p">[</span><span class="n">removed</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">Inputs</span> <span class="o">=</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">selection</span><span class="p">)</span>
+            <span class="n">Targets</span> <span class="o">=</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">Targets</span><span class="p">,</span> <span class="n">selection</span><span class="p">)</span>
+            <span class="c1"># mask = apply_mask(mask, selection)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">Targets</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Lstm.modify_dropout">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.modify_dropout">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modify_dropout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dp</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to modify dp : have to be extend as API modification to model features.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dp (_type_): ddropout rate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># For dropout, as rate is implictly saved in layers, we create new model with new dropout and transfer weight</span>
+        <span class="c1"># Maybe be optimized in only modify layers paramters !</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;dp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save_weights</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_initializer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Lstm.get_params">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.get_params">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># get parameters, refactoring needed to follows scikit standars.</span>
+        <span class="n">dict_param</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;model_parameters&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">,</span>
+            <span class="s2">&quot;architecture_parameters&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span><span class="p">,</span>
+            <span class="s2">&quot;model_specifications&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_specifications</span><span class="p">,</span>
+            <span class="s2">&quot;training_parameters&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">dict_param</span></div>
+
+
+<div class="viewcode-block" id="Lstm.save">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.save">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># save model</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save_weights</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">save_weights</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;Lstm_ed_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Lstm.load">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.load">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1"># load saved model</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">load_weights</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;Lstm_ed_&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Lstm.reset">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.reset">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># reset model</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;model_enc&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_enc</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;model_pred&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_pred</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="Lstm.delete">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.delete">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># delete model</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;model_enc&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_enc</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;model_pred&quot;</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_pred</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">architecture_parameters</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_specifications</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_parameters</span></div>
+
+
+<div class="viewcode-block" id="Lstm.Build_generator">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.Build_generator">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">Build_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">batch_min</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">LSTM_ED_Generator</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">batch_min</span><span class="o">=</span><span class="n">batch_min</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="n">shuffle</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="n">train</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Lstm.plot_metrics">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.Lstm.plot_metrics">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_loss</span><span class="o">=</span><span class="s2">&quot;val_loss&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot metrics values recovers form tensorflow metrics callback</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name_loss (str, optional):metrics to visualisze.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="n">name_loss</span><span class="p">]</span> <span class="k">for</span> <span class="n">history</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="p">]</span>
+        <span class="n">phase</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">]</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">phase</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">vlines</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">metrics</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">metrics</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;end phase&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">)),</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="mf">0.995</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">)),</span>
+        <span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="LSTM_ED_Generator">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LSTM_ED_Generator</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">metamodel</span><span class="p">,</span> <span class="n">batch_min</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_ctx</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_seq</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lenX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_ctx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">train</span> <span class="o">=</span> <span class="n">train</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span> <span class="o">=</span> <span class="n">shuffle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redundancy</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">training_parameters</span><span class="p">[</span><span class="s2">&quot;redundancy&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span> <span class="o">=</span> <span class="n">batch_min</span>
+
+        <span class="c1"># self.scaler = metamodel.scaler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">factory</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">factory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">_format</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rescale</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">rescale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">causality_remove</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_parameters</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">model_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_specifications</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">model_specifications</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size_subseq_enc</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;size_subseq_enc&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size_window_past</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;size_window_past&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">size_window_futur</span> <span class="o">=</span> <span class="n">metamodel</span><span class="o">.</span><span class="n">model_parameters</span><span class="p">[</span><span class="s2">&quot;size_window_futur&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">):</span>
+            <span class="n">set_off</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">div</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lenX</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lenX</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">set_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_futur</span>
+            <span class="n">div</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lenX</span> <span class="o">-</span> <span class="n">set_off</span><span class="p">)</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">len_</span> <span class="o">=</span> <span class="n">div</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">mod</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">shuffle</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">len_</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LSTM_ED_Generator.load">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator.load">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span>
+        <span class="n">seuil_min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">idx</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size_subseq_enc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_past</span><span class="p">))</span>
+
+        <span class="n">size_full_seq</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">size_subseq_enc</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_past</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_futur</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">):</span>
+            <span class="n">seuil_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">size_subseq_enc</span>
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_past</span>
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span>
+                <span class="o">-</span> <span class="n">seuil_min</span><span class="p">,</span>
+                <span class="n">idx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_futur</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">seuil_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lenX</span><span class="p">,</span> <span class="n">seuil_max</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">seuil_max</span> <span class="o">-</span> <span class="n">seuil_min</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">size_full_seq</span><span class="p">:</span>
+                <span class="n">diff</span> <span class="o">=</span> <span class="n">size_full_seq</span> <span class="o">-</span> <span class="p">(</span><span class="n">seuil_max</span> <span class="o">-</span> <span class="n">seuil_min</span><span class="p">)</span>
+                <span class="n">seuil_min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">seuil_min</span> <span class="o">-</span> <span class="n">diff</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">seuil_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
+                <span class="n">size_full_seq</span> <span class="o">+</span> <span class="n">seuil_min</span><span class="p">,</span> <span class="n">idx</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_futur</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">X_ctx</span><span class="p">[</span><span class="n">seuil_min</span><span class="p">:</span><span class="n">seuil_max</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_seq</span><span class="p">[</span><span class="n">seuil_min</span><span class="p">:</span><span class="n">seuil_max</span><span class="p">]],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">seuil_min</span><span class="p">:</span><span class="n">seuil_max</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">len_</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+
+        <span class="n">redundancy</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">:</span>
+            <span class="n">redundancy</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">Inputs</span><span class="p">,</span> <span class="n">Ouputs</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">factory</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">causality_remove</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit_rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">redundancy</span><span class="o">=</span><span class="n">redundancy</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">):</span>
+            <span class="n">set_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_futur</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">set_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_futur</span>
+
+        <span class="n">seq_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span> <span class="o">&lt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size_subseq_enc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">size_window_past</span><span class="p">):</span>
+            <span class="n">selection</span><span class="p">[</span><span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="kc">True</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">corr</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span> <span class="o">+</span> <span class="n">set_off</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lenX</span><span class="p">:</span>
+                <span class="n">corr</span> <span class="o">=</span> <span class="p">((</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span> <span class="o">+</span> <span class="n">set_off</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">lenX</span>
+            <span class="n">selection</span><span class="p">[</span>
+                <span class="n">seq_len</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_min</span> <span class="o">-</span> <span class="n">set_off</span> <span class="o">+</span> <span class="n">corr</span> <span class="p">:</span> <span class="n">seq_len</span> <span class="o">-</span> <span class="n">set_off</span> <span class="o">+</span> <span class="n">corr</span>
+            <span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">Inputs</span> <span class="o">=</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">Inputs</span><span class="p">,</span> <span class="n">selection</span><span class="p">)</span>
+        <span class="n">Ouputs</span> <span class="o">=</span> <span class="n">apply_mask</span><span class="p">(</span><span class="n">Ouputs</span><span class="p">,</span> <span class="n">selection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Inputs</span><span class="p">,</span> <span class="n">Ouputs</span>
+
+    <span class="c1"># shuffles the dataset at the end of each epoch</span>
+<div class="viewcode-block" id="LSTM_ED_Generator.on_epoch_end">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator.on_epoch_end">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuffle</span><span class="p">:</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="double_roll">
+<a class="viewcode-back" href="../../../../uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.Lstm_WS_ED.double_roll">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">double_roll</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">size_window_past</span><span class="p">,</span>
+    <span class="n">size_window_futur</span><span class="p">,</span>
+    <span class="n">size_subseq_dec</span><span class="p">,</span>
+    <span class="n">padding_past</span><span class="p">,</span>
+    <span class="n">padding_futur</span><span class="p">,</span>
+    <span class="n">only_futur</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">n_step_Zdec</span> <span class="o">=</span> <span class="n">get_fold_nstep</span><span class="p">(</span><span class="n">size_window_futur</span><span class="p">,</span> <span class="n">size_subseq_dec</span><span class="p">,</span> <span class="n">padding_futur</span><span class="p">)</span>
+
+    <span class="n">n_step_Zenc</span> <span class="o">=</span> <span class="n">get_fold_nstep</span><span class="p">(</span><span class="n">size_window_past</span><span class="p">,</span> <span class="n">n_step_Zdec</span><span class="p">,</span> <span class="n">padding_past</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">padding_futur</span> <span class="o">==</span> <span class="n">size_subseq_dec</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">padding_past</span> <span class="o">==</span> <span class="n">size_window_futur</span><span class="p">):</span>
+        <span class="n">y_n</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">size_subseq_dec</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">y_n</span> <span class="o">=</span> <span class="n">y_n</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_step_Zenc</span><span class="p">,</span> <span class="n">n_step_Zdec</span><span class="p">,</span> <span class="n">size_subseq_dec</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">only_futur</span><span class="p">:</span>
+            <span class="n">y_n</span> <span class="o">=</span> <span class="n">y_n</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">only_futur</span><span class="p">:</span>
+            <span class="n">y_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_step_Zdec</span><span class="p">,</span> <span class="n">size_subseq_dec</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_step_Zdec</span><span class="p">):</span>
+                <span class="n">begin</span> <span class="o">=</span> <span class="p">(</span><span class="n">n_step_Zenc</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">padding_past</span> <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="n">padding_futur</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">begin</span> <span class="o">+</span> <span class="n">size_subseq_dec</span>
+                <span class="n">y_n</span><span class="p">[:,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">begin</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_step_Zenc</span><span class="p">,</span> <span class="n">n_step_Zdec</span><span class="p">,</span> <span class="n">size_subseq_dec</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_step_Zenc</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_step_Zdec</span><span class="p">):</span>
+                    <span class="n">begin</span> <span class="o">=</span> <span class="n">i</span> <span class="o">*</span> <span class="n">padding_past</span> <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="n">padding_futur</span>
+                    <span class="n">end</span> <span class="o">=</span> <span class="n">begin</span> <span class="o">+</span> <span class="n">size_subseq_dec</span>
+                    <span class="n">y_n</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">begin</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">y_n</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
