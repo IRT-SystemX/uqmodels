@@ -1,6 +1,5 @@
 
 <div align="center">
-    <img src="_static/Logo_ConfianceAI.png" width="20%" alt="ConfianceAI Logo" />
     <h1 style="font-size: large; font-weight: bold;">UQMODELS</h1>
 </div><div align="center">
     <a href="#">
@@ -237,5 +236,16 @@ UQmodel is a pipeline of modeling & postprocessing aim to provide prediction and
 (Work in progress) : Refactoring needed. Contains a data_generation process to generate gaussian time dependent time series.
 
 
+## Contributors and Support
 
+<p align="center">
+  UQmodels is developped by 
+  <a href="https://www.irt-systemx.fr/" title="IRT SystemX">
+   <img src="https://www.irt-systemx.fr/wp-content/uploads/2013/03/system-x-logo.jpeg"  height="70">
+  </a>
+  and is supported by the  
+  <a href="https://www.confiance.ai/" title="Confiance.ai">
+   <img src="https://www.trustworthy-ai-foundation.eu/wp-content/uploads/2025/07/M0302_LOGO-ETAIA_RVB_2000px.png"  height="70">
+  </a>
+</p>
 
