@@ -11316,7 +11316,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[367:415]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[589:637]<br />            new_y = stack_and_roll(<br />                y,<br />                model_params["dim_horizon"],<br />                lag=model_params["dim_horizon"] - 1,<br />                step=step,<br />            )<br /><br />        return inputs, new_y, mask<br /><br />    def Build_generator(self, X, y, batch=32, shuffle=True, train=True):<br />        return Folder_Generator(<br />            X,<br />            y,<br />            self,<br />            batch=batch,<br />            shuffle=shuffle,<br />            train=train,<br />            random_state=self.random_state,<br />        )<br /><br /><br />def get_params_dict(<br />    dim_ctx,<br />    dim_dyn,<br />    dim_target,<br />    size_window=20,<br />    n_windows=5,<br />    dim_horizon=5,<br />    step=1,<br />    dim_chan=1,<br />    dp=0.05,<br />    dp_rec=0.05,<br />    dim_z=50,<br />    k_reg=(10e-7, 10e-7),<br />    num_lstm_enc=1,<br />    num_lstm_dec=1,<br />    layers_enc=[150, 75],<br />    layers_dec=[200, 125, 75],<br />    list_strides=[2, 1, 1, 1],<br />    list_filters=[128, 128, 128],<br />    list_kernels=None,<br />    with_convolution=True,<br />    with_ctx_input=True,<br />    n_ech=3,<br />    type_output="MC_Dropout",<br />):<br />    dict_params = {<br />        "dim_ctx": dim_ctx,</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[367:415]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[589:637]<br />            new_y = stack_and_roll(<br />                y,<br />                model_params["dim_horizon"],<br />                lag=model_params["dim_horizon"] - 1,<br />                step=step,<br />            )<br />        return inputs, new_y, mask<br /><br />    def Build_generator(self, X, y, batch=32, shuffle=True, train=True):<br />        return Folder_Generator(<br />            X,<br />            y,<br />            self,<br />            batch=batch,<br />            shuffle=shuffle,<br />            train=train,<br />            random_state=self.random_state,<br />        )<br /><br /><br />def get_params_dict(<br />    dim_ctx,<br />    dim_dyn,<br />    dim_target,<br />    dim_chan=1,<br />    size_window=20,<br />    n_windows=5,<br />    dim_horizon=5,<br />    dim_z=50,<br />    dp=0.05,<br />    dp_rec=0.02,<br />    num_heads=2,<br />    num_feed_forward=128,<br />    num_layers_enc=3,<br />    num_layers_dec=2,<br />    layers_enc=[75, 150, 75],<br />    layers_dec=[200, 125, 75],<br />    list_strides=[2, 1, 1, 1],<br />    list_filters=[128, 128, 128],<br />    list_kernels=None,<br />    with_convolution=True,<br />    with_ctx_input=True,<br />    n_ech=3,<br />    type_output="MC_Dropout",<br />    random_state=None,<br />):<br />    dict_params = {<br />        "dim_ctx": dim_ctx,</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11376,7 +11376,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[90:101]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[363:375]<br />    Interpretor = mlp(<br />        dim_in=dim_z,<br />        dim_out=dim_target,<br />        layers_size=layers_dec,<br />        dp=dp,<br />        type_output=type_output,<br />        name="Interpretor",<br />        random_state=random_state,<br />    )<br /><br />    # Encoder LSTM</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[90:101]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[363:375]<br />    Interpretor = mlp(<br />        dim_in=dim_z,<br />        dim_out=dim_target,<br />        layers_size=layers_dec,<br />        dp=dp,<br />        type_output=type_output,<br />        name="Interpretor",<br />        random_state=random_state,<br />    )<br /><br />    # dim_output_size = Interpretor.output.shape[-1]<br /></td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11396,7 +11396,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[95:110]<br />==uqmodels.modelization.UQEstimator:[414:433]<br />        X, y = super()._format(<br />            X=X,<br />            y=y,<br />            type_transform=type_transform,<br />            mode_UQ=mode_UQ,<br />            skip_format=skip_format,<br />        )<br />        return (X, y)<br /><br />    def fit(self, X: Array, y: Array, skip_format=False, **kwargs) -> None:<br />        """Fit GBRQ_UQEstimator list using QuantileUQEstimator fit methods.<br />        Args:<br />            X: Features<br />            y: Target values<br />        """</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[95:110]<br />==uqmodels.modelization.UQEstimator:[414:433]<br />        X, y = super()._format(<br />            X=X,<br />            y=y,<br />            type_transform=type_transform,<br />            mode_UQ=mode_UQ,<br />            skip_format=skip_format,<br />        )<br />        return (X, y)<br /><br />    def _tuning(<br />        self,<br />        X: Array,<br />        y: Array,<br />        n_esti: int = 100,<br />        folds: int = 4,<br />        params: Dict_params = None,<br />        **kwarg,<br />    ) -> None:<br />        """Perform a random search tuning using a parameter grid."""</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11416,7 +11416,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[154:161]<br />==uqmodels.postprocessing.UQ_processing:[226:233]<br />        pred=None,<br />        y=None,<br />        type_UQ_params=None,<br />        var_min=0,<br />        var_max=None,<br />        min_cut=0,<br />        max_cut=1,</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[154:161]<br />==uqmodels.postprocessing.UQ_processing:[226:233]<br />                pred=None,<br />                y=None,<br />                type_UQ_params=None,<br />                var_min=0,<br />                var_max=None,<br />                min_cut=0,<br />                max_cut=1,</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11426,7 +11426,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[654:662]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[631:638]<br />        pred = np.concatenate(pred, axis=0)<br />        var_a = np.concatenate(var_a, axis=0)<br />        var_e = np.concatenate(var_e, axis=0)<br />        UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)<br />    else:<br />        output = []<br />        for i in range(n_ech):</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[654:662]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[631:638]<br />                pred = np.concatenate(pred, axis=0)<br />                var_a = np.concatenate(var_a, axis=0)<br />                var_e = np.concatenate(var_e, axis=0)<br />                UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)<br /><br />            else:<br />                output = []<br />                for i in range(n_ech):</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11466,7 +11466,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[342:348]<br />==uqmodels.postprocessing.custom_UQKPI_Processor:[120:126]<br />                UQ=UQ,<br />                type_UQ=type_UQ,<br />                pred=pred,<br />                y=y,<br />                type_UQ_params=type_UQ_params,<br />                ctx_mask=ctx_mask,</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[342:348]<br />==uqmodels.postprocessing.custom_UQKPI_Processor:[120:126]<br />                    UQ=UQ,<br />                    type_UQ=type_UQ,<br />                    pred=pred,<br />                    y=y,<br />                    type_UQ_params=type_UQ_params,<br />                    ctx_mask=ctx_mask,</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11476,7 +11476,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:646]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[720:726]<br />            if generator:<br />                pred = []<br />                var_a = []<br />                var_e = []<br />                for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results<br />                    output = []</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:646]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[720:726]<br />    if generator:<br />        pred = []<br />        var_a = []<br />        var_e = []<br />        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results<br />            output = []</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11486,7 +11486,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[271:278]<br />==uqmodels.modelization.UQEstimator:[273:279]<br />            name=name,<br />            type_UQ=type_UQ,<br />            rescale=rescale,<br />            var_min=var_min,<br />            random_state=random_state,<br />        )<br /></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[271:278]<br />==uqmodels.modelization.UQEstimator:[273:279]<br />            name=name,<br />            type_UQ=type_UQ,<br />            rescale=rescale,<br />            var_min=var_min,<br />            random_state=random_state,<br />        )</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11576,7 +11576,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[1043:1062]<br />==uqmodels.modelization.DL_estimator.utils:[225:233]<br />        Inputs = apply_mask(Inputs, selection)<br />        Ouputs = apply_mask(Ouputs, selection)<br />        return Inputs, Ouputs<br /><br />    # shuffles the dataset at the end of each epoch<br />    def on_epoch_end(self):<br />        if self.shuffle:<br />            np.random.shuffle(self.indices)<br /><br /><br />def double_roll(<br />    y,<br />    size_window_past,<br />    size_window_futur,<br />    size_subseq_dec,<br />    padding_past,<br />    padding_futur,<br />    only_futur=False,<br />):</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[1043:1062]<br />==uqmodels.modelization.DL_estimator.utils:[225:233]<br />        Inputs = apply_mask(Inputs, selection)<br />        Ouputs = apply_mask(Ouputs, selection)<br />        return Inputs, Ouputs<br /><br />    # shuffles the dataset at the end of each epoch<br />    def on_epoch_end(self):<br />        if self.shuffle:<br />            np.random.shuffle(self.indices)</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11586,7 +11586,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[947:952]<br />==uqmodels.modelization.DL_estimator.utils:[135:141]<br />        self.factory = metamodel.factory<br />        self._format = metamodel._format<br />        self.rescale = metamodel.rescale<br />        self.causality_remove = None<br />        self.model_parameters = metamodel.model_parameters</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[947:952]<br />==uqmodels.modelization.DL_estimator.utils:[135:141]<br />        self.factory = metamodel.factory<br />        self._format = metamodel._format<br />        self.rescale = metamodel.rescale<br /><br />        self.causality_remove = None<br />        self.model_parameters = metamodel.model_parameters</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>
@@ -11596,7 +11596,7 @@
                     <td>0</td>
                     <td>refactor</td>
                     <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[581:587]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[441:446]<br />                        validation_data=validation_data_,<br />                        epochs=epochs[i],<br />                        steps_per_epoch=steps_per_epoch,<br />                        validation_steps=validation_steps,<br />                        batch_size=batch_size,</td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[581:587]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[441:446]<br />                        validation_data=validation_data_,<br />                        epochs=epochs[i],<br />                        steps_per_epoch=steps_per_epoch,<br />                        validation_steps=validation_steps,<br />                        batch_size=batch_size,<br />                        # sample_weight=sample_weight,</td>
                     <td>duplicate-code</td>
                     <td>R0801</td>
                   </tr>

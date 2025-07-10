@@ -1352,15 +1352,15 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[568:577]
 ==uqmodels.modelization.DL_estimator.neural_network_UQ:[499:508]
-            steps_per_epoch = In_.__len__()
-            validation_steps = validation_data_.__len__()
-            batch_size = None
-        else:
-            In_ = Inputs
-            Tar_ = Targets
-            validation_data_ = validation_data
-            validation_steps = None
-            steps_per_epoch = None (duplicate-code)
+                        steps_per_epoch = In_.__len__()
+                    validation_steps = validation_data_.__len__()
+                    batch_size = None
+                else:
+                    In_ = Inputs
+                    Tar_ = Targets
+                    validation_data_ = validation_data
+                    validation_steps = None
+                    steps_per_epoch = None (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.lstm_ed:[353:366]
 ==uqmodels.modelization.DL_estimator.transformer_ed:[575:588]
@@ -1438,13 +1438,13 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.postprocessing.UQKPI_Processor:[154:161]
 ==uqmodels.postprocessing.UQ_processing:[226:233]
-        pred=None,
-        y=None,
-        type_UQ_params=None,
-        var_min=0,
-        var_max=None,
-        min_cut=0,
-        max_cut=1, (duplicate-code)
+                pred=None,
+                y=None,
+                type_UQ_params=None,
+                var_min=0,
+                var_max=None,
+                min_cut=0,
+                max_cut=1, (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[654:662]
 ==uqmodels.modelization.DL_estimator.neural_network_UQ:[631:638]
@@ -1488,12 +1488,12 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.postprocessing.UQKPI_Processor:[342:348]
 ==uqmodels.postprocessing.custom_UQKPI_Processor:[120:126]
-                    UQ=UQ,
-                    type_UQ=type_UQ,
-                    pred=pred,
-                    y=y,
-                    type_UQ_params=type_UQ_params,
-                    ctx_mask=ctx_mask, (duplicate-code)
+                UQ=UQ,
+                type_UQ=type_UQ,
+                pred=pred,
+                y=y,
+                type_UQ_params=type_UQ_params,
+                ctx_mask=ctx_mask, (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:646]
 ==uqmodels.modelization.DL_estimator.neural_network_UQ:[720:726]
@@ -1511,8 +1511,7 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
             rescale=rescale,
             var_min=var_min,
             random_state=random_state,
-        )
- (duplicate-code)
+        ) (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.preprocessing.features_processing:[364:370]
 ==uqmodels.utils:[785:791]
@@ -1609,8 +1608,7 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
                         epochs=epochs[i],
                         steps_per_epoch=steps_per_epoch,
                         validation_steps=validation_steps,
-                        batch_size=batch_size,
-                        # sample_weight=sample_weight, (duplicate-code)
+                        batch_size=batch_size, (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.lstm_ed:[156:161]
 ==uqmodels.modelization.DL_estimator.transformer_ed:[409:414]
