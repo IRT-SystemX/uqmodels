@@ -1262,7 +1262,6 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
                 lag=model_params["dim_horizon"] - 1,
                 step=step,
             )
-
         return inputs, new_y, mask
 
     def Build_generator(self, X, y, batch=32, shuffle=True, train=True):
@@ -1281,18 +1280,18 @@ def get_params_dict(
     dim_ctx,
     dim_dyn,
     dim_target,
+    dim_chan=1,
     size_window=20,
     n_windows=5,
     dim_horizon=5,
-    step=1,
-    dim_chan=1,
-    dp=0.05,
-    dp_rec=0.05,
     dim_z=50,
-    k_reg=(10e-7, 10e-7),
-    num_lstm_enc=1,
-    num_lstm_dec=1,
-    layers_enc=[150, 75],
+    dp=0.05,
+    dp_rec=0.02,
+    num_heads=2,
+    num_feed_forward=128,
+    num_layers_enc=3,
+    num_layers_dec=2,
+    layers_enc=[75, 150, 75],
     layers_dec=[200, 125, 75],
     list_strides=[2, 1, 1, 1],
     list_filters=[128, 128, 128],
@@ -1301,6 +1300,7 @@ def get_params_dict(
     with_ctx_input=True,
     n_ech=3,
     type_output="MC_Dropout",
+    random_state=None,
 ):
     dict_params = {
         "dim_ctx": dim_ctx, (duplicate-code)
@@ -1390,7 +1390,8 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
         random_state=random_state,
     )
 
-    # Encoder LSTM (duplicate-code)
+    # dim_output_size = Interpretor.output.shape[-1]
+ (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.custom_UQModel:[329:338]
 ==uqmodels.postprocessing.custom_UQKPI_Processor:[32:41]
@@ -1415,16 +1416,12 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
         )
         return (X, y)
 
-    def _tuning(
-        self,
-        X: Array,
-        y: Array,
-        n_esti: int = 100,
-        folds: int = 4,
-        params: Dict_params = None,
-        **kwarg,
-    ) -> None:
-        """Perform a random search tuning using a parameter grid.""" (duplicate-code)
+    def fit(self, X: Array, y: Array, skip_format=False, **kwargs) -> None:
+        """Fit GBRQ_UQEstimator list using QuantileUQEstimator fit methods.
+        Args:
+            X: Features
+            y: Target values
+        """ (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.postprocessing.UQ_processing:[570:577]
 ==uqmodels.postprocessing.anomaly_processing:[741:748]
@@ -1458,13 +1455,13 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:647]
 ==uqmodels.modelization.DL_estimator.neural_network_UQ:[611:618]
-    if generator:
-        pred = []
-        var_a = []
-        var_e = []
-        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results
-            output = []
-            for i in range(n_ech): (duplicate-code)
+            if generator:
+                pred = []
+                var_a = []
+                var_e = []
+                for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results
+                    output = []
+                    for i in range(n_ech): (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.ML_estimator.baseline:[295:302]
 ==uqmodels.modelization.UQEstimator:[414:421]
@@ -1488,21 +1485,21 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.postprocessing.UQKPI_Processor:[342:348]
 ==uqmodels.postprocessing.custom_UQKPI_Processor:[120:126]
-                UQ=UQ,
-                type_UQ=type_UQ,
-                pred=pred,
-                y=y,
-                type_UQ_params=type_UQ_params,
-                ctx_mask=ctx_mask, (duplicate-code)
+                    UQ=UQ,
+                    type_UQ=type_UQ,
+                    pred=pred,
+                    y=y,
+                    type_UQ_params=type_UQ_params,
+                    ctx_mask=ctx_mask, (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:646]
 ==uqmodels.modelization.DL_estimator.neural_network_UQ:[720:726]
-            if generator:
-                pred = []
-                var_a = []
-                var_e = []
-                for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results
-                    output = [] (duplicate-code)
+    if generator:
+        pred = []
+        var_a = []
+        var_e = []
+        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results
+            output = [] (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.ML_estimator.baseline:[271:278]
 ==uqmodels.modelization.UQEstimator:[273:279]
@@ -1550,11 +1547,11 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.postprocessing.UQKPI_Processor:[329:334]
 ==uqmodels.postprocessing.anomaly_processing:[558:563]
-        UQ,
-        type_UQ,
-        pred,
-        y=y,
-        type_UQ_params=type_UQ_params, (duplicate-code)
+            UQ,
+            type_UQ,
+            pred,
+            y=y,
+            type_UQ_params=type_UQ_params, (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.postprocessing.UQKPI_Processor:[222:227]
 ==uqmodels.postprocessing.anomaly_processing:[399:404]
@@ -1592,7 +1589,18 @@ uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
     # shuffles the dataset at the end of each epoch
     def on_epoch_end(self):
         if self.shuffle:
-            np.random.shuffle(self.indices) (duplicate-code)
+            np.random.shuffle(self.indices)
+
+
+def double_roll(
+    y,
+    size_window_past,
+    size_window_futur,
+    size_subseq_dec,
+    padding_past,
+    padding_futur,
+    only_futur=False,
+): (duplicate-code)
 uqmodels/visualization/__init__.py:1:0: R0801: Similar lines in 2 files
 ==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[947:952]
 ==uqmodels.modelization.DL_estimator.utils:[135:141]

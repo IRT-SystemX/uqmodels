@@ -87,7 +87,7 @@
 <li><p>Visualisation &amp; Evaluation : (Target, Pred, UQ-KPI) -&gt; (metrics &amp; visualisation)</p></li>
 </ol>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%load_ext autoreload
@@ -107,30 +107,23 @@ cwd = os.path.basename(cwd_path)
 import numpy as np
 sys.path.insert(1, &#39;..&#39;)
 import uqmodels as uqmodels
-
-if(True):
-    from IPython.core.display import display, HTML
-    display(HTML(
-        &#39;&lt;style&gt;&#39;
-            &#39;#notebook { padding-top:0px !important; } &#39;
-            &#39;.container { width:85% !important; } &#39;
-            &#39;.end_space { min-height:0px !important; } &#39;
-        &#39;&lt;/style&gt;&#39;
-    ))
-</pre></div>
+<br/></pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area rendered_html docutils container">
-<style>#notebook { padding-top:0px !important; } .container { width:85% !important; } .end_space { min-height:0px !important; } </style></div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</pre></div></div>
 </div>
 </section>
 <section id="1)-Data-load-&amp;-preprocessing-:">
 <h1>1) Data load &amp; preprocessing :<a class="headerlink" href="#1)-Data-load-&-preprocessing-:" title="Link to this heading"></a></h1>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import uqmodels.processing as proc
@@ -196,7 +189,7 @@ X shape: (12000, 19) y: yshape (12000, 3) Name: Synthetic_data
 <section id="Model-UQ-by-design-+-Transformation-d'une-variance-en-une-interval-de-confiance.">
 <h1>Model UQ by design + Transformation d’une variance en une interval de confiance.<a class="headerlink" href="#Model-UQ-by-design-+-Transformation-d'une-variance-en-une-interval-de-confiance." title="Link to this heading"></a></h1>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from sklearn.ensemble import RandomForestRegressor
@@ -242,14 +235,14 @@ print(&#39;Using PIs_processor : coverage_empriric&#39;,np.round((np.array(PIs_K
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 pred shape (12000, 3) Nature of UQ_mesure var_A&amp;E UQ shape :  (2, 12000, 3)  (2:var_A,Var_E),(12000:time_step),(3:data dimension)
-Using processing function : coverage_empiric [ 1.3 10.8 90.3 98.8]  |Coverage_target : [ 2.5 16.  84.  97.5]
-Using PIs_processor : coverage_empriric [ 1.3 10.8 90.3 98.8]  |Coverage_target : [ 2.5 16.  84.  97.5]
+Using processing function : coverage_empiric [ 1.3 10.7 90.1 98.8]  |Coverage_target : [ 2.5 16.  84.  97.5]
+Using PIs_processor : coverage_empriric [ 1.3 10.7 90.1 98.8]  |Coverage_target : [ 2.5 16.  84.  97.5]
 </pre></div></div>
 </div>
 <section id="Using-UQModel-pipeline-for-predictive-interval">
 <h2>Using UQModel pipeline for predictive interval<a class="headerlink" href="#Using-UQModel-pipeline-for-predictive-interval" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.UQModel import UQModel
@@ -289,15 +282,15 @@ print(&#39;Using UQModel pipeline : coverage_empriric&#39;,np.round((np.array(PI
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Using UQModel pipeline : coverage_empriric [ 1.3 10.6 90.2 98.8]  |Coverage_target : [ 2.5 16.  84.  97.5]
-Using UQModel pipeline : coverage_empriric [ 1.3 10.6 90.2 98.8]  | Coverage_target : [ 2.5 16.  84.  97.5]
+Using UQModel pipeline : coverage_empriric [ 1.3 10.9 90.5 98.8]  |Coverage_target : [ 2.5 16.  84.  97.5]
+Using UQModel pipeline : coverage_empriric [ 1.3 10.9 90.5 98.8]  | Coverage_target : [ 2.5 16.  84.  97.5]
 </pre></div></div>
 </div>
 </section>
 <section id="Using-UQModel-pipeline-for-multi-KPI-at-inference-(UQMesure,-Predictive-interval-and-model-unreliability-score)-and-after-observation-(Anomaly-score)">
 <h2>Using UQModel pipeline for multi KPI at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)<a class="headerlink" href="#Using-UQModel-pipeline-for-multi-KPI-at-inference-(UQMesure,-Predictive-interval-and-model-unreliability-score)-and-after-observation-(Anomaly-score)" title="Link to this heading"></a></h2>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># We can also create a more complexe UQmodel that handle several UQKPI_Processor to build at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
@@ -356,8 +349,8 @@ KPI_ANOM1, KPI_ANOM2, KPI_ANOM3 = RF_UQModel.score(X,y)
 </section>
 <section id="3)-Visualisation-&amp;-Evaluation-:-(Target,-Pred,-UQ-KPI)--&gt;-(metrics-&amp;-visualisation)">
 <h1>3) Visualisation &amp; Evaluation : (Target, Pred, UQ-KPI) -&gt; (metrics &amp; visualisation)<a class="headerlink" href="#3)-Visualisation-&-Evaluation-:-(Target,-Pred,-UQ-KPI)-->-(metrics-&-visualisation)" title="Link to this heading"></a></h1>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%matplotlib notebook
@@ -376,11 +369,41 @@ visu.plot_anom_matrice(score=KPI_anom_with_epistemic,true_label=dict_data[&#39;a
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tutorial_UQModels_12_0.png" src="../_images/examples_tutorial_UQModels_12_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tutorial_UQModels_12_1.png" src="../_images/examples_tutorial_UQModels_12_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Q_bot emp val:2.5% [99.34166667 99.425      99.45      ] Q_top emp val:97 [92.70833333 93.25       93.025     ]
+Elvl : [0.0, 1.0, 2.0, 3.0, 4.0, 4.0, 5.0]
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tutorial_UQModels_12_3.png" src="../_images/examples_tutorial_UQModels_12_3.png" />
+</div>
+</div>
 </section>
 <section id="3)-Visualisation-:-zoom-to-one-subset-:">
 <h1>3) Visualisation : zoom to one subset :<a class="headerlink" href="#3)-Visualisation-:-zoom-to-one-subset-:" title="Link to this heading"></a></h1>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>f_obs = np.arange(11750,12000)
@@ -395,8 +418,36 @@ visu.uncertainty_plot(y,output,born=born_with_epistemic,context=None,size=fig_s,
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tutorial_UQModels_14_0.png" src="../_images/examples_tutorial_UQModels_14_0.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tutorial_UQModels_14_1.png" src="../_images/examples_tutorial_UQModels_14_1.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tutorial_UQModels_14_2.png" src="../_images/examples_tutorial_UQModels_14_2.png" />
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_tutorial_UQModels_14_3.png" src="../_images/examples_tutorial_UQModels_14_3.png" />
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.evaluation.metrics import Generic_metric, rmse, UQ_average_coverage, UQ_sharpness, UQ_Gaussian_NLL, UQ_dEI, UQ_absolute_residu_score
@@ -425,6 +476,34 @@ for i,metrics in enumerate(list_metrics):
     mask_anom_after_anom = (np.roll(dict_data[&#39;aux&#39;][&#39;anom&#39;],1)+np.roll(dict_data[&#39;aux&#39;][&#39;anom&#39;],2))&gt;0.5
     perf = metrics.compute(y,output,[train,test,test&amp;mask_anom,test&amp;mask_anom_after_anom],context=None)
     print(metrics.name,&#39;train :&#39;,np.round(perf[0],3),&#39;test :&#39;,np.round(perf[1],3),&#39;Anom :&#39;,np.round(perf[2],3),&#39;After_anom :&#39;,np.round(perf[3],3),&#39;|commentary :&#39;,commentary[i])
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Metrics evaluation apply on (pred,UQ)
+
+Root mean square train : 0.327 test : 0.438 Anom : 1.854 After_anom : 0.678 |commentary : Error increase between test and anom due to anomaly
+
+Coverage train : 0.996 test : 0.977 Anom : 0.2 After_anom : 0.944 |commentary : Coverage loss between test and anom anomaly
+
+Sharpness train : 1.798 test : 1.882 Anom : 1.977 After_anom : 2.476 |commentary : Sharpness increase between test and after-anom to incertainty caused by the anomaly (in lag feature)
+
+NLL train : -0.287 test : -0.496 Anom : -4.83 After_anom : -0.935 |commentary : NLL increase between test and anom du to anomaly
+
+Epistemic_indicator train : -0.472 test : -0.428 Anom : -0.41 After_anom : -0.313 |commentary : Epistemic confidence increase between test and after-anomaly due to an OOD input that contain the abnormal lag values
+
+Anom_score train : 0.388 test : 0.756 Anom : 12.711 After_anom : 1.195 |commentary : Anom score between test and anom du to anomalie
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
 </pre></div>
 </div>
 </div>
