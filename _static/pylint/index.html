@@ -2230,6 +2230,326 @@
                     <td>too-many-positional-arguments</td>
                     <td>R0917</td>
                   </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[303:352]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[525:574]<br />            model_parameters=model_parameters,<br />            factory_parameters=factory_parameters,<br />            training_parameters=training_parameters,<br />            type_output=type_output,<br />            rescale=rescale,<br />            n_ech=n_ech,<br />            train_ratio=train_ratio,<br />            name=name,<br />            random_state=random_state,<br />        )<br /><br />    def factory(self, X, y, mask=None, only_fit_scaler=False, **kwarg):<br />        model_params = self.model_parameters<br />        factory_params = self.factory_parameters<br /><br />        with_ctx_input = model_params["with_ctx_input"]<br /><br />        step = 1<br />        if "step" in model_params.keys():<br />            step = model_params["step"]<br /><br />        X_none = False<br />        if X is None:<br />            X_none = True<br /><br />        if X_none:<br />            inputs = None<br />        else:<br />            if with_ctx_input:<br />                X, X_lag = X<br />                X, X_lag, mask = super().factory(X, X_lag, mask)<br />                if only_fit_scaler:<br />                    return None<br />                X_lt = stack_and_roll(<br />                    X,<br />                    model_params["n_windows"],<br />                    lag=factory_params["factory_lag_lt"],<br />                    step=step,<br />                )<br /><br />                X_st = stack_and_roll(<br />                    X_lag,<br />                    model_params["size_window"],<br />                    lag=factory_params["factory_lag_st"] - 1,<br />                    step=step,<br />                )<br /><br />                inputs = [X_lt, X_st]<br />            else:</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[367:415]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[589:637]<br />            new_y = stack_and_roll(<br />                y,<br />                model_params["dim_horizon"],<br />                lag=model_params["dim_horizon"] - 1,<br />                step=step,<br />            )<br />        return inputs, new_y, mask<br /><br />    def Build_generator(self, X, y, batch=32, shuffle=True, train=True):<br />        return Folder_Generator(<br />            X,<br />            y,<br />            self,<br />            batch=batch,<br />            shuffle=shuffle,<br />            train=train,<br />            random_state=self.random_state,<br />        )<br /><br /><br />def get_params_dict(<br />    dim_ctx,<br />    dim_dyn,<br />    dim_target,<br />    dim_chan=1,<br />    size_window=20,<br />    n_windows=5,<br />    dim_horizon=5,<br />    dim_z=50,<br />    dp=0.05,<br />    dp_rec=0.02,<br />    num_heads=2,<br />    num_feed_forward=128,<br />    num_layers_enc=3,<br />    num_layers_dec=2,<br />    layers_enc=[75, 150, 75],<br />    layers_dec=[200, 125, 75],<br />    list_strides=[2, 1, 1, 1],<br />    list_filters=[128, 128, 128],<br />    list_kernels=None,<br />    with_convolution=True,<br />    with_ctx_input=True,<br />    n_ech=3,<br />    type_output="MC_Dropout",<br />    random_state=None,<br />):<br />    dict_params = {<br />        "dim_ctx": dim_ctx,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[154:167]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[392:405]<br />    if with_convolution:<br />        MWE = Mouving_conv_Embedding(<br />            size_window,<br />            n_windows,<br />            step=step,<br />            dim_d=dim_dyn,<br />            dim_chan=dim_chan,<br />            use_conv2D=True,<br />            list_strides=list_strides,<br />            list_filters=list_filters,<br />            list_kernels=list_kernels,<br />            dp=0.05,<br />            flag_mc=flag_mc,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQ_processing:[471:483]<br />==uqmodels.postprocessing.anomaly_processing:[545:557]<br />            UQ,<br />            type_UQ=type_UQ,<br />            min_cut=min_cut,<br />            max_cut=max_cut,<br />            var_min=0,<br />            var_max=None,<br />            factor=2,<br />            q_var=q_var,<br />            q_Eratio=q_Eratio,<br />            mode_multidim=True,<br />        )<br /></td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[177:188]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[420:431]<br />    dim_embedding = MWE.last_shape<br />    if with_ctx_input:<br />        dim_embedding += dim_ctx<br /><br />    Embeddor_ctx = mlp(<br />        dim_in=dim_embedding,<br />        dim_out=None,<br />        layers_size=layers_enc,<br />        dp=dp,<br />        name="Embeddor",<br />        regularizer_W=k_reg,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[353:366]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[575:588]<br />                if only_fit_scaler:<br />                    return None<br />                X_lag = X<br />                X_st = stack_and_roll(<br />                    X,<br />                    model_params["size_window"],<br />                    lag=factory_params["factory_lag_st"] - 1,<br />                    step=step,<br />                )<br />                inputs = [X_st]<br /><br />        new_y = None<br />        if y is not None:</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[90:101]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[363:375]<br />    Interpretor = mlp(<br />        dim_in=dim_z,<br />        dim_out=dim_target,<br />        layers_size=layers_dec,<br />        dp=dp,<br />        type_output=type_output,<br />        name="Interpretor",<br />        random_state=random_state,<br />    )<br /><br />    # Encoder LSTM</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[568:577]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[499:508]<br />            steps_per_epoch = In_.__len__()<br />            validation_steps = validation_data_.__len__()<br />            batch_size = None<br />        else:<br />            In_ = Inputs<br />            Tar_ = Targets<br />            validation_data_ = validation_data<br />            validation_steps = None<br />            steps_per_epoch = None</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.custom_UQModel:[329:338]<br />==uqmodels.postprocessing.custom_UQKPI_Processor:[32:41]<br />            "type_norm": "Nsigma_local",<br />            "q_var": 1,<br />            "d": 2,<br />            "beta": 0.001,<br />            "beta_source": 0.001,<br />            "beta_global": 0.001,<br />            "min_cut": 0.002,<br />            "max_cut": 0.998,<br />            "per_seuil": 0.999,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[95:110]<br />==uqmodels.modelization.UQEstimator:[414:433]<br />        X, y = super()._format(<br />            X=X,<br />            y=y,<br />            type_transform=type_transform,<br />            mode_UQ=mode_UQ,<br />            skip_format=skip_format,<br />        )<br />        return (X, y)<br /><br />    def fit(self, X: Array, y: Array, skip_format=False, **kwargs) -> None:<br />        """Fit GBRQ_UQEstimator list using QuantileUQEstimator fit methods.<br />        Args:<br />            X: Features<br />            y: Target values<br />        """</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[654:662]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[631:638]<br />        pred = np.concatenate(pred, axis=0)<br />        var_a = np.concatenate(var_a, axis=0)<br />        var_e = np.concatenate(var_e, axis=0)<br />        UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)<br />    else:<br />        output = []<br />        for i in range(n_ech):</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:647]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[611:618]<br />    if generator:<br />        pred = []<br />        var_a = []<br />        var_e = []<br />        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results<br />            output = []<br />            for i in range(n_ech):</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[64:71]<br />==uqmodels.modelization.UQEstimator:[272:279]<br />        super().__init__(<br />            name=name,<br />            type_UQ=type_UQ,<br />            rescale=rescale,<br />            var_min=var_min,<br />            random_state=random_state,<br />        )</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[295:302]<br />==uqmodels.modelization.UQEstimator:[414:421]<br />        X, y = super()._format(<br />            X=X,<br />            y=y,<br />            type_transform=type_transform,<br />            mode_UQ=mode_UQ,<br />            skip_format=skip_format,<br />        )</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQ_processing:[570:577]<br />==uqmodels.postprocessing.anomaly_processing:[741:748]<br />                min_cut=min_cut,<br />                max_cut=max_cut,<br />                var_min=var_min,<br />                var_max=var_max,<br />                q_var=q_var,<br />                q_var_e=q_var_e,<br />                k_var_e=k_var_e,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[154:161]<br />==uqmodels.postprocessing.UQ_processing:[226:233]<br />        pred=None,<br />        y=None,<br />        type_UQ_params=None,<br />        var_min=0,<br />        var_max=None,<br />        min_cut=0,<br />        max_cut=1,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:646]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[720:726]<br />    if generator:<br />        pred = []<br />        var_a = []<br />        var_e = []<br />        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results<br />            output = []</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[271:278]<br />==uqmodels.modelization.UQEstimator:[273:279]<br />            name=name,<br />            type_UQ=type_UQ,<br />            rescale=rescale,<br />            var_min=var_min,<br />            random_state=random_state,<br />        )</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[342:348]<br />==uqmodels.postprocessing.custom_UQKPI_Processor:[120:126]<br />                    UQ=UQ,<br />                    type_UQ=type_UQ,<br />                    pred=pred,<br />                    y=y,<br />                    type_UQ_params=type_UQ_params,<br />                    ctx_mask=ctx_mask,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.UQModel:[368:375]<br />==uqmodels.custom_UQModel:[821:828]<br />            train = None<br />            if x_split is not None:<br />                train = x_split == 1<br />                X, y = apply_mask(X, train), apply_mask(y, train)<br />                if sample_weight is not None:<br />                    sample_weight = sample_weight[train]<br />            # Called fit procedure for each dataset</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.preprocessing.features_processing:[364:370]<br />==uqmodels.utils:[785:791]<br />        if i > 0:<br />            Y_cur[0:i] = 0<br />        for g in range(dim[1]):<br />            new_features_list.append(Y_cur[:, g])<br />            new_features_name.append("lag_" + str(i) + "_dim:" + str(g))<br />    new_features_name = np.array(new_features_name)</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[1043:1062]<br />==uqmodels.modelization.DL_estimator.utils:[225:233]<br />        Inputs = apply_mask(Inputs, selection)<br />        Ouputs = apply_mask(Ouputs, selection)<br />        return Inputs, Ouputs<br /><br />    # shuffles the dataset at the end of each epoch<br />    def on_epoch_end(self):<br />        if self.shuffle:<br />            np.random.shuffle(self.indices)<br /><br /><br />def double_roll(<br />    y,<br />    size_window_past,<br />    size_window_futur,<br />    size_subseq_dec,<br />    padding_past,<br />    padding_futur,<br />    only_futur=False,<br />):</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[947:952]<br />==uqmodels.modelization.DL_estimator.utils:[135:141]<br />        self.factory = metamodel.factory<br />        self._format = metamodel._format<br />        self.rescale = metamodel.rescale<br /><br />        self.causality_remove = None<br />        self.model_parameters = metamodel.model_parameters</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[156:161]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[409:414]<br />            size_window,<br />            n_windows,<br />            step=step,<br />            dim_d=dim_dyn,<br />            dim_chan=dim_chan,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[581:587]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[441:446]<br />                        validation_data=validation_data_,<br />                        epochs=epochs[i],<br />                        steps_per_epoch=steps_per_epoch,<br />                        validation_steps=validation_steps,<br />                        batch_size=batch_size,<br />                        # sample_weight=sample_weight,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[854:862]<br />==uqmodels.modelization.DL_estimator.utils:[131:139]<br />        self.shuffle = shuffle<br />        self.batch = batch<br /><br />        # self.scaler = metamodel.scaler<br />        self.factory = metamodel.factory<br />        self._format = metamodel._format<br />        self.rescale = metamodel.rescale<br /></td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.preprocessing.Custom_Preprocessor:[95:100]<br />==uqmodels.preprocessing.Preprocessor:[227:232]<br />        super().__init__(<br />            name=name,<br />            cache=cache,<br />            structure=structure,<br />            update_query=update_query,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQ_processing:[361:366]<br />==uqmodels.postprocessing.anomaly_processing:[741:746]<br />                min_cut=min_cut,<br />                max_cut=max_cut,<br />                var_min=var_min,<br />                var_max=var_max,<br />                q_var=q_var,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQ_processing:[923:928]<br />==uqmodels.postprocessing.anomaly_processing:[306:311]<br />            UQ,<br />            type_UQ,<br />            pred,<br />            y=None,<br />            type_UQ_params=type_UQ_params,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQ_processing:[757:762]<br />==uqmodels.postprocessing.anomaly_processing:[399:404]<br />            UQ,<br />            type_UQ,<br />            pred,<br />            y,<br />            type_UQ_params,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[329:334]<br />==uqmodels.postprocessing.anomaly_processing:[558:563]<br />        UQ,<br />        type_UQ,<br />        pred,<br />        y=y,<br />        type_UQ_params=type_UQ_params,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
+                  <tr class="table-primary">
+                    <td><a href="/blob//uqmodels/modelization/DL_estimator/Lstm_WS_ED.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>refactor</td>
+                    <td></td>
+                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[222:227]<br />==uqmodels.postprocessing.UQ_processing:[736:741]<br />            UQ,<br />            type_UQ,<br />            pred,<br />            y,<br />            type_UQ_params,</td>
+                    <td>duplicate-code</td>
+                    <td>R0801</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -11274,341 +11594,6 @@
                     <td>Unnecessary "else" after "return", remove the "else" and de-indent the code inside it</td>
                     <td>no-else-return</td>
                     <td>R1705</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div class="card bg-light mb-3">
-          <div class="card-header">
-            <h5 class="mb-0">uqmodels.visualization.__init__</h5>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-hover table-sm">
-                <thead class="thead-light">
-                  <tr scope="col">
-                    <th></th>
-                    <th data-field="line">Line</th>
-                    <th data-field="column">Column</th>
-                    <th data-field="type">Type</th>
-                    <th data-field="obj">Object</th>
-                    <th data-field="message">Message</th>
-                    <th data-field="symbol">Symbol</th>
-                    <th data-field="message_id">Message Id</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[303:352]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[525:574]<br />            model_parameters=model_parameters,<br />            factory_parameters=factory_parameters,<br />            training_parameters=training_parameters,<br />            type_output=type_output,<br />            rescale=rescale,<br />            n_ech=n_ech,<br />            train_ratio=train_ratio,<br />            name=name,<br />            random_state=random_state,<br />        )<br /><br />    def factory(self, X, y, mask=None, only_fit_scaler=False, **kwarg):<br />        model_params = self.model_parameters<br />        factory_params = self.factory_parameters<br /><br />        with_ctx_input = model_params["with_ctx_input"]<br /><br />        step = 1<br />        if "step" in model_params.keys():<br />            step = model_params["step"]<br /><br />        X_none = False<br />        if X is None:<br />            X_none = True<br /><br />        if X_none:<br />            inputs = None<br />        else:<br />            if with_ctx_input:<br />                X, X_lag = X<br />                X, X_lag, mask = super().factory(X, X_lag, mask)<br />                if only_fit_scaler:<br />                    return None<br />                X_lt = stack_and_roll(<br />                    X,<br />                    model_params["n_windows"],<br />                    lag=factory_params["factory_lag_lt"],<br />                    step=step,<br />                )<br /><br />                X_st = stack_and_roll(<br />                    X_lag,<br />                    model_params["size_window"],<br />                    lag=factory_params["factory_lag_st"] - 1,<br />                    step=step,<br />                )<br /><br />                inputs = [X_lt, X_st]<br />            else:</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[367:415]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[589:637]<br />            new_y = stack_and_roll(<br />                y,<br />                model_params["dim_horizon"],<br />                lag=model_params["dim_horizon"] - 1,<br />                step=step,<br />            )<br /><br />        return inputs, new_y, mask<br /><br />    def Build_generator(self, X, y, batch=32, shuffle=True, train=True):<br />        return Folder_Generator(<br />            X,<br />            y,<br />            self,<br />            batch=batch,<br />            shuffle=shuffle,<br />            train=train,<br />            random_state=self.random_state,<br />        )<br /><br /><br />def get_params_dict(<br />    dim_ctx,<br />    dim_dyn,<br />    dim_target,<br />    size_window=20,<br />    n_windows=5,<br />    dim_horizon=5,<br />    step=1,<br />    dim_chan=1,<br />    dp=0.05,<br />    dp_rec=0.05,<br />    dim_z=50,<br />    k_reg=(10e-7, 10e-7),<br />    num_lstm_enc=1,<br />    num_lstm_dec=1,<br />    layers_enc=[150, 75],<br />    layers_dec=[200, 125, 75],<br />    list_strides=[2, 1, 1, 1],<br />    list_filters=[128, 128, 128],<br />    list_kernels=None,<br />    with_convolution=True,<br />    with_ctx_input=True,<br />    n_ech=3,<br />    type_output="MC_Dropout",<br />):<br />    dict_params = {<br />        "dim_ctx": dim_ctx,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[154:167]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[392:405]<br />    if with_convolution:<br />        MWE = Mouving_conv_Embedding(<br />            size_window,<br />            n_windows,<br />            step=step,<br />            dim_d=dim_dyn,<br />            dim_chan=dim_chan,<br />            use_conv2D=True,<br />            list_strides=list_strides,<br />            list_filters=list_filters,<br />            list_kernels=list_kernels,<br />            dp=0.05,<br />            flag_mc=flag_mc,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQ_processing:[471:483]<br />==uqmodels.postprocessing.anomaly_processing:[545:557]<br />            UQ,<br />            type_UQ=type_UQ,<br />            min_cut=min_cut,<br />            max_cut=max_cut,<br />            var_min=0,<br />            var_max=None,<br />            factor=2,<br />            q_var=q_var,<br />            q_Eratio=q_Eratio,<br />            mode_multidim=True,<br />        )<br /></td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[177:188]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[420:431]<br />    dim_embedding = MWE.last_shape<br />    if with_ctx_input:<br />        dim_embedding += dim_ctx<br /><br />    Embeddor_ctx = mlp(<br />        dim_in=dim_embedding,<br />        dim_out=None,<br />        layers_size=layers_enc,<br />        dp=dp,<br />        name="Embeddor",<br />        regularizer_W=k_reg,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[568:577]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[499:508]<br />            steps_per_epoch = In_.__len__()<br />            validation_steps = validation_data_.__len__()<br />            batch_size = None<br />        else:<br />            In_ = Inputs<br />            Tar_ = Targets<br />            validation_data_ = validation_data<br />            validation_steps = None<br />            steps_per_epoch = None</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[353:366]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[575:588]<br />                if only_fit_scaler:<br />                    return None<br />                X_lag = X<br />                X_st = stack_and_roll(<br />                    X,<br />                    model_params["size_window"],<br />                    lag=factory_params["factory_lag_st"] - 1,<br />                    step=step,<br />                )<br />                inputs = [X_st]<br /><br />        new_y = None<br />        if y is not None:</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[90:101]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[363:375]<br />    Interpretor = mlp(<br />        dim_in=dim_z,<br />        dim_out=dim_target,<br />        layers_size=layers_dec,<br />        dp=dp,<br />        type_output=type_output,<br />        name="Interpretor",<br />        random_state=random_state,<br />    )<br /><br />    # Encoder LSTM</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.custom_UQModel:[329:338]<br />==uqmodels.postprocessing.custom_UQKPI_Processor:[32:41]<br />                "type_norm": "Nsigma_local",<br />                "q_var": 1,<br />                "d": 2,<br />                "beta": 0.001,<br />                "beta_source": 0.001,<br />                "beta_global": 0.001,<br />                "min_cut": 0.002,<br />                "max_cut": 0.998,<br />                "per_seuil": 0.999,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[95:110]<br />==uqmodels.modelization.UQEstimator:[414:433]<br />        X, y = super()._format(<br />            X=X,<br />            y=y,<br />            type_transform=type_transform,<br />            mode_UQ=mode_UQ,<br />            skip_format=skip_format,<br />        )<br />        return (X, y)<br /><br />    def _tuning(<br />        self,<br />        X: Array,<br />        y: Array,<br />        n_esti: int = 100,<br />        folds: int = 4,<br />        params: Dict_params = None,<br />        **kwarg,<br />    ) -> None:<br />        """Perform a random search tuning using a parameter grid."""</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQ_processing:[570:577]<br />==uqmodels.postprocessing.anomaly_processing:[741:748]<br />                min_cut=min_cut,<br />                max_cut=max_cut,<br />                var_min=var_min,<br />                var_max=var_max,<br />                q_var=q_var,<br />                q_var_e=q_var_e,<br />                k_var_e=k_var_e,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[154:161]<br />==uqmodels.postprocessing.UQ_processing:[226:233]<br />        pred=None,<br />        y=None,<br />        type_UQ_params=None,<br />        var_min=0,<br />        var_max=None,<br />        min_cut=0,<br />        max_cut=1,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[654:662]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[631:638]<br />        pred = np.concatenate(pred, axis=0)<br />        var_a = np.concatenate(var_a, axis=0)<br />        var_e = np.concatenate(var_e, axis=0)<br />        UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)<br />    else:<br />        output = []<br />        for i in range(n_ech):</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:647]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[611:618]<br />    if generator:<br />        pred = []<br />        var_a = []<br />        var_e = []<br />        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results<br />            output = []<br />            for i in range(n_ech):</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[295:302]<br />==uqmodels.modelization.UQEstimator:[414:421]<br />        X, y = super()._format(<br />            X=X,<br />            y=y,<br />            type_transform=type_transform,<br />            mode_UQ=mode_UQ,<br />            skip_format=skip_format,<br />        )</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[64:71]<br />==uqmodels.modelization.UQEstimator:[272:279]<br />        super().__init__(<br />            name=name,<br />            type_UQ=type_UQ,<br />            rescale=rescale,<br />            var_min=var_min,<br />            random_state=random_state,<br />        )</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[342:348]<br />==uqmodels.postprocessing.custom_UQKPI_Processor:[120:126]<br />                UQ=UQ,<br />                type_UQ=type_UQ,<br />                pred=pred,<br />                y=y,<br />                type_UQ_params=type_UQ_params,<br />                ctx_mask=ctx_mask,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[640:646]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[720:726]<br />    if generator:<br />        pred = []<br />        var_a = []<br />        var_e = []<br />        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results<br />            output = []</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.ML_estimator.baseline:[271:278]<br />==uqmodels.modelization.UQEstimator:[273:279]<br />            name=name,<br />            type_UQ=type_UQ,<br />            rescale=rescale,<br />            var_min=var_min,<br />            random_state=random_state,<br />        )<br /></td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.preprocessing.features_processing:[364:370]<br />==uqmodels.utils:[785:791]<br />        if i > 0:<br />            Y_cur[0:i] = 0<br />        for g in range(dim[1]):<br />            new_features_list.append(Y_cur[:, g])<br />            new_features_name.append("lag_" + str(i) + "_dim:" + str(g))<br />    new_features_name = np.array(new_features_name)</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.UQModel:[368:375]<br />==uqmodels.custom_UQModel:[821:828]<br />            train = None<br />            if x_split is not None:<br />                train = x_split == 1<br />                X, y = apply_mask(X, train), apply_mask(y, train)<br />                if sample_weight is not None:<br />                    sample_weight = sample_weight[train]<br />            # Called fit procedure for each dataset</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQ_processing:[361:366]<br />==uqmodels.postprocessing.anomaly_processing:[741:746]<br />                min_cut=min_cut,<br />                max_cut=max_cut,<br />                var_min=var_min,<br />                var_max=var_max,<br />                q_var=q_var,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQ_processing:[923:928]<br />==uqmodels.postprocessing.anomaly_processing:[306:311]<br />            UQ,<br />            type_UQ,<br />            pred,<br />            y=None,<br />            type_UQ_params=type_UQ_params,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[329:334]<br />==uqmodels.postprocessing.anomaly_processing:[558:563]<br />        UQ,<br />        type_UQ,<br />        pred,<br />        y=y,<br />        type_UQ_params=type_UQ_params,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.postprocessing.UQKPI_Processor:[222:227]<br />==uqmodels.postprocessing.anomaly_processing:[399:404]<br />            UQ,<br />            type_UQ,<br />            pred,<br />            y,<br />            type_UQ_params,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.preprocessing.Custom_Preprocessor:[95:100]<br />==uqmodels.preprocessing.Preprocessor:[227:232]<br />        super().__init__(<br />            name=name,<br />            cache=cache,<br />            structure=structure,<br />            update_query=update_query,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[854:862]<br />==uqmodels.modelization.DL_estimator.utils:[131:139]<br />        self.shuffle = shuffle<br />        self.batch = batch<br /><br />        # self.scaler = metamodel.scaler<br />        self.factory = metamodel.factory<br />        self._format = metamodel._format<br />        self.rescale = metamodel.rescale<br /></td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[1043:1062]<br />==uqmodels.modelization.DL_estimator.utils:[225:233]<br />        Inputs = apply_mask(Inputs, selection)<br />        Ouputs = apply_mask(Ouputs, selection)<br />        return Inputs, Ouputs<br /><br />    # shuffles the dataset at the end of each epoch<br />    def on_epoch_end(self):<br />        if self.shuffle:<br />            np.random.shuffle(self.indices)<br /><br /><br />def double_roll(<br />    y,<br />    size_window_past,<br />    size_window_futur,<br />    size_subseq_dec,<br />    padding_past,<br />    padding_futur,<br />    only_futur=False,<br />):</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[947:952]<br />==uqmodels.modelization.DL_estimator.utils:[135:141]<br />        self.factory = metamodel.factory<br />        self._format = metamodel._format<br />        self.rescale = metamodel.rescale<br />        self.causality_remove = None<br />        self.model_parameters = metamodel.model_parameters</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.Lstm_WS_ED:[581:587]<br />==uqmodels.modelization.DL_estimator.neural_network_UQ:[441:446]<br />                        validation_data=validation_data_,<br />                        epochs=epochs[i],<br />                        steps_per_epoch=steps_per_epoch,<br />                        validation_steps=validation_steps,<br />                        batch_size=batch_size,<br />                        # sample_weight=sample_weight,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
-                  </tr>
-                  <tr class="table-primary">
-                    <td><a href="/blob//uqmodels/visualization/__init__.py#L1" class="btn btn-light btn-sm" role="button"><i class="fas fa-code"></i> Source</a></td>
-                    <td>1</td>
-                    <td>0</td>
-                    <td>refactor</td>
-                    <td></td>
-                    <td>Similar lines in 2 files<br />==uqmodels.modelization.DL_estimator.lstm_ed:[156:161]<br />==uqmodels.modelization.DL_estimator.transformer_ed:[409:414]<br />            size_window,<br />            n_windows,<br />            step=step,<br />            dim_d=dim_dyn,<br />            dim_chan=dim_chan,</td>
-                    <td>duplicate-code</td>
-                    <td>R0801</td>
                   </tr>
                 </tbody>
               </table>
