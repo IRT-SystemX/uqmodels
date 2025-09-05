@@ -23,7 +23,19 @@
 </div>
 <br>
 
+<div align="center">
+    <a href="https://github.com/IRT-SystemX/uqmodels">
+        <img src="https://img.shields.io/badge/GitHub-Repository-181717?logo=github" alt="GitHub">
+    </a>
+    <a href="https://irt-systemx.github.io/uqmodels/">
+        <img src="https://img.shields.io/badge/Online%20Documentation-available-0A66C2?logo=readthedocs&logoColor=white" alt="Docs">
+    </a>
+    <a href="https://pypi.org/project/uqmodels/">
+        <img src="https://img.shields.io/pypi/v/uqmodels?color=blue&label=PyPI&logo=pypi&logoColor=white" alt="PyPI">
+    </a>
+</div>
 
+<br>
 `UQMODELS` for time series is a python library that seeks to put into practice Uncertainty Quantification (UQ) based on ML/Deep learning models for the analysis of numerical data (Regression and time series). UQModels is inspired by scikit-learn for the creation of ML datascience processing chains incorporating uncertainty quantification mechanisms.
 
 The main objective of these chains is to provide functionality that enhance confidence in model prediction by computing additional UQ-KPI that give insight about ML-modeling uncertainty throught for example : Predictive intervales/Margin of error that catch irreducible variability around an observation, or even local Model unreliability link to the impact of the lack of observation due to data-representativeness issues.
