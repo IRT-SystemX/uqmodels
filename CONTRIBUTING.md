@@ -1,4 +1,4 @@
-# Contributing to dqm-ml
+# Contributing to uqmodels
 
 We’re thrilled that you want to contribute to our project! Your contributions help make the project better for everyone. Please take a moment to review this document in order to make your contribution as smooth as possible.
 
