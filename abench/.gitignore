@@ -1,0 +1,12 @@
+# Byte-compiled / optimized files
+
+**__pycache__/
+**build/
+**dist/
+**egg-info
+**.egg
+# Editor files
+.vscode
+# ipynb checkpoints
+**.ipynb_checkpoints/
+**.pyc

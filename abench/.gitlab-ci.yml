@@ -1,0 +1,7 @@
+variables:
+  PROJECT_TYPE: "egg"
+
+include:
+  - project: 'confianceai/ec_1/fa2_infrastructure/gitlab-ci-pipelines'
+    ref: master
+    file: 'python-lib-build.gitlab-ci.yml'

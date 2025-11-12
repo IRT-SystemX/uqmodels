@@ -1,0 +1,629 @@
+from abench.store.data_management import explore_csv_hierarchy, filter_paths_from_metadata
+from abench.data_loader.data_loader import ABLoader,ABDataExperiment
+from abench.data_loader.timeseries.scaler import TemporalFeatureScaler
+from sklearn.base import BaseEstimator
+import os, json, hashlib, inspect, datetime
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+from copy import deepcopy
+from abench.utils import concat
+from abench.data_loader.timeseries.chunk_utils import create_chunk_df,read_chunk,compute_chunk_info
+from typing import List, Tuple, Iterable
+
+def is_scaler_class(obj):
+    return isinstance(obj, type) and issubclass(obj, BaseEstimator)
+
+def is_scaler_TemporalFeatureScaler(obj):
+    return isinstance(obj, TemporalFeatureScaler) and not isinstance(obj, type)
+
+def extract_sequence_dataset(
+    df: pd.DataFrame,
+    window_size: int = 100,
+    sampling: int = 1,
+    x_features: list | None = None,
+    horizon_start: int | None = None,
+    prediction_number: int = 1,
+    y_step: int = 1,
+    y_features: list | None = None,
+    sample_stride: int | None = None,
+    context_features: list | None = None,
+    seed: int = 0,
+    drop_frac: float = 0.0,
+):
+    """
+    Build supervised time-series samples ``(X, y, Context)`` from a DataFrame.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Source data ordered in time.
+    window_size : int, default 100
+        Number of consecutive rows constituting the input window *X*.
+    sampling : int, default 1
+        Sub-sampling factor; keeps one row every ``sampling`` rows.
+    x_features : list, optional
+        Columns used as input features *X*. Defaults to **all** columns.
+    horizon_start : int, optional
+        Offset between the last element of *X* and the first prediction step.
+        Defaults to ``window_size`` (predict right after the window).
+    prediction_number : int, default 1
+        Number of prediction steps in *y*.
+    y_step : int, default 1
+        Stride (in rows) between successive prediction steps.
+    y_features : list, optional
+        Columns used as targets *y*. Defaults to ``x_features``.
+    sample_stride : int, optional
+        Sliding stride when moving the window along the series.
+        Defaults to ``window_size``.
+    context_features : list, optional
+        Columns attached to each output step (e.g. calendar info).
+    seed : int, default 0
+        Random seed controlling both the initial sampling offset and
+        the optional dropping phase.
+    drop_frac : float, default 0.0
+        Fraction (0 ≤ *drop_frac* < 1) of generated samples to discard
+        uniformly at random *after* sequence extraction.
+
+    Returns
+    -------
+    X : np.ndarray  – shape (n_samples, window_size, n_x_features)
+    Y : np.ndarray  – shape (n_samples, prediction_number, n_y_features)
+    Context : np.ndarray  – shape (n_samples, prediction_number, n_context_features)
+
+    Notes
+    -----
+    • The function is fully deterministic given the same ``seed``.  
+    • If the DataFrame is too short to hold one full window + horizon,
+      empty arrays are returned.
+    """
+    # -------- feature fallbacks -------------------------------------------
+    if x_features is None:
+        x_features = df.columns.tolist()
+    if y_features is None:
+        y_features = x_features
+    if horizon_start is None:
+        horizon_start = window_size
+    if sample_stride is None:
+        sample_stride = window_size
+
+    # -------- deterministic sub-sampling ----------------------------------
+    sampling_offset = seed % sampling
+    df_sampled = df.iloc[sampling_offset::sampling].reset_index(drop=True)
+
+    # -------- convert to NumPy --------------------------------------------
+    x_data = df_sampled[x_features].to_numpy()
+    y_data = df_sampled[y_features].to_numpy()
+    
+    context_data = (
+        df_sampled.reindex(columns=context_features, fill_value=None).to_numpy()
+        if context_features is not None
+        else None
+    )
+    if(window_size==1):
+        return x_data[:,None,:], y_data[:,None,:], context_data[:,None,:]
+
+
+    # -------- minimal length required for one sequence --------------------
+    min_size = (
+        window_size                        # history
+        + (horizon_start - window_size)    # gap (may be 0)
+        + (prediction_number - 1) * y_step # last forecast offset
+    )
+    max_start = len(df_sampled) - min_size
+    if max_start <= 0:
+        # too few rows → return empty tensors of the right shape
+        return (
+            np.empty((0, window_size, len(x_features))),
+            np.empty((0, prediction_number, len(y_features))),
+            np.empty(
+                (0, prediction_number, len(context_features or []))
+            ),
+        )
+
+    # -------- build index lists -------------------------------------------
+    X_list, Y_list, C_list = [], [], []
+    for i in range(0, max_start + 1, sample_stride):
+        x_idx = np.arange(i, i + window_size)
+        y_idx = np.arange(
+            i + horizon_start,
+            i + horizon_start + prediction_number * y_step,
+            y_step,
+        )
+        # bounds check
+        if x_idx[-1] < len(df_sampled) and y_idx[-1] < len(df_sampled):
+            X_list.append(x_data[x_idx])
+            Y_list.append(y_data[y_idx])
+            if context_features is not None:
+                C_list.append(context_data[y_idx])
+
+    # -------- stack into arrays -------------------------------------------
+    X = np.stack(X_list)
+    Y = np.stack(Y_list)
+    Context = (
+        np.stack(C_list)
+        if context_features is not None
+        else np.empty((len(X), prediction_number, 0))
+    )
+
+    # -------- random drop (optional, deterministic) -----------------------
+    if 0.0 < drop_frac < 1.0 and len(X):
+        rng = np.random.RandomState(seed)
+        keep_n = int(np.round(len(X) * (1.0 - drop_frac)))
+        keep_idx = rng.choice(len(X), keep_n, replace=False)
+        X, Y, Context = X[keep_idx], Y[keep_idx], Context[keep_idx]
+
+    return X, Y, Context
+
+class ABLoaderFromSequenceFolder(ABLoader):
+    def __init__(self, 
+                 path,
+                 x_features,
+                 y_features,
+                 context_features,
+                 constraint_selection_list = [], 
+                 constraint_rejection_list = [],
+                 w_size=120, 
+                 sampling=1, 
+                 sample_stride=10, 
+                 horizon_start=60,
+                 prediction_number=3,
+                 y_step=60,
+                 with_context=True,
+                 with_metadata=True,
+                 df_metadata = None,
+                 depth_name_list=None,
+                 Xscaler = None,
+                 Yscaler = None,
+                 seq_per_chunk=None,
+                 shuffle=False,
+                 all_data=True,
+                 drop_frac=0.0,
+                 name='set',
+                 dir_cache=None,
+                 cache_tag=None):
+        """
+        Initializes a data loader for time series sequences stored in CSV files within a folder structure.
+        This loader supports windowing, feature scaling, future target prediction, contextual features,
+        and optional metadata filtering or augmentation.
+
+        Parameters
+        ----------
+        path : str
+            Path to the root folder containing CSV sequence files.
+        
+        x_features : list of str
+            List of column names to use as input features (X).
+        
+        y_features : list of str
+            List of column names to use as target outputs (Y).
+        
+        context_features : list of str
+            List of column names to use as contextual (static or auxiliary) features.
+
+        constraint_selection_list : list, optional
+            List of selection constraints to filter sequences that meet specific conditions (default is empty).
+        
+        constraint_rejection_list : list, optional
+            List of rejection constraints to exclude sequences that meet specific conditions (default is empty).
+
+        w_size : int, optional
+            Size of each input time window (default is 120).
+
+        sampling : int, optional
+            Temporal downsampling factor; `1` uses every time step, `2` every other step, etc. (default is 1).
+
+        sample_stride : int, optional
+            Step size between the start of consecutive input windows (default is 10).
+
+        horizon_start : int, optional
+            Number of time steps ahead from the window end to begin prediction (forecast horizon) (default is 60).
+
+        prediction_number : int, optional
+            Number of prediction time steps to generate per window (default is 3).
+
+        y_step : int, optional
+            Step between consecutive predicted time points (default is 60).
+
+        with_context : bool, optional
+            Whether to include context features as part of the output (default is True).
+
+        with_metadata : bool, optional
+            Whether to include file-level metadata along with each sample (default is True).
+
+        df_metadata : pandas.DataFrame, optional
+            Optional DataFrame containing metadata for the sequence files. If None, it will be automatically generated by scanning `path`.
+
+        depth_name_list : list of str, optional
+            Optional list to define folder hierarchy depth levels when scanning the CSV file tree.
+
+        Xscaler : sklearn-compatible scaler or TemporalFeatureScaler obj, optional
+            A scikit-learn-style scaler instance (e.g., `StandardScaler`, `MinMaxScaler`) to apply to input features.
+            If TemporalFeatureScaler obj is already fit, it not will be fit again. 
+
+        Yscaler : sklearn-compatible scaler or TemporalFeatureScaler obj, optional
+            A scikit-learn-style scaler instance to apply to target values or a TemporalFeatureScaler obj.
+            If TemporalFeatureScaler obj is already fit, it not will be fit again. 
+
+        name : str, optional
+            Name or label for the current data loader instance (e.g., "train", "val", "test") (default is 'set').
+
+        """
+
+        if(df_metadata is None):
+            df_metadata = explore_csv_hierarchy(path,depth_name_list)
+
+        if df_metadata.empty:
+            raise ValueError(path,"doesn't contains data")
+            
+        self.name = name
+        self.sampling = sampling
+        self.w_size = w_size
+        self.x_features = x_features
+        self.horizon_start = horizon_start
+        self.prediction_number = prediction_number
+        self.y_step = y_step
+        self.y_features = y_features
+        self.context_features = context_features
+        self.sample_stride = sample_stride
+        self.seq_per_chunk = seq_per_chunk
+        self.shuffle = shuffle
+        self.all_data = all_data
+        self.drop_frac = drop_frac
+        self.dir_cache = dir_cache
+        self.cache_tag = cache_tag
+
+        self.dict_chunk_info = compute_chunk_info(window_size = self.w_size,
+                                                  horizon_start = horizon_start,
+                                                  prediction_number = prediction_number,
+                                                  y_step= y_step,
+                                                  sample_stride= sample_stride,
+                                                  seq_per_chunk=seq_per_chunk)
+
+        if(Xscaler is None):
+            self.Xscaler = None
+        elif is_scaler_class(Xscaler):
+            self.Xscaler = TemporalFeatureScaler(Xscaler)
+        elif is_scaler_TemporalFeatureScaler(Xscaler):
+            self.Xscaler = Xscaler
+        else:
+            print(Xscaler,'is temporalFeatureScaler', isinstance(Xscaler, TemporalFeatureScaler), 'is object', not isinstance(Xscaler, type))
+            raise(ValueError('Xscaler should be a Scaler class or a TemporalFeatureScaler obj'))
+
+        if(Yscaler is None):
+            self.Yscaler = None
+        elif is_scaler_class(Yscaler):
+            self.Yscaler = TemporalFeatureScaler(Yscaler)
+        elif is_scaler_TemporalFeatureScaler(Yscaler):
+            self.Yscaler = Yscaler
+        else:
+            raise(ValueError('Xscaler should be a Scaler class or a TemporalFeatureScaler obj'))
+
+        self.constraint_selection_list = constraint_selection_list
+        self.constraint_rejection_list = constraint_rejection_list
+        self.list_path = filter_paths_from_metadata(df_metadata,
+                                                    constraint_selection_list=constraint_selection_list,
+                                                    constraint_rejection_list=constraint_rejection_list)
+        
+        self.chunk_dataframe = create_chunk_df(self.list_path,
+                                                chunk_size=self.dict_chunk_info['chunk_size'],
+                                                offset_before=self.dict_chunk_info['offset_before'],
+                                                offset_after=self.dict_chunk_info['offset_after'])
+        
+
+        if self.shuffle:
+            self.chunk_dataframe.sample(n=len(self.chunk_dataframe), random_state=42)
+
+        metadata = None
+        super().__init__(metadata=metadata,with_context=with_context,with_metadata=with_metadata,name=name)
+
+    def get_setname(self):
+        setname = super().get_setname()
+        return setname
+    
+    def get_target_arg(self):
+        """Required method for ABloader"""
+        return self.metadata['target_arg']
+        
+    def chunk_process(self,n,drop_frac):
+        """Process the 'n'th chunk using extract_sequence_dataset
+
+        Args:
+            n (_type_): _description_
+            drop_frac (_type_): _description_
+        """
+        # Hold compatibilty bug
+        if(hasattr(self,'chunk_dataframe')):
+            chunk_dataframe = self.chunk_dataframe
+        else:
+            chunk_dataframe = self.chunck_dataframe
+
+        chunk_load_info = chunk_dataframe.iloc[n]
+        dataframe = read_chunk(chunk_load_info,
+                                offset_before=self.dict_chunk_info['offset_before'],
+                                offset_after=self.dict_chunk_info['offset_after'])
+        
+        X_,Y_,Context_ = extract_sequence_dataset(dataframe,
+                                                sampling=self.sampling,
+                                                window_size=self.w_size,
+                                                sample_stride=self.sample_stride,
+                                                horizon_start=self.horizon_start,
+                                                prediction_number=self.prediction_number,
+                                                y_step=self.y_step,
+                                                x_features=self.x_features,
+                                                y_features=self.y_features,
+                                                context_features=self.context_features,
+                                                drop_frac=drop_frac)
+        return(X_,Y_,Context_)
+        
+    def fit_scaler(self,X=None,y=None,drop_frac=0.50):
+
+            # try cache
+        if self.dir_cache and self._load_scalers():
+            return
+
+        if ((self.Xscaler is None) or (self.Xscaler.is_fitted())) and ((self.Yscaler is None) or (self.Yscaler.is_fitted())):
+            pass
+
+        else:
+            X_list = []
+            Y_list = []
+            Context_list = []
+            if ((X is None) or (y is None)):
+                for n in tqdm(range(len(self.chunk_dataframe))):
+                    X_,Y_,Context_ = self.chunk_process(n,drop_frac)
+                    X_list.append(X_)
+                    Y_list.append(Y_)
+    
+                X_list = concat(X_list,axis=0)
+                Y_list = concat(Y_list,axis=0)
+     
+            self.__pack_and_scale_output__(X_list,Y_list,None)
+            if self.dir_cache:
+                self._save_scalers()
+
+    def __pack_and_scale_output__(self,X,y,context):
+        if(self.Xscaler is not None):
+            if not self.Xscaler.is_fitted():
+                self.Xscaler.fit(X)
+            X = self.Xscaler.transform(X)
+
+        if(self.Yscaler is not None):
+            if not self.Yscaler.is_fitted():
+                self.Yscaler.fit(y)
+            y = self.Yscaler.transform(y)
+
+        output = [(X, y)]
+        if self.with_context:
+            output.append(context)
+        else:
+            output.append(None)  # Ensure consistent structure
+        if self.with_metadata:
+            output.append(self.metadata)
+        return(output)
+    
+    def __iter__(self):
+        """
+        Itère sur les chunks.
+        - Si un cache global (post-scaling) existe, on le sert directement (un seul batch) puis on retourne.
+        - Si self.all_data == False : streaming chunk par chunk (scaling à la volée).
+        - Sinon : agrégation, shuffle optionnel, scaling, sauvegarde du cache et yield unique.
+        """
+        # --- Fast path : cache global ---
+        if getattr(self, "dir_cache", None):
+            cached = self._load_cache()
+            if cached is not None:
+                Xc, yc, cc = cached
+                out = [(Xc, yc)]
+                out.append(cc if self.with_context else None)
+                if self.with_metadata:
+                    out.append(self.metadata)
+                yield out
+                return
+
+        def _take(obj, perm):
+            # pandas DataFrame/Series
+            if hasattr(obj, "iloc"):
+                return obj.iloc[perm].reset_index(drop=True)
+            # numpy array ou "array-like"
+            return np.take(obj, perm, axis=0)
+
+        # --- Mode streaming : chunk par chunk ---
+        if not self.all_data:
+            for n in tqdm(range(len(self.chunk_dataframe))):
+                X_, y_, ctx_ = self.chunk_process(n, self.drop_frac)
+                yield self.__pack_and_scale_output__(X_, y_, ctx_)
+            return
+
+        # --- Mode agrégé : on accumule puis on concatène ---
+        X_parts, y_parts, ctx_parts = [], [], []
+
+        # Hold compatibilty bug
+        if(hasattr(self,'chunk_dataframe')):
+            chunk_dataframe = self.chunk_dataframe
+        else:
+            chunk_dataframe = self.chunck_dataframe
+
+        for n in tqdm(range(len(chunk_dataframe))):
+            X_, y_, ctx_ = self.chunk_process(n, self.drop_frac)
+            X_parts.append(X_)
+            y_parts.append(y_)
+            ctx_parts.append(ctx_)
+
+        if not X_parts:
+            return
+
+        X = concat(X_parts, axis=0)
+        y = concat(y_parts, axis=0)
+        context = concat(ctx_parts, axis=0)
+
+        # Shuffle cohérent si demandé
+        if self.shuffle:
+            rng = np.random.default_rng(42)
+            n_rows = len(X) if hasattr(X, "__len__") else X.shape[0]
+            perm = rng.permutation(n_rows)
+            X = _take(X, perm)
+            y = _take(y, perm)
+            context = _take(context, perm)
+
+        # Mise à l'échelle + empaquetage
+        output = self.__pack_and_scale_output__(X, y, context)
+
+        # Sauvegarde du cache global (post-scaling) + scalers
+        if getattr(self, "dir_cache", None):
+            scaled_X, scaled_y = output[0]
+            cached_context = output[1] if self.with_context else context
+            if cached_context is None:
+                # contexte vide mais 3D, partageant la 1ère dimension
+                cached_context = np.empty((scaled_X.shape[0], 0, 0))
+            self._save_cache(scaled_X, scaled_y, cached_context)
+            self._save_scalers()
+
+        yield output
+    # ================== CACHE COMPACT ==================
+    @staticmethod
+    def _stable_hash(obj) -> str:
+        j = json.dumps(obj, sort_keys=True, default=str)
+        return hashlib.blake2b(j.encode(), digest_size=16).hexdigest()
+
+    def _paths_from_chunk_dataframe(self):
+        # suppose une colonne 'path' dans self.chunk_dataframe
+        paths = [os.path.abspath(os.path.realpath(str(p)))
+                for p in self.chunk_dataframe['path'].tolist()]
+        return sorted(set(paths))
+
+    def _cache_key(self):
+        return self._stable_hash(self._paths_from_chunk_dataframe())
+
+    def _base_cache(self):
+        if not self.dir_cache: return None
+        os.makedirs(self.dir_cache, exist_ok=True)
+        key = self._cache_key()
+        prefix = f"{self.cache_tag}_" if self.cache_tag else ""
+        return os.path.join(self.dir_cache, f"{prefix}{key}")
+
+    def _cache_paths(self):
+        base = self._base_cache()
+        if not base: return None, None
+        return base + ".npz", base + ".json"
+
+    def _scaler_cache_paths(self):
+        base = self._base_cache()
+        if not base: return None, None
+        return base + ".xscaler.pkl", base + ".yscaler.pkl"
+
+    def _save_cache(self, X, y, context):
+        npz_path, meta_path = self._cache_paths()
+        if not npz_path: return
+        X = np.asarray(X); y = np.asarray(y); context = np.asarray(context)
+        tmp = npz_path + ".tmp"
+        with open(tmp, "wb") as f:
+            np.savez_compressed(f, X=X, y=y, context=context)
+        os.replace(tmp, npz_path)
+        if meta_path:
+            meta_tmp = meta_path + ".tmp"
+            with open(meta_tmp, "w", encoding="utf-8") as f:
+                json.dump({"created_utc": datetime.datetime.utcnow().isoformat()+"Z",
+                        "key": self._cache_key()}, f)
+            os.replace(meta_tmp, meta_path)
+
+    def _load_cache(self):
+        npz_path, _ = self._cache_paths()
+        if not npz_path or not os.path.exists(npz_path): return None
+        with np.load(npz_path, allow_pickle=True) as d:
+            return d["X"], d["y"], d["context"]
+        
+    def _save_scalers(self):
+        x_path, y_path = self._scaler_cache_paths()
+        if x_path and self.Xscaler is not None:
+            xt = x_path + ".tmp"
+            with open(xt, "wb") as f: pickle.dump(self.Xscaler, f, protocol=pickle.HIGHEST_PROTOCOL)
+            os.replace(xt, x_path)
+        if y_path and self.Yscaler is not None:
+            yt = y_path + ".tmp"
+            with open(yt, "wb") as f: pickle.dump(self.Yscaler, f, protocol=pickle.HIGHEST_PROTOCOL)
+            os.replace(yt, y_path)
+
+    def _load_scalers(self):
+        x_path, y_path = self._scaler_cache_paths()
+        ok = False
+        if x_path and os.path.exists(x_path) and self.Xscaler is not None:
+            with open(x_path, "rb") as f: self.Xscaler = pickle.load(f); ok = True
+        if y_path and os.path.exists(y_path) and self.Yscaler is not None:
+            with open(y_path, "rb") as f: self.Yscaler = pickle.load(f); ok = True
+        return ok
+
+
+class ABLosoDataExperiment(ABDataExperiment):
+    def __init__(self,
+                 ABloader,
+                 ABloader_dict_params,
+                 depth_name,
+                 subjet_ids,
+                 validation_setup=[],
+                 name='loso_experiment'):
+        
+        ABtrainloader_list = []
+        ABtestloader_sets_list = []
+        for subject in subjet_ids:
+            #Train set
+            ABloader_dict_params_cur = deepcopy(ABloader_dict_params)
+            ABloader_dict_params_cur['name'] = ABloader_dict_params_cur['name']+'_Train_LOSO_'+subject
+            ABloader_dict_params_cur['constraint_rejection_list'].append((depth_name,[subject])) 
+            ABtrainloader_list.append(ABloader(**ABloader_dict_params_cur))
+            #Valid set
+            ABloader_dict_params_cur = deepcopy(ABloader_dict_params)
+            ABloader_dict_params_cur['name'] = ABloader_dict_params_cur['name']+'_Test_LOSO_'+subject
+            ABloader_dict_params_cur['constraint_selection_list'].append((depth_name,[subject]))
+            ABtestloader_sets_list.append([ABloader(**ABloader_dict_params_cur)])
+            
+            for name_valid_setup, constraint_selection_list_valid, constraint_rejection_list_valid in validation_setup:
+                #Other validation set
+                ABloader_dict_params_cur = deepcopy(ABloader_dict_params)
+                ABloader_dict_params_cur['name'] = ABloader_dict_params_cur['name']+'_Valid_LOSO_'+subject+"_"+name_valid_setup
+                ABloader_dict_params_cur['constraint_selection_list'].append((depth_name,[subject]))
+
+                constraint_selection_list = ABloader_dict_params_cur['constraint_selection_list']
+                for new_constraint_selection in constraint_selection_list_valid:
+                    constraint_selection_list = update_constraints(constraint_selection_list,
+                                                                   new_constraint_selection)
+                    
+                constraint_rejection_list = ABloader_dict_params_cur['constraint_rejection_list']
+                for new_constraint_rejection in constraint_rejection_list_valid:
+                    constraint_rejection_list = update_constraints(constraint_rejection_list,
+                                                                   new_constraint_rejection)
+
+                ABloader_dict_params_cur['constraint_selection_list'] = constraint_selection_list
+                ABloader_dict_params_cur['constraint_rejection_list'] = constraint_rejection_list
+                ABtestloader_sets_list[0].append(ABloader(**ABloader_dict_params_cur))
+        super().__init__(ABtrainloader_list,ABtestloader_sets_list,name=name)
+
+def update_constraints(
+    constraints: List[Tuple[str, Iterable[str]]],
+    new_constraint: Tuple[str, Iterable[str]],) -> List[Tuple[str, Iterable[str]]]:
+    """
+    Replace a constraint by key (niveau) if it exists, otherwise append it.
+
+    Example:
+        constraints = [
+            ('niveauA', ['a1', 'a2']),
+            ('niveauB', ['b1', 'b2']),
+        ]
+        update_constraints(constraints, ('niveauA', ['x', 'y']))
+        # -> [('niveauA', ['x','y']), ('niveauB', ['b1','b2'])]
+    """
+    key, values = new_constraint
+
+    replaced = False
+    updated = []
+    for k, v in constraints:
+        if k == key:
+            updated.append((key, list(values)))
+            replaced = True
+        else:
+            updated.append((k, v))
+
+    if not replaced:
+        updated.append((key, list(values)))
+
+    return updated
