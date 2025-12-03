@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <title>uqmodels\processing.py - flake8 annotated source</title>
+      <title>uqmodels/processing.py - flake8 annotated source</title>
       <meta http-equiv="Content-Type" value="text/html; charset=UTF-8">
       <link rel="stylesheet" href="styles.css">
    </head>
    <body>
-      <div id="masthead" class="sev-1"></div>
+      <div id="masthead" class="sev-2"></div>
       <div id="page">
          <h1>
             <a href="uqmodels.processing.report.html">
                <img src="back.svg" alt="&#x2B05;">
-               uqmodels\processing.py source
+               uqmodels/processing.py source
             </a>
          </h1>
 
@@ -113,16 +113,7 @@
                class="code sev- "><tt><i>32</i>     <span class="n">folder_name</span> <span class="o">=</span> <span class="p">[]</span></tt>
             </div>
             <div id="l33"
-               class="code sev-1  le">
-               <ul class="violations">
-               
-                  <li>
-                     <span class="count sev-1">
-                        F632
-                     </span>
-                     Use ==/!= to compare constant literals (str, bytes, int, float, tuple)</li>
-               
-               </ul><tt><i>33</i>     <span class="k">while</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="s2">&quot;&quot;</span><span class="p">:</span></tt>
+               class="code sev- "><tt><i>33</i>     <span class="k">while</span> <span class="n">path</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span></tt>
             </div>
             <div id="l34"
                class="code sev- "><tt><i>34</i>         <span class="n">path</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></tt>
@@ -938,7 +929,16 @@
                class="code sev- "><tt><i>304</i> &nbsp;</tt>
             </div>
             <div id="l305"
-               class="code sev- "><tt><i>305</i>         <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span></tt>
+               class="code sev-2  le">
+               <ul class="violations">
+               
+                  <li>
+                     <span class="count sev-2">
+                        E711
+                     </span>
+                     Comparison to None should be 'if cond is not None:'</li>
+               
+               </ul><tt><i>305</i>         <span class="k">if</span> <span class="n">values</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span></tt>
             </div>
             <div id="l306"
                class="code sev- "><tt><i>306</i>             <span class="n">cache_query</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span></tt>
@@ -992,7 +992,16 @@
                class="code sev- "><tt><i>322</i> &nbsp;</tt>
             </div>
             <div id="l323"
-               class="code sev- "><tt><i>323</i>         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span></tt>
+               class="code sev-2  le">
+               <ul class="violations">
+               
+                  <li>
+                     <span class="count sev-2">
+                        E711
+                     </span>
+                     Comparison to None should be 'if cond is not None:'</li>
+               
+               </ul><tt><i>323</i>         <span class="k">if</span> <span class="n">filename</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span></tt>
             </div>
             <div id="l324"
                class="code sev- "><tt><i>324</i>             <span class="n">cache_query</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></tt>
@@ -1259,7 +1268,7 @@
                class="code sev- "><tt><i>411</i> &nbsp;</tt>
             </div>
             <div id="l412"
-               class="code sev- "><tt><i>412</i>         <span class="k">if</span> <span class="n">query</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">{}:</span></tt>
+               class="code sev- "><tt><i>412</i>         <span class="k">if</span> <span class="n">query</span> <span class="o">!=</span> <span class="p">{}:</span></tt>
             </div>
             <div id="l413"
                class="code sev- "><tt><i>413</i> &nbsp;</tt>
@@ -1376,7 +1385,16 @@
                class="code sev- "><tt><i>450</i> &nbsp;</tt>
             </div>
             <div id="l451"
-               class="code sev- "><tt><i>451</i>         <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span></tt>
+               class="code sev-2  le">
+               <ul class="violations">
+               
+                  <li>
+                     <span class="count sev-2">
+                        E711
+                     </span>
+                     Comparison to None should be 'if cond is not None:'</li>
+               
+               </ul><tt><i>451</i>         <span class="k">if</span> <span class="n">values</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span></tt>
             </div>
             <div id="l452"
                class="code sev- "><tt><i>452</i>             <span class="n">dict_new_q</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span></tt>
@@ -1424,7 +1442,16 @@
                class="code sev- "><tt><i>466</i> &nbsp;</tt>
             </div>
             <div id="l467"
-               class="code sev- "><tt><i>467</i>         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span></tt>
+               class="code sev-2  le">
+               <ul class="violations">
+               
+                  <li>
+                     <span class="count sev-2">
+                        E711
+                     </span>
+                     Comparison to None should be 'if cond is not None:'</li>
+               
+               </ul><tt><i>467</i>         <span class="k">if</span> <span class="n">filename</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span></tt>
             </div>
             <div id="l468"
                class="code sev- "><tt><i>468</i>             <span class="n">dict_new_q</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></tt>
@@ -1661,10 +1688,28 @@
                class="code sev- "><tt><i>545</i> <span class="sd">        &quot;&quot;&quot;</span></tt>
             </div>
             <div id="l546"
-               class="code sev- "><tt><i>546</i>         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span></tt>
+               class="code sev-2  le">
+               <ul class="violations">
+               
+                  <li>
+                     <span class="count sev-2">
+                        E711
+                     </span>
+                     Comparison to None should be 'if cond is not None:'</li>
+               
+               </ul><tt><i>546</i>         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span></tt>
             </div>
             <div id="l547"
-               class="code sev- "><tt><i>547</i>             <span class="k">if</span> <span class="nb">object</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span></tt>
+               class="code sev-2  le">
+               <ul class="violations">
+               
+                  <li>
+                     <span class="count sev-2">
+                        E711
+                     </span>
+                     Comparison to None should be 'if cond is not None:'</li>
+               
+               </ul><tt><i>547</i>             <span class="k">if</span> <span class="nb">object</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span></tt>
             </div>
             <div id="l548"
                class="code sev- "><tt><i>548</i>                 <span class="bp">self</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></tt>

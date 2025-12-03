@@ -6,7 +6,8 @@ from keras.layers import RNN, Dense, Dropout, Lambda, Layer, LSTMCell, TimeDistr
 
 from uqmodels.modelization.DL_estimator.utils import set_global_determinism
 
-from ...utils import add_random_state, generate_random_state, get_fold_nstep
+from uqmodels.utils import add_random_state, generate_random_state, get_fold_nstep
+
 
 # EDL head
 # https://github.com/aamini/evidential-deep-learning/blob/main/evidential_deep_learning/layers/dense.py
@@ -122,7 +123,7 @@ def mlp(
         flag_mc = 1
 
     if shape_2D is None:
-        inputs = tf.keras.layers.Input(shape=(dim_in), name="input_" + name)
+        inputs = tf.keras.layers.Input(shape=(dim_in,), name="input_" + name)
         output = inputs
 
     else:

@@ -7,7 +7,7 @@ import numpy as np
 from copy import deepcopy
 from abench.store import api
 from abench.visu.visu import print_agg_result
-from abench.utils import stack_iterable_output,Extract_dict
+from abench.utils import stack_iterable_output,Extract_dict,extend_list_unique
 import abench.store.api as api
 from tqdm import tqdm
 
@@ -253,8 +253,12 @@ def benchmark(
 
     api.store_ABDataExperiment(storing,ABDataExperiment)
 
+    components_name_list = []
+    for n_list_dict_component, list_dict_component in enumerate(exp_design):
+        for n_component, dict_component in enumerate(list_dict_component):
+           components_name_list.append(dict_component["name"])
+
     # For eachs group of meta-model to be test.
-    list_component_name = []
     for n_list_dict_component, list_dict_component in enumerate(exp_design):
         print("n_component : " + str(list_dict_component))
         # If it specified, Apply a common tunning process of each submodule to be test in the group
@@ -262,60 +266,17 @@ def benchmark(
         # Side effect on dict_component submodule parameters
         ABtunning(dict_exp,tuning_scheme,list_dict_component)
 
-        components_name_list, trainset_name_list, testset_name_list = api.get_list_id(storing)
-
         # Eachs meta-model (specified as a list of submodule_candidate_name)
         for n_component, dict_component in enumerate(list_dict_component):
 
             # Recovers name of component_candidate
             component_name = dict_component["name"]
-            list_component_name.append(component_name)
             # Generate dict_argument of component_init method
-            dict_submodule = ABgenerate_dict_submodule(dict_component,dict_exp)
+            dict_submodule = ABgenerate_dict_submodule(dict_component,dict_exp)  
+            train_and_inference(storing,ABDataExperiment,component_name,Component_class,dict_submodule,skip_train=False,verbose=verbose)
+
+
             
-            if not(component_name in components_name_list):
-                components_name_list.append(component_name)
-                api.store_list_id(storing,components_name_list=components_name_list,trainset_name_list=None,testset_name_list=None)
-            # Subsample/UC_air_liquide/data set of the dataset generator i.e a item [X,y,split,context objectif]
-        
-            
-            testset_name_list_cur = [] 
-            ABDataExperiment_copy = deepcopy(ABDataExperiment)
-            for n_trainset, (ABtrainloader, ABtestloader_set) in enumerate(ABDataExperiment_copy):
-                trainset_name = ABtrainloader.get_setname()
-                
-                if(verbose>0):
-                    print('Train on' + trainset_name)
-                if not(trainset_name in trainset_name_list):
-                    trainset_name_list.append(trainset_name)
-                    api.store_list_id(storing,components_name_list=None,trainset_name_list=trainset_name_list,testset_name_list=None)
-
-                # Instanciate Meta_model be giving submodule model to the component_encaspulator
-                
-                component = Component_class(**dict_submodule)
-                # Fit component using training sample.
-                ABcomponent_fit_predict_and_store(component,ABtrainloader,component_name,storing,store=True)                
-      
-                for n_testset, ABtestloader in enumerate(ABtestloader_set):
-                    testset_name = ABtestloader.get_setname()
-                    if(verbose>0):
-                        print('Test on'+testset_name)
-                    if not(testset_name in testset_name_list):
-                        testset_name_list.append(testset_name)
-                        api.store_list_id(storing,components_name_list=None,trainset_name_list=None,testset_name_list=testset_name_list)
-                    ABcomponent_predict_and_store(component,ABtestloader,component_name,trainset_name,storing=storing,store=True)
-
-                testset_name_list_cur.append(testset_name)
-
-                if hasattr(component, "reset"):
-                    component.reset()
-             
-
-            if hasattr(component, "delete"):
-                component.delete()
-
-            del component
-
     # Performance evaluation on each cv_set for given list of meta_metrics
     ABDataExperiment_copy = deepcopy(ABDataExperiment)
     perf_compute_metrics(
@@ -325,52 +286,83 @@ def benchmark(
         list_metrics)
     
     experiment_plan = deepcopy(ABDataExperiment).get_experiment_plan()
-    agg_name=None
+    perf_agg_compute(
+        storing,
+        experiment_plan,
+        components_name_list,
+        list_metrics,
+        agg_name=None)
+    return None
+
+def train_and_inference(storing,ABDataExperiment,component_name,Component_class,dict_submodule=None,skip_train=False,verbose=0):
+    ABDataExperiment_copy = deepcopy(ABDataExperiment)
+    for n_trainset, (ABtrainloader, ABtestloader_set) in enumerate(ABDataExperiment_copy):
+        trainset_name = ABtrainloader.get_setname()
+        
+        if not(skip_train):
+            if(verbose>0):
+                print('Train on' + trainset_name)
+    
+            # Instanciate Meta_model be giving submodule model to the component_encaspulator
+            if dict_submodule is None:
+                raise(ValueError('dict_submodule can be None if skip_train=False'))
+            component = Component_class(**dict_submodule)
+            # Fit component using training sample.
+            ABcomponent_fit_predict_and_store(component,ABtrainloader,component_name,storing,store=True)                
+        else:
+            component = api.get_component(storing,trainset_name,component_name,Component_class)
+
+        for n_testset, ABtestloader in enumerate(ABtestloader_set):
+            testset_name = ABtestloader.get_setname()
+            if(verbose>0):
+                print('Test on'+testset_name)
+            output = ABcomponent_predict_and_store(component,ABtestloader,component_name,trainset_name,storing=storing,store=True)
+
+
+        if hasattr(component, "reset"):
+            component.reset()
+        
+
+    if hasattr(component, "delete"):
+        component.delete()
+
+    del component
+
+
+def inference(storing,
+              ABDataExperiment,
+              list_component_name,
+              Component_class_dict,
+              list_metrics,
+              verbose=0):
+    
+    api.store_ABDataExperiment(storing,ABDataExperiment)
+    for n_component, component_name in enumerate(list_component_name):
+        Component_class = Component_class_dict[component_name]
+        ABDataExperiment_copy = deepcopy(ABDataExperiment)
+        train_and_inference(storing,
+                            ABDataExperiment,
+                            component_name,
+                            Component_class,
+                            dict_submodule=None,
+                            skip_train=True,
+                            verbose=verbose)
+
+    ABDataExperiment_copy = deepcopy(ABDataExperiment)
+    perf_compute_metrics(
+        storing,
+        ABDataExperiment_copy,
+        list_component_name,
+        list_metrics)
+
+    experiment_plan = deepcopy(ABDataExperiment).get_experiment_plan()
     perf_agg_compute(
         storing,
         experiment_plan,
         list_component_name,
         list_metrics,
-        agg_name)
-    return None
-
-def inference(storing,
-              ABDataExperiment,
-              list_component_name,
-              Component_class,
-              list_metrics):
-    
-    testset_name_list = api.get_list_id(storing)
-    api.store_ABDataExperiment(storing,ABDataExperiment)
-    for n_component, component_name in enumerate(list_component_name):
-        testset_name_list_cur = []
-        ABDataExperiment_copy = deepcopy(ABDataExperiment)
-        for n_trainset, (ABtrainloader, ABtestloader_set) in enumerate(ABDataExperiment_copy):
-            trainset_name = ABtrainloader.get_setname()
-            component = api.get_component(storing,trainset_name,component_name,Component_class)
-            for n_testset,ABtestloader in enumerate(ABtestloader_set):
-                testset_name = ABtestloader.get_setname()
-                if not(testset_name in testset_name_list):
-                    testset_name_list.append(testset_name)
-                    api.store_list_id(storing,components_name_list=None,trainset_name_list=None,testset_name_list=testset_name_list)
-                output = ABcomponent_predict_and_store(component,ABtestloader,component_name,trainset_name,store=True)
-
-            testset_name_list_cur.append(testset_name)
-
-        if hasattr(component, "delete"):
-            component.delete()
-
-        perf_compute_metrics(
-            storing,
-            ABDataExperiment,
-            [component_name],
-            list_metrics)
+        agg_name=None)
         
-        perf_agg_compute(
-            storing,
-            ABDataExperiment,
-            [component_name],
-            list_metrics)
 
 def compute_metrics_on_dataloader(storing,
                                   ABloader=None,
@@ -378,6 +370,7 @@ def compute_metrics_on_dataloader(storing,
                                   list_component_name=[],
                                   list_metrics=[],
                                   set_name=None,
+                                  store=True,
                                   verbose=0):
     if(ABloader is None):
         if(set_name is None):
@@ -429,7 +422,7 @@ def compute_metrics_on_dataloader(storing,
         context=None
 
     for componant_name in list_component_to_compute_output:
-        dict_output[component_name] = stack_iterable_output(dict_output[component_name])
+        dict_output[componant_name] = stack_iterable_output(dict_output[component_name])
     # Use it for comppute metrics
 
 
@@ -451,10 +444,11 @@ def compute_metrics_on_dataloader(storing,
                 target_arg=target_arg)
                 
             dictperf_cv[metric_name] = perf_metric
-    
-        api.store_dictperf(storing,trainset_name,component_name,set_name=set_name,dictperf=dictperf_cv)
+        
         dictperf[set_name]=dictperf_cv
-        api.store_dictperf(storing,trainset_name,component_name,dictperf=dictperf)
+        if(store):
+            api.store_dictperf(storing,trainset_name,component_name,set_name=set_name,dictperf=dictperf_cv)
+            api.store_dictperf(storing,trainset_name,component_name,dictperf=dictperf)
     return(dictperf_cv, set_name)
         
 def perf_compute_metrics(

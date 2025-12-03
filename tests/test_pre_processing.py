@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from uqmodels.preprocessing.structure import Structure
 from uqmodels.processing import MyEncoder, to_list
 

@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
-from keras.layers import LSTM, Dropout, Input, Lambda, TimeDistributed
+from tensorflow.keras import Input, layers
 
 from uqmodels.modelization.DL_estimator.data_embedding import (
     Factice_Time_Extension,
@@ -14,10 +14,10 @@ from uqmodels.modelization.DL_estimator.neural_network_UQ import (
     get_UQEstimator_parameters,
     mlp,
 )
-from uqmodels.modelization.DL_estimator.utils import (
-    Folder_Generator,
-    set_global_determinism,
-)
+
+from uqmodels.modelization.DL_estimator.utils import set_global_determinism
+from uqmodels.modelization.DL_estimator.data_generator import Folder_Generator
+
 from uqmodels.utils import add_random_state, apply_mask, stack_and_roll
 
 # Basic memory module
@@ -102,7 +102,7 @@ def build_lstm_stacked(
     Encoders = []
     for i in range(num_lstm_enc):
         Encoders.append(
-            LSTM(
+            layers.LSTM(
                 dim_z,
                 name="LSTM_enc_" + str(i),
                 return_sequences=True,
@@ -122,7 +122,7 @@ def build_lstm_stacked(
     Decoders = []
     for i in range(num_lstm_dec):
         Decoders.append(
-            LSTM(
+            layers.LSTM(
                 dim_z,
                 name="LSTM_dec_" + str(i),
                 return_sequences=True,
@@ -145,10 +145,10 @@ def build_lstm_stacked(
     list_inputs = []
 
     if with_ctx_input:
-        CTX_inputs = Input(shape=(n_windows, dim_ctx), name="LT")
+        CTX_inputs = layers.Input(shape=(n_windows, dim_ctx), name="LT")
         list_inputs.append(CTX_inputs)
 
-    Y_past = Input(shape=(size_window, dim_dyn), name="ST")
+    Y_past = layers.Input(shape=(size_window, dim_dyn), name="ST")
     list_inputs.append(Y_past)
 
     # Preprocessing layers :
@@ -193,12 +193,13 @@ def build_lstm_stacked(
     # Preprocessing computation
     Data = MWE(Y_past)
     # Concat with cat features
+    print(type(CTX_inputs),type(Data))
     if with_ctx_input:
-        Data = K.concatenate([CTX_inputs, Data], axis=-1)
+        Data = layers.Concatenate(axis=-1)([CTX_inputs, Data])
 
     # Factice time augmentation (actually useless but can be usefull for extended predict horizon)
 
-    Embedding = TimeDistributed(Embeddor_ctx)(Data)
+    Embedding = layers.TimeDistributed(Embeddor_ctx)(Data)
 
     # Encoder part
     Z_enc = Embedding
@@ -213,13 +214,13 @@ def build_lstm_stacked(
     Z_enc = FTE(Z_enc)
 
     # Lattent embedding of each state (Z_t) and last current memory state (H et C)
-    Z_enc = Dropout(dp, seed=add_random_state(random_state, 501))(
+    Z_enc = layers.Dropout(dp, seed=add_random_state(random_state, 501))(
         Z_enc, training=flag_mc
     )
-    H_enc = Dropout(dp, seed=add_random_state(random_state, 502))(
+    H_enc = layers.Dropout(dp, seed=add_random_state(random_state, 502))(
         H_enc, training=flag_mc
     )
-    C_enc = Dropout(dp, seed=add_random_state(random_state, 503))(
+    C_enc = layers.Dropout(dp, seed=add_random_state(random_state, 503))(
         C_enc, training=flag_mc
     )
     state = H_enc, C_enc
@@ -232,8 +233,8 @@ def build_lstm_stacked(
     if residuals_link:
         Z_dec = Z_dec + Z_enc
 
-    outputs_training = TimeDistributed(Interpretor)(
-        Dropout(dp)(Z_dec[:, -dim_horizon:, :], training=flag_mc)
+    outputs_training = layers.TimeDistributed(Interpretor)(
+        layers.Dropout(dp)(Z_dec[:, -dim_horizon:, :], training=flag_mc)
     )
 
     # Inference loop
@@ -246,18 +247,18 @@ def build_lstm_stacked(
             if residuals_link:
                 Z_dec = Z_dec + Z_enc_inference
 
-            output = Interpretor(Dropout(dp)(Z_dec[:, -1, :], training=flag_mc))
+            output = Interpretor(layers.Dropout(dp)(Z_dec[:, -1, :], training=flag_mc))
             outputs.append(output)
 
         #        if i != (dim_horizon) - 1:
         #            Data = Data_embedding(
         #                inputs_lt, Y_past, outputs, "encoder")
-        #            Embedding = TimeDistributed(Embeddor_ctx)(Data)
+        #            Embedding = layers.TimeDistributed(Embeddor_ctx)(Data)
         #            Z_enc_inference, H_enc, C_enc = Encoder(Embedding)
         #            if residuals_link:
         #                Z_enc_inference = Z_enc_inference + Embedding
 
-        outputs = Lambda(lambda x: K.stack(x, axis=1))(outputs)
+        outputs = layers.Lambda(lambda x: K.stack(x, axis=1))(outputs)
 
     if False:  # Autoreg
         pass
@@ -371,6 +372,9 @@ class Lstm_ED_UQ(NN_UQ):
                 lag=model_params["dim_horizon"] - 1,
                 step=step,
             )
+        # Cast to tuple :
+        if(type(inputs) is list):
+            inputs = tuple(inputs)
 
         return inputs, new_y, mask
 

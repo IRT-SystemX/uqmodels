@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 from abench.utils import Extract_dict
 from sklearn.model_selection import PredefinedSplit, KFold, TimeSeriesSplit
-
+from typing import List, Tuple, Iterable
 ############# OLD STUF TO DELETE #########""
 
 class TimeSeries_from_dict:
@@ -107,3 +107,32 @@ def dataset_generator_from_array(
         )
     return dataset_generator
 
+def update_constraints(
+    constraints: List[Tuple[str, Iterable[str]]],
+    new_constraint: Tuple[str, Iterable[str]],) -> List[Tuple[str, Iterable[str]]]:
+    """
+    Replace a constraint by key (niveau) if it exists, otherwise append it.
+
+    Example:
+        constraints = [
+            ('niveauA', ['a1', 'a2']),
+            ('niveauB', ['b1', 'b2']),
+        ]
+        update_constraints(constraints, ('niveauA', ['x', 'y']))
+        # -> [('niveauA', ['x','y']), ('niveauB', ['b1','b2'])]
+    """
+    key, values = new_constraint
+
+    replaced = False
+    updated = []
+    for k, v in constraints:
+        if k == key:
+            updated.append((key, list(values)))
+            replaced = True
+        else:
+            updated.append((k, v))
+
+    if not replaced:
+        updated.append((key, list(values)))
+
+    return updated

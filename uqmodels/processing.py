@@ -30,7 +30,7 @@ def split_path(path):
         path (str): path
     """
     folder_name = []
-    while path is not "":
+    while path != "":
         path, tail = os.path.split(path)
         print(path)
         folder_name.append(tail)
@@ -302,7 +302,7 @@ def set_query_to_cache_query(filename, with_arborescence=False, storing=None):
         if "storing" in query.keys():
             cache_query["storing"] = query["storing"]
 
-        if values is not None:
+        if values != None:
             cache_query["values"] = values
 
         elif "values" in query.keys():
@@ -320,7 +320,7 @@ def set_query_to_cache_query(filename, with_arborescence=False, storing=None):
             for name in query["processing"]:
                 cache_query["keys"].append(name)
 
-        if filename is not None:
+        if filename != None:
             cache_query["keys"].append(filename)
 
         if not (with_arborescence):
@@ -409,7 +409,7 @@ class Cache_manager:
         # Save data link to a query on cache_link using it's unique id-query
         # print('save', query, filename)
 
-        if query is not {}:
+        if query != {}:
 
             # Use by default storing and filename
             if type(query is dict):
@@ -448,7 +448,7 @@ class Cache_manager:
         """
         dict_new_q = {"storing": "", "keys": []}
 
-        if values is not None:
+        if values != None:
             dict_new_q["values"] = values
 
         if "storing" in query.keys():
@@ -464,7 +464,7 @@ class Cache_manager:
         if "source" in query.keys():
             dict_new_q["keys"].append(query["source"])
 
-        if filename is not None:
+        if filename != None:
             dict_new_q["keys"].append(filename)
 
         if dict_new_q["keys"] == []:
@@ -543,8 +543,8 @@ class Processor:
             object (obj, optional): object to store. Defaults to None.
             name (_type_, optional): filename of obj to store. Defaults to None.
         """
-        if self.cache is not None:
-            if object is not None:
+        if self.cache != None:
+            if object != None:
                 self.cache.save(query, object, name)
             else:
                 self.cache.save(query, self, self.name)

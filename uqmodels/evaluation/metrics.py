@@ -14,6 +14,19 @@ sys.path.insert(1, "/home/kevin.pasini/Workspace/n5_uqmodels")
 
 # Metrics wrapper
 
+def base_rmse(y, pred, **kwarg):
+    """Root mean square for nD array
+
+    Args:
+        y (np.array): Targets/observation
+        pred (np.array): Prediction/Reconstruction
+
+    Returns:
+        val: rmse values
+    """
+    val = np.sqrt(np.power(pred - y, 2).mean(axis=0))
+    return val
+
 
 class Encapsulated_metrics(ABC):
     """Abstract Encapsulated Metrics class :
@@ -105,7 +118,7 @@ def rmse(y, output, set_, mask, reduce, **kwarg):
         val: rmse values
     """
     pred = output[0]
-    val = np.sqrt(np.power(pred[set_] - y[set_], 2).mean(axis=0))
+    val = base_rmse(y[set_], pred[set_], **kwarg)
     if mask:
         val = val[mask]
 

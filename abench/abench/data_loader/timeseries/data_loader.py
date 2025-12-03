@@ -5,10 +5,12 @@ from sklearn.base import BaseEstimator
 import os, json, hashlib, inspect, datetime
 import numpy as np
 import pandas as pd
+import warnings
 from tqdm import tqdm
 from copy import deepcopy
 from abench.utils import concat
 from abench.data_loader.timeseries.chunk_utils import create_chunk_df,read_chunk,compute_chunk_info
+from abench.data_loader.data_loader_utils import update_constraints
 from typing import List, Tuple, Iterable
 
 def is_scaler_class(obj):
@@ -553,77 +555,65 @@ class ABLoaderFromSequenceFolder(ABLoader):
             with open(y_path, "rb") as f: self.Yscaler = pickle.load(f); ok = True
         return ok
 
-
-class ABLosoDataExperiment(ABDataExperiment):
+class ABCVDataExperiment(ABDataExperiment):
     def __init__(self,
                  ABloader,
                  ABloader_dict_params,
                  depth_name,
                  subjet_ids,
-                 validation_setup=[],
-                 name='loso_experiment'):
+                 with_test=True,
+                 validation_config=[],
+                 name='cv_experiment'):
         
         ABtrainloader_list = []
         ABtestloader_sets_list = []
-        for subject in subjet_ids:
+        for n_s,subject in enumerate(subjet_ids):
+            print(subject)
             #Train set
             ABloader_dict_params_cur = deepcopy(ABloader_dict_params)
             ABloader_dict_params_cur['name'] = ABloader_dict_params_cur['name']+'_Train_LOSO_'+subject
             ABloader_dict_params_cur['constraint_rejection_list'].append((depth_name,[subject])) 
             ABtrainloader_list.append(ABloader(**ABloader_dict_params_cur))
-            #Valid set
-            ABloader_dict_params_cur = deepcopy(ABloader_dict_params)
-            ABloader_dict_params_cur['name'] = ABloader_dict_params_cur['name']+'_Test_LOSO_'+subject
-            ABloader_dict_params_cur['constraint_selection_list'].append((depth_name,[subject]))
-            ABtestloader_sets_list.append([ABloader(**ABloader_dict_params_cur)])
+            #Test set
+            if(with_test):
+                ABloader_dict_params_cur = deepcopy(ABloader_dict_params)
+                ABloader_dict_params_cur['name'] = ABloader_dict_params_cur['name']+'_Test_LOSO_'+subject
+                ABloader_dict_params_cur['constraint_selection_list'].append((depth_name,[subject]))
+                ABtestloader_sets_list.append([ABloader(**ABloader_dict_params_cur)])
+            else:
+                ABtestloader_sets_list.append([])
+
             
-            for name_valid_setup, constraint_selection_list_valid, constraint_rejection_list_valid in validation_setup:
+            for name_valid_setup, dict_config in validation_config.items():
                 #Other validation set
                 ABloader_dict_params_cur = deepcopy(ABloader_dict_params)
                 ABloader_dict_params_cur['name'] = ABloader_dict_params_cur['name']+'_Valid_LOSO_'+subject+"_"+name_valid_setup
                 ABloader_dict_params_cur['constraint_selection_list'].append((depth_name,[subject]))
 
                 constraint_selection_list = ABloader_dict_params_cur['constraint_selection_list']
-                for new_constraint_selection in constraint_selection_list_valid:
+                for new_constraint_selection in dict_config['constraint_selection']:
                     constraint_selection_list = update_constraints(constraint_selection_list,
                                                                    new_constraint_selection)
                     
                 constraint_rejection_list = ABloader_dict_params_cur['constraint_rejection_list']
-                for new_constraint_rejection in constraint_rejection_list_valid:
+                for new_constraint_rejection in dict_config['constraint_rejection']:
                     constraint_rejection_list = update_constraints(constraint_rejection_list,
                                                                    new_constraint_rejection)
 
                 ABloader_dict_params_cur['constraint_selection_list'] = constraint_selection_list
                 ABloader_dict_params_cur['constraint_rejection_list'] = constraint_rejection_list
-                ABtestloader_sets_list[0].append(ABloader(**ABloader_dict_params_cur))
+                ABtestloader_sets_list[n_s].append(ABloader(**ABloader_dict_params_cur))
         super().__init__(ABtrainloader_list,ABtestloader_sets_list,name=name)
 
-def update_constraints(
-    constraints: List[Tuple[str, Iterable[str]]],
-    new_constraint: Tuple[str, Iterable[str]],) -> List[Tuple[str, Iterable[str]]]:
-    """
-    Replace a constraint by key (niveau) if it exists, otherwise append it.
+class ABLosoDataExperiment(ABCVDataExperiment):
+    def __init__(self, *args, **kwargs):
 
-    Example:
-        constraints = [
-            ('niveauA', ['a1', 'a2']),
-            ('niveauB', ['b1', 'b2']),
-        ]
-        update_constraints(constraints, ('niveauA', ['x', 'y']))
-        # -> [('niveauA', ['x','y']), ('niveauB', ['b1','b2'])]
-    """
-    key, values = new_constraint
-
-    replaced = False
-    updated = []
-    for k, v in constraints:
-        if k == key:
-            updated.append((key, list(values)))
-            replaced = True
-        else:
-            updated.append((k, v))
-
-    if not replaced:
-        updated.append((key, list(values)))
-
-    return updated
+        if not("name" in kwargs):
+            kwargs['name'] = 'loso_experiment'
+        warnings.warn(
+            "Class 'OldComponent' is deprecated and will be removed in a future release. "
+            "Use 'Component' instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        super().__init__(*args, **kwargs)

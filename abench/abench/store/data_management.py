@@ -2,12 +2,14 @@ from functools import partial
 from typing import Callable, Dict, Mapping, Sequence, Optional, Dict, Literal, Iterable, Hashable
 from pathlib import Path
 from abench.store.store import read,write
+from sklearn.model_selection import StratifiedShuffleSplit
 import pandas as pd
 import numpy as np
 import re
 import os
 
-def explore_csv_hierarchy(root_dir, depth_name_list=None):
+
+def explore_csv_hierarchy(root_dir, depth_name_list=None,allowed_ext=('.csv')):
     """
     Recursively explore a directory tree and list all CSV files
     along with their hierarchical structure.
@@ -37,7 +39,7 @@ def explore_csv_hierarchy(root_dir, depth_name_list=None):
         filenames = [f for f in filenames if not f.startswith('.')]
         filenames = [f for f in filenames if "metadata" not in f]
         for file in filenames:
-            if file.endswith('.csv'):
+            if file.endswith(allowed_ext):
                 full_path = os.path.join(dirpath, file)
                 relative_path = os.path.relpath(full_path, root_dir)
                 parts = relative_path.split(os.sep)
@@ -59,8 +61,7 @@ def load_csv(storing,keys):
 def save_csv(storing,keys):
     return(write(storing,keys))
 
-
-def filter_paths_from_metadata(metadata_df, constraint_selection_list=None, constraint_rejection_list=None):
+def filter_metadata(metadata_df, constraint_selection_list=None, constraint_rejection_list=None):
     df_filtered = metadata_df.copy()
 
     # Apply inclusion constraints
@@ -72,7 +73,13 @@ def filter_paths_from_metadata(metadata_df, constraint_selection_list=None, cons
     if constraint_rejection_list:
         for col, rejected_values in constraint_rejection_list:
             df_filtered = df_filtered[~df_filtered[col].isin(rejected_values)]
+    return df_filtered
+
+def filter_paths_from_metadata(metadata_df, constraint_selection_list=None, constraint_rejection_list=None):
+    df_filtered = filter_metadata(metadata_df, constraint_selection_list=constraint_selection_list, constraint_rejection_list=constraint_rejection_list)
     return df_filtered['path'].tolist()
+
+
 
 
 def enrich_with_descriptors(
@@ -327,33 +334,67 @@ def augment_csvs_with_metadata(
 
     for _, row in metadata_df.iterrows():
         path = row['path']
-        try:
-            # Read CSV
-            storing, key = os.path.split(path)
-            df = read(storing,[key])
-            n_rows = len(df)
-
-            # Build the metadata columns (scalar values repeated for all rows)
-            meta_values = {col: row[col] for col in columns_to_add if col in metadata_df.columns}
-
-            # Insert columns
-            if insert_at == 'left':
-                # Prepend: create a new DataFrame with meta first
-                meta_df = pd.DataFrame({k: [v]*n_rows for k, v in meta_values.items()})
-                df_out = pd.concat([meta_df.reset_index(drop=True), df.reset_index(drop=True)], axis=1)
-            elif insert_at == 'right':
-                # Append: assign columns directly (pandas will broadcast)
-                for k, v in meta_values.items():
-                    df[k] = v
-                df_out = df
-            else:
-                raise ValueError("insert_at must be 'left' or 'right'")
-            # Overwrite CSV
-            df_out = df_out.loc[:, ~df.columns.str.contains("^Unnamed")]
-            if(enrich_params is not None):
-                df_out = enrich_with_descriptors(df_out,**enrich_params)
-            df_out.to_csv(path, index=False, lineterminator='\n')
-        except Exception as e:
-            raise(FileNotFoundError(path))
         
+        # Read CSV
+        storing, key = os.path.split(path)
 
+        df = read(storing,[key])
+        n_rows = len(df)
+
+        # Build the metadata columns (scalar values repeated for all rows)
+        meta_values = {col: row[col] for col in columns_to_add if col in metadata_df.columns}
+
+        # Insert columns
+        if insert_at == 'left':
+            # Prepend: create a new DataFrame with meta first
+            meta_df = pd.DataFrame({k: [v]*n_rows for k, v in meta_values.items()})
+            df_out = pd.concat([meta_df.reset_index(drop=True), df.reset_index(drop=True)], axis=1)
+        elif insert_at == 'right':
+            # Append: assign columns directly (pandas will broadcast)
+            for k, v in meta_values.items():
+                df[k] = v
+            df_out = df
+        else:
+            raise ValueError("insert_at must be 'left' or 'right'")
+        # Overwrite CSV
+        df_out = df_out.loc[:, ~df.columns.str.contains("^Unnamed")]
+        if(enrich_params is not None):
+            df_out = enrich_with_descriptors(df_out,**enrich_params)
+        df_out.to_csv(path, index=False, lineterminator='\n')
+
+def stratified_train_val_split(df, strat_cols, alpha=0.8, random_state=42):
+    """
+    Sépare un DataFrame en train et validation avec une stratification multi-colonnes.
+
+    Paramètres
+    ----------
+    df : pd.DataFrame
+        Le dataframe complet.
+    strat_cols : list[str]
+        Les colonnes utilisées pour la stratification (ex: ['col1', 'col2']).
+    alpha : float
+        Proportion d'exemples dans le train (entre 0 et 1).
+    random_state : int
+        Graine pour la reproductibilité.
+
+    Retour
+    ------
+    df_train : pd.DataFrame
+    df_val : pd.DataFrame
+    """
+
+    # On crée une colonne "strat_key" combinant les colonnes
+    strat_key = df[strat_cols].astype(str).agg('_'.join, axis=1)
+
+    splitter = StratifiedShuffleSplit(
+        n_splits=1,
+        train_size=alpha,
+        random_state=random_state
+    )
+
+    # split
+    for train_idx, val_idx in splitter.split(df, strat_key):
+        df_train = df.iloc[train_idx].copy()
+        df_val = df.iloc[val_idx].copy()
+
+    return df_train, df_val

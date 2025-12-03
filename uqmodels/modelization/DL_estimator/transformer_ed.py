@@ -17,10 +17,10 @@ from uqmodels.modelization.DL_estimator.neural_network_UQ import (
     get_UQEstimator_parameters,
     mlp,
 )
-from uqmodels.modelization.DL_estimator.utils import (
-    Folder_Generator,
-    set_global_determinism,
-)
+from uqmodels.modelization.DL_estimator.utils import set_global_determinism
+
+from uqmodels.modelization.DL_estimator.data_generator import Folder_Generator
+
 from uqmodels.utils import add_random_state, stack_and_roll
 
 
@@ -436,7 +436,7 @@ def build_transformer(
     Data = MWE(Y_past)
     # Concat with cat features
     if with_ctx_input:
-        Data = K.concatenate([CTX_inputs, Data], axis=-1)
+        Data = layers.Concatenate(axis=-1)([CTX_inputs, Data])
     # Factice time augmentation (actually useless but can be usefull for extended predict horizon)
     Data = FTE(Data)
 

@@ -98,7 +98,6 @@ class ABMetricGeneric(ABMetric):
             List[float]: List of metric values computed on each subset.
         """
         perf_res = []
-
         if self.kwarg:
             kwarg = self.kwarg
 
@@ -120,7 +119,6 @@ class ABMetricGeneric(ABMetric):
             y = apply_mask_along_dim(y, self.mask, self.dim_mask)
             output = apply_mask_along_dim(output, self.mask, self.dim_mask)
             context = apply_mask_along_dim(context, self.mask, self.dim_mask)
-
 
         # Build context mask if constraints are defined
         if self.list_ctx_constraint is not None:

@@ -1,5 +1,5 @@
 import numpy as np
-from abench.utils import Extract_dict, concat
+from abench.utils import Extract_dict, concat, extend_list_unique
 from abench.store.store import write, read
 from typing import Any, Dict, List, Iterable, Union, Tuple, Any, Optional, Callable, Sequence, Mapping
 from collections import defaultdict
@@ -9,12 +9,29 @@ import pandas as pd
 import pandas as pd
 import numpy as np
 from functools import reduce
+from fnmatch import fnmatch
 import operator, itertools
 
 Number = (int, float, np.integer, np.floating)
 
-# Imports optionnels : si pandas / polars ne sont pas installés,
-# la fonction continue de marcher pour les autres types.
+def filter_experiment_plan(experiment_plan, train_filters=None, test_filters=None):
+    result = {}
+
+    for key, values in experiment_plan.items():
+
+        # Condition 1 : la clé doit contenir train_filters
+        if train_filters is not None and train_filters not in key:
+            continue
+
+        # Condition 2 : la liste doit contenir au moins un match test_filters
+        if test_filters is not None:
+            filtered_values = [v for v in values if test_filters in v]
+            if not filtered_values:
+                continue  # aucun match → on ignore l'entrée
+            result[key] = filtered_values
+
+    return result
+
 
 def store_list_id(storing,components_name_list=None,trainset_name_list=None,testset_name_list=None):
     list_to_store = []
@@ -26,8 +43,7 @@ def store_list_id(storing,components_name_list=None,trainset_name_list=None,test
         list_to_store.append((["src_data","testset_name_list"], testset_name_list))
     for (keys, values) in list_to_store:
         write(storing, keys, values)
-
-      
+        
 def get_list_id(storing):
     list_to_read = [["src_data","components_name_list"],["src_data","trainset_name_list"],["src_data","testset_name_list"]]
     components_name_list, trainset_name_list, testset_name_list = [read(storing, keys) for keys in list_to_read]
@@ -39,15 +55,33 @@ def get_list_id(storing):
         testset_name_list = []
     return(components_name_list, trainset_name_list, testset_name_list)
 
+def update_store_list_id(storing,Exp_plan={},components_name_list=[]):
+    components_name_list_old, trainset_name_list_old, testset_name_list_old = get_list_id(storing)
+    trainlist = []
+    testlist = []
+   
+    for trainset,testset_list in Exp_plan.items():
+        trainlist.append(trainset)
+        for testset in testset_list:
+            if not(testset in testlist):
+                testlist.append(testset)
+
+    trainset_name_list_old = extend_list_unique(trainset_name_list_old,trainlist)
+    testset_name_list_old = extend_list_unique(testset_name_list_old,testlist)
+
+    components_name_list_old = extend_list_unique(components_name_list_old,components_name_list)
+    store_list_id(storing,components_name_list=components_name_list_old,trainset_name_list=trainset_name_list_old,testset_name_list=testset_name_list_old)
 
 # Component
 def store_component(storing,trainset_name,component_name,component):
     keys = [trainset_name,component_name,"component"]
     component.save(storing,keys)
+    update_store_list_id(storing,Exp_plan={},components_name_list=[component_name])
+    
 
-def get_component(storing,trainset_name,component_name,component_class):
+def get_component(storing,trainset_name,component_name,component_wrapper):
     keys = [trainset_name,component_name,"component"]
-    component = component_class.load(storing,keys)
+    component = component_wrapper.load(storing,keys)
     return(component)
 
 def get_subcomponent(storing,trainset_name,component_name,subcomponent_name,subcomponent_class):
@@ -58,6 +92,10 @@ def get_subcomponent(storing,trainset_name,component_name,subcomponent_name,subc
 # store_ABDataExperiment
 def store_ABDataExperiment(storing,ABDataExperiment):
     write(storing, ["src_data",ABDataExperiment.name], ABDataExperiment)
+    Exp_plan = ABDataExperiment.get_experiment_plan()
+    update_store_list_id(storing,Exp_plan=Exp_plan,components_name_list=[])
+
+
 
 def get_ABDataExperiment(storing,name):
     return(read(storing, ["src_data",name]))

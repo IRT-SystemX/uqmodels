@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <title>flake8 violations: uqmodels\preprocessing\preprocessing.py</title>
+      <title>flake8 violations: uqmodels/preprocessing/preprocessing.py</title>
       <meta http-equiv="Content-Type" value="text/html; charset=UTF-8">
       <link rel="stylesheet" href="styles.css">
 <script>
@@ -33,7 +33,7 @@ window.addEventListener('DOMContentLoaded', function () {
 </script>
    </head>
    <body>
-      <div id="masthead" class="sev-2"></div>
+      <div id="masthead" class="sev-1"></div>
       <div id="page">
          <p id="srclink">
             <a title="View full annotated source"
@@ -43,11 +43,58 @@ window.addEventListener('DOMContentLoaded', function () {
          <h1>
             <a href="index.html">
                <img src="back.svg" alt="&#x2B05;">
-               uqmodels\preprocessing\preprocessing.py
+               uqmodels/preprocessing/preprocessing.py
             </a>
          </h1>
 
          <ul id="index">
+         
+         <li>
+            <a data-code="F811">
+               <span class="count sev-1">
+                  2
+               </span>
+               <strong>F811:</strong> redefinition of unused 'np' from line 7
+               
+                  (and 1 similar)
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <p>Redefinition of unused 'np' from line 7:</p>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l18">
+                  <tt><i>18</i> <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span></tt>
+               </a>
+            </li><li>
+               
+               <p>Redefinition of unused 'pd' from line 8:</p>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l19">
+                  <tt><i>19</i> <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         <li>
+            <a data-code="F401">
+               <span class="count sev-1">
+                  1
+               </span>
+               <strong>F401:</strong> 'uqmodels.utils.mask_corr_feature_target' imported but unused
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l14">
+                  <tt><i>14</i> <span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">mask_corr_feature_target</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
          
          <li>
             <a data-code="E203">
@@ -60,38 +107,66 @@ window.addEventListener('DOMContentLoaded', function () {
             <ul class="details">
             <li>
                
-               <a href="uqmodels.preprocessing.preprocessing.source.html#l599">
-                  <tt><i>599</i>         <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="n">window_size</span><span class="p">)</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></tt>
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l706">
+                  <tt><i>706</i>         <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="n">window_size</span><span class="p">)</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></tt>
                </a>
             </li><li>
                
-               <a href="uqmodels.preprocessing.preprocessing.source.html#l616">
-                  <tt><i>616</i>     <span class="n">acorr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">set_</span><span class="p">,</span> <span class="n">set_</span><span class="p">,</span> <span class="s2">&quot;full&quot;</span><span class="p">)[</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:]</span></tt>
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l723">
+                  <tt><i>723</i>     <span class="n">acorr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">correlate</span><span class="p">(</span><span class="n">set_</span><span class="p">,</span> <span class="n">set_</span><span class="p">,</span> <span class="s2">&quot;full&quot;</span><span class="p">)[</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="p">:]</span></tt>
                </a>
             </li><li>
                
-               <a href="uqmodels.preprocessing.preprocessing.source.html#l638">
-                  <tt><i>638</i>     <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">)[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span></tt>
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l745">
+                  <tt><i>745</i>     <span class="n">energy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fft</span><span class="p">)[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span></tt>
                </a>
             </li><li>
                
-               <a href="uqmodels.preprocessing.preprocessing.source.html#l639">
-                  <tt><i>639</i>     <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">fft</span><span class="p">)[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span></tt>
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l746">
+                  <tt><i>746</i>     <span class="n">phase</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">fft</span><span class="p">)[:,</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">set_</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)]</span></tt>
                </a>
             </li><li>
                
-               <a href="uqmodels.preprocessing.preprocessing.source.html#l649">
-                  <tt><i>649</i>             <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="n">window_size</span><span class="p">]</span></tt>
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l756">
+                  <tt><i>756</i>             <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="n">window_size</span><span class="p">]</span></tt>
                </a>
             </li><li>
                
-               <a href="uqmodels.preprocessing.preprocessing.source.html#l653">
-                  <tt><i>653</i>             <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="n">size_bot</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="n">size_top</span><span class="p">]</span></tt>
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l760">
+                  <tt><i>760</i>             <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="n">size_bot</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="n">size_top</span><span class="p">]</span></tt>
                </a>
             </li><li>
                
-               <a href="uqmodels.preprocessing.preprocessing.source.html#l656">
-                  <tt><i>656</i>             <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="p">(</span><span class="n">window_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></tt>
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l763">
+                  <tt><i>763</i>             <span class="k">yield</span> <span class="n">array</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">-</span> <span class="p">(</span><span class="n">window_size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span> <span class="n">i</span> <span class="o">*</span> <span class="n">deta</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         <li>
+            <a data-code="E302">
+               <span class="count sev-2">
+                  3
+               </span>
+               <strong>E302:</strong> expected 2 blank lines, found 1
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l68">
+                  <tt><i>68</i> <span class="k">def</span><span class="w"> </span><span class="nf">select_data_and_context</span><span class="p">(</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l106">
+                  <tt><i>106</i> <span class="k">def</span><span class="w"> </span><span class="nf">build_window_representation</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l130">
+                  <tt><i>130</i> <span class="k">def</span><span class="w"> </span><span class="nf">compute_corr_and_filter</span><span class="p">(</span><span class="n">data</span><span class="p">):</span></tt>
                </a>
             </li>
             </ul>
@@ -108,13 +183,13 @@ window.addEventListener('DOMContentLoaded', function () {
             <ul class="details">
             <li>
                
-               <a href="uqmodels.preprocessing.preprocessing.source.html#l500">
-                  <tt><i>500</i>                 <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;min_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mean_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span></tt>
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l607">
+                  <tt><i>607</i>                 <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;min_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mean_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span></tt>
                </a>
             </li><li>
                
-               <a href="uqmodels.preprocessing.preprocessing.source.html#l501">
-                  <tt><i>501</i>                 <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;extremum_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mean_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span></tt>
+               <a href="uqmodels.preprocessing.preprocessing.source.html#l608">
+                  <tt><i>608</i>                 <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;extremum_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">-</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;mean_&quot;</span> <span class="o">+</span> <span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">),</span></tt>
                </a>
             </li>
             </ul>

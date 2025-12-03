@@ -1,8 +1,18 @@
 import numpy as np
 import pandas as pd
 import itertools
+import re
+from fnmatch import fnmatch
 from collections.abc import Iterable
 from typing import Callable, List, Optional, Union, Sequence
+
+def extend_list_unique(list_old, lis_new):
+    for elem in lis_new:
+        if elem in list_old:
+            list_old.append(elem)
+    return list_old
+
+
 def concat(obj, axis: int = 0, newaxis: bool = False):
     """
     Combine homogeneous objects.
@@ -54,42 +64,6 @@ def concat(obj, axis: int = 0, newaxis: bool = False):
 
     raise TypeError("Only ndarray, DataFrame or list are supported")
 
-def apply_mask_along_dim(array: np.ndarray, mask: Union[np.ndarray, Sequence[int]], dim_mask: int) -> np.ndarray:
-    """
-    Selects elements along the specified dimension using a boolean mask or list of indices.
-
-    Args:
-        array (np.ndarray): Input N-dimensional array.
-        mask (Union[np.ndarray, Sequence[int]]): Boolean mask or list of indices to apply along `dim_mask`.
-        dim_mask (int): Dimension along which to apply the mask.
-
-    Returns:
-        np.ndarray: Masked array with reduced size along `dim_mask`.
-
-    Raises:
-        ValueError: if dimensions mismatch or mask is invalid.
-    """
-    if isinstance(mask, np.ndarray) and mask.dtype == bool:
-        if mask.shape[0] != array.shape[dim_mask]:
-            raise ValueError(f"Boolean mask length {mask.shape[0]} does not match dimension {dim_mask} size {array.shape[dim_mask]}")
-        indexer = [slice(None)] * array.ndim
-        indexer[dim_mask] = mask
-        array = array[tuple(indexer)]
-        if(mask.sum()==1):
-            array = np.squeeze(array)
-        return array
-
-    elif isinstance(mask, (list, np.ndarray)):
-        indexer = [slice(None)] * array.ndim
-        indexer[dim_mask] = mask
-        array = array[tuple(indexer)]
-        if(len(mask)==1):
-            array = np.squeeze(array)
-        return array
-
-    else:
-        raise ValueError("mask must be either a boolean NumPy array or a list/array of indices")
-
 def Extract_dict(dictionaire, list_keys):
     """Extract list of values of dictionaire from list_of_keys
     return None if keys isn't in dictionaire
@@ -114,13 +88,97 @@ def Extract_dict(dictionaire, list_keys):
         list_extract = list_extract[0]
     return list_extract
 
-def apply_mask(list_or_array, mask):
-    if(mask is None):
-        return(list_or_array)
-    if type(list_or_array) in [list,tuple]:
-        return [i[mask] for i in list_or_array]
+
+def apply_mask_along_dim(
+    array: np.ndarray,
+    mask: Union[np.ndarray, Sequence[int]],
+    dim_mask: int,
+) -> np.ndarray:
+    """
+    Apply boolean mask or indices along a given dimension.
+    If exactly one element is selected on that dimension, it is squeezed.
+    """
+    arr = np.asarray(array)
+
+    # Bring dim_mask to front (axis 0)
+    arr_moved = np.moveaxis(arr, dim_mask, 0)
+
+    # Sanity check on boolean mask length if needed
+    m = np.asarray(mask)
+    if m.dtype == bool and m.shape[0] != arr_moved.shape[0]:
+        raise ValueError(
+            f"Boolean mask length {m.shape[0]} does not match size of dim {dim_mask} ({arr.shape[dim_mask]})."
+        )
+
+    # Apply mask along axis 0 using the generic helper
+    masked = apply_mask(arr_moved, mask)
+
+    # Move axis back to its original position
+    masked = np.moveaxis(masked, 0, dim_mask)
+
+    # Optional squeeze if only one element selected along dim_mask
+    # (après masquage, si la taille de cette dimension est 1, on la squeeze)
+    if masked.shape[dim_mask] == 1:
+        masked = np.squeeze(masked, axis=dim_mask)
+
+    return masked
+
+def apply_mask(arr, mask):
+    """
+    Apply boolean or integer masking to `arr` while preserving depth (`ndim`).
+
+    Behavior:
+    - If `mask` is None: return `arr` unchanged.
+    - If `mask` is boolean and has the same shape as `arr`:
+        Use NumPy's standard boolean indexing (result may be flattened).
+    - If `mask` is boolean and its shape matches the first dimension of `arr`,
+      possibly with trailing singleton dimensions (e.g., (N,), (N,1), (N,1,1)...):
+        Select slices along axis 0 only, preserving all remaining dimensions.
+        Output shape becomes (num_selected, *arr.shape[1:]).
+    - Otherwise, treat `mask` as integer indexing (NumPy standard rules).
+
+    The original container type (list, tuple, ndarray) is preserved.
+    """
+    if mask is None:
+        return arr
+
+    is_list = isinstance(arr, list)
+    is_tuple = isinstance(arr, tuple)
+    arr_np = np.asarray(arr)
+    m = np.asarray(mask)
+
+    # Cas masque booléen
+    if m.dtype == bool:
+        # 1) Même shape -> comportement NumPy standard
+        if m.shape == arr_np.shape:
+            out = arr_np[m]
+
+        else:
+            # 2) Masque utilisé pour sélectionner le long du premier axe uniquement.
+            #    On autorise des shapes du type (N,), (N,1), (N,1,1), ...
+            if arr_np.ndim >= 1 and m.shape[0] == arr_np.shape[0] and all(
+                s == 1 for s in m.shape[1:]
+            ):
+                # On réduit à un masque 1D pour l'axe 0
+                m_1d = m.reshape(m.shape[0])   # shape -> (N,)
+                # Sélection le long du premier axe, profondeur préservée
+                out = arr_np[m_1d, ...]
+            else:
+                raise ValueError(
+                    f"Boolean mask shape {m.shape} incompatible with source {arr_np.shape} "
+                    "(première dimension ou shape complète requise)."
+                )
+
     else:
-        return list_or_array[mask]
+        # Indices entiers (NumPy standard)
+        out = arr_np[m]
+
+    # Restauration du type d'origine
+    if is_list:
+        return out.tolist()
+    if is_tuple:
+        return tuple(out.tolist())
+    return out
 
 def stack_iterable_output(batch_iterable, stack_fn=np.concatenate):
     """
@@ -225,68 +283,6 @@ def build_ctx_mask(context: np.ndarray, list_ctx_constraint):
     ctx_flag = np.logical_and.reduce(meta_flag)
     return ctx_flag
 
-
-def unique_with_nan(arr, return_inverse=True, nan_code=-1):
-    """
-    Encode an array (object or numeric) into integer codes while handling NaNs.
-
-    Parameters
-    ----------
-    arr : np.ndarray
-        1-D (or N-D) input array.
-        • object dtype → may contain strings and np.nan  
-        • numeric dtype → integers or floats (floats may include NaN)
-    return_inverse : bool, default=True
-        If True, returns *codes* aligned with *arr* (see Returns section).
-    nan_code : int, default -1
-        Integer code assigned to NaN positions (only relevant when NaNs exist).
-
-    Returns
-    -------
-    uniques : np.ndarray
-        Sorted unique non-NaN values.
-    codes : np.ndarray
-        Integer codes with the same shape as *arr*:
-        • NaN → *nan_code*  
-        • other values → index in *uniques* (0-based)
-
-    Notes
-    -----
-    * For object arrays, NaNs are detected via ``x != x``.  
-    * For numeric arrays, `np.isnan` is used when dtype is floating.  
-    * Complexity dominated by `np.unique` on the non-NaN subset.
-    """
-    # ------------------------------------------------------------------
-    # Fast path: NUMERIC ARRAY
-    # ------------------------------------------------------------------
-    if arr.dtype != object:
-        if np.issubdtype(arr.dtype, np.floating):
-            # Floats can contain NaNs → treat them explicitly
-            nan_mask = np.isnan(arr)
-            uniques, inv = np.unique(arr[~nan_mask], return_inverse=True)
-            if not return_inverse:
-                return uniques
-            codes = np.full(arr.shape, nan_code, dtype=int)
-            codes[~nan_mask] = inv
-            return uniques, codes
-        else:
-            # Integer (or other numeric without NaN capability)
-            uniques, inv = np.unique(arr, return_inverse=True)
-            return (uniques, inv) if return_inverse else uniques
-
-    # ------------------------------------------------------------------
-    # OBJECT ARRAY: may mix strings and NaNs
-    # ------------------------------------------------------------------
-    nan_mask = arr != arr                       # True only for NaNs
-    uniques, inv = np.unique(arr[~nan_mask], return_inverse=True)
-
-    if not return_inverse:
-        return uniques
-
-    codes = np.full(arr.shape, nan_code, dtype=int)
-    codes[~nan_mask] = inv
-    return uniques, codes
-
 def build_sets(context,
                list_ctx,
                list_ctx_name=None,
@@ -374,3 +370,65 @@ def build_sets(context,
         list_pairs.append(block_infos)
 
     return list_sets, list_pairs
+
+def unique_with_nan(arr, return_inverse=True, nan_code=-1):
+    """
+    Encode an array (object or numeric) into integer codes while handling NaNs.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        1-D (or N-D) input array.
+        • object dtype → may contain strings and np.nan  
+        • numeric dtype → integers or floats (floats may include NaN)
+    return_inverse : bool, default=True
+        If True, returns *codes* aligned with *arr* (see Returns section).
+    nan_code : int, default -1
+        Integer code assigned to NaN positions (only relevant when NaNs exist).
+
+    Returns
+    -------
+    uniques : np.ndarray
+        Sorted unique non-NaN values.
+    codes : np.ndarray
+        Integer codes with the same shape as *arr*:
+        • NaN → *nan_code*  
+        • other values → index in *uniques* (0-based)
+
+    Notes
+    -----
+    * For object arrays, NaNs are detected via ``x != x``.  
+    * For numeric arrays, `np.isnan` is used when dtype is floating.  
+    * Complexity dominated by `np.unique` on the non-NaN subset.
+    """
+    # ------------------------------------------------------------------
+    # Fast path: NUMERIC ARRAY
+    # ------------------------------------------------------------------
+    if arr.dtype != object:
+        if np.issubdtype(arr.dtype, np.floating):
+            # Floats can contain NaNs → treat them explicitly
+            nan_mask = np.isnan(arr)
+            uniques, inv = np.unique(arr[~nan_mask], return_inverse=True)
+            if not return_inverse:
+                return uniques
+            codes = np.full(arr.shape, nan_code, dtype=int)
+            codes[~nan_mask] = inv
+            return uniques, codes
+        else:
+            # Integer (or other numeric without NaN capability)
+            uniques, inv = np.unique(arr, return_inverse=True)
+            return (uniques, inv) if return_inverse else uniques
+
+    # ------------------------------------------------------------------
+    # OBJECT ARRAY: may mix strings and NaNs
+    # ------------------------------------------------------------------
+    nan_mask = arr != arr                       # True only for NaNs
+    uniques, inv = np.unique(arr[~nan_mask], return_inverse=True)
+
+    if not return_inverse:
+        return uniques
+
+    codes = np.full(arr.shape, nan_code, dtype=int)
+    codes[~nan_mask] = inv
+    return uniques, codes
+

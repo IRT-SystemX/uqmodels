@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
    <head>
-      <title>flake8 violations: uqmodels\modelization\DL_estimator\neural_network_UQ.py</title>
+      <title>flake8 violations: uqmodels/modelization/DL_estimator/neural_network_UQ.py</title>
       <meta http-equiv="Content-Type" value="text/html; charset=UTF-8">
       <link rel="stylesheet" href="styles.css">
 <script>
@@ -43,7 +43,7 @@ window.addEventListener('DOMContentLoaded', function () {
          <h1>
             <a href="index.html">
                <img src="back.svg" alt="&#x2B05;">
-               uqmodels\modelization\DL_estimator\neural_network_UQ.py
+               uqmodels/modelization/DL_estimator/neural_network_UQ.py
             </a>
          </h1>
 
@@ -85,26 +85,123 @@ window.addEventListener('DOMContentLoaded', function () {
                
                <p>'uqmodels.utils.generate_random_state' imported but unused:</p>
                
-               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l15">
-                  <tt><i>15</i> <span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">apply_mask</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">generate_random_state</span></tt>
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l16">
+                  <tt><i>16</i> <span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">apply_mask</span><span class="p">,</span> <span class="n">cut</span><span class="p">,</span> <span class="n">generate_random_state</span></tt>
                </a>
             </li>
             </ul>
          </li>
          
          <li>
-            <a data-code="E203">
+            <a data-code="E226">
                <span class="count sev-2">
-                  1
+                  4
                </span>
-               <strong>E203:</strong> whitespace before ':'
+               <strong>E226:</strong> missing whitespace around arithmetic operator
                
             </a>
             <ul class="details">
             <li>
                
-               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l890">
-                  <tt><i>890</i>         <span class="n">selection</span><span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">idx</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="p">)</span> <span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="n">len_</span><span class="p">,</span> <span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">True</span></tt>
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l196">
+                  <tt><i>196</i>                 <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">cur_name</span><span class="o">+</span><span class="s1">&#39;.weights.h5&#39;</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l200">
+                  <tt><i>200</i>             <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s1">&#39;.weights.h5&#39;</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l223">
+                  <tt><i>223</i>                 <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.weights.h5&#39;</span><span class="p">)</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l226">
+                  <tt><i>226</i>             <span class="n">new_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="o">+</span><span class="s1">&#39;.weights.h5&#39;</span><span class="p">)</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         <li>
+            <a data-code="E265">
+               <span class="count sev-2">
+                  3
+               </span>
+               <strong>E265:</strong> block comment should start with '# '
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l211">
+                  <tt><i>211</i>         <span class="c1">#old_level_info = os.environ[&quot;TF_CPP_MIN_LOG_LEVEL&quot;]</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l212">
+                  <tt><i>212</i>         <span class="c1">#os.environ[&quot;TF_CPP_MIN_LOG_LEVEL&quot;] = &quot;2&quot;</span></tt>
+               </a>
+            </li><li>
+               
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l228">
+                  <tt><i>228</i>         <span class="c1">#os.environ[&quot;TF_CPP_MIN_LOG_LEVEL&quot;] = old_level_info</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         <li>
+            <a data-code="E123">
+               <span class="count sev-2">
+                  1
+               </span>
+               <strong>E123:</strong> closing bracket does not match indentation of opening bracket's line
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l426">
+                  <tt><i>426</i>                         <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_generator</span><span class="p">(</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         <li>
+            <a data-code="E303">
+               <span class="count sev-2">
+                  1
+               </span>
+               <strong>E303:</strong> too many blank lines (2)
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l525">
+                  <tt><i>525</i>     <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">type_output</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span></tt>
+               </a>
+            </li>
+            </ul>
+         </li>
+         
+         <li>
+            <a data-code="W293">
+               <span class="count sev-2">
+                  1
+               </span>
+               <strong>W293:</strong> blank line contains whitespace
+               
+            </a>
+            <ul class="details">
+            <li>
+               
+               <a href="uqmodels.modelization.DL_estimator.neural_network_UQ.source.html#l520">
+                  <tt><i>520</i>     </tt>
                </a>
             </li>
             </ul>

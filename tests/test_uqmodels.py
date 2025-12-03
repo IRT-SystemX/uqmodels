@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pytest
 from sklearn.ensemble import RandomForestRegressor
@@ -71,8 +72,7 @@ def test_fit_rf_uqmodel(rf_model_without_processing, sample_data):
 
 
 def test_uq_model_pipeline_for_prediction_interval(
-    sample_data, pis_processor, rf_estimator_params
-):
+    sample_data, pis_processor, rf_estimator_params):
     X_train, y_train, X_test = sample_data
     rf_uqmodel = UQModel(
         RF_UQEstimator,
@@ -90,8 +90,7 @@ def test_uq_model_pipeline_for_prediction_interval(
 
 
 def test_uq_model_pipeline_multi_kpi_after_observation(
-    list_alpha, sample_data, rf_estimator_params
-):
+    list_alpha, sample_data, rf_estimator_params):
     X_train, y_train, X_test = sample_data
     uq_proc = UQKPI_Processor()
     pis_proc = NormalPIs_processor(list_alpha=list_alpha)

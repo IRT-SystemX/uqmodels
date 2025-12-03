@@ -12,6 +12,7 @@ import uqmodels.processing as uqproc
 from uqmodels.modelization.DL_estimator.metalayers import mlp
 from uqmodels.modelization.DL_estimator.utils import set_global_determinism
 from uqmodels.modelization.UQEstimator import UQEstimator, get_UQEstimator_parameters
+from uqmodels.modelization.DL_estimator.data_generator import default_Generator
 from uqmodels.utils import add_random_state, apply_mask, cut, generate_random_state
 
 
@@ -192,10 +193,12 @@ class NN_UQ(UQEstimator):
         if self.type_output == "Deep_ensemble":
             for n, model in enumerate(self.model):
                 cur_name = name + "_" + str(n)
-                new_path = os.path.join(path, cur_name)
+                new_path = os.path.join(path, cur_name+'.weights.h5')
+                os.makedirs(os.path.dirname(new_path), exist_ok=True)
                 model.save_weights(new_path)
         else:
-            new_path = os.path.join(path, name)
+            new_path = os.path.join(path, name+'.weights.h5')
+            os.makedirs(os.path.dirname(new_path), exist_ok=True)
             self.model.save_weights(new_path)
 
         model_tmp = self.model
@@ -205,8 +208,8 @@ class NN_UQ(UQEstimator):
         self.model = model_tmp
 
     def load(self, path, name=None):
-        old_level_info = os.environ["TF_CPP_MIN_LOG_LEVEL"]
-        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+        #old_level_info = os.environ["TF_CPP_MIN_LOG_LEVEL"]
+        #os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
         if name is None:
             name = self.name
 
@@ -217,17 +220,17 @@ class NN_UQ(UQEstimator):
         self.init_neural_network()
         if self.type_output == "Deep_ensemble":
             for n, model in enumerate(self.model):
-                new_path = os.path.join(path, name + "_" + str(n))
+                new_path = os.path.join(path, name + "_" + str(n)+'.weights.h5')
                 model.load_weights(new_path)
         else:
-            new_path = os.path.join(path, name)
+            new_path = os.path.join(path, name+'.weights.h5')
             self.model.load_weights(new_path)
-        os.environ["TF_CPP_MIN_LOG_LEVEL"] = old_level_info
+        #os.environ["TF_CPP_MIN_LOG_LEVEL"] = old_level_info
 
     def compile(self, step=0, optimizer=None, loss=None, metrics=None, **kwarg):
         if optimizer is None:
             l_r = self.training_parameters["l_r"][step]
-            optimizer = tf.keras.optimizers.experimental.Nadam(learning_rate=l_r)
+            optimizer = tf.keras.optimizers.Nadam(learning_rate=l_r)
         kwarg["optimizer"] = optimizer
 
         if loss is None:
@@ -406,7 +409,7 @@ class NN_UQ(UQEstimator):
                         current_model = self.model
 
                     current_model.compile(
-                        optimizer=tf.keras.optimizers.experimental.Nadam(
+                        optimizer=tf.keras.optimizers.Nadam(
                             learning_rate=learning_rate
                         ),
                         loss=loss_,
@@ -419,8 +422,8 @@ class NN_UQ(UQEstimator):
                         validation_data_,
                         validation_steps,
                         steps_per_epoch,
-                        batch_size,
-                    ) = self.dataset_generator(
+                        batch_size
+                        ) = self.dataset_generator(
                         Inputs=apply_mask(Inputs, train_),
                         Targets=apply_mask(Targets, train_),
                         validation_data=(
@@ -461,10 +464,10 @@ class NN_UQ(UQEstimator):
         self,
         Inputs,
         Targets,
-        validation_data,
-        batch_size,
-        shuffle,
-        generator,
+        validation_data=None,
+        batch_size=32,
+        shuffle=False,
+        generator=True,
         test_batch_size=None,
     ):
         """Hold case with or without data generator
@@ -514,6 +517,10 @@ class NN_UQ(UQEstimator):
             steps_per_epoch,
             batch_size,
         )
+    
+    def Build_generator(self, X, y, batch=32, shuffle=True, train=True):
+        return default_Generator(X, y, metamodel=self, batch=batch, shuffle=shuffle, train=train)
+
 
     def predict(self, X, type_output=None, generator=None, **kwargs):
         if type_output is None:
@@ -588,9 +595,6 @@ class NN_UQ(UQEstimator):
             )
 
         return (pred, UQ)
-
-    def Build_generator(self, X, y, batch=32, shuffle=True, train=True):
-        return default_Generator(X, y, self, batch=batch, shuffle=shuffle, train=train)
 
 
 def Drawn_based_prediction(
@@ -843,63 +847,6 @@ def get_params_dict(
     return dict_params
 
 
-class default_Generator(tf.keras.utils.Sequence):
-    def __init__(
-        self, X, y, metamodel, batch=64, shuffle=True, train=True, random_state=None
-    ):
-        self.X = X
-        self.y = y
-        self.len_ = len(y)
-        self.train = train
-        self.random_state = random_state
-        self.shuffle = shuffle
-        self.batch = batch
-
-        # self.scaler = metamodel.scaler
-        self.factory = metamodel.factory
-        self._format = metamodel._format
-        self.rescale = metamodel.rescale
-
-        if shuffle:
-            self.indices = np.arange(self.len_)
-            np.random.seed(self.random_state)
-            np.random.shuffle(self.indices)
-
-    def load(self, idx):
-        idx = idx * self.batch
-
-        seuil_min = max(0, idx - 1)
-        seuil_max = min(idx, self.len_ - 1)
-        Inputs = self.X[seuil_min:seuil_max]
-        Targets = self.y[seuil_min:seuil_max]
-        return (Inputs, Targets)
-
-    def __len__(self):
-        return self.len_
-
-    def __getitem__(self, idx):
-        if self.shuffle:
-            idx = self.indices[idx]
-
-        x, y = self.load(idx)
-        Inputs, Ouputs, _ = self.factory(x, y)
-
-        len_ = len(Inputs)
-        selection = np.zeros(len(Inputs[0])) == 1
-
-        selection[max(0, idx * self.batch) : min(len_, (idx + 1) * self.batch)] = True
-
-        Inputs = apply_mask(Inputs, selection)
-        Ouputs = apply_mask(Ouputs, selection)
-        return Inputs, Ouputs
-
-    # shuffles the dataset at the end of each epoch
-    def on_epoch_end(self):
-        if self.shuffle:
-            np.random.seed(self.random_state)
-            np.random.shuffle(self.indices)
-
-
 def generate_K_fold_removing_index(
     n_model, k_fold, train, data_drop, random_state=None
 ):
@@ -935,7 +882,7 @@ def generate_K_fold_removing_index(
         list_sampletoremove = [[] for i in range(n_model)]
         if data_drop > 0:
             for n, i in enumerate(list_sampletoremove):
-                np.random.seed(add_random_state(random_state, n_fold))
+                np.random.seed(add_random_state(random_state, n))
                 sampletoremove = np.random.choice(
                     np.arange(len(train)),
                     int(len(train) * data_drop),

@@ -264,6 +264,7 @@ def test_mlp_uq_mc_dropout(random_seed=0):
         mlp_params = get_params_dict_mlp_uq(
             X.shape[1], y.shape[1], type_output=type_output
         )
+        print(mlp_params['dim_in'],type(mlp_params['dim_in']))
         training_params = get_training_parameters(
             epochs=[5], b_s=[128], l_r=[0.0005], type_output=type_output
         )

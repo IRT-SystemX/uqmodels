@@ -14,6 +14,8 @@ from sklearn.preprocessing import StandardScaler
 
 EPSILON = sys.float_info.min  # small value to avoid underflow
 
+def identity(*args):
+    return args
 
 def add_random_state(random_state, values):
     """hold addition with possible None values
@@ -121,6 +123,21 @@ def corr_matrix_array(m, a):
     c = (mean_xy - mean_i * mean_t) / (std_i * std_t)
     return c
 
+def mask_corr_feature_target(X, y, v_seuil=0.05):
+    """
+    Return a boolean array indicating which features show a max absolute
+    correlation with any target column above the threshold.
+
+    Parameters
+    ----------
+    X : ndarray (n_samples, n_features)
+    y : ndarray (n_samples, n_targets)
+    v_seuil : float
+    """
+    v_corr = np.abs(corr_matrix_array(X, y[:, 0]))
+    for i in np.arange(y.shape[1] - 1):
+        v_corr = np.maximum(v_corr, np.abs(corr_matrix_array(X, y[:, i + 1])))
+    return v_corr > v_seuil
 
 def coefficients_spreaded(X):
     coefficients = np.array(
