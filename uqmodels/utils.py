@@ -844,3 +844,35 @@ def convolute_1D(array, filter=None):
             print("Inapropriate size of array : hold 1 or 2d array")
             raise ValueError
         return array_convoluted
+
+import copy
+
+def _merge_config(default_cfg, user_cfg):
+    """Return a deep-merged copy of default_cfg updated with user_cfg."""
+    if user_cfg is None:
+        return copy.deepcopy(default_cfg)
+
+    cfg = copy.deepcopy(default_cfg)
+    for key, value in user_cfg.items():
+        if (
+            key in cfg 
+            and isinstance(cfg[key], dict) 
+            and isinstance(value, dict)
+        ):
+            cfg[key].update(value)
+        else:
+            cfg[key] = value
+    return cfg
+
+def _merge_nested(default_cfg, user_cfg):
+    if user_cfg is None:
+        return default_cfg.copy()
+    cfg = default_cfg.copy()
+    for k, v in user_cfg.items():
+        if isinstance(v, dict) and isinstance(cfg.get(k), dict):
+            sub = cfg[k].copy()
+            sub.update(v)
+            cfg[k] = sub
+        else:
+            cfg[k] = v
+    return cfg

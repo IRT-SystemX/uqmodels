@@ -283,6 +283,67 @@ def build_ctx_mask(context: np.ndarray, list_ctx_constraint):
     ctx_flag = np.logical_and.reduce(meta_flag)
     return ctx_flag
 
+def unique_with_nan(arr, return_inverse=True, nan_code=-1):
+    """
+    Encode an array (object or numeric) into integer codes while handling NaNs.
+
+    Parameters
+    ----------
+    arr : np.ndarray
+        1-D (or N-D) input array.
+        • object dtype → may contain strings and np.nan  
+        • numeric dtype → integers or floats (floats may include NaN)
+    return_inverse : bool, default=True
+        If True, returns *codes* aligned with *arr* (see Returns section).
+    nan_code : int, default -1
+        Integer code assigned to NaN positions (only relevant when NaNs exist).
+
+    Returns
+    -------
+    uniques : np.ndarray
+        Sorted unique non-NaN values.
+    codes : np.ndarray
+        Integer codes with the same shape as *arr*:
+        • NaN → *nan_code*  
+        • other values → index in *uniques* (0-based)
+
+    Notes
+    -----
+    * For object arrays, NaNs are detected via ``x != x``.  
+    * For numeric arrays, `np.isnan` is used when dtype is floating.  
+    * Complexity dominated by `np.unique` on the non-NaN subset.
+    """
+    # ------------------------------------------------------------------
+    # Fast path: NUMERIC ARRAY
+    # ------------------------------------------------------------------
+    if arr.dtype != object:
+        if np.issubdtype(arr.dtype, np.floating):
+            # Floats can contain NaNs → treat them explicitly
+            nan_mask = np.isnan(arr)
+            uniques, inv = np.unique(arr[~nan_mask], return_inverse=True)
+            if not return_inverse:
+                return uniques
+            codes = np.full(arr.shape, nan_code, dtype=int)
+            codes[~nan_mask] = inv
+            return uniques, codes
+        else:
+            # Integer (or other numeric without NaN capability)
+            uniques, inv = np.unique(arr, return_inverse=True)
+            return (uniques, inv) if return_inverse else uniques
+
+    # ------------------------------------------------------------------
+    # OBJECT ARRAY: may mix strings and NaNs
+    # ------------------------------------------------------------------
+    nan_mask = arr != arr                       # True only for NaNs
+    uniques, inv = np.unique(arr[~nan_mask], return_inverse=True)
+
+    if not return_inverse:
+        return uniques
+
+    codes = np.full(arr.shape, nan_code, dtype=int)
+    codes[~nan_mask] = inv
+    return uniques, codes
+
 def build_sets(context,
                list_ctx,
                list_ctx_name=None,
@@ -370,65 +431,3 @@ def build_sets(context,
         list_pairs.append(block_infos)
 
     return list_sets, list_pairs
-
-def unique_with_nan(arr, return_inverse=True, nan_code=-1):
-    """
-    Encode an array (object or numeric) into integer codes while handling NaNs.
-
-    Parameters
-    ----------
-    arr : np.ndarray
-        1-D (or N-D) input array.
-        • object dtype → may contain strings and np.nan  
-        • numeric dtype → integers or floats (floats may include NaN)
-    return_inverse : bool, default=True
-        If True, returns *codes* aligned with *arr* (see Returns section).
-    nan_code : int, default -1
-        Integer code assigned to NaN positions (only relevant when NaNs exist).
-
-    Returns
-    -------
-    uniques : np.ndarray
-        Sorted unique non-NaN values.
-    codes : np.ndarray
-        Integer codes with the same shape as *arr*:
-        • NaN → *nan_code*  
-        • other values → index in *uniques* (0-based)
-
-    Notes
-    -----
-    * For object arrays, NaNs are detected via ``x != x``.  
-    * For numeric arrays, `np.isnan` is used when dtype is floating.  
-    * Complexity dominated by `np.unique` on the non-NaN subset.
-    """
-    # ------------------------------------------------------------------
-    # Fast path: NUMERIC ARRAY
-    # ------------------------------------------------------------------
-    if arr.dtype != object:
-        if np.issubdtype(arr.dtype, np.floating):
-            # Floats can contain NaNs → treat them explicitly
-            nan_mask = np.isnan(arr)
-            uniques, inv = np.unique(arr[~nan_mask], return_inverse=True)
-            if not return_inverse:
-                return uniques
-            codes = np.full(arr.shape, nan_code, dtype=int)
-            codes[~nan_mask] = inv
-            return uniques, codes
-        else:
-            # Integer (or other numeric without NaN capability)
-            uniques, inv = np.unique(arr, return_inverse=True)
-            return (uniques, inv) if return_inverse else uniques
-
-    # ------------------------------------------------------------------
-    # OBJECT ARRAY: may mix strings and NaNs
-    # ------------------------------------------------------------------
-    nan_mask = arr != arr                       # True only for NaNs
-    uniques, inv = np.unique(arr[~nan_mask], return_inverse=True)
-
-    if not return_inverse:
-        return uniques
-
-    codes = np.full(arr.shape, nan_code, dtype=int)
-    codes[~nan_mask] = inv
-    return uniques, codes
-

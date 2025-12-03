@@ -328,7 +328,7 @@ class UQModel(BaseEstimator):
             X_norm, y_bis_norm = X, y_bis
         # ---
 
-        if not (skip_UQEstimator):
+        if not skip_UQEstimator:
             self.UQEstimator.fit(
                 X_norm,
                 y_bis_norm,

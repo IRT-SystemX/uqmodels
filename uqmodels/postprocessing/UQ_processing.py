@@ -519,6 +519,7 @@ def process_UQmeasure_to_residu(
     reduc_filter=None,
     roll=0,
     debug=False,
+    epsilon=10e-10
 ):
     """Process UQ measure to residu according prediction, UQmeasure and observation.
 
@@ -638,14 +639,17 @@ def process_UQmeasure_to_residu(
             UQ_bot = cut(UQ[0], min_cut, max_cut)
             UQ_top = cut(UQ[1], min_cut, max_cut)
 
+        if with_born:
+            born_bot = pred
+            born_top = pred
+
         reshape_marker = False
         if len(y.shape) == 1:
             res_norm = res_norm[:, None]
-            if with_born:
-                born_bot = born_bot[:, None]
-                born_top = born_top[:, None]
-
             reshape_marker = True
+            if with_born:
+                born_bot = pred[:,None]
+                born_top = pred[:,None]
 
         for dim in range(y.shape[1]):
             mask = res_norm[:, dim] > 0
@@ -656,15 +660,15 @@ def process_UQmeasure_to_residu(
             res_norm = sign_res * np.power(res_norm, d)
 
             if with_born:
-                born_bot[mask, dim] = born_bot[mask, dim] + E_penalisation - (sigma)
-                born_top[mask, dim] = born_top[mask, dim] - E_penalisation + (sigma)
+                born_bot[mask, dim] = pred + E_penalisation - (sigma)
+                born_top[mask, dim] = pred - E_penalisation + (sigma)
 
             sigma = np.power(UQ_top[~mask, dim], q_var)
-            res_norm[~mask, dim] = res_norm[~mask, dim] / (sigma)
+            res_norm[~mask, dim] = res_norm[~mask, dim] / (sigma+epsilon)
             res_norm = np.sign(res_norm) * np.power(res_norm, d)
             if with_born:
-                born_bot[~mask, dim] = born_bot[~mask, dim] + E_penalisation + (sigma)
-                born_top[~mask, dim] = born_top[~mask, dim] - E_penalisation + (sigma)
+                born_bot[~mask, dim] = pred + E_penalisation + (sigma)
+                born_top[~mask, dim] = pred - E_penalisation + (sigma)
 
         if reshape_marker:
             res_norm = res_norm[:, 0]
