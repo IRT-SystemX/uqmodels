@@ -51,8 +51,8 @@ def _get_tsfresh():
     if not _TSFRESH_IMPORTED:
         _ensure_numba_cpu_only()
         try:
-            import tsfresh  # noqa: WPS433
-            from tsfresh.feature_extraction import (  # noqa: WPS433
+            import tsfresh 
+            from tsfresh.feature_extraction import (
                 EfficientFCParameters as _EFP,
             )
         except ImportError as exc:

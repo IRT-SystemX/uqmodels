@@ -54,14 +54,14 @@ window.addEventListener('DOMContentLoaded', function () {
                <span class="count sev-1">
                   1
                </span>
-               <strong>F401:</strong> '...utils.generate_random_state' imported but unused
+               <strong>F401:</strong> 'uqmodels.utils.generate_random_state' imported but unused
                
             </a>
             <ul class="details">
             <li>
                
                <a href="uqmodels.modelization.DL_estimator.metalayers.source.html#l9">
-                  <tt><i>9</i> <span class="kn">from</span><span class="w"> </span><span class="nn">...utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">generate_random_state</span><span class="p">,</span> <span class="n">get_fold_nstep</span></tt>
+                  <tt><i>9</i> <span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">generate_random_state</span><span class="p">,</span> <span class="n">get_fold_nstep</span></tt>
                </a>
             </li>
             </ul>
@@ -78,18 +78,18 @@ window.addEventListener('DOMContentLoaded', function () {
             <ul class="details">
             <li>
                
-               <a href="uqmodels.modelization.DL_estimator.metalayers.source.html#l229">
-                  <tt><i>229</i>                 <span class="n">inputs</span><span class="p">[:,</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="o">+</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="p">:][:,</span> <span class="kc">None</span><span class="p">]</span></tt>
+               <a href="uqmodels.modelization.DL_estimator.metalayers.source.html#l230">
+                  <tt><i>230</i>                 <span class="n">inputs</span><span class="p">[:,</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="o">+</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="p">:][:,</span> <span class="kc">None</span><span class="p">]</span></tt>
                </a>
             </li><li>
                
-               <a href="uqmodels.modelization.DL_estimator.metalayers.source.html#l237">
-                  <tt><i>237</i>             <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="o">+</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="p">:],</span></tt>
+               <a href="uqmodels.modelization.DL_estimator.metalayers.source.html#l238">
+                  <tt><i>238</i>             <span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">padding</span><span class="p">)</span> <span class="o">+</span> <span class="n">size_subseq</span><span class="p">,</span> <span class="p">:],</span></tt>
                </a>
             </li><li>
                
-               <a href="uqmodels.modelization.DL_estimator.metalayers.source.html#l1207">
-                  <tt><i>1207</i>         <span class="n">Z</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">new_Z</span><span class="p">,</span> <span class="n">ZProcessing</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></tt>
+               <a href="uqmodels.modelization.DL_estimator.metalayers.source.html#l1208">
+                  <tt><i>1208</i>         <span class="n">Z</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">new_Z</span><span class="p">,</span> <span class="n">ZProcessing</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_z</span> <span class="p">:]],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></tt>
                </a>
             </li>
             </ul>

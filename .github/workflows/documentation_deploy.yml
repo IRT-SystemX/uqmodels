@@ -27,15 +27,22 @@ jobs:
         sudo apt-get update && sudo apt-get install -y libxml2-utils
         sudo apt-get update && sudo apt-get install -y pandoc
         python -m pip install --upgrade pip
-        pip install -r scripts/docs_requirements.txt
-        pip install -r scripts/quality_requirements.txt
-        pip install .
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        uv pip install -r scripts/docs_requirements.txt --system
+        uv pip install -r scripts/quality_requirements.txt --system
+        uv pip install . --system
        
     - name: Run quality check and test coverage
       run: |
         cd scripts 
         chmod +x run_quality_check.sh
         ./run_quality_check.sh
+        cd ..
+    - name: Launch tests coverage
+      run: |
+        cd scripts 
+        chmod +x run_test_coverage.sh
+        ./run_test_coverage.sh
         cd ..
     - name : Build the documentation
       run: |

@@ -2,6 +2,11 @@
 cd ..
 mkdir -p _static/pylint
 mkdir -p _static/flake8
+
+# Ruff check
+
+ruff check uqmodels/ --exit-zero > scripts/ruff_report.txt
+
 # Lancement de flake8
 flake8 uqmodels  --config=scripts/.flake8 --format=html --htmldir=_static/flake8 --exit-zero 
 SEVERITY=$(xmllint --html --xpath "//*[@id='masthead']" ./_static/flake8/index.html | awk -F 'class="|"/>' '{print $2}')
@@ -17,20 +22,6 @@ PYLINT_SCORE=$(sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p' _st
 pylint uqmodels --rcfile=scripts/.pylintrc --output-format=pylint_gitlab.GitlabPagesHtmlReporter --exit-zero > _static/pylint/index.html 
 anybadge --overwrite --label pylint --value=$PYLINT_SCORE --file=_static/pylint/pylint.svg 4=red 6=orange 8=yellow 10=green
 
-# Ruff check
 
-ruff check uqmodels/ > scripts/ruff_report.txt 
-
-# Test coverage
-
-echo "Running test coverage..."
-coverage run -m pytest tests
-coverage report > scripts/coverage_report.txt
-mkdir -p _static/coverage  
-COVERAGE_SCORE=$(grep 'TOTAL' scripts/coverage_report.txt | awk '{print $4}' | sed 's/%//')
-echo "Coverage score is $COVERAGE_SCORE"
-anybadge --overwrite --label coverage --value=$COVERAGE_SCORE --file=_static/coverage/coverage.svg 50=red 60=orange 75=yellow 100=green
-coverage html -d _static/coverage
-rm -f scripts/coverage_report.txt
 
 
