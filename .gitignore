@@ -21,5 +21,3 @@ docs/source/uqmodels*.rst
 
 # Folder Demo & TP
 demo/
-uqmodels/modelization/TF_estimator
-

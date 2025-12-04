@@ -8,6 +8,7 @@ import scipy
 import uqmodels.postprocessing.UQ_processing as UQ_proc
 from uqmodels.check import dim_1d_check
 import uqmodels.visualization.aux_visualization as auxvisu
+from uqmodels.visualization.aux_visualization import provide_cmap
 from uqmodels.visualization.old_visualisation import plot_prediction_interval,plot_sorted_pi,visu_latent_space,show_dUQ_refinement
 
 

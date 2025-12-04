@@ -1,8 +1,10 @@
-import os
+
 import numpy as np
 import pytest
+import warnings
+warnings.filterwarnings("ignore")
 from sklearn.ensemble import RandomForestRegressor
-
+from uqmodels.UQModel import UQModel
 from uqmodels.modelization.ML_estimator.random_forest_UQ import RF_UQEstimator
 from uqmodels.postprocessing.UQKPI_Processor import (
     Anomscore_processor,
@@ -10,8 +12,6 @@ from uqmodels.postprocessing.UQKPI_Processor import (
     NormalPIs_processor,
     UQKPI_Processor,
 )
-from uqmodels.UQModel import UQModel
-
 
 @pytest.fixture
 def list_alpha():

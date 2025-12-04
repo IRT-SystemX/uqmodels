@@ -2,9 +2,14 @@ import os
 import pickle
 import numpy as np
 import pytest
+
+import warnings
+warnings.filterwarnings("ignore")
+
 from sklearn.ensemble import RandomForestRegressor
 
 import uqmodels.postprocessing.UQ_processing as UQ_Process
+import uqmodels.visualization.visualization as visu
 import uqmodels.postprocessing.UQKPI_Processor as UQProc
 from uqmodels.evaluation.metrics import (
     Generic_metric,
@@ -138,11 +143,9 @@ def test_using_uqestimator_and_processing_fn_or_procesor_object(random_seed):
         assert abs(value - value_true) / value_true < 1.0e-3
     for value, value_true in zip(value2, value2_true):
         assert abs(value - value_true) / value_true < 1.0e-3
+    
 
-
-@pytest.mark.dependency(
-    depends=["test_using_uqestimator_and_processing_fn_or_procesor_object"]
-)
+@pytest.mark.dependency(depends=["test_using_uqestimator_and_processing_fn_or_procesor_object"])
 def test_uqmodel_pipeline_for_predictive_interval():
     global RF_UQModel
     PIs_proc = UQProc.NormalPIs_processor(
@@ -206,13 +209,17 @@ def test_using_uqmodel_pipeline_for_multikpi_at_inference_and_after_observation(
     assert KPI_anom.shape == (12000, 3)
     assert abs(KPI_anom.mean() - 0.0018677646364309293) < 1.0e-2
     assert abs(KPI_anom.std() - 0.927062229244036) < 1.0e-2
+    
+    f_obs= np.arange(len(y))[0:500]
+    visu.plot_pi(y[:,0],pred[:,0],PIs[0][:,0],PIs[-1][:,0],mode_res=False,f_obs = f_obs,name = 'Prediction with uncertainty',size = (15, 6))
+    visu.plot_pi(y[:,0],pred[:,0],PIs[0][:,0],PIs[-1][:,0],mode_res=True,f_obs = f_obs,name = 'Prediction with uncertainty',size = (15, 6))
+    visu.plot_anom_matrice(score=KPI_anom,true_label=None,f_obs=f_obs,vmin=-4,vmax=4)
+    output = (pred,UQ)
+    list_percent = [0.5, 0.8, 0.95, 0.98, 0.995, 1]
+    visu.uncertainty_plot(y,output,context=None,size=(18,6),f_obs=f_obs,name='Pred with UQmeasure',mode_res=False,dim=np.arange(y.shape[1]),confidence_lvl=Elvl,type_UQ='var_A&E',list_percent=list_percent)
 
 
-@pytest.mark.dependency(
-    depends=[
-        "test_using_uqmodel_pipeline_for_multikpi_at_inference_and_after_observation"
-    ]
-)
+@pytest.mark.dependency(depends=["test_using_uqmodel_pipeline_for_multikpi_at_inference_and_after_observation"])
 def test_visualisation():
     global output
     output = pred, UQ
@@ -235,10 +242,7 @@ def test_visualisation():
             assert abs(value - value_true) / value_true < 1.0e-3
         else:
             assert abs(value - value_true) < 1.0e-3
-
-
-@pytest.mark.dependency(depends=["test_vizualisation"])
-def test_vizualisation_zoom():
+            
     list_ctx_constraint = None
     list_metrics = [
         Generic_metric(
