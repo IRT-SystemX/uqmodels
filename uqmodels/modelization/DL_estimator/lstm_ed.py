@@ -1,7 +1,7 @@
-import numpy as np
+
 import tensorflow as tf
 import tensorflow.keras.backend as K
-from tensorflow.keras import Input, layers
+from tensorflow.keras import layers
 
 from uqmodels.modelization.DL_estimator.data_embedding import (
     Factice_Time_Extension,
@@ -9,16 +9,12 @@ from uqmodels.modelization.DL_estimator.data_embedding import (
     Mouving_Windows_Embedding,
 )
 from uqmodels.modelization.DL_estimator.neural_network_UQ import (
-    NN_UQ,
-    get_training_parameters,
-    get_UQEstimator_parameters,
-    mlp,
+    NN_UQ
 )
-
+from uqmodels.modelization.DL_estimator.metalayers import mlp
 from uqmodels.modelization.DL_estimator.utils import set_global_determinism
 from uqmodels.modelization.DL_estimator.data_generator import Folder_Generator
-
-from uqmodels.utils import add_random_state, apply_mask, stack_and_roll
+from uqmodels.utils import add_random_state, stack_and_roll
 
 # Basic memory module
 
@@ -193,7 +189,7 @@ def build_lstm_stacked(
     # Preprocessing computation
     Data = MWE(Y_past)
     # Concat with cat features
-    print(type(CTX_inputs),type(Data))
+    print(type(CTX_inputs), type(Data))
     if with_ctx_input:
         Data = layers.Concatenate(axis=-1)([CTX_inputs, Data])
 
@@ -373,7 +369,7 @@ class Lstm_ED_UQ(NN_UQ):
                 step=step,
             )
         # Cast to tuple :
-        if(type(inputs) is list):
+        if (type(inputs) is list):
             inputs = tuple(inputs)
 
         return inputs, new_y, mask

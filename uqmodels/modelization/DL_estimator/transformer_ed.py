@@ -1,10 +1,6 @@
-import keras.backend as K
-import numpy as np
 import tensorflow as tf
 from keras.layers import TimeDistributed
-from tensorflow import keras
 from tensorflow.keras import Input, layers
-
 from uqmodels.modelization.DL_estimator.data_embedding import (
     Factice_Time_Extension,
     Mouving_conv_Embedding,
@@ -12,15 +8,10 @@ from uqmodels.modelization.DL_estimator.data_embedding import (
     PositionalEmbedding,
 )
 from uqmodels.modelization.DL_estimator.neural_network_UQ import (
-    NN_UQ,
-    get_training_parameters,
-    get_UQEstimator_parameters,
-    mlp,
-)
+    NN_UQ)
+from uqmodels.modelization.DL_estimator.metalayers import mlp
 from uqmodels.modelization.DL_estimator.utils import set_global_determinism
-
 from uqmodels.modelization.DL_estimator.data_generator import Folder_Generator
-
 from uqmodels.utils import add_random_state, stack_and_roll
 
 

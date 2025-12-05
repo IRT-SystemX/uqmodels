@@ -10,13 +10,8 @@ import sklearn
 from scipy.interpolate import interp1d
 from scipy.sparse.csgraph import connected_components
 from sklearn.model_selection import TimeSeriesSplit
-
-from uqmodels.utils import mask_corr_feature_target
 import uqmodels.preprocessing.structure as pre_struc
 import uqmodels.utils as ut
-
-import numpy as np
-import pandas as pd
 import inspect
 from sklearn.ensemble import RandomForestRegressor
 
@@ -65,6 +60,7 @@ def select_features_from_FI(X, y, model="RF", threesold=0.01, **kwargs):
         features_mask = estimator.feature_importances_ > threesold
     return features_mask
 
+
 def select_data_and_context(
     data, context=None, ind_data=None, ind_context=None, **kwargs
 ):
@@ -103,6 +99,7 @@ def select_data_and_context(
         data_selected = pd.concat(data_selected, axis=1)
     return data_selected.values
 
+
 def build_window_representation(y, step=1, window=10):
     if step > 1:
         mask = np.arange(len(y)) % step == step - 1
@@ -127,6 +124,8 @@ def build_window_representation(y, step=1, window=10):
     return (df_ts, y_target)
 
 # Target selection based on corrcoef
+
+
 def compute_corr_and_filter(data):
     mat_corr = np.corrcoef(data.T)
     signal_to_drop = np.isnan(mat_corr[0])
@@ -604,8 +603,8 @@ def rolling_statistics(
             column = str(column)
             # Max is already named extremum
             data["extremum_" + column] = np.maximum(
-                np.abs(data["min_" + column].values-data["mean_" + column].values),
-                np.abs(data["extremum_" + column].values-data["mean_" + column].values),
+                np.abs(data["min_" + column].values - data["mean_" + column].values),
+                np.abs(data["extremum_" + column].values - data["mean_" + column].values),
             )
             data.drop(["min_" + column], axis=1, inplace=True)
 
@@ -703,7 +702,7 @@ def Past_Moving_window_mapping(array, deta, window_size=None):
         window_size = deta
 
     for i in range(int(np.floor(len(array) / deta))):
-        yield array[max(0, i * deta - window_size) : i * deta + 1]
+        yield array[max(0, i * deta - window_size): i * deta + 1]
 
 
 def identity(x, **kwargs):
@@ -720,7 +719,7 @@ def auto_corr_reduce(set_):
     mean = np.mean(set_)
     var = np.var(set_)
     set_ = set_ - mean
-    acorr = np.correlate(set_, set_, "full")[len(set_) - 1 :]
+    acorr = np.correlate(set_, set_, "full")[len(set_) - 1:]
     acorr = acorr / var / len(set_)
     return acorr
 
@@ -742,8 +741,8 @@ def corrcoef_reduce(set_):
 
 def fft_reduce(set_):
     fft = np.fft.fft(set_.T)
-    energy = np.abs(fft)[:, 0 : int(len(set_) / 2)] / len(set_)
-    phase = np.angle(fft)[:, 0 : int(len(set_) / 2)]
+    energy = np.abs(fft)[:, 0: int(len(set_) / 2)] / len(set_)
+    phase = np.angle(fft)[:, 0: int(len(set_) / 2)]
     carac = np.concatenate([energy, phase], axis=1)
     return carac
 
@@ -753,14 +752,14 @@ def Regular_Moving_window_mapping(array, deta, window_size, mode="left", **kwarg
         window_size = deta
     for i in range(int(np.floor(len(array) / deta))):
         if mode == "left":
-            yield array[i * deta : i * deta + window_size]
+            yield array[i * deta: i * deta + window_size]
         elif mode == "center":
             size_bot = int(np.ceil(window_size / 2))
             size_top = int(np.floor(window_size / 2))
-            yield array[i * deta - size_bot : i * deta + size_top]
+            yield array[i * deta - size_bot: i * deta + size_top]
 
         elif mode == "right":
-            yield array[i * deta - (window_size - 1) : i * deta + 1]
+            yield array[i * deta - (window_size - 1): i * deta + 1]
 
         else:
             raise ("error mode")

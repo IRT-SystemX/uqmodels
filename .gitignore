@@ -21,3 +21,6 @@ docs/source/uqmodels*.rst
 
 # Folder Demo & TP
 demo/
+
+# Examples generated model folder
+examples/model

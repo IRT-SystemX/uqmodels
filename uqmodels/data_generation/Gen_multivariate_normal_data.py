@@ -1,11 +1,8 @@
 import math
-
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 from scipy.signal import convolve2d, savgol_filter
-
-from uqmodels.processing import write
 
 
 def base_cos_freq(array, freq):
@@ -26,7 +23,6 @@ def trunc(x):
 
 # Motifs generation
 def gen_motif(verbose=0, dim=(400, 20, 3), seed=0):
-    dim_n, dim_t, dim_g = dim
     dim_n, dim_t, dim_g = dim
     int(dim_g * 2)
     Pattern_day_mean = []
@@ -120,7 +116,7 @@ def gen_cat_contexte(size=5, effect=0.2, per=0.1, dim=(400, 20, 3), seed=0):
     n_event = int((per * (dim_n * dim_t)) / size)
     impact_ctx_mean = np.zeros((dim_t * dim_n, dim_g))
     for n, i in enumerate(rng.choice(np.arange(dim_n * dim_t - size), n_event, False)):
-        impact_ctx_mean[i : (i + size), :] += effect
+        impact_ctx_mean[i: (i + size), :] += effect
     return impact_ctx_mean
 
 
@@ -206,7 +202,7 @@ def gen_fake_anom(n_anom, motif, dim=(400, 20, 3)):
         i = int(i)
         anom[i] = i
         anom_list.append((i // dim_t, i % dim_t, i, 1))
-        impact_anom[i : (i + len_motif), :] += (motif[ttype[n] - 1]).T
+        impact_anom[i: (i + len_motif), :] += (motif[ttype[n] - 1]).T
     return (anom_list, anom, impact_anom)
 
 
@@ -227,7 +223,7 @@ def gen_anom(n_anom, motif, dim=(400, 20, 3), seed=0):
         anom[i] = type_ * (1 + (n % 2))
         anom_list.append((i // dim_t, i % dim_t, type_, n % 2))
         # impact_anom[i:(i+len_motif),:]+=(motif[type_-1]*(1+(n%2)*0.5)).T
-        impact_anom[i : (i + len_motif), :] += (motif[type_ - 1]).T
+        impact_anom[i: (i + len_motif), :] += (motif[type_ - 1]).T
     return (anom_list, anom, impact_anom)
 
 
@@ -393,7 +389,7 @@ def core_gen(
     influence_ctx += np.array(cats_ctx).sum(axis=0)
     layer.append(cats_ctx)
 
-    influence_ctx = np.sqrt(np.abs(1 + ((influence_ctx - influence_ctx.mean()))))
+    influence_ctx = np.sqrt(np.abs(1 + (influence_ctx - influence_ctx.mean())))
     influence_ctx[influence_ctx < 0.05] = 0.05
     inf_max = np.percentile(influence_ctx, 99.5)
     influence_ctx[influence_ctx > inf_max] = inf_max
@@ -568,7 +564,7 @@ def core_gen(
 def moving_average(a, n):
     ret = np.cumsum(a, dtype=float)
     ret[n:] = ret[n:] - ret[:-n]
-    return np.concatenate([ret[: n - 1] / (np.arange(n - 1) + 1), ret[n - 1 :] / n])
+    return np.concatenate([ret[: n - 1] / (np.arange(n - 1) + 1), ret[n - 1:] / n])
 
 
 def factory(

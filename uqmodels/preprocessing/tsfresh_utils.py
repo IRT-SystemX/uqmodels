@@ -13,15 +13,16 @@ import numpy as np
 import pandas as pd
 
 from uqmodels.preprocessing.preprocessing import (
-	select_features_from_FI,
+    select_features_from_FI,
     select_data_and_context,
-	mask_corr_feature_target,
-	build_window_representation)
+    build_window_representation)
 
+from uqmodels.utils import mask_corr_feature_target
 
 _TSFRESH_IMPORTED = False
 _tsfresh = None
 _EfficientFCParameters = None
+
 
 def _ensure_numba_cpu_only():
     """Désactive Numba CUDA par défaut, sauf si l'utilisateur a explicitement opté pour le contraire."""
@@ -51,7 +52,7 @@ def _get_tsfresh():
     if not _TSFRESH_IMPORTED:
         _ensure_numba_cpu_only()
         try:
-            import tsfresh 
+            import tsfresh
             from tsfresh.feature_extraction import (
                 EfficientFCParameters as _EFP,
             )
@@ -69,17 +70,18 @@ def _get_tsfresh():
 
     return _tsfresh, _EfficientFCParameters
 
+
 def select_tsfresh_params(
     list_keys=["variance", "skewness", "fft", "cwt", "fourrier", "mean" "trend"]
 ):
     tsfresh, EfficientFCParameters = _get_tsfresh()
-    
     dict_params = dict()
     for key in list_keys:
         for k in EfficientFCParameters().keys():
             if key in k:
                 dict_params[k] = EfficientFCParameters()[k]
     return dict_params
+
 
 def fit_tsfresh_feature_engeenering(
     data,

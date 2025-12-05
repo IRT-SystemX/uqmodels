@@ -430,7 +430,7 @@ class Lstm(UQEstimator):
                         lambda x: K.concatenate(x)[:, :, None, :], name="Concat_T_futur"
                     )(
                         [
-                            Z_processing[:, i : n_step_past + i],
+                            Z_processing[:, i: n_step_past + i],
                             z_lag_futur[:, :, 0, :],
                             z_lstm_dec[:, :, 0, :],
                         ]
@@ -1029,7 +1029,7 @@ class LSTM_ED_Generator(tf.keras.utils.Sequence):
         selection = np.zeros(len(Inputs[0])) == 1
 
         if idx * self.batch_min < (self.size_subseq_enc + self.size_window_past):
-            selection[idx * self.batch_min : idx * self.batch_min + self.batch_min] = (
+            selection[idx * self.batch_min: idx * self.batch_min + self.batch_min] = (
                 True
             )
 
@@ -1038,7 +1038,7 @@ class LSTM_ED_Generator(tf.keras.utils.Sequence):
             if (idx + 1) * self.batch_min + set_off > self.lenX:
                 corr = ((idx + 1) * self.batch_min + set_off) - self.lenX
             selection[
-                seq_len - self.batch_min - set_off + corr : seq_len - set_off + corr
+                seq_len - self.batch_min - set_off + corr: seq_len - set_off + corr
             ] = True
 
         Inputs = apply_mask(Inputs, selection)

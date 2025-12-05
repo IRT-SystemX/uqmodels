@@ -2,7 +2,7 @@ import math
 import sys
 from copy import deepcopy
 from typing import Iterable
-
+import copy
 import numpy as np
 import scipy
 import tensorflow as tf
@@ -14,8 +14,10 @@ from sklearn.preprocessing import StandardScaler
 
 EPSILON = sys.float_info.min  # small value to avoid underflow
 
+
 def identity(*args):
     return args
+
 
 def add_random_state(random_state, values):
     """hold addition with possible None values
@@ -123,6 +125,7 @@ def corr_matrix_array(m, a):
     c = (mean_xy - mean_i * mean_t) / (std_i * std_t)
     return c
 
+
 def mask_corr_feature_target(X, y, v_seuil=0.05):
     """
     Return a boolean array indicating which features show a max absolute
@@ -138,6 +141,7 @@ def mask_corr_feature_target(X, y, v_seuil=0.05):
     for i in np.arange(y.shape[1] - 1):
         v_corr = np.maximum(v_corr, np.abs(corr_matrix_array(X, y[:, i + 1])))
     return v_corr > v_seuil
+
 
 def coefficients_spreaded(X):
     coefficients = np.array(
@@ -845,7 +849,6 @@ def convolute_1D(array, filter=None):
             raise ValueError
         return array_convoluted
 
-import copy
 
 def _merge_config(default_cfg, user_cfg):
     """Return a deep-merged copy of default_cfg updated with user_cfg."""
@@ -855,14 +858,15 @@ def _merge_config(default_cfg, user_cfg):
     cfg = copy.deepcopy(default_cfg)
     for key, value in user_cfg.items():
         if (
-            key in cfg 
-            and isinstance(cfg[key], dict) 
+            key in cfg
+            and isinstance(cfg[key], dict)
             and isinstance(value, dict)
         ):
             cfg[key].update(value)
         else:
             cfg[key] = value
     return cfg
+
 
 def _merge_nested(default_cfg, user_cfg):
     if user_cfg is None:

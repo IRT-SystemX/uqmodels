@@ -10,7 +10,8 @@ from uqmodels.evaluation.evaluation import evaluate
 from uqmodels.evaluation.metrics import Generic_metric, UQ_average_coverage, rmse
 from uqmodels.preprocessing.Custom_Preprocessor import dict_to_TS_Dataset
 from uqmodels.processing import Data_loader, Pipeline
-
+from uqmodels.modelization.DL_estimator.neural_network_UQ import get_training_parameters
+from uqmodels.modelization.UQEstimator import UQEstimator, get_UQEstimator_parameters
 
 # Loop over all files and delete them one by one
 def delete_folder(path):
@@ -223,10 +224,8 @@ def test_mlp_uq_mc_dropout(random_seed=0):
     from uqmodels.modelization.DL_estimator.neural_network_UQ import (
         get_training_parameters,
     )
-    from uqmodels.modelization.DL_estimator.neural_network_UQ import (
-        get_UQEstimator_parameters as get_UQEstimator_parameters,
-    )
-    from uqmodels.modelization.DL_estimator.neural_network_UQ import mlp
+    from uqmodels.modelization.UQEstimator import get_UQEstimator_parameters as get_UQEstimator_parameters
+    from uqmodels.modelization.DL_estimator.metalayers import mlp
 
     values_true = {
         "MC_Dropout": {
@@ -313,13 +312,10 @@ def test_mlp_uq_mc_dropout(random_seed=0):
 @pytest.mark.dependency(depends=["test_data_load_and_preprocessing"])
 def test_lstm_ed_uq_as_uqestimator(random_seed=0):
     from uqmodels.custom_UQModel import UQModel, UQModel_KPI
+    
     from uqmodels.modelization.DL_estimator.lstm_ed import Lstm_ED_UQ
     from uqmodels.modelization.DL_estimator.lstm_ed import (
         get_params_dict as get_params_dict_lstm,
-    )
-    from uqmodels.modelization.DL_estimator.lstm_ed import (
-        get_training_parameters,
-        get_UQEstimator_parameters,
     )
 
     values_true = {
@@ -422,10 +418,6 @@ def test_transformer_ed_uq_as_uqestimator(random_seed=0):
     from uqmodels.modelization.DL_estimator.transformer_ed import Transformer_ED_UQ
     from uqmodels.modelization.DL_estimator.transformer_ed import (
         get_params_dict as get_params_dict_transformer,
-    )
-    from uqmodels.modelization.DL_estimator.transformer_ed import (
-        get_training_parameters,
-        get_UQEstimator_parameters,
     )
 
     # to actualise

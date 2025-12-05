@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 import random
 
+
 def sum_part_prod(array):
     """compute sum_part_prod
     array = [k1,...,kn]
@@ -50,12 +51,14 @@ def find_conv_kernel(window_initial, size_final, list_strides):
     list_kernel[-1] = int(last_kernel)
     return (list_kernel, list_strides)
 
+
 def set_seeds(seed=None):
     if seed is not None:
         os.environ["PYTHONHASHSEED"] = str(seed)
         random.seed(seed)
         tf.random.set_seed(seed)
         np.random.seed(seed)
+
 
 def set_global_determinism(seed=None):
     if seed is not None:

@@ -18,8 +18,7 @@ from sklearn.gaussian_process.kernels import (
 
 from uqmodels.modelization.UQEstimator import (
     MeanVarUQEstimator,
-    QuantileUQEstimator,
-    get_UQEstimator_parameters,
+    QuantileUQEstimator
 )
 from uqmodels.utils import add_random_state
 

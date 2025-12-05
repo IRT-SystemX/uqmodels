@@ -5,8 +5,7 @@ from keras import Model, layers
 from keras.layers import RNN, Dense, Dropout, Lambda, Layer, LSTMCell, TimeDistributed
 
 from uqmodels.modelization.DL_estimator.utils import set_global_determinism
-
-from uqmodels.utils import add_random_state, generate_random_state, get_fold_nstep
+from uqmodels.utils import add_random_state, get_fold_nstep
 
 
 # EDL head
@@ -227,7 +226,7 @@ def stack_and_roll_layer(
     elif format == "np_slice":  # np slice based
         for i in range(n_step):
             slide_tensor.append(
-                inputs[:, (i * padding) : (i * padding) + size_subseq, :][:, None]
+                inputs[:, (i * padding): (i * padding) + size_subseq, :][:, None]
             )
         return Lambda(lambda x: K.concatenate(x, axis=1), name=name + "_rollstack")(
             slide_tensor
@@ -235,7 +234,7 @@ def stack_and_roll_layer(
 
     elif format == "tf_map":  # tf map based
         x = tf.map_fn(
-            lambda i: inputs[:, (i * padding) : (i * padding) + size_subseq, :],
+            lambda i: inputs[:, (i * padding): (i * padding) + size_subseq, :],
             tf.range(n_step),
             dtype=tf.float32,
         )
@@ -1205,7 +1204,7 @@ class Add_query_to_Z_Processing_with_state(Layer):
         """
         Z = tf.concat([ZProcessing[:, :, :, : self.dim_z], Query], axis=-1)
         new_Z = TimeDistributed(TimeDistributed(self.layer), name="wtf")(Z)
-        Z = tf.concat([new_Z, ZProcessing[:, :, :, self.dim_z :]], axis=-1)
+        Z = tf.concat([new_Z, ZProcessing[:, :, :, self.dim_z:]], axis=-1)
         return Z
 
 

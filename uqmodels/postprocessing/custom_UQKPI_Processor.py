@@ -1,12 +1,6 @@
-from copy import deepcopy
-
 import numpy as np
-
 import uqmodels.postprocessing.anomaly_processing as anom_proc
-import uqmodels.postprocessing.UQ_processing as UQ_proc
 import uqmodels.postprocessing.UQKPI_Processor as UQKPI_proc
-from uqmodels.processing import Processor
-from uqmodels.utils import apply_middledim_reduction
 
 
 class Multiscale_Anomscore_processor(UQKPI_proc.UQKPI_Processor):
