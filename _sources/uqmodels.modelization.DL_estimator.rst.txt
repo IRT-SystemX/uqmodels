@@ -28,6 +28,14 @@ uqmodels.modelization.DL\_estimator.data\_embedding module
    :undoc-members:
    :show-inheritance:
 
+uqmodels.modelization.DL\_estimator.data\_generator module
+----------------------------------------------------------
+
+.. automodule:: uqmodels.modelization.DL_estimator.data_generator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 uqmodels.modelization.DL\_estimator.loss module
 -----------------------------------------------
 

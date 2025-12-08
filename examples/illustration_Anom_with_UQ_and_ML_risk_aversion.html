@@ -192,11 +192,25 @@ plt.show()
 <br/></pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2025-12-05 15:47:49.193300: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-12-05 15:47:49.209978: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:477] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1764949669.227545  392777 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1764949669.232737  392777 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-12-05 15:47:49.251165: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_3_0.png" src="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_3_0.png" />
+<img alt="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_3_1.png" src="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_3_1.png" />
 </div>
 </div>
 <div class="nbinput docutils container">
@@ -245,7 +259,7 @@ if(True):
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Root mean square [array([0.15826019]), array([0.22640534])]
+Root mean square [array([0.15826065]), array([0.22641012])]
 Root mean square [array([0.99842857]), array([0.954])]
 </pre></div></div>
 </div>
@@ -367,7 +381,7 @@ plt.show()
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-target [0.025, 0.16, 0.84, 0.975] empirique [0.0081, 0.1086, 0.886, 0.9914]
+target [0.025, 0.16, 0.84, 0.975] empirique [0.008, 0.1085, 0.8859, 0.9914]
 target elvl [0.5, 0.8, 0.95, 0.98, 0.995, 1] empirique Elvl [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
 </pre></div></div>
 </div>
@@ -408,22 +422,6 @@ b_e 0.001 0.001
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_5.png" src="../_images/examples_illustration_Anom_with_UQ_and_ML_risk_aversion_5_5.png" />
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
 </div>
 </div>
 </section>

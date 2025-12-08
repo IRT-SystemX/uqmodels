@@ -65,6 +65,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#uqmodels.UQModel.UQModel"><code class="docutils literal notranslate"><span class="pre">UQModel</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="#module-uqmodels.check">uqmodels.check module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#uqmodels.check.dim_1d_check"><code class="docutils literal notranslate"><span class="pre">dim_1d_check()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#module-uqmodels.custom_UQModel">uqmodels.custom_UQModel module</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#uqmodels.custom_UQModel.MultiDEEPUQModel"><code class="docutils literal notranslate"><span class="pre">MultiDEEPUQModel</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#uqmodels.custom_UQModel.MultiUQModel"><code class="docutils literal notranslate"><span class="pre">MultiUQModel</span></code></a></li>
@@ -114,6 +118,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#uqmodels.utils.generate_random_state"><code class="docutils literal notranslate"><span class="pre">generate_random_state()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#uqmodels.utils.get_coeff"><code class="docutils literal notranslate"><span class="pre">get_coeff()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#uqmodels.utils.get_fold_nstep"><code class="docutils literal notranslate"><span class="pre">get_fold_nstep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uqmodels.utils.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#uqmodels.utils.mask_corr_feature_target"><code class="docutils literal notranslate"><span class="pre">mask_corr_feature_target()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#uqmodels.utils.mixture_quantile"><code class="docutils literal notranslate"><span class="pre">mixture_quantile()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#uqmodels.utils.norm_signal"><code class="docutils literal notranslate"><span class="pre">norm_signal()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#uqmodels.utils.propagate"><code class="docutils literal notranslate"><span class="pre">propagate()</span></code></a></li>
@@ -202,6 +208,7 @@
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.evaluation.html#uqmodels.evaluation.metrics.UQ_heteroscedasticity_ratio"><code class="docutils literal notranslate"><span class="pre">UQ_heteroscedasticity_ratio()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.evaluation.html#uqmodels.evaluation.metrics.UQ_sharpness"><code class="docutils literal notranslate"><span class="pre">UQ_sharpness()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.evaluation.html#uqmodels.evaluation.metrics.anom_score"><code class="docutils literal notranslate"><span class="pre">anom_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.evaluation.html#uqmodels.evaluation.metrics.base_rmse"><code class="docutils literal notranslate"><span class="pre">base_rmse()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.evaluation.html#uqmodels.evaluation.metrics.build_ctx_mask"><code class="docutils literal notranslate"><span class="pre">build_ctx_mask()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.evaluation.html#uqmodels.evaluation.metrics.calibrate_var"><code class="docutils literal notranslate"><span class="pre">calibrate_var()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.evaluation.html#uqmodels.evaluation.metrics.confidence_score"><code class="docutils literal notranslate"><span class="pre">confidence_score()</span></code></a></li>
@@ -221,6 +228,7 @@
 <li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.Lstm_WS_ED">uqmodels.modelization.DL_estimator.Lstm_WS_ED module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.baseline_models">uqmodels.modelization.DL_estimator.baseline_models module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.data_embedding">uqmodels.modelization.DL_estimator.data_embedding module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.data_generator">uqmodels.modelization.DL_estimator.data_generator module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.loss">uqmodels.modelization.DL_estimator.loss module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.lstm_ed">uqmodels.modelization.DL_estimator.lstm_ed module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.metalayers">uqmodels.modelization.DL_estimator.metalayers module</a></li>
@@ -388,14 +396,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="uqmodels.preprocessing.html#module-uqmodels.preprocessing.features_processing">uqmodels.preprocessing.features_processing module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.automatic_periods_detection"><code class="docutils literal notranslate"><span class="pre">automatic_periods_detection()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.build_window_representation"><code class="docutils literal notranslate"><span class="pre">build_window_representation()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.check_transform_input_to_panda"><code class="docutils literal notranslate"><span class="pre">check_transform_input_to_panda()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.compute_FE_by_estimator"><code class="docutils literal notranslate"><span class="pre">compute_FE_by_estimator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.compute_MV_features"><code class="docutils literal notranslate"><span class="pre">compute_MV_features()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.compute_ctx_features"><code class="docutils literal notranslate"><span class="pre">compute_ctx_features()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.compute_feature_engeenering"><code class="docutils literal notranslate"><span class="pre">compute_feature_engeenering()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.compute_pca"><code class="docutils literal notranslate"><span class="pre">compute_pca()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.compute_tsfresh_feature_engeenering"><code class="docutils literal notranslate"><span class="pre">compute_tsfresh_feature_engeenering()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.fit_FE_by_estimator"><code class="docutils literal notranslate"><span class="pre">fit_FE_by_estimator()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.fit_MV_features"><code class="docutils literal notranslate"><span class="pre">fit_MV_features()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.fit_compute_MA_derivate"><code class="docutils literal notranslate"><span class="pre">fit_compute_MA_derivate()</span></code></a></li>
@@ -405,14 +410,9 @@
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.fit_ctx_features"><code class="docutils literal notranslate"><span class="pre">fit_ctx_features()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.fit_feature_engeenering"><code class="docutils literal notranslate"><span class="pre">fit_feature_engeenering()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.fit_pca"><code class="docutils literal notranslate"><span class="pre">fit_pca()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.fit_tsfresh_feature_engeenering"><code class="docutils literal notranslate"><span class="pre">fit_tsfresh_feature_engeenering()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.get_FE_params"><code class="docutils literal notranslate"><span class="pre">get_FE_params()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.mask_corr_feature_target"><code class="docutils literal notranslate"><span class="pre">mask_corr_feature_target()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.normalise_panda"><code class="docutils literal notranslate"><span class="pre">normalise_panda()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.select_data"><code class="docutils literal notranslate"><span class="pre">select_data()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.select_data_and_context"><code class="docutils literal notranslate"><span class="pre">select_data_and_context()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.select_features_from_FI"><code class="docutils literal notranslate"><span class="pre">select_features_from_FI()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.select_tsfresh_params"><code class="docutils literal notranslate"><span class="pre">select_tsfresh_params()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="uqmodels.preprocessing.html#module-uqmodels.preprocessing.preprocessing">uqmodels.preprocessing.preprocessing module</a><ul>
@@ -420,7 +420,9 @@
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.Regular_Moving_window_mapping"><code class="docutils literal notranslate"><span class="pre">Regular_Moving_window_mapping()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.add_row"><code class="docutils literal notranslate"><span class="pre">add_row()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.auto_corr_reduce"><code class="docutils literal notranslate"><span class="pre">auto_corr_reduce()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.build_window_representation"><code class="docutils literal notranslate"><span class="pre">build_window_representation()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.check_is_pd_date"><code class="docutils literal notranslate"><span class="pre">check_is_pd_date()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.check_transform_input_to_panda"><code class="docutils literal notranslate"><span class="pre">check_transform_input_to_panda()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.compute_corr_and_filter"><code class="docutils literal notranslate"><span class="pre">compute_corr_and_filter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.corrcoef_reduce"><code class="docutils literal notranslate"><span class="pre">corrcoef_reduce()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.dataset_generator_from_array"><code class="docutils literal notranslate"><span class="pre">dataset_generator_from_array()</span></code></a></li>
@@ -449,6 +451,8 @@
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.remove_rows"><code class="docutils literal notranslate"><span class="pre">remove_rows()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.rolling_statistics"><code class="docutils literal notranslate"><span class="pre">rolling_statistics()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.select_best_representant"><code class="docutils literal notranslate"><span class="pre">select_best_representant()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.select_data_and_context"><code class="docutils literal notranslate"><span class="pre">select_data_and_context()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.select_features_from_FI"><code class="docutils literal notranslate"><span class="pre">select_features_from_FI()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.select_signal"><code class="docutils literal notranslate"><span class="pre">select_signal()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.splitter"><code class="docutils literal notranslate"><span class="pre">splitter</span></code></a><ul>
 <li class="toctree-l4"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.preprocessing.splitter.split"><code class="docutils literal notranslate"><span class="pre">splitter.split()</span></code></a></li>
@@ -496,28 +500,63 @@
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.structure.window_expansion"><code class="docutils literal notranslate"><span class="pre">window_expansion()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.preprocessing.html#module-uqmodels.preprocessing.tsfresh_utils">uqmodels.preprocessing.tsfresh_utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.tsfresh_utils.compute_tsfresh_feature_engeenering"><code class="docutils literal notranslate"><span class="pre">compute_tsfresh_feature_engeenering()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.tsfresh_utils.fit_tsfresh_feature_engeenering"><code class="docutils literal notranslate"><span class="pre">fit_tsfresh_feature_engeenering()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.tsfresh_utils.select_tsfresh_params"><code class="docutils literal notranslate"><span class="pre">select_tsfresh_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.preprocessing.html#module-uqmodels.preprocessing.utils">uqmodels.preprocessing.utils module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.utils.build_window_representation"><code class="docutils literal notranslate"><span class="pre">build_window_representation()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.utils.check_transform_input_to_panda"><code class="docutils literal notranslate"><span class="pre">check_transform_input_to_panda()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.utils.select_data_and_context"><code class="docutils literal notranslate"><span class="pre">select_data_and_context()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.preprocessing.html#uqmodels.preprocessing.utils.select_features_from_FI"><code class="docutils literal notranslate"><span class="pre">select_features_from_FI()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="uqmodels.preprocessing.html#module-uqmodels.preprocessing">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="uqmodels.visualization.html">uqmodels.visualization package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="uqmodels.visualization.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.visualization.html#module-uqmodels.visualization.aux_visualization">uqmodels.visualization.aux_visualization module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_adjust_axes"><code class="docutils literal notranslate"><span class="pre">aux_adjust_axes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_build_data_colors"><code class="docutils literal notranslate"><span class="pre">aux_build_data_colors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_compute_layout_params"><code class="docutils literal notranslate"><span class="pre">aux_compute_layout_params()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_create_score_figure"><code class="docutils literal notranslate"><span class="pre">aux_create_score_figure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_fill_area"><code class="docutils literal notranslate"><span class="pre">aux_fill_area()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_fill_between"><code class="docutils literal notranslate"><span class="pre">aux_fill_between()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_finalize_figure"><code class="docutils literal notranslate"><span class="pre">aux_finalize_figure()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_format_time_axis"><code class="docutils literal notranslate"><span class="pre">aux_format_time_axis()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_norm_score_inputs"><code class="docutils literal notranslate"><span class="pre">aux_norm_score_inputs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_overlay_score_anoms_on_data"><code class="docutils literal notranslate"><span class="pre">aux_overlay_score_anoms_on_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_overlay_setup_grid"><code class="docutils literal notranslate"><span class="pre">aux_overlay_setup_grid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_overlay_true_label_on_data"><code class="docutils literal notranslate"><span class="pre">aux_overlay_true_label_on_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_PIs"><code class="docutils literal notranslate"><span class="pre">aux_plot_PIs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_anom"><code class="docutils literal notranslate"><span class="pre">aux_plot_anom()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_conf_score"><code class="docutils literal notranslate"><span class="pre">aux_plot_conf_score()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_confiance"><code class="docutils literal notranslate"><span class="pre">aux_plot_confiance()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_data_timeseries"><code class="docutils literal notranslate"><span class="pre">aux_plot_data_timeseries()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_line"><code class="docutils literal notranslate"><span class="pre">aux_plot_line()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_pred"><code class="docutils literal notranslate"><span class="pre">aux_plot_pred()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_score_matrix"><code class="docutils literal notranslate"><span class="pre">aux_plot_score_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_true_label_matrix"><code class="docutils literal notranslate"><span class="pre">aux_plot_true_label_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_prepare_x_extent"><code class="docutils literal notranslate"><span class="pre">aux_prepare_x_extent()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.aux_visualization.provide_cmap"><code class="docutils literal notranslate"><span class="pre">provide_cmap()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.visualization.html#module-uqmodels.visualization.old_visualisation">uqmodels.visualization.old_visualisation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.old_visualisation.plot_prediction_interval"><code class="docutils literal notranslate"><span class="pre">plot_prediction_interval()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.old_visualisation.plot_sorted_pi"><code class="docutils literal notranslate"><span class="pre">plot_sorted_pi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.old_visualisation.show_dUQ_refinement"><code class="docutils literal notranslate"><span class="pre">show_dUQ_refinement()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.old_visualisation.visu_latent_space"><code class="docutils literal notranslate"><span class="pre">visu_latent_space()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="uqmodels.visualization.html#module-uqmodels.visualization.visualization">uqmodels.visualization.visualization module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.aux_fill_area"><code class="docutils literal notranslate"><span class="pre">aux_fill_area()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.aux_plot_PIs"><code class="docutils literal notranslate"><span class="pre">aux_plot_PIs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.aux_plot_anom"><code class="docutils literal notranslate"><span class="pre">aux_plot_anom()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.aux_plot_conf_score"><code class="docutils literal notranslate"><span class="pre">aux_plot_conf_score()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.aux_plot_confiance"><code class="docutils literal notranslate"><span class="pre">aux_plot_confiance()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.aux_plot_pred"><code class="docutils literal notranslate"><span class="pre">aux_plot_pred()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.dim_1d_check"><code class="docutils literal notranslate"><span class="pre">dim_1d_check()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.aux_get_var_color_sets"><code class="docutils literal notranslate"><span class="pre">aux_get_var_color_sets()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.plot_anom_matrice"><code class="docutils literal notranslate"><span class="pre">plot_anom_matrice()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.plot_pi"><code class="docutils literal notranslate"><span class="pre">plot_pi()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.plot_prediction_interval"><code class="docutils literal notranslate"><span class="pre">plot_prediction_interval()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.plot_sorted_pi"><code class="docutils literal notranslate"><span class="pre">plot_sorted_pi()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.plot_var"><code class="docutils literal notranslate"><span class="pre">plot_var()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.provide_cmap"><code class="docutils literal notranslate"><span class="pre">provide_cmap()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.show_dUQ_refinement"><code class="docutils literal notranslate"><span class="pre">show_dUQ_refinement()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.uncertainty_plot"><code class="docutils literal notranslate"><span class="pre">uncertainty_plot()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.visualization.html#uqmodels.visualization.visualization.visu_latent_space"><code class="docutils literal notranslate"><span class="pre">visu_latent_space()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="uqmodels.visualization.html#module-uqmodels.visualization.visualization_mutisource">uqmodels.visualization.visualization_mutisource module</a><ul>
@@ -702,7 +741,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -745,7 +784,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -785,7 +824,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -800,6 +839,15 @@ sub-estimator of a meta-estimator, e.g. used inside a
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+</section>
+<section id="module-uqmodels.check">
+<span id="uqmodels-check-module"></span><h2>uqmodels.check module<a class="headerlink" href="#module-uqmodels.check" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.check.dim_1d_check">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.check.</span></span><span class="sig-name descname"><span class="pre">dim_1d_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/check.html#dim_1d_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.check.dim_1d_check" title="Link to this definition"></a></dt>
+<dd><p>Reshape (n,1) 2D array to (n) 1D array else do nothing</p>
 </dd></dl>
 
 </section>
@@ -906,7 +954,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -950,7 +998,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1118,7 +1166,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1175,7 +1223,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1221,7 +1269,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1264,7 +1312,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1304,7 +1352,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1350,7 +1398,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1393,7 +1441,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1433,7 +1481,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1644,7 +1692,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1687,7 +1735,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2263,6 +2311,27 @@ else if it is a Tupple or list of array apply it on array in the list/tupple str
 <dt class="sig sig-object py" id="uqmodels.utils.get_fold_nstep">
 <span class="sig-prename descclassname"><span class="pre">uqmodels.utils.</span></span><span class="sig-name descname"><span class="pre">get_fold_nstep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size_window</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_subseq</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">padding</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/utils.html#get_fold_nstep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.utils.get_fold_nstep" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.utils.identity">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.utils.</span></span><span class="sig-name descname"><span class="pre">identity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/utils.html#identity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.utils.identity" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.utils.mask_corr_feature_target">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.utils.</span></span><span class="sig-name descname"><span class="pre">mask_corr_feature_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_seuil</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/utils.html#mask_corr_feature_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.utils.mask_corr_feature_target" title="Link to this definition"></a></dt>
+<dd><p>Return a boolean array indicating which features show a max absolute
+correlation with any target column above the threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>ndarray</em><em> (</em><em>n_samples</em><em>, </em><em>n_features</em><em>)</em>)</p></li>
+<li><p><strong>y</strong> (<em>ndarray</em><em> (</em><em>n_samples</em><em>, </em><em>n_targets</em><em>)</em>)</p></li>
+<li><p><strong>v_seuil</strong> (<em>float</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.utils.mixture_quantile">

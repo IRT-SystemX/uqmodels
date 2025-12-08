@@ -75,13 +75,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for uqmodels.modelization.DL_estimator.transformer_ed</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">keras.backend</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">K</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">tf</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">keras.layers</span><span class="w"> </span><span class="kn">import</span> <span class="n">TimeDistributed</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow</span><span class="w"> </span><span class="kn">import</span> <span class="n">keras</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">Input</span><span class="p">,</span> <span class="n">layers</span>
-
 <span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.data_embedding</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Factice_Time_Extension</span><span class="p">,</span>
     <span class="n">Mouving_conv_Embedding</span><span class="p">,</span>
@@ -89,15 +85,10 @@
     <span class="n">PositionalEmbedding</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.neural_network_UQ</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">NN_UQ</span><span class="p">,</span>
-    <span class="n">get_training_parameters</span><span class="p">,</span>
-    <span class="n">get_UQEstimator_parameters</span><span class="p">,</span>
-    <span class="n">mlp</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Folder_Generator</span><span class="p">,</span>
-    <span class="n">set_global_determinism</span><span class="p">,</span>
-<span class="p">)</span>
+    <span class="n">NN_UQ</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.metalayers</span><span class="w"> </span><span class="kn">import</span> <span class="n">mlp</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_global_determinism</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.modelization.DL_estimator.data_generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">Folder_Generator</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">stack_and_roll</span>
 
 
@@ -554,7 +545,7 @@
     <span class="n">Data</span> <span class="o">=</span> <span class="n">MWE</span><span class="p">(</span><span class="n">Y_past</span><span class="p">)</span>
     <span class="c1"># Concat with cat features</span>
     <span class="k">if</span> <span class="n">with_ctx_input</span><span class="p">:</span>
-        <span class="n">Data</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">CTX_inputs</span><span class="p">,</span> <span class="n">Data</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">Data</span> <span class="o">=</span> <span class="n">layers</span><span class="o">.</span><span class="n">Concatenate</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)([</span><span class="n">CTX_inputs</span><span class="p">,</span> <span class="n">Data</span><span class="p">])</span>
     <span class="c1"># Factice time augmentation (actually useless but can be usefull for extended predict horizon)</span>
     <span class="n">Data</span> <span class="o">=</span> <span class="n">FTE</span><span class="p">(</span><span class="n">Data</span><span class="p">)</span>
 

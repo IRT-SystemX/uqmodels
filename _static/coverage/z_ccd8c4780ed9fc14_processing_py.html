@@ -4,14 +4,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Coverage for uqmodels/processing.py: 51%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
-    <link rel="stylesheet" href="style_cb_6b508a39.css" type="text/css">
-    <script src="coverage_html_cb_6fb7b396.js" defer></script>
+    <link rel="stylesheet" href="style_cb_a5a05ca4.css" type="text/css">
+    <script src="coverage_html_cb_bcae5fc4.js" defer></script>
 </head>
 <body class="pyfile">
 <header>
     <div class="content">
         <h1>
-            <span class="text">Coverage for </span><b>uqmodels/processing.py</b>:
+            <span class="text">Coverage for </span><b>uqmodels&#8201;/&#8201;processing.py</b>:
             <span class="pc_cov">51%</span>
         </h1>
         <aside id="help_panel_wrapper">
@@ -60,12 +60,12 @@
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
-            <a id="prevFileLink" class="nav" href="z_eabc47c7f1cda7d8_structure_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="prevFileLink" class="nav" href="z_1b65af74531bc454_custom_UQKPI_Processor_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_ccd8c4780ed9fc14_utils_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-05 14:29 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.0">coverage.py v7.13.0</a>,
+            created at 2025-12-08 17:18 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -112,7 +112,7 @@
     <p class="pln"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t"><span class="str">        path (str): path</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">    <span class="nam">folder_name</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">    <span class="key">while</span> <span class="nam">path</span> <span class="key">is</span> <span class="key">not</span> <span class="str">""</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">    <span class="key">while</span> <span class="nam">path</span> <span class="op">!=</span> <span class="str">""</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">        <span class="nam">path</span><span class="op">,</span> <span class="nam">tail</span> <span class="op">=</span> <span class="nam">os</span><span class="op">.</span><span class="nam">path</span><span class="op">.</span><span class="nam">split</span><span class="op">(</span><span class="nam">path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">        <span class="nam">print</span><span class="op">(</span><span class="nam">path</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">        <span class="nam">folder_name</span><span class="op">.</span><span class="nam">append</span><span class="op">(</span><span class="nam">tail</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -491,7 +491,7 @@
     <p class="pln"><span class="n"><a id="t409" href="#t409">409</a></span><span class="t">        <span class="com"># Save data link to a query on cache_link using it's unique id-query</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t410" href="#t410">410</a></span><span class="t">        <span class="com"># print('save', query, filename)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t411" href="#t411">411</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t412" href="#t412">412</a></span><span class="t">        <span class="key">if</span> <span class="nam">query</span> <span class="key">is</span> <span class="key">not</span> <span class="op">{</span><span class="op">}</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t412" href="#t412">412</a></span><span class="t">        <span class="key">if</span> <span class="nam">query</span> <span class="op">!=</span> <span class="op">{</span><span class="op">}</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t413" href="#t413">413</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t414" href="#t414">414</a></span><span class="t">            <span class="com"># Use by default storing and filename</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t415" href="#t415">415</a></span><span class="t">            <span class="key">if</span> <span class="nam">type</span><span class="op">(</span><span class="nam">query</span> <span class="key">is</span> <span class="nam">dict</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -855,12 +855,12 @@
 <footer>
     <div class="content">
         <p>
-            <a class="nav" href="z_eabc47c7f1cda7d8_structure_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="z_1b65af74531bc454_custom_UQKPI_Processor_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_ccd8c4780ed9fc14_utils_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.10.6">coverage.py v7.10.6</a>,
-            created at 2025-09-05 14:29 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.0">coverage.py v7.13.0</a>,
+            created at 2025-12-08 17:18 +0000
         </p>
     </div>
 </footer>

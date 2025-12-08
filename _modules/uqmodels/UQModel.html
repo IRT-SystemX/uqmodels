@@ -83,16 +83,11 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEstimator</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.modelization.ML_estimator.random_forest_UQ</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">RF_UQ</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.UQKPI_Processor</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">UQProc</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.preprocessing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pre_pre</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.structure</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pre_struc</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Cache_manager</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">apply_mask</span><span class="p">,</span> <span class="n">apply_middledim_reduction</span><span class="p">,</span> <span class="n">cut</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_random_state</span><span class="p">,</span> <span class="n">apply_mask</span><span class="p">,</span> <span class="n">apply_middledim_reduction</span>
 
 
 <div class="viewcode-block" id="UQModel">
@@ -415,7 +410,7 @@
             <span class="n">X_norm</span><span class="p">,</span> <span class="n">y_bis_norm</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span> <span class="n">y_bis</span>
         <span class="c1"># ---</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">skip_UQEstimator</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_UQEstimator</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">UQEstimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
                 <span class="n">X_norm</span><span class="p">,</span>
                 <span class="n">y_bis_norm</span><span class="p">,</span>

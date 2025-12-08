@@ -112,7 +112,7 @@ display(HTML(&quot;&lt;style&gt;.container { width:95% !important; }&lt;/style&g
 <section id="Generation-of-synthetic-data-with-global-&amp;-local-anomaly-and-OOD-behaviour">
 <h1>Generation of synthetic data with global &amp; local anomaly and OOD behaviour<a class="headerlink" href="#Generation-of-synthetic-data-with-global-&-local-anomaly-and-OOD-behaviour" title="Link to this heading"></a></h1>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from uqmodels.utils import cut, base_cos_freq
@@ -351,22 +351,36 @@ plt.show()
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_Score_anomaly_interpretation_3_0.png" src="../_images/examples_Score_anomaly_interpretation_3_0.png" />
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2025-12-05 15:46:51.722220: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-12-05 15:46:51.738934: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:477] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1764949611.757344  392450 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1764949611.762682  392450 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-12-05 15:46:51.781356: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+</pre></div></div>
 </div>
-</div>
-<div class="nboutput nblast docutils container">
+<div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/examples_Score_anomaly_interpretation_3_1.png" src="../_images/examples_Score_anomaly_interpretation_3_1.png" />
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_Score_anomaly_interpretation_3_2.png" src="../_images/examples_Score_anomaly_interpretation_3_2.png" />
+</div>
+</div>
 </section>
 <section id="Anomaly-detection-from-UQModels-Random-forest-with-uncertainty-quantification-using-residu-based-anomaly-scores">
 <h1>Anomaly detection from UQModels Random forest with uncertainty quantification using residu based anomaly scores<a class="headerlink" href="#Anomaly-detection-from-UQModels-Random-forest-with-uncertainty-quantification-using-residu-based-anomaly-scores" title="Link to this heading"></a></h1>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># Train and inference of and UQModels based on a Random forest regressor UQ-estimators
@@ -437,13 +451,13 @@ plot_anom_matrice(score=score_fusion,true_label=None,f_obs=f_obs,figsize=(18,4),
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Root mean square [array([0.09430756, 0.03809759, 0.09895293, 0.06592479, 0.02082075,
-       0.05012237]), array([0.11340056, 0.04960447, 0.12806282, 0.0776516 , 0.02962544,
-       0.084533  ])]
-Root mean square [array([1.        , 0.99985714, 0.99957143, 1.        , 0.99971429,
-       0.99857143]), array([0.99933333, 0.982     , 0.96366667, 0.99333333, 0.93833333,
-       0.955     ])]
-target [0.025, 0.16, 0.84, 0.975] empirique [0.0037833333333333334, 0.05188333333333333, 0.9483, 0.9945166666666667]
+Root mean square [array([0.09478356, 0.03807543, 0.09866445, 0.06579403, 0.02075072,
+       0.04999655]), array([0.11483937, 0.04961069, 0.12809648, 0.07770403, 0.02957013,
+       0.08440194])]
+Root mean square [array([1.        , 1.        , 0.99957143, 1.        , 1.        ,
+       0.99871429]), array([1.        , 0.98166667, 0.96466667, 0.993     , 0.941     ,
+       0.95566667])]
+target [0.025, 0.16, 0.84, 0.975] empirique [0.003533333333333333, 0.05213333333333333, 0.9483666666666667, 0.99465]
 target elvl [0.9, 0.95, 0.99, 0.995, 0.9995, 1] empirique Elvl [0.0, 1.0, 2.0, 3.0, 5.0, 5.0]
 </pre></div></div>
 </div>
@@ -469,7 +483,7 @@ target elvl [0.9, 0.95, 0.99, 0.995, 0.9995, 1] empirique Elvl [0.0, 1.0, 2.0, 3
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>plot_anom_matrice(score=KPI_anom,true_label=None,f_obs=f_obs,figsize=(18,4),vmin=-3,vmax=3,setup=(3,2))

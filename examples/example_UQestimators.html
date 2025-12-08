@@ -82,10 +82,12 @@
 <h1>Loop with several UQ Predictors<a class="headerlink" href="#Loop-with-several-UQ-Predictors" title="Link to this heading"></a></h1>
 <p>Aim to show and test several UQ baseline approachs implement as UQEstimators UQEstimators can be wrapped witthin a UQModels that also can include a Non-UQ predictor.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import ipykernel
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import sys
+sys.path.insert(0,&#39;../&#39;)
+import ipykernel
 import uqmodels
 import xgboost
 import os
@@ -99,7 +101,7 @@ storing = path + &#39;/data/&#39;
 <section id="Preprocessing">
 <h1>Preprocessing<a class="headerlink" href="#Preprocessing" title="Link to this heading"></a></h1>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import uqmodels.processing as proc
@@ -137,6 +139,20 @@ f_obs= np.arange(len(y))[test][0:500]
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+2025-12-05 15:49:05.996575: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2025-12-05 15:49:06.011582: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:477] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1764949746.028812  393095 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1764949746.034085  393095 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2025-12-05 15:49:06.051669: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
@@ -150,7 +166,7 @@ X shape: (9600, 21) y: yshape (9600, 1) Name: Synthetic_data
 <section id="Evaluation-function">
 <h1>Evaluation function<a class="headerlink" href="#Evaluation-function" title="Link to this heading"></a></h1>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import uqmodels.evaluation.base_metrics as base_metrics
@@ -183,7 +199,7 @@ def print_metrics(y,y_pred,y_pred_lower,y_pred_upper,train,test):
 <section id="Base-estimator">
 <h1>Base estimator<a class="headerlink" href="#Base-estimator" title="Link to this heading"></a></h1>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>from xgboost import XGBRegressor
@@ -224,7 +240,7 @@ n_greedsearch = 10
 <section id="Specification-of-UQ_Estimators-to-test">
 <h1>Specification of UQ_Estimators to test<a class="headerlink" href="#Specification-of-UQ_Estimators-to-test" title="Link to this heading"></a></h1>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import uqmodels.modelization.UQEstimator as UQ_esti
@@ -304,7 +320,7 @@ GradientBoostingRegressor()
 <section id="Traning-&amp;-Inference-of-UQ-Estimators-+-KPI_processors">
 <h2>Traning &amp; Inference of UQ-Estimators + KPI_processors<a class="headerlink" href="#Traning-&-Inference-of-UQ-Estimators-+-KPI_processors" title="Link to this heading"></a></h2>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>import uqmodels.postprocessing.UQKPI_Processor as UQProc
@@ -381,8 +397,8 @@ for intialiser,parameters in zip(list_UQEstimator_initialisers,list_UQEstimator_
         size = (15, 6))
 
     visu.plot_anom_matrice(score=anom_score,true_label=None,f_obs=f_obs,vmin=-4,vmax=4)
-    del(estimator)
-    del(anom_score)
+    #del(estimator)
+    #del(anom_score)
 </pre></div>
 </div>
 </div>
@@ -399,9 +415,9 @@ MeanVarUQEstimator var
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -412,10 +428,10 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1
 <div class="highlight"><pre>
 warning y shape : (8229, 1) pred shape (8229,)
 warning y shape : (9600, 1) pred shape (9600,)
-MSE TRAIN: 0.14 MSE TEST: 0.17
+MSE TRAIN: 0.14 MSE TEST: 0.18
 Coverage TRAIN: 0.31 Coverage TEST: 0.33
 ACE TRAIN: -0.59 ACE TEST: -0.57
-Sharpness TRAIN: 1.0 Sharpness TEST: 1.1
+Sharpness TRAIN: 1.0 Sharpness TEST: 1.11
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -452,12 +468,12 @@ QuantileUQEstimator quantile
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -470,26 +486,8 @@ recover quantile
 warning y shape : (8229, 1) pred shape (8229,)
 warning y shape : (9600, 1) pred shape (9600,)
 MSE TRAIN: 0.16 MSE TEST: 0.19
-Coverage TRAIN: 0.37 Coverage TEST: 0.37
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\uqmodels\postprocessing\UQ_processing.py:663: RuntimeWarning: divide by zero encountered in divide
-  res_norm[~mask, dim] = res_norm[~mask, dim] / (sigma)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\numpy\lib\function_base.py:4527: RuntimeWarning: invalid value encountered in subtract
-  diff_b_a = subtract(b, a)
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-ACE TRAIN: -0.53 ACE TEST: -0.53
+Coverage TRAIN: 0.38 Coverage TEST: 0.37
+ACE TRAIN: -0.52 ACE TEST: -0.53
 Sharpness TRAIN: 1.21 Sharpness TEST: 1.23
 </pre></div></div>
 </div>
@@ -497,21 +495,21 @@ Sharpness TRAIN: 1.21 Sharpness TEST: 1.23
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
+<img alt="../_images/examples_example_UQestimators_11_9.png" src="../_images/examples_example_UQestimators_11_9.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_UQestimators_11_10.png" src="../_images/examples_example_UQestimators_11_10.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
 <img alt="../_images/examples_example_UQestimators_11_11.png" src="../_images/examples_example_UQestimators_11_11.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_12.png" src="../_images/examples_example_UQestimators_11_12.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_13.png" src="../_images/examples_example_UQestimators_11_13.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -527,14 +525,14 @@ QuantileUQEstimator res_quantile
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -547,10 +545,24 @@ recover quantile
 warning y shape : (8229, 1) pred shape (8229,)
 warning y shape : (9600, 1) pred shape (9600,)
 MSE TRAIN: 0.13 MSE TEST: 0.17
-Coverage TRAIN: 0.31 Coverage TEST: 0.3
-ACE TRAIN: -0.59 ACE TEST: -0.6
-Sharpness TRAIN: 1.0 Sharpness TEST: 1.0
+Coverage TRAIN: 0.32 Coverage TEST: 0.31
+ACE TRAIN: -0.58 ACE TEST: -0.59
+Sharpness TRAIN: 1.01 Sharpness TEST: 1.02
 </pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_UQestimators_11_15.png" src="../_images/examples_example_UQestimators_11_15.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_UQestimators_11_16.png" src="../_images/examples_example_UQestimators_11_16.png" />
+</div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
@@ -563,8 +575,15 @@ Sharpness TRAIN: 1.0 Sharpness TEST: 1.0
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_18.png" src="../_images/examples_example_UQestimators_11_18.png" />
-</div>
+<div class="highlight"><pre>
+Gaussian_Process_UQ var
+warning y shape : (8229, 1) pred shape (8229,)
+warning y shape : (9600, 1) pred shape (9600,)
+MSE TRAIN: 0.23 MSE TEST: 0.26
+Coverage TRAIN: 0.38 Coverage TEST: 0.39
+ACE TRAIN: -0.52 ACE TEST: -0.51
+Sharpness TRAIN: 1.17 Sharpness TEST: 1.24
+</pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
@@ -577,51 +596,14 @@ Sharpness TRAIN: 1.0 Sharpness TEST: 1.0
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<div class="highlight"><pre>
-Gaussian_Process_UQ var
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\gaussian_process\kernels.py:419: ConvergenceWarning: The optimal value found for dimension 0 of parameter k1__k1__k1__k2__alpha is close to the specified lower bound 1e-05. Decreasing the bound and calling fit again may find a better value.
-  warnings.warn(
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-warning y shape : (8229, 1) pred shape (8229,)
-warning y shape : (9600, 1) pred shape (9600,)
-MSE TRAIN: 0.25 MSE TEST: 0.3
-Coverage TRAIN: 0.43 Coverage TEST: 0.44
-ACE TRAIN: -0.47 ACE TEST: -0.46
-Sharpness TRAIN: 1.3 Sharpness TEST: 1.35
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_23.png" src="../_images/examples_example_UQestimators_11_23.png" />
+<img alt="../_images/examples_example_UQestimators_11_20.png" src="../_images/examples_example_UQestimators_11_20.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_24.png" src="../_images/examples_example_UQestimators_11_24.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_25.png" src="../_images/examples_example_UQestimators_11_25.png" />
+<img alt="../_images/examples_example_UQestimators_11_21.png" src="../_images/examples_example_UQestimators_11_21.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -637,12 +619,12 @@ REGML_UQEstimator_var var
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -655,28 +637,28 @@ warning y shape : (9600, 1) pred shape (9600,)
 MSE TRAIN: 0.12 MSE TEST: 0.17
 Coverage TRAIN: 0.3 Coverage TEST: 0.3
 ACE TRAIN: -0.6 ACE TEST: -0.6
-Sharpness TRAIN: 0.83 Sharpness TEST: 0.83
+Sharpness TRAIN: 0.83 Sharpness TEST: 0.84
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_29.png" src="../_images/examples_example_UQestimators_11_29.png" />
+<img alt="../_images/examples_example_UQestimators_11_25.png" src="../_images/examples_example_UQestimators_11_25.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_30.png" src="../_images/examples_example_UQestimators_11_30.png" />
+<img alt="../_images/examples_example_UQestimators_11_26.png" src="../_images/examples_example_UQestimators_11_26.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_31.png" src="../_images/examples_example_UQestimators_11_31.png" />
+<img alt="../_images/examples_example_UQestimators_11_27.png" src="../_images/examples_example_UQestimators_11_27.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -692,14 +674,14 @@ REGML_UQEstimator_2var 2var
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -714,28 +696,28 @@ Naïf approach mean of 2 sigma
 MSE TRAIN: 0.12 MSE TEST: 0.17
 Coverage TRAIN: 0.32 Coverage TEST: 0.31
 ACE TRAIN: -0.58 ACE TEST: -0.59
-Sharpness TRAIN: 0.98 Sharpness TEST: 1.0
+Sharpness TRAIN: 0.98 Sharpness TEST: 0.99
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_35.png" src="../_images/examples_example_UQestimators_11_35.png" />
+<img alt="../_images/examples_example_UQestimators_11_31.png" src="../_images/examples_example_UQestimators_11_31.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_36.png" src="../_images/examples_example_UQestimators_11_36.png" />
+<img alt="../_images/examples_example_UQestimators_11_32.png" src="../_images/examples_example_UQestimators_11_32.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_37.png" src="../_images/examples_example_UQestimators_11_37.png" />
+<img alt="../_images/examples_example_UQestimators_11_33.png" src="../_images/examples_example_UQestimators_11_33.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -751,14 +733,14 @@ REGML_UQEstimator_res_var res_var
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -768,31 +750,31 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\
 <div class="highlight"><pre>
 warning y shape : (8229, 1) pred shape (8229,)
 warning y shape : (9600, 1) pred shape (9600,)
-MSE TRAIN: 0.1 MSE TEST: 0.17
+MSE TRAIN: 0.1 MSE TEST: 0.16
 Coverage TRAIN: 0.28 Coverage TEST: 0.28
 ACE TRAIN: -0.62 ACE TEST: -0.62
-Sharpness TRAIN: 0.78 Sharpness TEST: 0.79
+Sharpness TRAIN: 0.78 Sharpness TEST: 0.78
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_41.png" src="../_images/examples_example_UQestimators_11_41.png" />
+<img alt="../_images/examples_example_UQestimators_11_37.png" src="../_images/examples_example_UQestimators_11_37.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_42.png" src="../_images/examples_example_UQestimators_11_42.png" />
+<img alt="../_images/examples_example_UQestimators_11_38.png" src="../_images/examples_example_UQestimators_11_38.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_43.png" src="../_images/examples_example_UQestimators_11_43.png" />
+<img alt="../_images/examples_example_UQestimators_11_39.png" src="../_images/examples_example_UQestimators_11_39.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -808,16 +790,16 @@ REGML_UQEstimator_res_2var res_2var
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -829,9 +811,9 @@ warning y shape : (8229, 1) pred shape (8229,)
 Naïf approach mean of 2 sigma
 warning y shape : (9600, 1) pred shape (9600,)
 Naïf approach mean of 2 sigma
-MSE TRAIN: 0.1 MSE TEST: 0.17
-Coverage TRAIN: 0.3 Coverage TEST: 0.29
-ACE TRAIN: -0.6 ACE TEST: -0.61
+MSE TRAIN: 0.1 MSE TEST: 0.16
+Coverage TRAIN: 0.3 Coverage TEST: 0.3
+ACE TRAIN: -0.6 ACE TEST: -0.6
 Sharpness TRAIN: 0.92 Sharpness TEST: 0.93
 </pre></div></div>
 </div>
@@ -839,21 +821,21 @@ Sharpness TRAIN: 0.92 Sharpness TEST: 0.93
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_47.png" src="../_images/examples_example_UQestimators_11_47.png" />
+<img alt="../_images/examples_example_UQestimators_11_43.png" src="../_images/examples_example_UQestimators_11_43.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_48.png" src="../_images/examples_example_UQestimators_11_48.png" />
+<img alt="../_images/examples_example_UQestimators_11_44.png" src="../_images/examples_example_UQestimators_11_44.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_49.png" src="../_images/examples_example_UQestimators_11_49.png" />
+<img alt="../_images/examples_example_UQestimators_11_45.png" src="../_images/examples_example_UQestimators_11_45.png" />
 </div>
 </div>
 <div class="nboutput docutils container">
@@ -869,12 +851,12 @@ GBRQ_UQEstimator quantile
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -887,7 +869,38 @@ recover quantile
 warning y shape : (8229, 1) pred shape (8229,)
 warning y shape : (9600, 1) pred shape (9600,)
 MSE TRAIN: 0.16 MSE TEST: 0.19
-Coverage TRAIN: 0.37 Coverage TEST: 0.37
+Coverage TRAIN: 0.38 Coverage TEST: 0.37
+ACE TRAIN: -0.52 ACE TEST: -0.53
+Sharpness TRAIN: 1.21 Sharpness TEST: 1.22
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_UQestimators_11_49.png" src="../_images/examples_example_UQestimators_11_49.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_UQestimators_11_50.png" src="../_images/examples_example_UQestimators_11_50.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../_images/examples_example_UQestimators_11_51.png" src="../_images/examples_example_UQestimators_11_51.png" />
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+GBRQ_UQEstimator res_quantile
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -895,10 +908,14 @@ Coverage TRAIN: 0.37 Coverage TEST: 0.37
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\uqmodels\postprocessing\UQ_processing.py:663: RuntimeWarning: divide by zero encountered in divide
-  res_norm[~mask, dim] = res_norm[~mask, dim] / (sigma)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\numpy\lib\function_base.py:4527: RuntimeWarning: invalid value encountered in subtract
-  diff_b_a = subtract(b, a)
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -906,8 +923,14 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\numpy\lib\functio
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-ACE TRAIN: -0.53 ACE TEST: -0.53
-Sharpness TRAIN: 1.2 Sharpness TEST: 1.22
+recover quantile
+recover quantile
+warning y shape : (8229, 1) pred shape (8229,)
+warning y shape : (9600, 1) pred shape (9600,)
+MSE TRAIN: 0.13 MSE TEST: 0.17
+Coverage TRAIN: 0.32 Coverage TEST: 0.31
+ACE TRAIN: -0.58 ACE TEST: -0.59
+Sharpness TRAIN: 1.02 Sharpness TEST: 1.02
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -936,7 +959,7 @@ Sharpness TRAIN: 1.2 Sharpness TEST: 1.22
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-GBRQ_UQEstimator res_quantile
+RF_UQEstimator var
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -944,14 +967,8 @@ GBRQ_UQEstimator res_quantile
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+  return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -959,14 +976,10 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-recover quantile
-recover quantile
-warning y shape : (8229, 1) pred shape (8229,)
-warning y shape : (9600, 1) pred shape (9600,)
-MSE TRAIN: 0.13 MSE TEST: 0.17
-Coverage TRAIN: 0.31 Coverage TEST: 0.3
-ACE TRAIN: -0.59 ACE TEST: -0.6
-Sharpness TRAIN: 1.0 Sharpness TEST: 1.0
+MSE TRAIN: 0.07 MSE TEST: 0.17
+Coverage TRAIN: 1.0 Coverage TEST: 0.95
+ACE TRAIN: 0.1 ACE TEST: 0.05
+Sharpness TRAIN: 1.17 Sharpness TEST: 1.26
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -995,7 +1008,7 @@ Sharpness TRAIN: 1.0 Sharpness TEST: 1.0
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-RF_UQEstimator var
+RF_UQEstimator 2var
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1003,7 +1016,7 @@ RF_UQEstimator var
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1012,10 +1025,12 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+Naïf approach mean of 2 sigma
+Naïf approach mean of 2 sigma
 MSE TRAIN: 0.07 MSE TEST: 0.17
-Coverage TRAIN: 1.0 Coverage TEST: 0.94
-ACE TRAIN: 0.1 ACE TEST: 0.04
-Sharpness TRAIN: 1.16 Sharpness TEST: 1.25
+Coverage TRAIN: 0.76 Coverage TEST: 0.6
+ACE TRAIN: -0.14 ACE TEST: -0.3
+Sharpness TRAIN: 0.48 Sharpness TEST: 0.49
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1044,7 +1059,7 @@ Sharpness TRAIN: 1.16 Sharpness TEST: 1.25
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-RF_UQEstimator 2var
+RF_UQEstimator quantile
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1052,7 +1067,7 @@ RF_UQEstimator 2var
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1061,12 +1076,12 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Naïf approach mean of 2 sigma
-Naïf approach mean of 2 sigma
-MSE TRAIN: 0.07 MSE TEST: 0.17
-Coverage TRAIN: 0.76 Coverage TEST: 0.62
-ACE TRAIN: -0.14 ACE TEST: -0.28
-Sharpness TRAIN: 0.49 Sharpness TEST: 0.49
+recover quantile
+recover quantile
+MSE TRAIN: 0.07 MSE TEST: 0.18
+Coverage TRAIN: 0.78 Coverage TEST: 0.71
+ACE TRAIN: -0.12 ACE TEST: -0.19
+Sharpness TRAIN: 0.64 Sharpness TEST: 0.64
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1095,7 +1110,7 @@ Sharpness TRAIN: 0.49 Sharpness TEST: 0.49
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-RF_UQEstimator quantile
+RF_UQEstimator var_A&amp;E
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1103,7 +1118,7 @@ RF_UQEstimator quantile
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1112,12 +1127,10 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-recover quantile
-recover quantile
-MSE TRAIN: 0.07 MSE TEST: 0.17
-Coverage TRAIN: 0.79 Coverage TEST: 0.71
-ACE TRAIN: -0.11 ACE TEST: -0.19
-Sharpness TRAIN: 0.64 Sharpness TEST: 0.64
+MSE TRAIN: 0.07 MSE TEST: 0.18
+Coverage TRAIN: 1.0 Coverage TEST: 0.94
+ACE TRAIN: 0.1 ACE TEST: 0.04
+Sharpness TRAIN: 1.2 Sharpness TEST: 1.27
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1146,7 +1159,7 @@ Sharpness TRAIN: 0.64 Sharpness TEST: 0.64
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-RF_UQEstimator var_A&amp;E
+RF_UQEstimator res_var
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1154,7 +1167,9 @@ RF_UQEstimator var_A&amp;E
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1163,10 +1178,10 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-MSE TRAIN: 0.07 MSE TEST: 0.17
-Coverage TRAIN: 1.0 Coverage TEST: 0.95
-ACE TRAIN: 0.1 ACE TEST: 0.05
-Sharpness TRAIN: 1.19 Sharpness TEST: 1.27
+MSE TRAIN: 0.08 MSE TEST: 0.16
+Coverage TRAIN: 0.97 Coverage TEST: 0.92
+ACE TRAIN: 0.07 ACE TEST: 0.02
+Sharpness TRAIN: 1.13 Sharpness TEST: 1.16
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1195,7 +1210,7 @@ Sharpness TRAIN: 1.19 Sharpness TEST: 1.27
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-RF_UQEstimator res_var
+RF_UQEstimator res_2var
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1203,9 +1218,9 @@ RF_UQEstimator res_var
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1214,10 +1229,12 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-MSE TRAIN: 0.08 MSE TEST: 0.16
-Coverage TRAIN: 0.97 Coverage TEST: 0.92
-ACE TRAIN: 0.07 ACE TEST: 0.02
-Sharpness TRAIN: 1.12 Sharpness TEST: 1.15
+Naïf approach mean of 2 sigma
+Naïf approach mean of 2 sigma
+MSE TRAIN: 0.08 MSE TEST: 0.17
+Coverage TRAIN: 0.81 Coverage TEST: 0.74
+ACE TRAIN: -0.09 ACE TEST: -0.16
+Sharpness TRAIN: 0.66 Sharpness TEST: 0.66
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1246,7 +1263,7 @@ Sharpness TRAIN: 1.12 Sharpness TEST: 1.15
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-RF_UQEstimator res_2var
+RF_UQEstimator res_quantile
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1254,9 +1271,9 @@ RF_UQEstimator res_2var
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/ensemble/_gb.py:672: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
+  y = column_or_1d(y, warn=True)  # TODO: Is this still required?
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1265,12 +1282,12 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Naïf approach mean of 2 sigma
-Naïf approach mean of 2 sigma
+recover quantile
+recover quantile
 MSE TRAIN: 0.08 MSE TEST: 0.17
-Coverage TRAIN: 0.8 Coverage TEST: 0.73
-ACE TRAIN: -0.1 ACE TEST: -0.17
-Sharpness TRAIN: 0.64 Sharpness TEST: 0.64
+Coverage TRAIN: 0.94 Coverage TEST: 0.83
+ACE TRAIN: 0.04 ACE TEST: -0.07
+Sharpness TRAIN: 0.86 Sharpness TEST: 0.87
 </pre></div></div>
 </div>
 <div class="nboutput docutils container">
@@ -1287,64 +1304,26 @@ Sharpness TRAIN: 0.64 Sharpness TEST: 0.64
 <img alt="../_images/examples_example_UQestimators_11_98.png" src="../_images/examples_example_UQestimators_11_98.png" />
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <img alt="../_images/examples_example_UQestimators_11_99.png" src="../_images/examples_example_UQestimators_11_99.png" />
 </div>
 </div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-RF_UQEstimator res_quantile
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\ensemble\_gb.py:424: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples, ), for example using ravel().
-  y = column_or_1d(y, warn=True)
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
-  return fit_method(estimator, *args, **kwargs)
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-recover quantile
-recover quantile
-MSE TRAIN: 0.08 MSE TEST: 0.17
-Coverage TRAIN: 0.94 Coverage TEST: 0.83
-ACE TRAIN: 0.04 ACE TEST: -0.07
-Sharpness TRAIN: 0.86 Sharpness TEST: 0.86
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_103.png" src="../_images/examples_example_UQestimators_11_103.png" />
-</div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_104.png" src="../_images/examples_example_UQestimators_11_104.png" />
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>visu.plot_anom_matrice(score=anom_score,true_label=None,f_obs=f_obs,vmin=-4,vmax=4)
+</pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
-<img alt="../_images/examples_example_UQestimators_11_105.png" src="../_images/examples_example_UQestimators_11_105.png" />
+<img alt="../_images/examples_example_UQestimators_12_0.png" src="../_images/examples_example_UQestimators_12_0.png" />
 </div>
 </div>
 </section>
@@ -1352,7 +1331,7 @@ Sharpness TRAIN: 0.86 Sharpness TEST: 0.86
 <section id="Test-for-KPI_parameters">
 <h1>Test for KPI_parameters<a class="headerlink" href="#Test-for-KPI_parameters" title="Link to this heading"></a></h1>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span># set of KPI parameters to test
@@ -1427,7 +1406,7 @@ for n,(KPI_params_Normal,KPI_params_Epistemic,KPI_params_Anom1,KPI_params_Anom2)
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1444,7 +1423,7 @@ Done run  0
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1461,7 +1440,7 @@ Done run  1
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1478,7 +1457,7 @@ Done run  2
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1495,7 +1474,7 @@ Done run  3
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1151: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
+/home/jovyan/Maturation/env-uqmodels/lib/python3.10/site-packages/sklearn/base.py:1363: DataConversionWarning: A column-vector y was passed when a 1d array was expected. Please change the shape of y to (n_samples,), for example using ravel().
   return fit_method(estimator, *args, **kwargs)
 </pre></div></div>
 </div>
@@ -1506,30 +1485,6 @@ C:\FONDATION\Support_composants\env-uqmodels\lib\site-packages\sklearn\base.py:1
 <div class="highlight"><pre>
 Done run  4
 </pre></div></div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
-</div>
-<div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
-</pre></div>
-</div>
 </div>
 </section>
 

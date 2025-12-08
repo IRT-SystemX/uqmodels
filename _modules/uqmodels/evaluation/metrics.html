@@ -92,6 +92,23 @@
 <span class="c1"># Metrics wrapper</span>
 
 
+<div class="viewcode-block" id="base_rmse">
+<a class="viewcode-back" href="../../../uqmodels.evaluation.html#uqmodels.evaluation.metrics.base_rmse">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">base_rmse</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="o">**</span><span class="n">kwarg</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Root mean square for nD array</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y (np.array): Targets/observation</span>
+<span class="sd">        pred (np.array): Prediction/Reconstruction</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        val: rmse values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">pred</span> <span class="o">-</span> <span class="n">y</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">val</span></div>
+
+
+
 <div class="viewcode-block" id="Encapsulated_metrics">
 <a class="viewcode-back" href="../../../uqmodels.evaluation.html#uqmodels.evaluation.metrics.Encapsulated_metrics">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Encapsulated_metrics</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -199,7 +216,7 @@
 <span class="sd">        val: rmse values</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">pred</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="n">set_</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">set_</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">base_rmse</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">set_</span><span class="p">],</span> <span class="n">pred</span><span class="p">[</span><span class="n">set_</span><span class="p">],</span> <span class="o">**</span><span class="n">kwarg</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">mask</span><span class="p">:</span>
         <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 

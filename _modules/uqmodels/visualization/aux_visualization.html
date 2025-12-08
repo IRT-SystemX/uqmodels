@@ -1,0 +1,1063 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.visualization.aux_visualization &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.visualization.aux_visualization</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.visualization.aux_visualization</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_born</span><span class="p">,</span> <span class="n">propagate</span><span class="p">,</span> <span class="n">_merge_config</span><span class="p">,</span> <span class="n">_merge_nested</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.dates</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mdates</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearSegmentedColormap</span>
+
+
+<div class="viewcode-block" id="aux_adjust_axes">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_adjust_axes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_adjust_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y_list</span><span class="p">,</span> <span class="n">ylim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x_lim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">x_margin</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adjust x/y axis limits based on data and optional explicit limits.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : Axes</span>
+<span class="sd">    x : array-like</span>
+<span class="sd">    y_list : array-like or list of array-like</span>
+<span class="sd">        One or several y-series to consider for limits.</span>
+<span class="sd">    ylim : tuple or None</span>
+<span class="sd">        If not None, force (ymin, ymax).</span>
+<span class="sd">    x_lim : tuple or None</span>
+<span class="sd">        If not None, force (xmin, xmax).</span>
+<span class="sd">    margin : float</span>
+<span class="sd">        Relative margin applied to inferred y-limits (ignored if ylim is set).</span>
+<span class="sd">    x_margin : float</span>
+<span class="sd">        Margin added around min/max of x (ignored if x_lim is set).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y_list</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">y_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">y_list</span><span class="p">]</span>
+
+    <span class="n">y_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">y_list</span><span class="p">)</span>
+    <span class="n">y_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">y_list</span><span class="p">)</span>
+
+    <span class="c1"># Y limits</span>
+    <span class="k">if</span> <span class="n">ylim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">y_low</span> <span class="o">=</span> <span class="n">y_min</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y_min</span> <span class="o">*</span> <span class="n">margin</span><span class="p">)</span>
+        <span class="n">y_high</span> <span class="o">=</span> <span class="n">y_max</span> <span class="o">+</span> <span class="nb">abs</span><span class="p">(</span><span class="n">y_max</span> <span class="o">*</span> <span class="n">margin</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">y_low</span><span class="p">,</span> <span class="n">y_high</span> <span class="o">=</span> <span class="n">ylim</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="n">y_low</span><span class="p">,</span> <span class="n">y_high</span><span class="p">)</span>
+
+    <span class="c1"># X limits</span>
+    <span class="k">if</span> <span class="n">x_lim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">x_low</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">x_margin</span>
+        <span class="n">x_high</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">x_margin</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_low</span><span class="p">,</span> <span class="n">x_high</span> <span class="o">=</span> <span class="n">x_lim</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">x_low</span><span class="p">,</span> <span class="n">x_high</span><span class="p">)</span></div>
+
+
+
+<span class="n">DEFAULT_PLOT_PRED_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;truth_line&quot;</span><span class="p">:</span> <span class="p">{</span>  <span class="c1"># line for y (true / observed curve)</span>
+        <span class="s2">&quot;ls&quot;</span><span class="p">:</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;pred_line&quot;</span><span class="p">:</span> <span class="p">{</span>   <span class="c1"># line for pred</span>
+        <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span>  <span class="c1"># alias to show it works even with different key</span>
+        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgreen&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Prediction&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;obs_scatter&quot;</span><span class="p">:</span> <span class="p">{</span>  <span class="c1"># scatter for observations as points</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Observation&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">DEFAULT_LINE_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;markersize&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="aux_plot_line">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_line">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot a line (or markers only) on an Axes with configurable style.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : Axes</span>
+<span class="sd">    x, y : array-like</span>
+<span class="sd">    config : dict, optional</span>
+<span class="sd">        Keys: color, linestyle, linewidth, marker, markersize, label, zorder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">DEFAULT_LINE_CONFIG</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">})</span>
+
+    <span class="c1"># Filtrer les None pour ne pas polluer ax.plot</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="n">DEFAULT_PLOT_PRED_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;truth_line&quot;</span><span class="p">:</span> <span class="p">{</span>   <span class="c1"># line for y (true / observed curve)</span>
+        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;pred_line&quot;</span><span class="p">:</span> <span class="p">{</span>    <span class="c1"># line for pred</span>
+        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;darkgreen&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">4</span><span class="p">,</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Prediction&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;obs_scatter&quot;</span><span class="p">:</span> <span class="p">{</span>  <span class="c1"># observations as points</span>
+        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;markersize&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Observation&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="aux_plot_pred">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_pred">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_plot_pred</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot observations and predictions on a given Axes with optional style config.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : Axes</span>
+<span class="sd">    x, y, pred : array-like</span>
+<span class="sd">        Coordinates, observations, and predictions.</span>
+<span class="sd">    config : dict, optional</span>
+<span class="sd">        Style overrides for truth line, prediction line, and observation scatter.</span>
+<span class="sd">        Keys: &quot;truth_line&quot;, &quot;pred_line&quot;, &quot;obs_scatter&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">_merge_config</span><span class="p">(</span><span class="n">DEFAULT_PLOT_PRED_CONFIG</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+    <span class="c1"># Courbe &quot;vérité terrain&quot;</span>
+    <span class="n">aux_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;truth_line&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Courbe de prédiction</span>
+    <span class="n">aux_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;pred_line&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Points d&#39;observation</span>
+    <span class="n">aux_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;obs_scatter&quot;</span><span class="p">])</span></div>
+
+
+
+<span class="n">DEFAULT_PLOT_ANOM_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;anom_scatter&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;c&quot;</span><span class="p">:</span> <span class="s2">&quot;magenta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s1">&#39;&quot;Abnormal&quot; real demand&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">DEFAULT_PLOT_ANOM_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;anom_scatter&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;magenta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;markersize&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="s2">&quot;linestyle&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s1">&#39;&quot;Abnormal&quot; observation&#39;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="aux_plot_anom">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_anom">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_plot_anom</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot anomalous observations on an Axes using aux_plot_line.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : Axes</span>
+<span class="sd">    x, y : array-like</span>
+<span class="sd">        Coordinates and anomalous values.</span>
+<span class="sd">    config : dict, optional</span>
+<span class="sd">        Style overrides for anomalous points.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">_merge_config</span><span class="p">(</span><span class="n">DEFAULT_PLOT_ANOM_CONFIG</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+    <span class="n">aux_plot_line</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;anom_scatter&quot;</span><span class="p">])</span></div>
+
+
+
+<span class="n">DEFAULT_FILL_AREA_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">DEFAULT_FILL_BETWEEN_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;facecolor&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="s2">&quot;interpolate&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="aux_fill_between">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_fill_between">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_fill_between</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">,</span> <span class="n">where</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrapper around ax.fill_between with configurable style.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : Axes</span>
+<span class="sd">    x, y1, y2 : array-like</span>
+<span class="sd">    where : array-like or None</span>
+<span class="sd">        Boolean mask for conditional fill.</span>
+<span class="sd">    config : dict, optional</span>
+<span class="sd">        Style overrides (color, facecolor, alpha, label, interpolate, zorder).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span>
+    <span class="n">y2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y2</span><span class="p">)</span>
+
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">DEFAULT_FILL_BETWEEN_CONFIG</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">y1</span><span class="p">,</span>
+        <span class="n">y2</span><span class="p">,</span>
+        <span class="n">where</span><span class="o">=</span><span class="n">where</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="aux_fill_area">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_fill_area">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_fill_area</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">env_bot</span><span class="p">,</span> <span class="n">env_top</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fill an envelope between two curves on an Axes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : Axes</span>
+<span class="sd">    x, env_bot, env_top : array-like</span>
+<span class="sd">        Coordinates and envelope bounds.</span>
+<span class="sd">    config : dict, optional</span>
+<span class="sd">        Style overrides (color, alpha, label).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">env_bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">env_bot</span><span class="p">)</span>
+    <span class="n">env_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">env_top</span><span class="p">)</span>
+
+    <span class="n">final_cfg</span> <span class="o">=</span> <span class="n">DEFAULT_FILL_AREA_CONFIG</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">final_cfg</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">ax</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+        <span class="n">x</span><span class="p">,</span>
+        <span class="n">env_bot</span><span class="p">,</span>
+        <span class="n">env_top</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">final_cfg</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">],</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="n">final_cfg</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">],</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">final_cfg</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">],</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="n">DEFAULT_PI_PLOT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;line&quot;</span><span class="p">:</span> <span class="p">{</span>      <span class="c1"># style des lignes de bornes</span>
+        <span class="s2">&quot;ls&quot;</span><span class="p">:</span> <span class="s2">&quot;dotted&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;lw&quot;</span><span class="p">:</span> <span class="mf">1.2</span><span class="p">,</span>
+        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;fill&quot;</span><span class="p">:</span> <span class="p">{</span>      <span class="c1"># style du remplissage</span>
+        <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="aux_plot_PIs">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_PIs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_plot_PIs</span><span class="p">(</span>
+    <span class="n">ax</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">,</span>
+    <span class="n">list_PIs</span><span class="p">,</span>
+    <span class="n">list_alpha_PIs</span><span class="p">,</span>
+    <span class="n">list_colors_PIs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;lightblue&quot;</span><span class="p">,</span> <span class="s2">&quot;lightgreen&quot;</span><span class="p">],</span>
+    <span class="n">list_alpha_fig_PIs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">],</span>
+    <span class="n">list_label_PIs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot multiple prediction interval envelopes on an Axes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : Axes</span>
+<span class="sd">    x : array-like</span>
+<span class="sd">    list_PIs : list of array-like</span>
+<span class="sd">        [low_1, ..., low_k, high_k, ..., high_1].</span>
+<span class="sd">    list_alpha_PIs : list of float</span>
+<span class="sd">        Quantile levels for each bound.</span>
+<span class="sd">    list_colors_PIs : list, optional</span>
+<span class="sd">        Per-interval colors overriding config.</span>
+<span class="sd">    list_alpha_fig_PIs : list, optional</span>
+<span class="sd">        Per-interval alphas overriding config.</span>
+<span class="sd">    list_label_PIs : list, optional</span>
+<span class="sd">        Per-interval labels.</span>
+<span class="sd">    config : dict, optional</span>
+<span class="sd">        Global style config: {&quot;line&quot;: {...}, &quot;fill&quot;: {...}}.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_bounds</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_PIs</span><span class="p">)</span>
+    <span class="n">n_couple</span> <span class="o">=</span> <span class="n">n_bounds</span> <span class="o">//</span> <span class="mi">2</span>
+
+    <span class="c1"># Merge global config with defaults</span>
+    <span class="n">line_cfg</span> <span class="o">=</span> <span class="n">DEFAULT_PI_PLOT_CONFIG</span><span class="p">[</span><span class="s2">&quot;line&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">fill_cfg</span> <span class="o">=</span> <span class="n">DEFAULT_PI_PLOT_CONFIG</span><span class="p">[</span><span class="s2">&quot;fill&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;line&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">line_cfg</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;line&quot;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="s2">&quot;fill&quot;</span> <span class="ow">in</span> <span class="n">config</span><span class="p">:</span>
+            <span class="n">fill_cfg</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;fill&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Defaults for per-interval overrides</span>
+    <span class="k">if</span> <span class="n">list_colors_PIs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">list_colors_PIs</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_couple</span>
+    <span class="k">if</span> <span class="n">list_alpha_fig_PIs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">list_alpha_fig_PIs</span> <span class="o">=</span> <span class="p">[</span><span class="n">fill_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;alpha&quot;</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)]</span> <span class="o">*</span> <span class="n">n_couple</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_couple</span><span class="p">):</span>
+        <span class="n">low</span> <span class="o">=</span> <span class="n">list_PIs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">high</span> <span class="o">=</span> <span class="n">list_PIs</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+
+        <span class="n">color</span> <span class="o">=</span> <span class="n">list_colors_PIs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">list_colors_PIs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">fill_cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;color&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">list_alpha_fig_PIs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">list_label_PIs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">coverage</span> <span class="o">=</span> <span class="p">(</span><span class="n">list_alpha_PIs</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">-</span> <span class="n">list_alpha_PIs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="mi">100</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Predictive interval: </span><span class="si">{</span><span class="n">coverage</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">%&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">list_label_PIs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># Lignes de bornes</span>
+        <span class="n">line_kwargs</span> <span class="o">=</span> <span class="n">line_cfg</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">line_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="o">**</span><span class="n">line_kwargs</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="o">**</span><span class="n">line_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Remplissage via le helper</span>
+        <span class="n">fill_kwargs</span> <span class="o">=</span> <span class="n">fill_cfg</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fill_kwargs</span><span class="p">[</span><span class="s2">&quot;color&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="n">fill_kwargs</span><span class="p">[</span><span class="s2">&quot;alpha&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="n">fill_kwargs</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">label</span>
+
+        <span class="n">aux_fill_area</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">fill_kwargs</span><span class="p">)</span></div>
+
+
+
+<span class="n">DEFAULT_CONF_SCORE_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;marker&quot;</span><span class="p">:</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+    <span class="s2">&quot;edgecolors&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;linewidth&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="s2">&quot;cmap&quot;</span><span class="p">:</span> <span class="s2">&quot;RdYlGn_r&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;zorder_base&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="aux_plot_conf_score">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_conf_score">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_plot_conf_score</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">confidence_lvl</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">mode_res</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot confidence scores as colored markers on an Axes.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    ax : Axes</span>
+<span class="sd">    x, pred : array-like</span>
+<span class="sd">        Coordinates and predictions.</span>
+<span class="sd">    confidence_lvl : array-like</span>
+<span class="sd">        Discrete confidence levels (int).</span>
+<span class="sd">    label : list of str</span>
+<span class="sd">        Legend labels per confidence level.</span>
+<span class="sd">    mode_res : bool, default False</span>
+<span class="sd">        If True, plot residual scores around zero.</span>
+<span class="sd">    config : dict, optional</span>
+<span class="sd">        Style overrides (marker, s, edgecolors, linewidth, cmap, zorder_base).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+    <span class="n">confidence_lvl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">confidence_lvl</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mode_res</span><span class="p">:</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">-</span> <span class="n">pred</span>
+
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">DEFAULT_CONF_SCORE_CONFIG</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">})</span>
+
+    <span class="n">max_conf</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">confidence_lvl</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;cmap&quot;</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_conf</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">confidence_lvl</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mask</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">continue</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+            <span class="n">pred</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+            <span class="n">c</span><span class="o">=</span><span class="n">confidence_lvl</span><span class="p">[</span><span class="n">mask</span><span class="p">],</span>
+            <span class="n">marker</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;marker&quot;</span><span class="p">],</span>
+            <span class="n">s</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;s&quot;</span><span class="p">],</span>
+            <span class="n">edgecolors</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;edgecolors&quot;</span><span class="p">],</span>
+            <span class="n">linewidth</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;linewidth&quot;</span><span class="p">],</span>
+            <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+            <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">vmax</span><span class="o">=</span><span class="n">max_conf</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;zorder_base&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+
+<span class="n">DEFAULT_CONFIDENCE_PLOT_CONFIG</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;pred&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>              <span class="c1"># config -&gt; aux_plot_pred</span>
+    <span class="s2">&quot;anom&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>              <span class="c1"># config -&gt; aux_plot_anom</span>
+    <span class="s2">&quot;pis_born&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>          <span class="c1"># config -&gt; aux_plot_PIs (born)</span>
+    <span class="s2">&quot;pis_aleatoric&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>     <span class="c1"># config -&gt; aux_plot_PIs (aleatoric PI)</span>
+    <span class="s2">&quot;pis_total&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>         <span class="c1"># config -&gt; aux_plot_PIs (total PI)</span>
+    <span class="s2">&quot;pis_born_bis&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>      <span class="c1"># config -&gt; aux_plot_PIs (born_bis)</span>
+    <span class="s2">&quot;anom_fill_upper&quot;</span><span class="p">:</span> <span class="p">{</span>       <span class="c1"># config -&gt; aux_fill_between (born upper)</span>
+        <span class="s2">&quot;facecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Anomaly&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;interpolate&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;anom_fill_lower&quot;</span><span class="p">:</span> <span class="p">{</span>       <span class="c1"># config -&gt; aux_fill_between (born lower)</span>
+        <span class="s2">&quot;facecolor&quot;</span><span class="p">:</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span>
+        <span class="s2">&quot;interpolate&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;zorder&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;axes&quot;</span><span class="p">:</span> <span class="p">{</span>                  <span class="c1"># config -&gt; aux_adjust_axes</span>
+        <span class="s2">&quot;margin&quot;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+        <span class="s2">&quot;x_margin&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="aux_plot_confiance">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_confiance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_plot_confiance</span><span class="p">(</span>
+    <span class="n">ax</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">pred</span><span class="p">,</span>
+    <span class="n">var_A</span><span class="p">,</span>
+    <span class="n">var_E</span><span class="p">,</span>
+    <span class="n">born</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">born_bis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ylim</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">split_values</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">mode_res</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">min_A</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span>
+    <span class="n">min_E</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+    <span class="n">env</span><span class="o">=</span><span class="p">[</span><span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.68</span><span class="p">],</span>
+    <span class="n">config</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwarg</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot prediction, uncertainty intervals and anomaly regions on an Axes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+    <span class="n">var_A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">var_A</span><span class="p">)</span>
+    <span class="n">var_E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">var_E</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+    <span class="c1"># Config globale fusionnée</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">_merge_nested</span><span class="p">(</span><span class="n">DEFAULT_CONFIDENCE_PLOT_CONFIG</span><span class="p">,</span> <span class="n">config</span> <span class="ow">or</span> <span class="p">{})</span>
+
+    <span class="c1"># Mode résidus</span>
+    <span class="k">if</span> <span class="n">mode_res</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">pred</span>
+        <span class="k">if</span> <span class="n">born</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">born</span> <span class="o">=</span> <span class="p">(</span><span class="n">born</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pred</span><span class="p">,</span> <span class="n">born</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pred</span><span class="p">)</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">pred</span> <span class="o">*</span> <span class="mf">0.0</span>
+
+    <span class="c1"># Indicateurs tronqués</span>
+    <span class="n">ind_A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_A</span><span class="p">)</span>
+    <span class="n">ind_E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_E</span><span class="p">)</span>
+    <span class="n">ind_E</span><span class="p">[</span><span class="n">ind_E</span> <span class="o">&lt;</span> <span class="n">min_E</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_E</span>
+    <span class="n">ind_A</span><span class="p">[</span><span class="n">ind_A</span> <span class="o">&lt;</span> <span class="n">min_A</span><span class="p">]</span> <span class="o">=</span> <span class="n">min_A</span>
+
+    <span class="c1"># PIs (aleatoric et total)</span>
+    <span class="n">y_lower</span><span class="p">,</span> <span class="n">y_upper</span> <span class="o">=</span> <span class="n">compute_born</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_A</span> <span class="o">+</span> <span class="n">var_E</span> <span class="o">*</span> <span class="mf">0.0</span><span class="p">),</span> <span class="mf">0.045</span><span class="p">)</span>
+    <span class="n">y_lower_N</span><span class="p">,</span> <span class="n">y_upper_N</span> <span class="o">=</span> <span class="n">compute_born</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_A</span> <span class="o">+</span> <span class="n">var_E</span><span class="p">),</span> <span class="mf">0.045</span><span class="p">)</span>
+
+    <span class="c1"># Anomalies</span>
+    <span class="k">if</span> <span class="n">born</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">anom_mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">born</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">|</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">born</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">anom_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">pred</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ind_E</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">ind_A</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">anom_mask</span> <span class="o">=</span> <span class="n">anom_score</span> <span class="o">&gt;</span> <span class="mf">1.0</span>
+
+    <span class="c1"># Prédiction + anomalies</span>
+    <span class="n">aux_plot_pred</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;pred&quot;</span><span class="p">])</span>
+    <span class="n">aux_plot_anom</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">[</span><span class="n">anom_mask</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">anom_mask</span><span class="p">],</span> <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;anom&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Cas avec bornes explicites</span>
+    <span class="k">if</span> <span class="n">born</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">aux_plot_PIs</span><span class="p">(</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">born</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">born</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="n">list_alpha_PIs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">],</span>
+            <span class="n">list_colors_PIs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">],</span>
+            <span class="n">list_label_PIs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Normal_limit&quot;</span><span class="p">],</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;pis_born&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">aux_fill_between</span><span class="p">(</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="n">born</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">where</span><span class="o">=</span><span class="n">propagate</span><span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">born</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sym</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;anom_fill_upper&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">aux_fill_between</span><span class="p">(</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="n">born</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">where</span><span class="o">=</span><span class="n">propagate</span><span class="p">(</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">born</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;anom_fill_lower&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Cas sans bornes explicites : PIs théoriques</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">aux_plot_PIs</span><span class="p">(</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">y_lower</span><span class="p">,</span> <span class="n">y_upper</span><span class="p">],</span>
+            <span class="n">list_alpha_PIs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">],</span>
+            <span class="n">list_colors_PIs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">],</span>
+            <span class="n">list_label_PIs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;2σAleatoric PIs (95%)&quot;</span><span class="p">],</span>
+            <span class="n">list_alpha_fig_PIs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.2</span><span class="p">],</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;pis_aleatoric&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">aux_plot_PIs</span><span class="p">(</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">y_lower_N</span><span class="p">,</span> <span class="n">y_upper_N</span><span class="p">],</span>
+            <span class="n">list_alpha_PIs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.16</span><span class="p">,</span> <span class="mf">0.84</span><span class="p">],</span>
+            <span class="n">list_colors_PIs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;darkblue&quot;</span><span class="p">],</span>
+            <span class="n">list_alpha_fig_PIs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span>
+            <span class="n">list_label_PIs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;2σTotal PIs(95%)&quot;</span><span class="p">],</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;pis_total&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Bornes supplémentaires</span>
+    <span class="k">if</span> <span class="n">born_bis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">aux_plot_PIs</span><span class="p">(</span>
+            <span class="n">ax</span><span class="p">,</span>
+            <span class="n">x</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">born_bis</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">born_bis</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+            <span class="n">list_alpha_PIs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.975</span><span class="p">],</span>
+            <span class="n">list_colors_PIs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;teal&quot;</span><span class="p">],</span>
+            <span class="n">list_alpha_fig_PIs</span><span class="o">=</span><span class="p">[</span><span class="mf">0.1</span><span class="p">],</span>
+            <span class="n">list_label_PIs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Normal_limit&quot;</span><span class="p">],</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;pis_born_bis&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Ajustement axes</span>
+    <span class="n">axes_cfg</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">]</span>
+    <span class="n">aux_adjust_axes</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="p">[</span><span class="n">y</span><span class="p">,</span> <span class="n">y_lower</span><span class="p">],</span> <span class="n">ylim</span><span class="o">=</span><span class="n">ylim</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="n">axes_cfg</span><span class="p">[</span><span class="s2">&quot;margin&quot;</span><span class="p">],</span> <span class="n">x_margin</span><span class="o">=</span><span class="n">axes_cfg</span><span class="p">[</span><span class="s2">&quot;x_margin&quot;</span><span class="p">])</span></div>
+
+
+
+<span class="c1"># Auxiliar function related to matplot</span>
+
+<div class="viewcode-block" id="aux_norm_score_inputs">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_norm_score_inputs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_norm_score_inputs</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="n">f_obs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalise score en liste, infère len_score, dim_score, n_score et f_obs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">len_score</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">dim_score</span> <span class="o">=</span> <span class="p">[</span><span class="n">score_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">score_</span> <span class="ow">in</span> <span class="n">score</span><span class="p">]</span>
+        <span class="n">n_score</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+        <span class="n">score_list</span> <span class="o">=</span> <span class="n">score</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">score_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">score</span><span class="p">]</span>
+        <span class="n">len_score</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
+        <span class="n">dim_score</span> <span class="o">=</span> <span class="p">[</span><span class="n">score_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">n_score</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">f_obs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">f_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">len_score</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">f_obs</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cmap</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">provide_cmap</span><span class="p">(</span><span class="s2">&quot;bluetored&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">score_list</span><span class="p">,</span> <span class="n">len_score</span><span class="p">,</span> <span class="n">dim_score</span><span class="p">,</span> <span class="n">n_score</span><span class="p">,</span> <span class="n">f_obs</span><span class="p">,</span> <span class="n">cmap</span></div>
+
+
+
+<div class="viewcode-block" id="aux_prepare_x_extent">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_prepare_x_extent">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_prepare_x_extent</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">f_obs</span><span class="p">,</span> <span class="n">dim_score</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prépare x (échelle) et la liste d&#39;extent pour imshow.</span>
+<span class="sd">    Retourne x, x_flag (datetime ou non), list_extent.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">x_flag</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f_obs</span><span class="p">))</span>
+        <span class="n">list_extent</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">dim_score</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x_flag</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">d0</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">f_obs</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">d1</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">date2num</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">f_obs</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">list_extent</span> <span class="o">=</span> <span class="p">[[</span><span class="n">d0</span><span class="p">,</span> <span class="n">d1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">dim_score</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_flag</span><span class="p">,</span> <span class="n">list_extent</span></div>
+
+
+
+<div class="viewcode-block" id="aux_compute_layout_params">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_compute_layout_params">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_compute_layout_params</span><span class="p">(</span><span class="n">n_score</span><span class="p">,</span> <span class="n">dim_score</span><span class="p">,</span> <span class="n">true_label</span><span class="p">,</span> <span class="n">score2</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">grid_spec</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calcule n_fig, sharey, grid_spec.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_fig</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">n_score</span>
+    <span class="k">if</span> <span class="n">true_label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">n_fig</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">score2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">n_fig</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">n_fig</span> <span class="o">-=</span> <span class="mi">1</span>
+
+    <span class="n">sharey</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="p">(</span><span class="n">n_score</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="p">(</span><span class="n">true_label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="p">(</span><span class="n">dim_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">true_label</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="c1"># Même condition que ton code initial (même si peu naturelle)</span>
+        <span class="n">sharey</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">grid_spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">grid_spec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n_fig</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">n_fig</span><span class="p">,</span> <span class="n">sharey</span><span class="p">,</span> <span class="n">grid_spec</span></div>
+
+
+
+<div class="viewcode-block" id="aux_create_score_figure">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_create_score_figure">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_create_score_figure</span><span class="p">(</span><span class="n">n_fig</span><span class="p">,</span> <span class="n">sharey</span><span class="p">,</span> <span class="n">grid_spec</span><span class="p">,</span> <span class="n">figsize</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crée la figure et les axes pour la matrice d&#39;anomalies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span>
+        <span class="n">n_fig</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">,</span>
+        <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">sharey</span><span class="o">=</span><span class="n">sharey</span><span class="p">,</span>
+        <span class="n">gridspec_kw</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;height_ratios&quot;</span><span class="p">:</span> <span class="n">grid_spec</span><span class="p">},</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span></div>
+
+
+
+<div class="viewcode-block" id="aux_plot_score_matrix">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_score_matrix">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_plot_score_matrix</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">score_mat</span><span class="p">,</span> <span class="n">f_obs</span><span class="p">,</span> <span class="n">extent</span><span class="p">,</span> <span class="n">vmin</span><span class="p">,</span> <span class="n">vmax</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;score&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Affiche une matrice de score via imshow.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">score_mat</span><span class="p">[</span><span class="n">f_obs</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">,</span>
+        <span class="n">vmin</span><span class="o">=</span><span class="n">vmin</span><span class="p">,</span>
+        <span class="n">vmax</span><span class="o">=</span><span class="n">vmax</span><span class="p">,</span>
+        <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
+        <span class="n">interpolation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="aux_overlay_setup_grid">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_overlay_setup_grid">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_overlay_setup_grid</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">setup</span><span class="p">,</span> <span class="n">n_points</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Superpose la grille channels/sensors sur une matrice de score.</span>
+<span class="sd">    setup = (n_chan, n_sensor)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">setup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">n_chan</span><span class="p">,</span> <span class="n">n_sensor</span> <span class="o">=</span> <span class="n">setup</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_chan</span> <span class="o">*</span> <span class="n">n_sensor</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n_points</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_sensor</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="n">n_chan</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">n_points</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="aux_plot_true_label_matrix">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_true_label_matrix">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_plot_true_label_matrix</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">true_label</span><span class="p">,</span> <span class="n">f_obs</span><span class="p">,</span> <span class="n">extent</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Affiche la matrice de labels vrais.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;True_anom&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+        <span class="n">true_label</span><span class="p">[</span><span class="n">f_obs</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Reds&quot;</span><span class="p">,</span>
+        <span class="n">aspect</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+        <span class="n">extent</span><span class="o">=</span><span class="n">extent</span><span class="p">,</span>
+        <span class="n">interpolation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="aux_build_data_colors">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_build_data_colors">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_build_data_colors</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">list_anom_ind</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construit la palette de couleurs par canal, en surlignant éventuellement</span>
+<span class="sd">    certains indices anormaux.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n_chan</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">base_cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;Greens&quot;</span><span class="p">,</span> <span class="n">n_chan</span><span class="p">)</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="n">base_cmap</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_chan</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">list_anom_ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">red_cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;Reds&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_anom_ind</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">anom_ind</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_anom_ind</span><span class="p">):</span>
+            <span class="n">colors</span><span class="p">[</span><span class="n">anom_ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">red_cmap</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">colors</span></div>
+
+
+
+<div class="viewcode-block" id="aux_plot_data_timeseries">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_plot_data_timeseries">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_plot_data_timeseries</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">f_obs</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">colors</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Trace les séries temporelles multicanal.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">f_obs</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">lw</span><span class="o">=</span><span class="n">lw</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="aux_overlay_score_anoms_on_data">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_overlay_score_anoms_on_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_overlay_score_anoms_on_data</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">f_obs</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Superpose les points où |score| &gt; threshold sur les séries de données.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">score</span><span class="p">)[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+            <span class="n">x</span><span class="p">[</span><span class="n">f_obs</span><span class="p">][</span><span class="n">mask</span><span class="p">],</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">i</span><span class="p">][</span><span class="n">mask</span><span class="p">],</span>
+            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+            <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+            <span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="aux_overlay_true_label_on_data">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_overlay_true_label_on_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_overlay_true_label_on_data</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">true_label</span><span class="p">,</span> <span class="n">f_obs</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;purple&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Superpose les labels vrais sur les séries temporelles.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">true_label</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">f_obs</span><span class="p">][</span><span class="n">mask</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">i</span><span class="p">][</span><span class="n">mask</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="aux_format_time_axis">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_format_time_axis">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_format_time_axis</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">x_flag</span><span class="p">,</span> <span class="n">x_date</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Configure l&#39;axe des x comme temporel et éventuellement applique un formatter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">x_flag</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis_date</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">x_date</span><span class="p">:</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mdates</span><span class="o">.</span><span class="n">DateFormatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">/%m %H:%M&quot;</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="aux_finalize_figure">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.aux_finalize_figure">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">aux_finalize_figure</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Finalise la figure (tight_layout + show optionnel).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">show_plot</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="provide_cmap">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.aux_visualization.provide_cmap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">provide_cmap</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;bluetored&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a bluetored or a cyantopurple cutsom cmap</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        mode (str, optional):Values: bluetored&#39; or &#39;cyantopurple &#39;</span>
+
+<span class="sd">    return:</span>
+<span class="sd">       Colormap matplotlib</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;bluetored&quot;</span><span class="p">:</span>
+        <span class="n">bluetored</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">90</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">120</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">150</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.15</span><span class="p">,</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">190</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="p">(</span><span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">220</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="p">(</span><span class="mi">70</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">255</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.33</span><span class="p">,</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">255</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.36</span><span class="p">,</span> <span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">255</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="p">(</span><span class="mi">218</span><span class="p">,</span> <span class="mi">218</span><span class="p">,</span> <span class="mi">255</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.45</span><span class="p">,</span> <span class="p">(</span><span class="mi">245</span><span class="p">,</span> <span class="mi">245</span><span class="p">,</span> <span class="mi">255</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">253</span><span class="p">,</span> <span class="mi">253</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.55</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">245</span><span class="p">,</span> <span class="mi">245</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.6</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">218</span><span class="p">,</span> <span class="mi">218</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.63</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.66</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">160</span><span class="p">,</span> <span class="mi">160</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">110</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.75</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">70</span><span class="p">,</span> <span class="mi">70</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="p">(</span><span class="mi">230</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">40</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.85</span><span class="p">,</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span> <span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="mi">130</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
+        <span class="p">]</span>
+        <span class="n">bluetored_cmap</span> <span class="o">=</span> <span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span>
+            <span class="s2">&quot;bluetored&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">255</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">bluetored</span><span class="p">],</span> <span class="n">N</span><span class="o">=</span><span class="mi">255</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">bluetored_cmap</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;cyantopurple&quot;</span><span class="p">:</span>
+        <span class="n">cyantopurple</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">250</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">230</span><span class="p">,</span> <span class="mi">230</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.15</span><span class="p">,</span> <span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">220</span><span class="p">,</span> <span class="mi">220</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">170</span><span class="p">,</span> <span class="mi">170</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">140</span><span class="p">,</span> <span class="mi">140</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.36</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">80</span><span class="p">,</span> <span class="mi">80</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.45</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">30</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.55</span><span class="p">,</span> <span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.6</span><span class="p">,</span> <span class="p">(</span><span class="mi">59</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.64</span><span class="p">,</span> <span class="p">(</span><span class="mi">80</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">80</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.7</span><span class="p">,</span> <span class="p">(</span><span class="mi">140</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">140</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.75</span><span class="p">,</span> <span class="p">(</span><span class="mi">170</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">170</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">200</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.85</span><span class="p">,</span> <span class="p">(</span><span class="mi">220</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">220</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="p">(</span><span class="mi">240</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">240</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">0.95</span><span class="p">,</span> <span class="p">(</span><span class="mi">250</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">250</span><span class="p">)],</span>
+            <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)],</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NameError</span>
+
+        <span class="n">cyantopurple_cmap</span> <span class="o">=</span> <span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span>
+            <span class="s2">&quot;cyantopurple&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">255</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">cyantopurple</span><span class="p">],</span> <span class="n">N</span><span class="o">=</span><span class="mi">255</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">cyantopurple_cmap</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_panel_ax</span><span class="p">(</span><span class="n">axs</span><span class="p">,</span> <span class="n">n_dim</span><span class="p">,</span> <span class="n">n_ctx</span><span class="p">,</span> <span class="n">idx_dim</span><span class="p">,</span> <span class="n">idx_ctx</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sélectionne l&#39;Axes correct dans la grille axs (len(dim) x n_ctx).&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">n_dim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">n_ctx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">axs</span>
+    <span class="k">if</span> <span class="n">n_dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">axs</span><span class="p">[</span><span class="n">idx_ctx</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">n_ctx</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">axs</span><span class="p">[</span><span class="n">idx_dim</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">axs</span><span class="p">[</span><span class="n">idx_dim</span><span class="p">,</span> <span class="n">idx_ctx</span><span class="p">]</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

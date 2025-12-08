@@ -79,51 +79,19 @@
 <span class="sd">Data preprocessing module.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">tsfresh</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tsfresh</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_features</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">tsfresh.feature_extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">EfficientFCParameters</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.features_processing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">f_proc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">downscale_series</span><span class="p">,</span> <span class="n">upscale_series</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">base_cos_freq</span><span class="p">,</span> <span class="n">convolute_1D</span><span class="p">,</span> <span class="n">corr_matrix_array</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.tsfresh_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">select_tsfresh_params</span><span class="p">,</span> <span class="n">fit_tsfresh_feature_engeenering</span><span class="p">,</span>
+    <span class="n">compute_tsfresh_feature_engeenering</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">downscale_series</span><span class="p">,</span> <span class="n">upscale_series</span><span class="p">,</span>
+    <span class="n">select_features_from_FI</span><span class="p">,</span> <span class="n">select_data_and_context</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">base_cos_freq</span><span class="p">,</span> <span class="n">convolute_1D</span>
 
 <span class="c1"># import uqmodels.test as UQ_test</span>
-
-
-<div class="viewcode-block" id="check_transform_input_to_panda">
-<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.check_transform_input_to_panda">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">check_transform_input_to_panda</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if input is dataframe.</span>
-<span class="sd">        if it&#39;s a np.ndarray turn it to dataframe</span>
-<span class="sd">        else raise error.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        input (_type_): input to check or tranforaam</span>
-<span class="sd">        name (str, optional): name of input</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        TypeError: Input have a wrong type</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        input: pd.dataframe</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="c1"># print(&#39;Change ndarray in pd.dataframe&#39;)</span>
-        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Type issues in &quot;</span> <span class="o">+</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">function</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;should be pd.DataFrame rather than &quot;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="nb">input</span><span class="p">))</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span>
-    <span class="k">return</span> <span class="nb">input</span></div>
-
 
 
 <div class="viewcode-block" id="normalise_panda">
@@ -157,22 +125,7 @@
         <span class="k">return</span> <span class="n">dataframe</span></div>
 
 
-
 <span class="c1"># Target selection from data :</span>
-
-
-<div class="viewcode-block" id="select_tsfresh_params">
-<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.select_tsfresh_params">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">select_tsfresh_params</span><span class="p">(</span>
-    <span class="n">list_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;variance&quot;</span><span class="p">,</span> <span class="s2">&quot;skewness&quot;</span><span class="p">,</span> <span class="s2">&quot;fft&quot;</span><span class="p">,</span> <span class="s2">&quot;cwt&quot;</span><span class="p">,</span> <span class="s2">&quot;fourrier&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span> <span class="s2">&quot;trend&quot;</span><span class="p">]</span>
-<span class="p">):</span>
-    <span class="n">dict_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">list_keys</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">EfficientFCParameters</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">k</span><span class="p">:</span>
-                <span class="n">dict_params</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">EfficientFCParameters</span><span class="p">()[</span><span class="n">k</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">dict_params</span></div>
-
 
 
 <div class="viewcode-block" id="select_data">
@@ -196,49 +149,6 @@
 
 <span class="c1"># ----------------------------------------- #</span>
 <span class="c1"># PCA transformation form data &amp; context</span>
-
-
-<div class="viewcode-block" id="select_data_and_context">
-<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.select_data_and_context">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">select_data_and_context</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ind_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ind_context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select data and context using ind_data &amp; ind_context.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        data (ndarray): data</span>
-<span class="sd">        context (ndarray, optional): context_data. Defaults to None.</span>
-<span class="sd">        n_components (int, optional): n_components of pca. Defaults to 3.</span>
-<span class="sd">        ind_data (ind_array, optional): selected data. Defaults to None : all dim are pick</span>
-<span class="sd">        ind_context (ind_array, optional): seletected data context.</span>
-<span class="sd">        Defaults to None : all dim are pick if there is context</span>
-<span class="sd">    Returns:</span>
-<span class="sd">        data_selected : Ndarray that contains np.concatenation of all selected features</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">data</span> <span class="o">=</span> <span class="n">check_transform_input_to_panda</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">context</span> <span class="o">=</span> <span class="n">check_transform_input_to_panda</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">)</span>
-
-    <span class="n">data_selected</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="n">ind_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">data_selected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ind_data</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="n">ind_context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">data_selected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ind_context</span><span class="p">])</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_selected</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">data_selected</span> <span class="o">=</span> <span class="n">data</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">data_selected</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data_selected</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">data_selected</span><span class="o">.</span><span class="n">values</span></div>
-
-
 
 <div class="viewcode-block" id="fit_pca">
 <a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.fit_pca">[docs]</a>
@@ -481,155 +391,6 @@
             <span class="n">new_features_name</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;lag_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_dim:&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">g</span><span class="p">))</span>
     <span class="n">new_features_name</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_features_name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_features_list</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">params</span></div>
-
-
-
-<div class="viewcode-block" id="mask_corr_feature_target">
-<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.mask_corr_feature_target">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">mask_corr_feature_target</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">v_seuil</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
-    <span class="n">v_corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">corr_matrix_array</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="n">v_corr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">v_corr</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">corr_matrix_array</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])))</span>
-
-    <span class="k">return</span> <span class="n">v_corr</span> <span class="o">&gt;</span> <span class="n">v_seuil</span></div>
-
-
-
-<div class="viewcode-block" id="select_features_from_FI">
-<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.select_features_from_FI">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">select_features_from_FI</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;RF&quot;</span><span class="p">,</span> <span class="n">threesold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;RF&quot;</span><span class="p">:</span>
-        <span class="n">estimator</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span>
-            <span class="n">ccp_alpha</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span>
-            <span class="n">max_depth</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-            <span class="n">max_features</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-            <span class="n">max_samples</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-            <span class="n">min_impurity_decrease</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
-            <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-            <span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-            <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-        <span class="n">features_mask</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">feature_importances_</span> <span class="o">&gt;</span> <span class="n">threesold</span>
-    <span class="k">return</span> <span class="n">features_mask</span></div>
-
-
-
-<div class="viewcode-block" id="build_window_representation">
-<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.build_window_representation">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">build_window_representation</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">%</span> <span class="n">step</span> <span class="o">==</span> <span class="n">step</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span>
-
-    <span class="n">list_df</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">window</span><span class="p">):</span>
-        <span class="n">dict_df_ts</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">])),</span>
-            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">])),</span> <span class="n">i</span><span class="p">),</span>
-        <span class="p">}</span>
-        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
-            <span class="n">dict_df_ts</span><span class="p">[</span><span class="s2">&quot;value_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">i</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
-        <span class="n">df_ts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dict_df_ts</span><span class="p">)</span>
-        <span class="n">list_df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_ts</span><span class="p">)</span>
-    <span class="n">df_ts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">list_df</span><span class="p">)</span>
-    <span class="n">y_target</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="n">window</span><span class="p">:</span>
-        <span class="n">df_ts</span> <span class="o">=</span> <span class="n">df_ts</span><span class="p">[</span><span class="n">df_ts</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="n">y_target</span> <span class="o">=</span> <span class="n">y_target</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
-
-    <span class="k">return</span> <span class="p">(</span><span class="n">df_ts</span><span class="p">,</span> <span class="n">y_target</span><span class="p">)</span></div>
-
-
-
-<div class="viewcode-block" id="fit_tsfresh_feature_engeenering">
-<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.fit_tsfresh_feature_engeenering">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">fit_tsfresh_feature_engeenering</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">window</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">ts_fresh_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">ind_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">ind_context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span>
-<span class="p">):</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">select_data_and_context</span><span class="p">(</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">ind_data</span><span class="o">=</span><span class="n">ind_data</span><span class="p">,</span> <span class="n">ind_context</span><span class="o">=</span><span class="n">ind_context</span>
-    <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">step</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">step</span> <span class="o">=</span> <span class="n">window</span>
-
-    <span class="n">df_ts</span><span class="p">,</span> <span class="n">y_target</span> <span class="o">=</span> <span class="n">build_window_representation</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">ts_fresh_params</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ts_fresh_params</span> <span class="o">=</span> <span class="n">EfficientFCParameters</span><span class="p">()</span>
-
-    <span class="n">X_extracted</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span>
-        <span class="n">df_ts</span><span class="p">,</span> <span class="n">ts_fresh_params</span><span class="p">,</span> <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">column_sort</span><span class="o">=</span><span class="s2">&quot;time&quot;</span>
-    <span class="p">)</span>
-    <span class="n">filter_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X_extracted</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-
-    <span class="n">X_extracted</span> <span class="o">=</span> <span class="n">X_extracted</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">filter_</span><span class="p">]</span>
-    <span class="n">filter_</span> <span class="o">=</span> <span class="n">mask_corr_feature_target</span><span class="p">(</span><span class="n">X_extracted</span><span class="p">,</span> <span class="n">y_target</span><span class="p">)</span>
-    <span class="n">X_extracted</span> <span class="o">=</span> <span class="n">X_extracted</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">filter_</span><span class="p">]</span>
-
-    <span class="n">X_selected</span> <span class="o">=</span> <span class="n">tsfresh</span><span class="o">.</span><span class="n">feature_selection</span><span class="o">.</span><span class="n">select_features</span><span class="p">(</span><span class="n">X_extracted</span><span class="p">,</span> <span class="n">y_target</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
-
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="n">X_selected_tmp</span> <span class="o">=</span> <span class="n">tsfresh</span><span class="o">.</span><span class="n">feature_selection</span><span class="o">.</span><span class="n">select_features</span><span class="p">(</span>
-            <span class="n">X_extracted</span><span class="p">,</span> <span class="n">y_target</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="p">)</span>
-
-        <span class="n">mask</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">colums_tmp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">X_selected</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">colums_tmp</span> <span class="ow">in</span> <span class="n">X_selected_tmp</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span>
-        <span class="p">]</span>
-        <span class="n">X_selected</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">X_selected</span><span class="p">,</span> <span class="n">X_selected_tmp</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">mask</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="n">mask_featutre_selection</span> <span class="o">=</span> <span class="n">select_features_from_FI</span><span class="p">(</span><span class="n">X_selected</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_target</span><span class="p">)</span>
-    <span class="n">name_feature_selected</span> <span class="o">=</span> <span class="n">X_selected</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">mask_featutre_selection</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">kind_to_fc_parameters</span> <span class="o">=</span> <span class="n">tsfresh</span><span class="o">.</span><span class="n">feature_extraction</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span>
-        <span class="n">name_feature_selected</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="n">kind_to_fc_parameters</span></div>
-
-
-
-<div class="viewcode-block" id="compute_tsfresh_feature_engeenering">
-<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.features_processing.compute_tsfresh_feature_engeenering">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">compute_tsfresh_feature_engeenering</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">,</span>
-    <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">window</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">step</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-    <span class="n">ind_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">ind_context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">params_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span>
-<span class="p">):</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">select_data_and_context</span><span class="p">(</span>
-        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">ind_data</span><span class="o">=</span><span class="n">ind_data</span><span class="p">,</span> <span class="n">ind_context</span><span class="o">=</span><span class="n">ind_context</span>
-    <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">step</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">step</span> <span class="o">=</span> <span class="n">window</span>
-
-    <span class="k">if</span> <span class="n">params_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">params_</span> <span class="o">=</span> <span class="n">fit_tsfresh_feature_engeenering</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">window</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-
-    <span class="n">df_ts</span><span class="p">,</span> <span class="n">y_target</span> <span class="o">=</span> <span class="n">build_window_representation</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
-    <span class="n">X_extracted</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span>
-        <span class="n">df_ts</span><span class="p">,</span>
-        <span class="n">kind_to_fc_parameters</span><span class="o">=</span><span class="n">params_</span><span class="p">,</span>
-        <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span>
-        <span class="n">column_sort</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
-        <span class="n">disable_progressbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">X_extracted</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_target</span><span class="p">),</span> <span class="n">params_</span></div>
 
 
 
@@ -877,7 +638,7 @@
         <span class="s2">&quot;ts_fresh&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;window&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
             <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
-            <span class="s2">&quot;ts_fresh_params&quot;</span><span class="p">:</span> <span class="n">f_proc</span><span class="o">.</span><span class="n">select_tsfresh_params</span><span class="p">([</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;cwt&quot;</span><span class="p">]),</span>
+            <span class="s2">&quot;ts_fresh_params&quot;</span><span class="p">:</span> <span class="n">select_tsfresh_params</span><span class="p">([</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span> <span class="s2">&quot;cwt&quot;</span><span class="p">]),</span>
         <span class="p">},</span>
     <span class="p">}</span>
     <span class="k">if</span> <span class="n">delta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

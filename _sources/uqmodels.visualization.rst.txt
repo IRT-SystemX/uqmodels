@@ -4,6 +4,22 @@ uqmodels.visualization package
 Submodules
 ----------
 
+uqmodels.visualization.aux\_visualization module
+------------------------------------------------
+
+.. automodule:: uqmodels.visualization.aux_visualization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+uqmodels.visualization.old\_visualisation module
+------------------------------------------------
+
+.. automodule:: uqmodels.visualization.old_visualisation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 uqmodels.visualization.visualization module
 -------------------------------------------
 

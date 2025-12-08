@@ -24,6 +24,14 @@ uqmodels.UQModel module
    :undoc-members:
    :show-inheritance:
 
+uqmodels.check module
+---------------------
+
+.. automodule:: uqmodels.check
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 uqmodels.custom\_UQModel module
 -------------------------------
 

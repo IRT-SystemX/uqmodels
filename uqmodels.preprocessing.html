@@ -62,6 +62,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.UQModel">uqmodels.UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.check">uqmodels.check module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.custom_UQModel">uqmodels.custom_UQModel module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.processing">uqmodels.processing module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.utils">uqmodels.utils module</a></li>
@@ -453,38 +454,6 @@
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.build_window_representation">
-<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">build_window_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#build_window_representation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.build_window_representation" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.check_transform_input_to_panda">
-<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">check_transform_input_to_panda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#check_transform_input_to_panda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.check_transform_input_to_panda" title="Link to this definition"></a></dt>
-<dd><dl class="simple">
-<dt>Check if input is dataframe.</dt><dd><p>if it’s a np.ndarray turn it to dataframe
-else raise error.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>input</strong> (<em>_type_</em>) – input to check or tranforaam</p></li>
-<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – name of input</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>TypeError</strong> – Input have a wrong type</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.dataframe</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>input</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.compute_FE_by_estimator">
 <span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">compute_FE_by_estimator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">estimator_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_lag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#compute_FE_by_estimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.compute_FE_by_estimator" title="Link to this definition"></a></dt>
 <dd></dd></dl>
@@ -566,11 +535,6 @@ compute PCA from selected data &amp; context and params which contains fitted pc
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.compute_tsfresh_feature_engeenering">
-<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">compute_tsfresh_feature_engeenering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#compute_tsfresh_feature_engeenering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.compute_tsfresh_feature_engeenering" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.fit_FE_by_estimator">
@@ -700,11 +664,6 @@ if there is context</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.fit_tsfresh_feature_engeenering">
-<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">fit_tsfresh_feature_engeenering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_fresh_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#fit_tsfresh_feature_engeenering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.fit_tsfresh_feature_engeenering" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.get_FE_params">
 <span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">get_FE_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#get_FE_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.get_FE_params" title="Link to this definition"></a></dt>
 <dd><p>Provide defaults parameters for features engenering</p>
@@ -714,11 +673,6 @@ if there is context</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.mask_corr_feature_target">
-<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">mask_corr_feature_target</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v_seuil</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#mask_corr_feature_target"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.mask_corr_feature_target" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.normalise_panda">
@@ -759,40 +713,6 @@ if there is context</p></li>
 </dd>
 </dl>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.select_data_and_context">
-<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">select_data_and_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#select_data_and_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.select_data_and_context" title="Link to this definition"></a></dt>
-<dd><p>Select data and context using ind_data &amp; ind_context.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>ndarray</em>) – data</p></li>
-<li><p><strong>context</strong> (<em>ndarray</em><em>, </em><em>optional</em>) – context_data. Defaults to None.</p></li>
-<li><p><strong>n_components</strong> (<em>int</em><em>, </em><em>optional</em>) – n_components of pca. Defaults to 3.</p></li>
-<li><p><strong>ind_data</strong> (<em>ind_array</em><em>, </em><em>optional</em>) – selected data. Defaults to None : all dim are pick</p></li>
-<li><p><strong>ind_context</strong> (<em>ind_array</em><em>, </em><em>optional</em>) – seletected data context.</p></li>
-<li><p><strong>None</strong> (<em>Defaults to</em>) – all dim are pick if there is context</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Ndarray that contains np.concatenation of all selected features</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>data_selected</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.select_features_from_FI">
-<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">select_features_from_FI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threesold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#select_features_from_FI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.select_features_from_FI" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="uqmodels.preprocessing.features_processing.select_tsfresh_params">
-<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.features_processing.</span></span><span class="sig-name descname"><span class="pre">select_tsfresh_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['variance',</span> <span class="pre">'skewness',</span> <span class="pre">'fft',</span> <span class="pre">'cwt',</span> <span class="pre">'fourrier',</span> <span class="pre">'meantrend']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/features_processing.html#select_tsfresh_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.features_processing.select_tsfresh_params" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </section>
 <section id="module-uqmodels.preprocessing.preprocessing">
@@ -835,9 +755,41 @@ if there is context</p></li>
 <dd></dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.preprocessing.build_window_representation">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.preprocessing.</span></span><span class="sig-name descname"><span class="pre">build_window_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/preprocessing.html#build_window_representation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.preprocessing.build_window_representation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.preprocessing.preprocessing.check_is_pd_date">
 <span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.preprocessing.</span></span><span class="sig-name descname"><span class="pre">check_is_pd_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/preprocessing.html#check_is_pd_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.preprocessing.check_is_pd_date" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.preprocessing.check_transform_input_to_panda">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.preprocessing.</span></span><span class="sig-name descname"><span class="pre">check_transform_input_to_panda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/preprocessing.html#check_transform_input_to_panda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.preprocessing.check_transform_input_to_panda" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Check if input is dataframe.</dt><dd><p>if it’s a np.ndarray turn it to dataframe
+else raise error.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<em>_type_</em>) – input to check or tranforaam</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – name of input</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – Input have a wrong type</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.dataframe</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>input</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.preprocessing.preprocessing.compute_corr_and_filter">
@@ -1116,6 +1068,35 @@ Into a ground truth matrix with a regular step scale of delta that start at star
 <dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.preprocessing.preprocessing.select_best_representant">
 <span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.preprocessing.</span></span><span class="sig-name descname"><span class="pre">select_best_representant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat_corr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_components</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/preprocessing.html#select_best_representant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.preprocessing.select_best_representant" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.preprocessing.select_data_and_context">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.preprocessing.</span></span><span class="sig-name descname"><span class="pre">select_data_and_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/preprocessing.html#select_data_and_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.preprocessing.select_data_and_context" title="Link to this definition"></a></dt>
+<dd><p>Select data and context using ind_data &amp; ind_context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – data</p></li>
+<li><p><strong>context</strong> (<em>ndarray</em><em>, </em><em>optional</em>) – context_data. Defaults to None.</p></li>
+<li><p><strong>n_components</strong> (<em>int</em><em>, </em><em>optional</em>) – n_components of pca. Defaults to 3.</p></li>
+<li><p><strong>ind_data</strong> (<em>ind_array</em><em>, </em><em>optional</em>) – selected data. Defaults to None : all dim are pick</p></li>
+<li><p><strong>ind_context</strong> (<em>ind_array</em><em>, </em><em>optional</em>) – seletected data context.</p></li>
+<li><p><strong>None</strong> (<em>Defaults to</em>) – all dim are pick if there is context</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Ndarray that contains np.concatenation of all selected features</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>data_selected</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.preprocessing.select_features_from_FI">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.preprocessing.</span></span><span class="sig-name descname"><span class="pre">select_features_from_FI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threesold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/preprocessing.html#select_features_from_FI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.preprocessing.select_features_from_FI" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -1455,6 +1436,93 @@ date = (step/delta-d_init).astype(dtype).tostr()</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.preprocessing.structure.window_expansion">
 <span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.structure.</span></span><span class="sig-name descname"><span class="pre">window_expansion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_expend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/structure.html#window_expansion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.structure.window_expansion" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-uqmodels.preprocessing.tsfresh_utils">
+<span id="uqmodels-preprocessing-tsfresh-utils-module"></span><h2>uqmodels.preprocessing.tsfresh_utils module<a class="headerlink" href="#module-uqmodels.preprocessing.tsfresh_utils" title="Link to this heading"></a></h2>
+<p>Utility module ensuring safe CPU-only usage of tsfresh.</p>
+<p>Because tsfresh relies on numba, which may try to load CUDA runtime
+libraries (libcudart.so) and fail in environments without a full CUDA
+toolkit, this module forces NUMBA_DISABLE_CUDA=1 by default to prevent
+CUDA initialization, unless UQMODELS_ENABLE_NUMBA_CUDA=1 is explicitly set.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.tsfresh_utils.compute_tsfresh_feature_engeenering">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.tsfresh_utils.</span></span><span class="sig-name descname"><span class="pre">compute_tsfresh_feature_engeenering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/tsfresh_utils.html#compute_tsfresh_feature_engeenering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.tsfresh_utils.compute_tsfresh_feature_engeenering" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.tsfresh_utils.fit_tsfresh_feature_engeenering">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.tsfresh_utils.</span></span><span class="sig-name descname"><span class="pre">fit_tsfresh_feature_engeenering</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ts_fresh_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/tsfresh_utils.html#fit_tsfresh_feature_engeenering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.tsfresh_utils.fit_tsfresh_feature_engeenering" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.tsfresh_utils.select_tsfresh_params">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.tsfresh_utils.</span></span><span class="sig-name descname"><span class="pre">select_tsfresh_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">list_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['variance',</span> <span class="pre">'skewness',</span> <span class="pre">'fft',</span> <span class="pre">'cwt',</span> <span class="pre">'fourrier',</span> <span class="pre">'meantrend']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/tsfresh_utils.html#select_tsfresh_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.tsfresh_utils.select_tsfresh_params" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-uqmodels.preprocessing.utils">
+<span id="uqmodels-preprocessing-utils-module"></span><h2>uqmodels.preprocessing.utils module<a class="headerlink" href="#module-uqmodels.preprocessing.utils" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.utils.build_window_representation">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.utils.</span></span><span class="sig-name descname"><span class="pre">build_window_representation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/utils.html#build_window_representation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.utils.build_window_representation" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.utils.check_transform_input_to_panda">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.utils.</span></span><span class="sig-name descname"><span class="pre">check_transform_input_to_panda</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/utils.html#check_transform_input_to_panda"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.utils.check_transform_input_to_panda" title="Link to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Check if input is dataframe.</dt><dd><p>if it’s a np.ndarray turn it to dataframe
+else raise error.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<em>_type_</em>) – input to check or tranforaam</p></li>
+<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – name of input</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>TypeError</strong> – Input have a wrong type</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.dataframe</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>input</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.utils.select_data_and_context">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.utils.</span></span><span class="sig-name descname"><span class="pre">select_data_and_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind_context</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/utils.html#select_data_and_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.utils.select_data_and_context" title="Link to this definition"></a></dt>
+<dd><p>Select data and context using ind_data &amp; ind_context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>ndarray</em>) – data</p></li>
+<li><p><strong>context</strong> (<em>ndarray</em><em>, </em><em>optional</em>) – context_data. Defaults to None.</p></li>
+<li><p><strong>n_components</strong> (<em>int</em><em>, </em><em>optional</em>) – n_components of pca. Defaults to 3.</p></li>
+<li><p><strong>ind_data</strong> (<em>ind_array</em><em>, </em><em>optional</em>) – selected data. Defaults to None : all dim are pick</p></li>
+<li><p><strong>ind_context</strong> (<em>ind_array</em><em>, </em><em>optional</em>) – seletected data context.</p></li>
+<li><p><strong>None</strong> (<em>Defaults to</em>) – all dim are pick if there is context</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Ndarray that contains np.concatenation of all selected features</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>data_selected</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.preprocessing.utils.select_features_from_FI">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.preprocessing.utils.</span></span><span class="sig-name descname"><span class="pre">select_features_from_FI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'RF'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threesold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.01</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/preprocessing/utils.html#select_features_from_FI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.preprocessing.utils.select_features_from_FI" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>

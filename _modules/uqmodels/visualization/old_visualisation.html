@@ -1,0 +1,418 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.visualization.old_visualisation &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.visualization.old_visualisation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.visualization.old_visualisation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.UQ_processing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">UQ_proc</span>
+
+
+<div class="viewcode-block" id="plot_prediction_interval">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.old_visualisation.plot_prediction_interval">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_prediction_interval</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+    <span class="n">y_pred_lower</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+    <span class="n">y_pred_upper</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+    <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">save_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort_X</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot prediction intervals whose bounds are given by y_pred_lower and y_pred_upper.</span>
+<span class="sd">    True values and point estimates are also plotted if given as argument.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y: label true values.</span>
+<span class="sd">        y_pred_lower: lower bounds of the prediction interval.</span>
+<span class="sd">        y_pred_upper: upper bounds of the prediction interval.</span>
+<span class="sd">        X &lt;optionnal&gt;: abscisse vector.</span>
+<span class="sd">        y_pred &lt;optionnal&gt;: predicted values.</span>
+<span class="sd">        kwargs: plot parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Figure configuration</span>
+    <span class="k">if</span> <span class="s2">&quot;figsize&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">figsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;figsize&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;loc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;loc&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="s2">&quot;upper left&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;font.family&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Times New Roman&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;ytick.labelsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;xtick.labelsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;axes.labelsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s2">&quot;legend.fontsize&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">16</span>
+
+    <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">sort_X</span><span class="p">:</span>
+        <span class="n">sorted_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">sorted_idx</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">sorted_idx</span><span class="p">]</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">sorted_idx</span><span class="p">]</span>
+        <span class="n">y_pred_lower</span> <span class="o">=</span> <span class="n">y_pred_lower</span><span class="p">[</span><span class="n">sorted_idx</span><span class="p">]</span>
+        <span class="n">y_pred_upper</span> <span class="o">=</span> <span class="n">y_pred_upper</span><span class="p">[</span><span class="n">sorted_idx</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">y_pred_upper</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">y_pred_lower</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">miscoverage</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="kc">False</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">miscoverage</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">y_pred_upper</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">y_pred_lower</span><span class="p">)</span>
+
+    <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Observation&quot;</span> <span class="k">if</span> <span class="n">y_pred_upper</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;Observation (inside PI)&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">[</span><span class="o">~</span><span class="n">miscoverage</span><span class="p">],</span>
+        <span class="n">y</span><span class="p">[</span><span class="o">~</span><span class="n">miscoverage</span><span class="p">],</span>
+        <span class="s2">&quot;darkgreen&quot;</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Observation&quot;</span> <span class="k">if</span> <span class="n">y_pred_upper</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;Observation (outside PI)&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">[</span><span class="n">miscoverage</span><span class="p">],</span>
+        <span class="n">y</span><span class="p">[</span><span class="n">miscoverage</span><span class="p">],</span>
+        <span class="n">σ</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">y_pred_upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y_pred_lower</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y_pred_upper</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y_pred_lower</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+            <span class="n">y1</span><span class="o">=</span><span class="n">y_pred_upper</span><span class="p">,</span>
+            <span class="n">y2</span><span class="o">=</span><span class="n">y_pred_lower</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+            <span class="n">fc</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+            <span class="n">ec</span><span class="o">=</span><span class="s2">&quot;None&quot;</span><span class="p">,</span>
+            <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Prediction Interval&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">y_pred</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Prediction&quot;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">&quot;loc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="s2">&quot;upper left&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">loc</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;loc&quot;</span><span class="p">]</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="n">loc</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">save_path</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">save_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;pdf&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="plot_sorted_pi">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.old_visualisation.plot_sorted_pi">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_sorted_pi</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+    <span class="n">y_pred_lower</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+    <span class="n">y_pred_upper</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
+    <span class="n">X</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">y_pred</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot prediction intervals in an ordered fashion (lowest to largest width),</span>
+<span class="sd">    showing the upper and lower bounds for each prediction.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        y: label true values.</span>
+<span class="sd">        y_pred_lower: lower bounds of the prediction interval.</span>
+<span class="sd">        y_pred_upper: upper bounds of the prediction interval.</span>
+<span class="sd">        X &lt;optionnal&gt;: abscisse vector.</span>
+<span class="sd">        y_pred &lt;optionnal&gt;: predicted values.</span>
+<span class="sd">        kwargs: plot parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">y_pred</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="p">(</span><span class="n">y_pred_upper</span> <span class="o">+</span> <span class="n">y_pred_lower</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="n">width</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">y_pred_upper</span> <span class="o">-</span> <span class="n">y_pred_lower</span><span class="p">)</span>
+    <span class="n">sorted_order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">width</span><span class="p">)</span>
+
+    <span class="c1"># Figure configuration</span>
+    <span class="k">if</span> <span class="s2">&quot;figsize&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">figsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;figsize&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;loc&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;loc&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_pred_lower</span><span class="p">))</span>
+
+    <span class="c1"># True values</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">y_pred</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Prediction&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">misscoverage</span> <span class="o">=</span> <span class="p">(</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">y_pred_upper</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;</span> <span class="n">y_pred_lower</span><span class="p">)</span>
+    <span class="n">misscoverage</span> <span class="o">=</span> <span class="n">misscoverage</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">]</span>
+
+    <span class="c1"># True values</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">[</span><span class="o">~</span><span class="n">misscoverage</span><span class="p">],</span>
+        <span class="n">y</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">][</span><span class="o">~</span><span class="n">misscoverage</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">][</span><span class="o">~</span><span class="n">misscoverage</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;darkgreen&quot;</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Observation (inside PI)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">[</span><span class="n">misscoverage</span><span class="p">],</span>
+        <span class="n">y</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">][</span><span class="n">misscoverage</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">][</span><span class="n">misscoverage</span><span class="p">],</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+        <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;o&quot;</span><span class="p">,</span>
+        <span class="n">markersize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">zorder</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Observation (outside PI)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># PI Lower bound</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">y_pred_lower</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">],</span>
+        <span class="s2">&quot;--&quot;</span><span class="p">,</span>
+        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Prediction Interval Bounds&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># PI upper bound</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">y_pred_upper</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">sorted_order</span><span class="p">],</span>
+        <span class="s2">&quot;--&quot;</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="visu_latent_space">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.old_visualisation.visu_latent_space">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">visu_latent_space</span><span class="p">(</span><span class="n">grid_dim</span><span class="p">,</span> <span class="n">embedding</span><span class="p">,</span> <span class="n">f_obs</span><span class="p">,</span> <span class="n">context_grid</span><span class="p">,</span> <span class="n">context_grid_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span>
+                <span class="n">grid_dim</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">grid_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span> <span class="o">*</span> <span class="n">grid_dim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s2">&quot;3d&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">context_grid_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">context_grid_name</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+                <span class="n">embedding</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="n">embedding</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">embedding</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                <span class="n">c</span><span class="o">=</span><span class="n">context_grid</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">f_obs</span><span class="p">],</span>
+                <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;jet&quot;</span><span class="p">),</span>
+                <span class="n">s</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="show_dUQ_refinement">
+<a class="viewcode-back" href="../../../uqmodels.visualization.html#uqmodels.visualization.old_visualisation.show_dUQ_refinement">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">show_dUQ_refinement</span><span class="p">(</span>
+    <span class="n">UQ</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">d</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">f_obs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_cut_A</span><span class="o">=</span><span class="mf">0.99</span><span class="p">,</span>
+    <span class="n">q_Eratio</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">E_cut_in_var_nominal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">A_res_in_var_atypic</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">UQ</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">UQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">UQ</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">f_obs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">f_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">UQ</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">var_A</span><span class="p">,</span> <span class="n">var_E</span> <span class="o">=</span> <span class="n">UQ</span>
+    <span class="n">extremum_var_TOT</span><span class="p">,</span> <span class="n">ndUQ_ratio</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">get_extremum_var_TOT_and_ndUQ_ratio</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">min_cut</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">max_cut</span><span class="o">=</span><span class="n">max_cut_A</span><span class="p">,</span>
+        <span class="n">var_min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">var_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">q_Eratio</span><span class="o">=</span><span class="n">q_Eratio</span><span class="p">,</span>
+        <span class="n">mode_multidim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">E_cut_in_var_nominal</span><span class="o">=</span><span class="n">E_cut_in_var_nominal</span><span class="p">,</span>
+        <span class="n">A_res_in_var_atypic</span><span class="o">=</span><span class="n">A_res_in_var_atypic</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">var_A_cut</span><span class="p">,</span> <span class="n">var_E_res</span> <span class="o">=</span> <span class="n">UQ_proc</span><span class="o">.</span><span class="n">split_var_dUQ</span><span class="p">(</span>
+        <span class="n">UQ</span><span class="p">,</span>
+        <span class="n">q_var</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">q_var_e</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">ndUQ_ratio</span><span class="o">=</span><span class="n">ndUQ_ratio</span><span class="p">,</span>
+        <span class="n">E_cut_in_var_nominal</span><span class="o">=</span><span class="n">E_cut_in_var_nominal</span><span class="p">,</span>
+        <span class="n">A_res_in_var_atypic</span><span class="o">=</span><span class="n">A_res_in_var_atypic</span><span class="p">,</span>
+        <span class="n">extremum_var_TOT</span><span class="o">=</span><span class="n">extremum_var_TOT</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">var_A_res</span> <span class="o">=</span> <span class="n">var_A</span> <span class="o">-</span> <span class="n">var_A_cut</span>
+    <span class="n">var_E_cut</span> <span class="o">=</span> <span class="n">var_E</span> <span class="o">-</span> <span class="n">var_E_res</span>
+
+    <span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span> <span class="o">+</span> <span class="n">val</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;true_val&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">var_A</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;row_var_A&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">var_A_cut</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;refined_var_A&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">0</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">var_E</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;row_var_E&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">var_E_res</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;refined_var_E&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">var_E</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">var_A</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">2</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ratio</span> <span class="o">/</span> <span class="n">ratio</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;row_ratio&quot;</span><span class="p">)</span>
+    <span class="n">refined_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="n">var_A_res</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">var_E_res</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">var_A_cut</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">var_E_cut</span><span class="p">[</span><span class="n">f_obs</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">2</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">refined_ratio</span> <span class="o">/</span> <span class="n">refined_ratio</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;refined_ratio&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="mi">2</span> <span class="o">+</span> <span class="n">val</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;yaya&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

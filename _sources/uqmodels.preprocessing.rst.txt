@@ -52,6 +52,22 @@ uqmodels.preprocessing.structure module
    :undoc-members:
    :show-inheritance:
 
+uqmodels.preprocessing.tsfresh\_utils module
+--------------------------------------------
+
+.. automodule:: uqmodels.preprocessing.tsfresh_utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+uqmodels.preprocessing.utils module
+-----------------------------------
+
+.. automodule:: uqmodels.preprocessing.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

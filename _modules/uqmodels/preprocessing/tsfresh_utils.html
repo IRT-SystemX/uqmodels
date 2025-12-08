@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.preprocessing.tsfresh_utils &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.preprocessing.tsfresh_utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.preprocessing.tsfresh_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Utility module ensuring safe CPU-only usage of tsfresh.</span>
+
+<span class="sd">Because tsfresh relies on numba, which may try to load CUDA runtime</span>
+<span class="sd">libraries (libcudart.so) and fail in environments without a full CUDA</span>
+<span class="sd">toolkit, this module forces NUMBA_DISABLE_CUDA=1 by default to prevent</span>
+<span class="sd">CUDA initialization, unless UQMODELS_ENABLE_NUMBA_CUDA=1 is explicitly set.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.preprocessing.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">select_features_from_FI</span><span class="p">,</span>
+    <span class="n">select_data_and_context</span><span class="p">,</span>
+    <span class="n">build_window_representation</span><span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">mask_corr_feature_target</span>
+
+<span class="n">_TSFRESH_IMPORTED</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">_tsfresh</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">_EfficientFCParameters</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ensure_numba_cpu_only</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Désactive Numba CUDA par défaut, sauf si l&#39;utilisateur a explicitement opté pour le contraire.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;UQMODELS_ENABLE_NUMBA_CUDA&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">:</span>
+        <span class="c1"># L&#39;utilisateur sait ce qu&#39;il fait, on ne touche pas à NUMBA_DISABLE_CUDA</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="s2">&quot;NUMBA_DISABLE_CUDA&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;NUMBA_DISABLE_CUDA&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;uqmodels a désactivé Numba CUDA (NUMBA_DISABLE_CUDA=1) pour éviter &quot;</span>
+            <span class="s2">&quot;des conflits CUDA lors de l&#39;utilisation de tsfresh. &quot;</span>
+            <span class="s2">&quot;Définissez UQMODELS_ENABLE_NUMBA_CUDA=1 avant d&#39;importer uqmodels &quot;</span>
+            <span class="s2">&quot;si vous souhaitez gérer Numba+CUDA vous-même.&quot;</span><span class="p">,</span>
+            <span class="ne">RuntimeWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_tsfresh</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Import tsfresh safely (CPU-only by default) and raise a clear error</span>
+<span class="sd">    if the library is not installed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_TSFRESH_IMPORTED</span><span class="p">,</span> <span class="n">_tsfresh</span><span class="p">,</span> <span class="n">_EfficientFCParameters</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_TSFRESH_IMPORTED</span><span class="p">:</span>
+        <span class="n">_ensure_numba_cpu_only</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">tsfresh</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">tsfresh.feature_extraction</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+                <span class="n">EfficientFCParameters</span> <span class="k">as</span> <span class="n">_EFP</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+                <span class="s2">&quot;tsfresh is required for feature extraction but is not installed.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;Please install it via:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;    pip install tsfresh==0.21.1</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                <span class="s2">&quot;or include it in your project&#39;s dependencies.&quot;</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+
+        <span class="n">_tsfresh</span> <span class="o">=</span> <span class="n">tsfresh</span>
+        <span class="n">_EfficientFCParameters</span> <span class="o">=</span> <span class="n">_EFP</span>
+        <span class="n">_TSFRESH_IMPORTED</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">_tsfresh</span><span class="p">,</span> <span class="n">_EfficientFCParameters</span>
+
+
+<div class="viewcode-block" id="select_tsfresh_params">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.tsfresh_utils.select_tsfresh_params">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_tsfresh_params</span><span class="p">(</span>
+    <span class="n">list_keys</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;variance&quot;</span><span class="p">,</span> <span class="s2">&quot;skewness&quot;</span><span class="p">,</span> <span class="s2">&quot;fft&quot;</span><span class="p">,</span> <span class="s2">&quot;cwt&quot;</span><span class="p">,</span> <span class="s2">&quot;fourrier&quot;</span><span class="p">,</span> <span class="s2">&quot;mean&quot;</span> <span class="s2">&quot;trend&quot;</span><span class="p">]</span>
+<span class="p">):</span>
+    <span class="n">tsfresh</span><span class="p">,</span> <span class="n">EfficientFCParameters</span> <span class="o">=</span> <span class="n">_get_tsfresh</span><span class="p">()</span>
+    <span class="n">dict_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">list_keys</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">EfficientFCParameters</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">k</span><span class="p">:</span>
+                <span class="n">dict_params</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">EfficientFCParameters</span><span class="p">()[</span><span class="n">k</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">dict_params</span></div>
+
+
+
+<div class="viewcode-block" id="fit_tsfresh_feature_engeenering">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.tsfresh_utils.fit_tsfresh_feature_engeenering">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">fit_tsfresh_feature_engeenering</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">window</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">step</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ts_fresh_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ind_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ind_context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="n">tsfresh</span><span class="p">,</span> <span class="n">EfficientFCParameters</span> <span class="o">=</span> <span class="n">_get_tsfresh</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">select_data_and_context</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">ind_data</span><span class="o">=</span><span class="n">ind_data</span><span class="p">,</span> <span class="n">ind_context</span><span class="o">=</span><span class="n">ind_context</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">step</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">window</span>
+
+    <span class="n">df_ts</span><span class="p">,</span> <span class="n">y_target</span> <span class="o">=</span> <span class="n">build_window_representation</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ts_fresh_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ts_fresh_params</span> <span class="o">=</span> <span class="n">EfficientFCParameters</span><span class="p">()</span>
+
+    <span class="n">X_extracted</span> <span class="o">=</span> <span class="n">tsfresh</span><span class="o">.</span><span class="n">extract_features</span><span class="p">(</span>
+        <span class="n">df_ts</span><span class="p">,</span> <span class="n">ts_fresh_params</span><span class="p">,</span> <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">column_sort</span><span class="o">=</span><span class="s2">&quot;time&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">filter_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X_extracted</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="n">X_extracted</span> <span class="o">=</span> <span class="n">X_extracted</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">filter_</span><span class="p">]</span>
+
+    <span class="n">filter_</span> <span class="o">=</span> <span class="n">mask_corr_feature_target</span><span class="p">(</span><span class="n">X_extracted</span><span class="p">,</span> <span class="n">y_target</span><span class="p">)</span>
+    <span class="n">X_extracted</span> <span class="o">=</span> <span class="n">X_extracted</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">filter_</span><span class="p">]</span>
+
+    <span class="n">X_selected</span> <span class="o">=</span> <span class="n">tsfresh</span><span class="o">.</span><span class="n">feature_selection</span><span class="o">.</span><span class="n">select_features</span><span class="p">(</span><span class="n">X_extracted</span><span class="p">,</span> <span class="n">y_target</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">X_selected_tmp</span> <span class="o">=</span> <span class="n">tsfresh</span><span class="o">.</span><span class="n">feature_selection</span><span class="o">.</span><span class="n">select_features</span><span class="p">(</span>
+            <span class="n">X_extracted</span><span class="p">,</span> <span class="n">y_target</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">col_tmp</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">X_selected</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">col_tmp</span> <span class="ow">in</span> <span class="n">X_selected_tmp</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">values</span>
+        <span class="p">]</span>
+        <span class="n">X_selected</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">X_selected</span><span class="p">,</span> <span class="n">X_selected_tmp</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">mask</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">mask_feature_selection</span> <span class="o">=</span> <span class="n">select_features_from_FI</span><span class="p">(</span><span class="n">X_selected</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_target</span><span class="p">)</span>
+    <span class="n">name_feature_selected</span> <span class="o">=</span> <span class="n">X_selected</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">mask_feature_selection</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="n">kind_to_fc_parameters</span> <span class="o">=</span> <span class="n">tsfresh</span><span class="o">.</span><span class="n">feature_extraction</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">from_columns</span><span class="p">(</span>
+        <span class="n">name_feature_selected</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">kind_to_fc_parameters</span></div>
+
+
+
+<div class="viewcode-block" id="compute_tsfresh_feature_engeenering">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.tsfresh_utils.compute_tsfresh_feature_engeenering">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_tsfresh_feature_engeenering</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">window</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">step</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">ind_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ind_context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">params_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="n">tsfresh</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_get_tsfresh</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">select_data_and_context</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span> <span class="n">ind_data</span><span class="o">=</span><span class="n">ind_data</span><span class="p">,</span> <span class="n">ind_context</span><span class="o">=</span><span class="n">ind_context</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">step</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">window</span>
+
+    <span class="k">if</span> <span class="n">params_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">params_</span> <span class="o">=</span> <span class="n">fit_tsfresh_feature_engeenering</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+            <span class="n">window</span><span class="o">=</span><span class="n">window</span><span class="p">,</span>
+            <span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="n">df_ts</span><span class="p">,</span> <span class="n">y_target</span> <span class="o">=</span> <span class="n">build_window_representation</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+    <span class="n">X_extracted</span> <span class="o">=</span> <span class="n">tsfresh</span><span class="o">.</span><span class="n">extract_features</span><span class="p">(</span>
+        <span class="n">df_ts</span><span class="p">,</span>
+        <span class="n">kind_to_fc_parameters</span><span class="o">=</span><span class="n">params_</span><span class="p">,</span>
+        <span class="n">column_id</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span>
+        <span class="n">column_sort</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span>
+        <span class="n">disable_progressbar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">X_extracted</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">y_target</span><span class="p">),</span> <span class="n">params_</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

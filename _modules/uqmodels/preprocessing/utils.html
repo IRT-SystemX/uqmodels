@@ -1,0 +1,231 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>uqmodels.preprocessing.utils &mdash; Uqmodels 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Uqmodels
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guidelines.html">📖 Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../additional.html">📜 Additional informations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tech_docs.html">📚 Technical docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../theory_overview.html">📈 Theory overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">🔄 Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">🔎 Package uqmodels</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Uqmodels</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">uqmodels.preprocessing.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for uqmodels.preprocessing.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+
+
+<div class="viewcode-block" id="check_transform_input_to_panda">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.utils.check_transform_input_to_panda">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_transform_input_to_panda</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if input is dataframe.</span>
+<span class="sd">        if it&#39;s a np.ndarray turn it to dataframe</span>
+<span class="sd">        else raise error.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input (_type_): input to check or tranforaam</span>
+<span class="sd">        name (str, optional): name of input</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        TypeError: Input have a wrong type</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        input: pd.dataframe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="c1"># print(&#39;Change ndarray in pd.dataframe&#39;)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Type issues in &quot;</span> <span class="o">+</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">function</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;should be pd.DataFrame rather than &quot;</span> <span class="o">+</span> <span class="nb">type</span><span class="p">(</span><span class="nb">input</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span>
+    <span class="k">return</span> <span class="nb">input</span></div>
+
+
+
+<div class="viewcode-block" id="select_features_from_FI">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.utils.select_features_from_FI">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_features_from_FI</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s2">&quot;RF&quot;</span><span class="p">,</span> <span class="n">threesold</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">model</span> <span class="o">==</span> <span class="s2">&quot;RF&quot;</span><span class="p">:</span>
+        <span class="n">estimator</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span>
+            <span class="n">ccp_alpha</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span>
+            <span class="n">max_depth</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+            <span class="n">max_features</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+            <span class="n">max_samples</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+            <span class="n">min_impurity_decrease</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
+            <span class="n">min_samples_leaf</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">min_samples_split</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+            <span class="n">n_estimators</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">estimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+        <span class="n">features_mask</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">feature_importances_</span> <span class="o">&gt;</span> <span class="n">threesold</span>
+    <span class="k">return</span> <span class="n">features_mask</span></div>
+
+
+
+<div class="viewcode-block" id="select_data_and_context">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.utils.select_data_and_context">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">select_data_and_context</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ind_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ind_context</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Select data and context using ind_data &amp; ind_context.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (ndarray): data</span>
+<span class="sd">        context (ndarray, optional): context_data. Defaults to None.</span>
+<span class="sd">        n_components (int, optional): n_components of pca. Defaults to 3.</span>
+<span class="sd">        ind_data (ind_array, optional): selected data. Defaults to None : all dim are pick</span>
+<span class="sd">        ind_context (ind_array, optional): seletected data context.</span>
+<span class="sd">        Defaults to None : all dim are pick if there is context</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        data_selected : Ndarray that contains np.concatenation of all selected features</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">check_transform_input_to_panda</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">check_transform_input_to_panda</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">)</span>
+
+    <span class="n">data_selected</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">ind_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_selected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ind_data</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">ind_context</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_selected</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">ind_context</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_selected</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">data_selected</span> <span class="o">=</span> <span class="n">data</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_selected</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data_selected</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data_selected</span><span class="o">.</span><span class="n">values</span></div>
+
+
+
+<div class="viewcode-block" id="build_window_representation">
+<a class="viewcode-back" href="../../../uqmodels.preprocessing.html#uqmodels.preprocessing.utils.build_window_representation">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_window_representation</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">%</span> <span class="n">step</span> <span class="o">==</span> <span class="n">step</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span>
+
+    <span class="n">list_df</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">window</span><span class="p">):</span>
+        <span class="n">dict_df_ts</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">])),</span>
+            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">])),</span> <span class="n">i</span><span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">dict_df_ts</span><span class="p">[</span><span class="s2">&quot;value_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span><span class="n">y</span><span class="p">[:,</span> <span class="n">k</span><span class="p">],</span> <span class="n">i</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">df_ts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dict_df_ts</span><span class="p">)</span>
+        <span class="n">list_df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df_ts</span><span class="p">)</span>
+    <span class="n">df_ts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">list_df</span><span class="p">)</span>
+    <span class="n">y_target</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="n">window</span><span class="p">:</span>
+        <span class="n">df_ts</span> <span class="o">=</span> <span class="n">df_ts</span><span class="p">[</span><span class="n">df_ts</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">y_target</span> <span class="o">=</span> <span class="n">y_target</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">df_ts</span><span class="p">,</span> <span class="n">y_target</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Kevin Pasini.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

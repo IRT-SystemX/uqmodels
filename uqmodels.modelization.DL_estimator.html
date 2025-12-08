@@ -62,6 +62,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.UQModel">uqmodels.UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.check">uqmodels.check module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.custom_UQModel">uqmodels.custom_UQModel module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.processing">uqmodels.processing module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.utils">uqmodels.utils module</a></li>
@@ -109,7 +110,7 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.DL_estimator.Lstm_WS_ED.</span></span><span class="sig-name descname"><span class="pre">LSTM_ED_Generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metamodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/Lstm_WS_ED.html#LSTM_ED_Generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyDataset</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator.load">
 <span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/Lstm_WS_ED.html#LSTM_ED_Generator.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.Lstm_WS_ED.LSTM_ED_Generator.load" title="Link to this definition"></a></dt>
@@ -270,7 +271,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -327,7 +328,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -490,22 +491,9 @@ val  val  val</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.data_embedding.Factice_Time_Extension.get_config">
 <span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/data_embedding.html#Factice_Time_Extension.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.data_embedding.Factice_Time_Extension.get_config" title="Link to this definition"></a></dt>
-<dd><p>Returns the config of the layer.</p>
-<p>A layer config is a Python dictionary (serializable)
-containing the configuration of a layer.
-The same layer can be reinstantiated later
-(without its trained weights) from this configuration.</p>
-<p>The config of a layer does not include connectivity
-information, nor the layer class name. These are handled
-by <cite>Network</cite> (one layer of abstraction above).</p>
-<p>Note that <cite>get_config()</cite> does not guarantee to return a fresh copy of
-dict every time it is called. The callers should make a copy of the
-returned dict if they want to modify it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Python dictionary.</p>
-</dd>
-</dl>
+<dd><p>Returns the config of the object.</p>
+<p>An object config is a Python dictionary (serializable)
+containing the information needed to re-instantiate it.</p>
 </dd></dl>
 
 </dd></dl>
@@ -612,18 +600,23 @@ returned dict if they want to modify it.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.data_embedding.Mouving_conv_Embedding.from_config">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/data_embedding.html#Mouving_conv_Embedding.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.data_embedding.Mouving_conv_Embedding.from_config" title="Link to this definition"></a></dt>
-<dd><p>Creates a layer from its config.</p>
-<p>This method is the reverse of <cite>get_config</cite>,
-capable of instantiating the same layer from the config
-dictionary. It does not handle layer connectivity
-(handled by Network), nor weights (handled by <cite>set_weights</cite>).</p>
+<dd><p>Creates an operation from its config.</p>
+<p>This method is the reverse of <cite>get_config</cite>, capable of instantiating the
+same operation from the config dictionary.</p>
+<p>Note: If you override this method, you might receive a serialized dtype
+config, which is a <cite>dict</cite>. You can deserialize it as follows:</p>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a><a href="#id5"><span class="problematic" id="id6">`</span></a>python
+if “dtype” in config and isinstance(config[“dtype”], dict):</p>
+<blockquote>
+<div><p>policy = dtype_policies.deserialize(config[“dtype”])</p>
+</div></blockquote>
+<p><a href="#id7"><span class="problematic" id="id8">``</span></a><a href="#id9"><span class="problematic" id="id10">`</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the
-output of get_config.</p>
+<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the output of <cite>get_config</cite>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A layer instance.</p>
+<dd class="field-even"><p>An operation instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -631,22 +624,9 @@ output of get_config.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.data_embedding.Mouving_conv_Embedding.get_config">
 <span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/data_embedding.html#Mouving_conv_Embedding.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.data_embedding.Mouving_conv_Embedding.get_config" title="Link to this definition"></a></dt>
-<dd><p>Returns the config of the layer.</p>
-<p>A layer config is a Python dictionary (serializable)
-containing the configuration of a layer.
-The same layer can be reinstantiated later
-(without its trained weights) from this configuration.</p>
-<p>The config of a layer does not include connectivity
-information, nor the layer class name. These are handled
-by <cite>Network</cite> (one layer of abstraction above).</p>
-<p>Note that <cite>get_config()</cite> does not guarantee to return a fresh copy of
-dict every time it is called. The callers should make a copy of the
-returned dict if they want to modify it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Python dictionary.</p>
-</dd>
-</dl>
+<dd><p>Returns the config of the object.</p>
+<p>An object config is a Python dictionary (serializable)
+containing the information needed to re-instantiate it.</p>
 </dd></dl>
 
 </dd></dl>
@@ -716,6 +696,40 @@ returned dict if they want to modify it.</p>
 <dd class="field-odd"><p>_type_</p>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-uqmodels.modelization.DL_estimator.data_generator">
+<span id="uqmodels-modelization-dl-estimator-data-generator-module"></span><h2>uqmodels.modelization.DL_estimator.data_generator module<a class="headerlink" href="#module-uqmodels.modelization.DL_estimator.data_generator" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.data_generator.Folder_Generator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.DL_estimator.data_generator.</span></span><span class="sig-name descname"><span class="pre">Folder_Generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metamodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch=64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/data_generator.html#Folder_Generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.data_generator.Folder_Generator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyDataset</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.data_generator.Folder_Generator.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/data_generator.html#Folder_Generator.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.data_generator.Folder_Generator.load" title="Link to this definition"></a></dt>
+<dd><p>Charge la séquence de données centrée autour du batch idx :
+[idx * batch - past_horizon, idx * batch + futur_horizon]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.data_generator.Folder_Generator.on_epoch_end">
+<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/data_generator.html#Folder_Generator.on_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.data_generator.Folder_Generator.on_epoch_end" title="Link to this definition"></a></dt>
+<dd><p>Shuffle des batches à la fin de chaque epoch.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.data_generator.default_Generator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.DL_estimator.data_generator.</span></span><span class="sig-name descname"><span class="pre">default_Generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metamodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/data_generator.html#default_Generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.data_generator.default_Generator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">PyDataset</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.data_generator.default_Generator.on_epoch_end">
+<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/data_generator.html#default_Generator.on_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.data_generator.default_Generator.on_epoch_end" title="Link to this definition"></a></dt>
+<dd><p>Method called at the end of every epoch.</p>
 </dd></dl>
 
 </dd></dl>
@@ -810,7 +824,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -857,7 +871,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -950,24 +964,7 @@ sub-estimator of a meta-estimator, e.g. used inside a
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.Add_query_to_Z_Processing_with_state.compute_output_shape">
 <span class="sig-name descname"><span class="pre">compute_output_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#Add_query_to_Z_Processing_with_state.compute_output_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.Add_query_to_Z_Processing_with_state.compute_output_shape" title="Link to this definition"></a></dt>
-<dd><p>Computes the output shape of the layer.</p>
-<p>This method will cause the layer’s state to be built, if that has not
-happened before. This requires that the layer will later be used with
-inputs that match the input shape provided here.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_shape</strong> – Shape tuple (tuple of integers) or <cite>tf.TensorShape</cite>,
-or structure of shape tuples / <cite>tf.TensorShape</cite> instances
-(one per output tensor of the layer).
-Shape tuples can include None for free dimensions,
-instead of an integer.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <cite>tf.TensorShape</cite> instance
-or structure of <cite>tf.TensorShape</cite> instances.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -984,21 +981,7 @@ or structure of <cite>tf.TensorShape</cite> instances.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.build">
 <span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#Double_Moving_slice_layer.build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.build" title="Link to this definition"></a></dt>
-<dd><p>Creates the variables of the layer (for subclass implementers).</p>
-<p>This is a method that implementers of subclasses of <cite>Layer</cite> or <cite>Model</cite>
-can override if they need a state-creation step in-between
-layer instantiation and layer call. It is invoked automatically before
-the first execution of <cite>call()</cite>.</p>
-<p>This is typically used to create the weights of <cite>Layer</cite> subclasses
-(at the discretion of the subclass implementer).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_shape</strong> – Instance of <cite>TensorShape</cite>, or list of instances of
-<cite>TensorShape</cite> if the layer expects a list of inputs
-(one instance per input).</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.call">
@@ -1020,24 +1003,7 @@ the first execution of <cite>call()</cite>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.compute_output_shape">
 <span class="sig-name descname"><span class="pre">compute_output_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#Double_Moving_slice_layer.compute_output_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.Double_Moving_slice_layer.compute_output_shape" title="Link to this definition"></a></dt>
-<dd><p>Computes the output shape of the layer.</p>
-<p>This method will cause the layer’s state to be built, if that has not
-happened before. This requires that the layer will later be used with
-inputs that match the input shape provided here.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_shape</strong> – Shape tuple (tuple of integers) or <cite>tf.TensorShape</cite>,
-or structure of shape tuples / <cite>tf.TensorShape</cite> instances
-(one per output tensor of the layer).
-Shape tuples can include None for free dimensions,
-instead of an integer.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <cite>tf.TensorShape</cite> instance
-or structure of <cite>tf.TensorShape</cite> instances.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1065,44 +1031,14 @@ or structure of <cite>tf.TensorShape</cite> instances.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.compute_output_shape">
 <span class="sig-name descname"><span class="pre">compute_output_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#EDLProcessing.compute_output_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.compute_output_shape" title="Link to this definition"></a></dt>
-<dd><p>Computes the output shape of the layer.</p>
-<p>This method will cause the layer’s state to be built, if that has not
-happened before. This requires that the layer will later be used with
-inputs that match the input shape provided here.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_shape</strong> – Shape tuple (tuple of integers) or <cite>tf.TensorShape</cite>,
-or structure of shape tuples / <cite>tf.TensorShape</cite> instances
-(one per output tensor of the layer).
-Shape tuples can include None for free dimensions,
-instead of an integer.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <cite>tf.TensorShape</cite> instance
-or structure of <cite>tf.TensorShape</cite> instances.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.get_config">
 <span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#EDLProcessing.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.EDLProcessing.get_config" title="Link to this definition"></a></dt>
-<dd><p>Returns the config of the layer.</p>
-<p>A layer config is a Python dictionary (serializable)
-containing the configuration of a layer.
-The same layer can be reinstantiated later
-(without its trained weights) from this configuration.</p>
-<p>The config of a layer does not include connectivity
-information, nor the layer class name. These are handled
-by <cite>Network</cite> (one layer of abstraction above).</p>
-<p>Note that <cite>get_config()</cite> does not guarantee to return a fresh copy of
-dict every time it is called. The callers should make a copy of the
-returned dict if they want to modify it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Python dictionary.</p>
-</dd>
-</dl>
+<dd><p>Returns the config of the object.</p>
+<p>An object config is a Python dictionary (serializable)
+containing the information needed to re-instantiate it.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1120,21 +1056,7 @@ returned dict if they want to modify it.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.LSTMCellMidsize.build">
 <span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#LSTMCellMidsize.build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.LSTMCellMidsize.build" title="Link to this definition"></a></dt>
-<dd><p>Creates the variables of the layer (for subclass implementers).</p>
-<p>This is a method that implementers of subclasses of <cite>Layer</cite> or <cite>Model</cite>
-can override if they need a state-creation step in-between
-layer instantiation and layer call. It is invoked automatically before
-the first execution of <cite>call()</cite>.</p>
-<p>This is typically used to create the weights of <cite>Layer</cite> subclasses
-(at the discretion of the subclass implementer).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_shape</strong> – Instance of <cite>TensorShape</cite>, or list of instances of
-<cite>TensorShape</cite> if the layer expects a list of inputs
-(one instance per input).</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1232,21 +1154,7 @@ Input (batch,n_step,dim_in) output (batch,n_step,dim_z*2) with Z_h and Z_state c
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.build">
 <span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#Moving_slice_layer.build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.build" title="Link to this definition"></a></dt>
-<dd><p>Creates the variables of the layer (for subclass implementers).</p>
-<p>This is a method that implementers of subclasses of <cite>Layer</cite> or <cite>Model</cite>
-can override if they need a state-creation step in-between
-layer instantiation and layer call. It is invoked automatically before
-the first execution of <cite>call()</cite>.</p>
-<p>This is typically used to create the weights of <cite>Layer</cite> subclasses
-(at the discretion of the subclass implementer).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_shape</strong> – Instance of <cite>TensorShape</cite>, or list of instances of
-<cite>TensorShape</cite> if the layer expects a list of inputs
-(one instance per input).</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.call">
@@ -1268,24 +1176,7 @@ the first execution of <cite>call()</cite>.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.compute_output_shape">
 <span class="sig-name descname"><span class="pre">compute_output_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#Moving_slice_layer.compute_output_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.Moving_slice_layer.compute_output_shape" title="Link to this definition"></a></dt>
-<dd><p>Computes the output shape of the layer.</p>
-<p>This method will cause the layer’s state to be built, if that has not
-happened before. This requires that the layer will later be used with
-inputs that match the input shape provided here.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_shape</strong> – Shape tuple (tuple of integers) or <cite>tf.TensorShape</cite>,
-or structure of shape tuples / <cite>tf.TensorShape</cite> instances
-(one per output tensor of the layer).
-Shape tuples can include None for free dimensions,
-instead of an integer.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <cite>tf.TensorShape</cite> instance
-or structure of <cite>tf.TensorShape</cite> instances.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -1319,44 +1210,14 @@ or structure of <cite>tf.TensorShape</cite> instances.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.compute_output_shape">
 <span class="sig-name descname"><span class="pre">compute_output_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#ProbabilisticProcessing.compute_output_shape"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.compute_output_shape" title="Link to this definition"></a></dt>
-<dd><p>Computes the output shape of the layer.</p>
-<p>This method will cause the layer’s state to be built, if that has not
-happened before. This requires that the layer will later be used with
-inputs that match the input shape provided here.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>input_shape</strong> – Shape tuple (tuple of integers) or <cite>tf.TensorShape</cite>,
-or structure of shape tuples / <cite>tf.TensorShape</cite> instances
-(one per output tensor of the layer).
-Shape tuples can include None for free dimensions,
-instead of an integer.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A <cite>tf.TensorShape</cite> instance
-or structure of <cite>tf.TensorShape</cite> instances.</p>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.get_config">
 <span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/metalayers.html#ProbabilisticProcessing.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.metalayers.ProbabilisticProcessing.get_config" title="Link to this definition"></a></dt>
-<dd><p>Returns the config of the layer.</p>
-<p>A layer config is a Python dictionary (serializable)
-containing the configuration of a layer.
-The same layer can be reinstantiated later
-(without its trained weights) from this configuration.</p>
-<p>The config of a layer does not include connectivity
-information, nor the layer class name. These are handled
-by <cite>Network</cite> (one layer of abstraction above).</p>
-<p>Note that <cite>get_config()</cite> does not guarantee to return a fresh copy of
-dict every time it is called. The callers should make a copy of the
-returned dict if they want to modify it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Python dictionary.</p>
-</dd>
-</dl>
+<dd><p>Returns the config of the object.</p>
+<p>An object config is a Python dictionary (serializable)
+containing the information needed to re-instantiate it.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1778,7 +1639,7 @@ returned dict if they want to modify it.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.dataset_generator">
-<span class="sig-name descname"><span class="pre">dataset_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/neural_network_UQ.html#NN_UQ.dataset_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.dataset_generator" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">dataset_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">generator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/neural_network_UQ.html#NN_UQ.dataset_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.dataset_generator" title="Link to this definition"></a></dt>
 <dd><p>Hold case with or without data generator</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1876,7 +1737,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1923,7 +1784,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1939,23 +1800,6 @@ sub-estimator of a meta-estimator, e.g. used inside a
 <dd class="field-odd"><p>object</p>
 </dd>
 </dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.DL_estimator.neural_network_UQ.</span></span><span class="sig-name descname"><span class="pre">default_Generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metamodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/neural_network_UQ.html#default_Generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/neural_network_UQ.html#default_Generator.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.load" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/neural_network_UQ.html#default_Generator.on_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.on_epoch_end" title="Link to this definition"></a></dt>
-<dd><p>Method called at the end of every epoch.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2061,18 +1905,23 @@ sub-estimator of a meta-estimator, e.g. used inside a
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.from_config">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/transformer_ed.html#TransformerDecoder.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.from_config" title="Link to this definition"></a></dt>
-<dd><p>Creates a layer from its config.</p>
-<p>This method is the reverse of <cite>get_config</cite>,
-capable of instantiating the same layer from the config
-dictionary. It does not handle layer connectivity
-(handled by Network), nor weights (handled by <cite>set_weights</cite>).</p>
+<dd><p>Creates an operation from its config.</p>
+<p>This method is the reverse of <cite>get_config</cite>, capable of instantiating the
+same operation from the config dictionary.</p>
+<p>Note: If you override this method, you might receive a serialized dtype
+config, which is a <cite>dict</cite>. You can deserialize it as follows:</p>
+<p><a href="#id11"><span class="problematic" id="id12">``</span></a><a href="#id13"><span class="problematic" id="id14">`</span></a>python
+if “dtype” in config and isinstance(config[“dtype”], dict):</p>
+<blockquote>
+<div><p>policy = dtype_policies.deserialize(config[“dtype”])</p>
+</div></blockquote>
+<p><a href="#id15"><span class="problematic" id="id16">``</span></a><a href="#id17"><span class="problematic" id="id18">`</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the
-output of get_config.</p>
+<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the output of <cite>get_config</cite>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A layer instance.</p>
+<dd class="field-even"><p>An operation instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2080,22 +1929,9 @@ output of get_config.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.get_config">
 <span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/transformer_ed.html#TransformerDecoder.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.transformer_ed.TransformerDecoder.get_config" title="Link to this definition"></a></dt>
-<dd><p>Returns the config of the layer.</p>
-<p>A layer config is a Python dictionary (serializable)
-containing the configuration of a layer.
-The same layer can be reinstantiated later
-(without its trained weights) from this configuration.</p>
-<p>The config of a layer does not include connectivity
-information, nor the layer class name. These are handled
-by <cite>Network</cite> (one layer of abstraction above).</p>
-<p>Note that <cite>get_config()</cite> does not guarantee to return a fresh copy of
-dict every time it is called. The callers should make a copy of the
-returned dict if they want to modify it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Python dictionary.</p>
-</dd>
-</dl>
+<dd><p>Returns the config of the object.</p>
+<p>An object config is a Python dictionary (serializable)
+containing the information needed to re-instantiate it.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2128,18 +1964,23 @@ returned dict if they want to modify it.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.from_config">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/transformer_ed.html#TransformerEncoder.from_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.from_config" title="Link to this definition"></a></dt>
-<dd><p>Creates a layer from its config.</p>
-<p>This method is the reverse of <cite>get_config</cite>,
-capable of instantiating the same layer from the config
-dictionary. It does not handle layer connectivity
-(handled by Network), nor weights (handled by <cite>set_weights</cite>).</p>
+<dd><p>Creates an operation from its config.</p>
+<p>This method is the reverse of <cite>get_config</cite>, capable of instantiating the
+same operation from the config dictionary.</p>
+<p>Note: If you override this method, you might receive a serialized dtype
+config, which is a <cite>dict</cite>. You can deserialize it as follows:</p>
+<p><a href="#id19"><span class="problematic" id="id20">``</span></a><a href="#id21"><span class="problematic" id="id22">`</span></a>python
+if “dtype” in config and isinstance(config[“dtype”], dict):</p>
+<blockquote>
+<div><p>policy = dtype_policies.deserialize(config[“dtype”])</p>
+</div></blockquote>
+<p><a href="#id23"><span class="problematic" id="id24">``</span></a><a href="#id25"><span class="problematic" id="id26">`</span></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the
-output of get_config.</p>
+<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the output of <cite>get_config</cite>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A layer instance.</p>
+<dd class="field-even"><p>An operation instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2147,22 +1988,9 @@ output of get_config.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.get_config">
 <span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/transformer_ed.html#TransformerEncoder.get_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.transformer_ed.TransformerEncoder.get_config" title="Link to this definition"></a></dt>
-<dd><p>Returns the config of the layer.</p>
-<p>A layer config is a Python dictionary (serializable)
-containing the configuration of a layer.
-The same layer can be reinstantiated later
-(without its trained weights) from this configuration.</p>
-<p>The config of a layer does not include connectivity
-information, nor the layer class name. These are handled
-by <cite>Network</cite> (one layer of abstraction above).</p>
-<p>Note that <cite>get_config()</cite> does not guarantee to return a fresh copy of
-dict every time it is called. The callers should make a copy of the
-returned dict if they want to modify it.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Python dictionary.</p>
-</dd>
-</dl>
+<dd><p>Returns the config of the object.</p>
+<p>An object config is a Python dictionary (serializable)
+containing the information needed to re-instantiate it.</p>
 </dd></dl>
 
 </dd></dl>
@@ -2207,7 +2035,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2254,7 +2082,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2326,40 +2154,6 @@ sub-estimator of a meta-estimator, e.g. used inside a
 </section>
 <section id="module-uqmodels.modelization.DL_estimator.utils">
 <span id="uqmodels-modelization-dl-estimator-utils-module"></span><h2>uqmodels.modelization.DL_estimator.utils module<a class="headerlink" href="#module-uqmodels.modelization.DL_estimator.utils" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.utils.Folder_Generator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.DL_estimator.utils.</span></span><span class="sig-name descname"><span class="pre">Folder_Generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metamodel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/utils.html#Folder_Generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.utils.Folder_Generator" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.utils.Folder_Generator.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/utils.html#Folder_Generator.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.utils.Folder_Generator.load" title="Link to this definition"></a></dt>
-<dd><p>load seq of data locate at [idx*self.batch-past_horizon, idx*self.batch+self.futur_horizon]</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.utils.Folder_Generator.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/utils.html#Folder_Generator.on_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.utils.Folder_Generator.on_epoch_end" title="Link to this definition"></a></dt>
-<dd><p>Method called at the end of every epoch.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.utils.Generator">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.DL_estimator.utils.</span></span><span class="sig-name descname"><span class="pre">Generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">64</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/utils.html#Generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.utils.Generator" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.utils.Generator.load">
-<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/utils.html#Generator.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.utils.Generator.load" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.utils.Generator.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/utils.html#Generator.on_epoch_end"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.utils.Generator.on_epoch_end" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.utils.find_conv_kernel">
 <span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.DL_estimator.utils.</span></span><span class="sig-name descname"><span class="pre">find_conv_kernel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_initial</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_final</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">list_strides</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/utils.html#find_conv_kernel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.utils.find_conv_kernel" title="Link to this definition"></a></dt>
@@ -2369,11 +2163,6 @@ size_final : size final
 list_strides : list of strides</p>
 <p>return(list_kernel,list_strides)</p>
 </dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.utils.identity">
-<span class="sig-prename descclassname"><span class="pre">uqmodels.modelization.DL_estimator.utils.</span></span><span class="sig-name descname"><span class="pre">identity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/modelization/DL_estimator/utils.html#identity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.modelization.DL_estimator.utils.identity" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.modelization.DL_estimator.utils.set_global_determinism">

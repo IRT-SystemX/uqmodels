@@ -62,6 +62,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.UQModel">uqmodels.UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.check">uqmodels.check module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.custom_UQModel">uqmodels.custom_UQModel module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.processing">uqmodels.processing module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.utils">uqmodels.utils module</a></li>
@@ -185,6 +186,18 @@
 </li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.data_generator">uqmodels.modelization.DL_estimator.data_generator module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_generator.Folder_Generator"><code class="docutils literal notranslate"><span class="pre">Folder_Generator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_generator.Folder_Generator.load"><code class="docutils literal notranslate"><span class="pre">Folder_Generator.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_generator.Folder_Generator.on_epoch_end"><code class="docutils literal notranslate"><span class="pre">Folder_Generator.on_epoch_end()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_generator.default_Generator"><code class="docutils literal notranslate"><span class="pre">default_Generator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.data_generator.default_Generator.on_epoch_end"><code class="docutils literal notranslate"><span class="pre">default_Generator.on_epoch_end()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.loss">uqmodels.modelization.DL_estimator.loss module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.BNN_loss_edl"><code class="docutils literal notranslate"><span class="pre">BNN_loss_edl()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.loss.BNN_loss_gaussian"><code class="docutils literal notranslate"><span class="pre">BNN_loss_gaussian()</span></code></a></li>
@@ -296,11 +309,6 @@
 <li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.NN_UQ.set_predict_request"><code class="docutils literal notranslate"><span class="pre">NN_UQ.set_predict_request()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator"><code class="docutils literal notranslate"><span class="pre">default_Generator</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.load"><code class="docutils literal notranslate"><span class="pre">default_Generator.load()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.default_Generator.on_epoch_end"><code class="docutils literal notranslate"><span class="pre">default_Generator.on_epoch_end()</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.generate_K_fold_removing_index"><code class="docutils literal notranslate"><span class="pre">generate_K_fold_removing_index()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.generate_train_test"><code class="docutils literal notranslate"><span class="pre">generate_train_test()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.neural_network_UQ.get_params_dict"><code class="docutils literal notranslate"><span class="pre">get_params_dict()</span></code></a></li>
@@ -337,18 +345,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#module-uqmodels.modelization.DL_estimator.utils">uqmodels.modelization.DL_estimator.utils module</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Folder_Generator"><code class="docutils literal notranslate"><span class="pre">Folder_Generator</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Folder_Generator.load"><code class="docutils literal notranslate"><span class="pre">Folder_Generator.load()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Folder_Generator.on_epoch_end"><code class="docutils literal notranslate"><span class="pre">Folder_Generator.on_epoch_end()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Generator"><code class="docutils literal notranslate"><span class="pre">Generator</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Generator.load"><code class="docutils literal notranslate"><span class="pre">Generator.load()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.Generator.on_epoch_end"><code class="docutils literal notranslate"><span class="pre">Generator.on_epoch_end()</span></code></a></li>
-</ul>
-</li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.find_conv_kernel"><code class="docutils literal notranslate"><span class="pre">find_conv_kernel()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.identity"><code class="docutils literal notranslate"><span class="pre">identity()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.set_global_determinism"><code class="docutils literal notranslate"><span class="pre">set_global_determinism()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.set_seeds"><code class="docutils literal notranslate"><span class="pre">set_seeds()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.modelization.DL_estimator.html#uqmodels.modelization.DL_estimator.utils.size_post_conv"><code class="docutils literal notranslate"><span class="pre">size_post_conv()</span></code></a></li>
@@ -458,7 +455,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -498,7 +495,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -564,7 +561,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -604,7 +601,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -695,7 +692,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -735,7 +732,7 @@ parameters and not others.</p>
 <p class="admonition-title">Note</p>
 <p>This method is only relevant if this estimator is used as a
 sub-estimator of a meta-estimator, e.g. used inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">pipeline.Pipeline</span></code>. Otherwise it has no effect.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Pipeline</span></code>. Otherwise it has no effect.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

@@ -75,15 +75,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for uqmodels.postprocessing.custom_UQKPI_Processor</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">copy</span><span class="w"> </span><span class="kn">import</span> <span class="n">deepcopy</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.anomaly_processing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">anom_proc</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.UQ_processing</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">UQ_proc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">uqmodels.postprocessing.UQKPI_Processor</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">UQKPI_proc</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.processing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Processor</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">uqmodels.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">apply_middledim_reduction</span>
 
 
 <div class="viewcode-block" id="Multiscale_Anomscore_processor">

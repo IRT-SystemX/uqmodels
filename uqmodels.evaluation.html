@@ -62,6 +62,7 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#submodules">Submodules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.UQModel">uqmodels.UQModel module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.check">uqmodels.check module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.custom_UQModel">uqmodels.custom_UQModel module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.processing">uqmodels.processing module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="uqmodels.html#module-uqmodels.utils">uqmodels.utils module</a></li>
@@ -390,6 +391,26 @@ Allow generic manipulation of metrics with output specifyied format</p>
 <dt class="sig sig-object py" id="uqmodels.evaluation.metrics.anom_score">
 <span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">anom_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduce</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_output</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_A</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.08</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_E</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.02</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#anom_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.anom_score" title="Link to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="uqmodels.evaluation.metrics.base_rmse">
+<span class="sig-prename descclassname"><span class="pre">uqmodels.evaluation.metrics.</span></span><span class="sig-name descname"><span class="pre">base_rmse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pred</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwarg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/uqmodels/evaluation/metrics.html#base_rmse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#uqmodels.evaluation.metrics.base_rmse" title="Link to this definition"></a></dt>
+<dd><p>Root mean square for nD array</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>np.array</em>) – Targets/observation</p></li>
+<li><p><strong>pred</strong> (<em>np.array</em>) – Prediction/Reconstruction</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>rmse values</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>val</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="uqmodels.evaluation.metrics.build_ctx_mask">
