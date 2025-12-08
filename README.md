@@ -3,7 +3,7 @@
     <h1 style="font-size: large; font-weight: bold;">UQMODELS</h1>
 </div><div align="center">
     <a href="#">
-        <img src="https://img.shields.io/badge/Python-3.11%20--%203.13-blue">
+        <img src="https://img.shields.io/badge/Python-3.10%20--%203.12-blue">
     </a>
     <a href="#">
         <img src="https://img.shields.io/badge/Licence-Apache%202.0-blue">
