@@ -41,9 +41,4 @@ jobs:
             ./run_quality_check.sh
             cd ..
 
-       - name: Launch tests coverage
-         run: |
-            cd scripts 
-            chmod +x run_test_coverage.sh
-            ./run_test_coverage.sh
-            cd ..
+    

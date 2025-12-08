@@ -1,0 +1,43 @@
+name: Run test coverage
+
+on:
+
+  workflow_dispatch:
+
+    inputs:
+      branch:
+        description: 'target branch '
+        required: true
+        default: 'dev'
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies for next steps
+      run: |
+        sudo apt-get update && sudo apt-get install -y libxml2-utils
+        sudo apt-get update && sudo apt-get install -y pandoc
+        python -m pip install --upgrade pip
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        uv pip install . --system
+       
+    - name: Launch tests coverage
+      run: |
+        cd scripts 
+        chmod +x run_test_coverage.sh
+        ./run_test_coverage.sh
+        cd ..
