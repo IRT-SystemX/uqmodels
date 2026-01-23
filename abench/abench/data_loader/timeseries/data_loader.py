@@ -1,4 +1,4 @@
-from abench.store.data_management import explore_csv_hierarchy, filter_paths_from_metadata
+from abench.store.data_management import explore_csv_hierarchy, filter_paths_from_metadata, enrich_with_descriptors
 from abench.data_loader.data_loader import ABLoader,ABDataExperiment
 from abench.data_loader.timeseries.scaler import TemporalFeatureScaler
 from sklearn.base import BaseEstimator
@@ -11,6 +11,7 @@ from copy import deepcopy
 from abench.utils import concat
 from abench.data_loader.timeseries.chunk_utils import create_chunk_df,read_chunk,compute_chunk_info
 from abench.data_loader.data_loader_utils import update_constraints
+from abench.data_loader.timeseries.sampling import _apply_sampling
 from typing import List, Tuple, Iterable
 
 def is_scaler_class(obj):
@@ -18,6 +19,7 @@ def is_scaler_class(obj):
 
 def is_scaler_TemporalFeatureScaler(obj):
     return isinstance(obj, TemporalFeatureScaler) and not isinstance(obj, type)
+
 
 def extract_sequence_dataset(
     df: pd.DataFrame,
@@ -32,7 +34,8 @@ def extract_sequence_dataset(
     context_features: list | None = None,
     seed: int = 0,
     drop_frac: float = 0.0,
-):
+    sampling_cfg: dict | None = None,
+    feature_engineering: object | None = None):
     """
     Build supervised time-series samples ``(X, y, Context)`` from a DataFrame.
 
@@ -66,6 +69,12 @@ def extract_sequence_dataset(
     drop_frac : float, default 0.0
         Fraction (0 ≤ *drop_frac* < 1) of generated samples to discard
         uniformly at random *after* sequence extraction.
+    feature_engineering : None | Callable | Sequence[Callable] | dict, optional
+        Optional feature-engineering step applied on the raw dataframe **before**
+        sampling and sequence extraction.
+        - If `dict`, it is passed as `enrich_with_descriptors(df, **feature_engineering)`.
+        - If `Callable`, it is applied as `df = feature_engineering(df)`.
+        - If `Sequence[Callable]`, each callable is applied in order.
 
     Returns
     -------
@@ -79,9 +88,40 @@ def extract_sequence_dataset(
     • If the DataFrame is too short to hold one full window + horizon,
       empty arrays are returned.
     """
+
+
+    # Snapshot columns BEFORE feature engineering
+    base_cols = list(df.columns)
+    base_colset = set(base_cols)
+
+    # -------- optional feature engineering (agnostic) ---------------------
+    if feature_engineering is not None:
+        if isinstance(feature_engineering, dict):
+            # Delegates to data_management.enrich_with_descriptors
+            df = enrich_with_descriptors(df, **feature_engineering)
+        elif callable(feature_engineering):
+            df = feature_engineering(df)
+        else:
+            # Assume iterable of callables
+            try:
+                for fn in feature_engineering:
+                    if not callable(fn):
+                        raise TypeError("feature_engineering pipeline contains a non-callable element.")
+                    df = fn(df)
+            except TypeError as e:
+                raise TypeError(
+                    "feature_engineering must be None, a dict, a callable, or an iterable of callables."
+                    ) from e
+
+    # Detect new columns created by feature engineering
+    new_cols = [c for c in df.columns if c not in base_colset]
+
     # -------- feature fallbacks -------------------------------------------
     if x_features is None:
         x_features = df.columns.tolist()
+    else:
+        # Append newly created features while preserving order and removing duplicates
+        x_features = list(dict.fromkeys(list(x_features) + new_cols))
     if y_features is None:
         y_features = x_features
     if horizon_start is None:
@@ -90,11 +130,28 @@ def extract_sequence_dataset(
         sample_stride = window_size
 
     # -------- deterministic sub-sampling ----------------------------------
-    sampling_offset = seed % sampling
-    df_sampled = df.iloc[sampling_offset::sampling].reset_index(drop=True)
-
+    df_sampled = _apply_sampling(df, seed=seed, sampling=sampling, sampling_cfg=sampling_cfg)
+    
+    # -------- sanity check: required columns exist ------------------------
+    def _missing(cols):
+        return [c for c in (cols or []) if c not in df_sampled.columns]
+    
+    missing_x = _missing(x_features)
+    missing_y = _missing(y_features)
+    missing_c = _missing(context_features)
+    if missing_x or missing_y or missing_c:
+        raise KeyError(
+            "Missing columns after feature_engineering/sampling. "
+            f"missing_x={missing_x}, missing_y={missing_y}, missing_context={missing_c}"
+            )
+    
+    
+    
     # -------- convert to NumPy --------------------------------------------
-    x_data = df_sampled[x_features].to_numpy()
+    x_data = df_sampled[x_features]
+    print(type(x_data.values[0,0]))
+    x_data = x_data.drop(columns=x_data.select_dtypes(include=["datetime", "datetimetz"]).columns)
+    x_data = x_data.to_numpy()
     y_data = df_sampled[y_features].to_numpy()
     
     context_data = (
@@ -183,7 +240,9 @@ class ABLoaderFromSequenceFolder(ABLoader):
                  drop_frac=0.0,
                  name='set',
                  dir_cache=None,
-                 cache_tag=None):
+                 cache_tag=None,
+                 sampling_cfg=None,
+                 feature_engineering=None):
         """
         Initializes a data loader for time series sequences stored in CSV files within a folder structure.
         This loader supports windowing, feature scaling, future target prediction, contextual features,
@@ -250,6 +309,9 @@ class ABLoaderFromSequenceFolder(ABLoader):
         name : str, optional
             Name or label for the current data loader instance (e.g., "train", "val", "test") (default is 'set').
 
+        sampling_cfg : Config form sampling mecanism (see extract sequence)
+        
+        feature_engineering : Config form features mecanism (see extract sequence)
         """
 
         if(df_metadata is None):
@@ -274,6 +336,8 @@ class ABLoaderFromSequenceFolder(ABLoader):
         self.drop_frac = drop_frac
         self.dir_cache = dir_cache
         self.cache_tag = cache_tag
+        self.sampling_cfg = sampling_cfg
+        self.feature_engineering = feature_engineering
 
         self.dict_chunk_info = compute_chunk_info(window_size = self.w_size,
                                                   horizon_start = horizon_start,
@@ -345,6 +409,9 @@ class ABLoaderFromSequenceFolder(ABLoader):
                                 offset_before=self.dict_chunk_info['offset_before'],
                                 offset_after=self.dict_chunk_info['offset_after'])
         
+        if(not(hasattr(self,'sampling_cfg'))):
+            self.sampling_cfg=None
+
         X_,Y_,Context_ = extract_sequence_dataset(dataframe,
                                                 sampling=self.sampling,
                                                 window_size=self.w_size,
@@ -355,6 +422,7 @@ class ABLoaderFromSequenceFolder(ABLoader):
                                                 x_features=self.x_features,
                                                 y_features=self.y_features,
                                                 context_features=self.context_features,
+                                                sampling_cfg=self.sampling_cfg,
                                                 drop_frac=drop_frac)
         return(X_,Y_,Context_)
         
@@ -380,6 +448,7 @@ class ABLoaderFromSequenceFolder(ABLoader):
                 X_list = concat(X_list,axis=0)
                 Y_list = concat(Y_list,axis=0)
      
+            
             self.__pack_and_scale_output__(X_list,Y_list,None)
             if self.dir_cache:
                 self._save_scalers()
@@ -495,7 +564,25 @@ class ABLoaderFromSequenceFolder(ABLoader):
         return sorted(set(paths))
 
     def _cache_key(self):
-        return self._stable_hash(self._paths_from_chunk_dataframe())
+        fe = getattr(self, "feature_engineering", None)
+        fe_fingerprint = None
+        if isinstance(fe, dict):
+            fe_fingerprint = fe
+        elif fe is not None:
+            # Best-effort fingerprint for callables/pipelines
+            try:
+                if callable(fe):
+                    fe_fingerprint = {"callable": getattr(fe, "__qualname__", repr(fe))}
+                else:
+                    fe_fingerprint = {"pipeline": [getattr(f, "__qualname__", repr(f)) for f in fe]}
+            except Exception:
+                fe_fingerprint = {"feature_engineering": "unhashable"}
+        
+        payload = {
+            "paths": self._paths_from_chunk_dataframe(),
+            "feature_engineering": fe_fingerprint,
+        }
+        return self._stable_hash(payload)
 
     def _base_cache(self):
         if not self.dir_cache: return None

@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Callable, Dict, Mapping, Sequence, Optional, Dict, Literal, Iterable, Hashable
+from typing import Any, Callable, Dict, Mapping, Sequence, Optional, Dict, Literal, Iterable, Hashable
 from pathlib import Path
 from abench.store.store import read,write
 from sklearn.model_selection import StratifiedShuffleSplit
@@ -80,82 +80,131 @@ def filter_paths_from_metadata(metadata_df, constraint_selection_list=None, cons
     return df_filtered['path'].tolist()
 
 
-
-
 def enrich_with_descriptors(
     df: pd.DataFrame,
-    macro_descriptors: Mapping[str, Callable[[pd.DataFrame], float]] = {},
-    group_descriptors: Mapping[str, Callable[[pd.DataFrame], float]]= {},
+    macro_descriptors: Mapping[str, Callable[[pd.DataFrame], pd.DataFrame]] = {},
+    group_descriptors: Mapping[str, Callable[[pd.DataFrame], float]] = {},
     *,
-    Id_group: str = "metaId",
+    Id_group: Optional[str] = "metaId",
     time_col: str = "frame",
-    quantize: Optional[Mapping[str, Sequence[float]]] = None,
+    time_in_index: bool = False,
+    quantize: Optional[Mapping[str, Sequence[Any]]] = None,
     cat_prefix: str = "cat_",
 ) -> pd.DataFrame:
     """
-    Compute per-trajectory descriptors and (optionally) add quantile-based
-    categorical columns `cat_<descriptor>`.
+    Compute optional macro descriptors (row-wise / dataframe-wise transforms) and per-group descriptors,
+    then broadcast per-group descriptor values back to the original rows.
 
-    Performance notes
-    -----------------
-    - The dataframe is sorted **once** by (Id_group, time_col), which eliminates
-      repeated sorts insIde descriptor functions.
-    - We iterate groups once and evaluate all descriptor functions per group,
-      avoIding multiple `groupby.apply` passes.
+    This function supports:
+    - Standard case: `Id_group` and `time_col` are regular columns.
+    - No grouping: set `Id_group=None` to treat the whole dataframe as a single group.
+    - Time stored in index: set `time_in_index=True` to sort by the index instead of `time_col`.
 
     Parameters
     ----------
     df : pd.DataFrame
-        Input data containing at least columns [Id_group, time_col].
-    descriptors : Mapping[str, Callable[[pd.DataFrame], float]]
-        Dict of {output_column_name: function}. Each function must accept the
-        trajectory sub-DataFrame. 
-    Id_group, time_col : str
-        Column names for Id_group and time index.
-    quantize : Optional[Mapping[str, Sequence[float]]]
-        Dict of {descriptor_name: quantile scale} to create categorical
-        columns (e.g., {"length": [0, 0.5, 0.75, 0.9, 1.0]} -> classes 1..4).
+        Input dataframe.
+    macro_descriptors : Mapping[str, Callable[[pd.DataFrame], pd.DataFrame]]
+        Dict of dataframe transforms. Each function receives a dataframe and must return a dataframe
+        (typically with additional columns).
+    group_descriptors : Mapping[str, Callable[[pd.DataFrame], float]]
+        Dict of {output_column_name: function}. Each function receives a group sub-dataframe (sorted in time)
+        and returns a scalar descriptor.
+    Id_group : str | None
+        Column name used to define groups (trajectories). If None, a single global group is used.
+    time_col : str
+        Column name containing time information when `time_in_index=False`.
+    time_in_index : bool
+        If True, time is taken from the dataframe index for sorting.
+    quantize : Optional[Mapping[str, Sequence[Any]]]
+        Optional categorization spec per descriptor. This is passed to your `categorize_series`.
+        (Kept as `Any` because your function supports different (mode, spec) formats.)
     cat_prefix : str
         Prefix for generated categorical columns.
 
     Returns
     -------
     pd.DataFrame
-        Original df with descriptor columns and optional `cat_*` columns
-        broadcast (joined) back to every row of the corresponding trajectory.
+        Enriched dataframe (original rows) with descriptor columns (and optional categorical columns).
     """
-    # Stable one-time sort ensures each group is time-ordered
-    for name, func in macro_descriptors.items():
+    # --- Apply macro descriptors (dataframe transforms)
+    for _, func in macro_descriptors.items():
         df = func(df)
-    
-    df_sorted = df.sort_values([Id_group, time_col], kind="mergesort")
 
-    # Prepare callable per descriptor with bound column names and assume_sorted=True when supported
-    prepared: Dict[str, Callable[[pd.DataFrame], float]] = {}
-    for name, func in group_descriptors.items():
-            prepared[name] = func
+    # --- Validate / decide sorting keys
+    if time_in_index:
+        # Ensure index is sortable and stable
+        df_sorted = df.sort_index(kind="mergesort")
+    else:
+        if time_col not in df.columns:
+            raise KeyError(
+                f"time_col={time_col!r} not found in df.columns. "
+                "Either provide a valid time_col or set time_in_index=True."
+            )
+        if Id_group is None:
+            df_sorted = df.sort_values([time_col], kind="mergesort")
+        else:
+            if Id_group not in df.columns:
+                raise KeyError(
+                    f"Id_group={Id_group!r} not found in df.columns. "
+                    "Either provide a valid Id_group or set Id_group=None."
+                )
+            df_sorted = df.sort_values([Id_group, time_col], kind="mergesort")
 
-    # Compute descriptors once per trajectory (one pass)
-    results = {}
-    for gId, sub in df_sorted.groupby(Id_group, sort=False, as_index=True, group_keys=False):
-        row = {}
+    # --- Prepare descriptors
+    prepared: Dict[str, Callable[[pd.DataFrame], float]] = dict(group_descriptors)
+
+    # --- Compute group descriptors
+    results: Dict[Any, Dict[str, float]] = {}
+
+    if Id_group is None:
+        # Single global group
+        sub = df_sorted
+        row: Dict[str, float] = {}
         for name, fn in prepared.items():
             try:
-                row[name] = fn(sub)
+                row[name] = float(fn(sub))
             except Exception:
-                # Keep the pipeline robust: a failing descriptor yields NaN
                 row[name] = np.nan
-        results[gId] = row
+        results["__all__"] = row
 
-    summary = pd.DataFrame.from_dict(results, orient="index")
-    enriched = df.merge(summary, left_on=Id_group, right_index=True, how="left")
-    # Optional quantile-based categorization on the summary table (one class per trajectory)
+        summary = pd.DataFrame.from_dict(results, orient="index")
+        # Broadcast to all rows
+        enriched = df.copy()
+        for col in summary.columns:
+            enriched[col] = summary.loc["__all__", col]
+
+    else:
+        # Standard grouped case
+        for gId, sub in df_sorted.groupby(Id_group, sort=False, as_index=True, group_keys=False):
+            row = {}
+            for name, fn in prepared.items():
+                try:
+                    row[name] = float(fn(sub))
+                except Exception:
+                    row[name] = np.nan
+            results[gId] = row
+
+        summary = pd.DataFrame.from_dict(results, orient="index")
+        enriched = df.merge(summary, left_on=Id_group, right_index=True, how="left")
+
+    # --- Optional quantization (your existing behavior)
     if quantize:
-        for col, (mode,spec) in quantize.items():
+        for col, spec in quantize.items():
             if col in enriched.columns:
-                name,out = categorize_series(enriched[col], spec, mode=mode, cat_prefix=cat_prefix, colname=col)
+                # Your current code expects (mode, spec). Keep compatibility:
+                # - if user provides tuple (mode, spec)
+                # - else assume legacy spec is already in desired format
+                if isinstance(spec, tuple) and len(spec) == 2:
+                    mode, qspec = spec
+                else:
+                    # fallback (legacy): interpret as quantiles with default mode
+                    mode, qspec = "quantile", spec
+                name, out = categorize_series(
+                    enriched[col], qspec, mode=mode, cat_prefix=cat_prefix, colname=col
+                )
                 enriched[name] = out
-        
+
     return enriched
 
 def categorize_series(
