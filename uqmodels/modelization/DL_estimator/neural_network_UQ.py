@@ -1,19 +1,16 @@
 import copy
 import inspect
 import os
-import random
-
 import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import KFold
 
 import uqmodels.modelization.DL_estimator.loss as uqloss
 import uqmodels.processing as uqproc
-from uqmodels.modelization.DL_estimator.metalayers import mlp
 from uqmodels.modelization.DL_estimator.utils import set_global_determinism
-from uqmodels.modelization.UQEstimator import UQEstimator, get_UQEstimator_parameters
+from uqmodels.modelization.UQEstimator import UQEstimator
 from uqmodels.modelization.DL_estimator.data_generator import default_Generator
-from uqmodels.utils import add_random_state, apply_mask, cut, generate_random_state
+from uqmodels.utils import add_random_state, apply_mask, cut
 
 
 def Identity_factory(X, y, **kwargs):
@@ -193,11 +190,11 @@ class NN_UQ(UQEstimator):
         if self.type_output == "Deep_ensemble":
             for n, model in enumerate(self.model):
                 cur_name = name + "_" + str(n)
-                new_path = os.path.join(path, cur_name+'.weights.h5')
+                new_path = os.path.join(path, cur_name + '.weights.h5')
                 os.makedirs(os.path.dirname(new_path), exist_ok=True)
                 model.save_weights(new_path)
         else:
-            new_path = os.path.join(path, name+'.weights.h5')
+            new_path = os.path.join(path, name + '.weights.h5')
             os.makedirs(os.path.dirname(new_path), exist_ok=True)
             self.model.save_weights(new_path)
 
@@ -208,8 +205,8 @@ class NN_UQ(UQEstimator):
         self.model = model_tmp
 
     def load(self, path, name=None):
-        #old_level_info = os.environ["TF_CPP_MIN_LOG_LEVEL"]
-        #os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+        # old_level_info = os.environ["TF_CPP_MIN_LOG_LEVEL"]
+        # os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
         if name is None:
             name = self.name
 
@@ -220,12 +217,12 @@ class NN_UQ(UQEstimator):
         self.init_neural_network()
         if self.type_output == "Deep_ensemble":
             for n, model in enumerate(self.model):
-                new_path = os.path.join(path, name + "_" + str(n)+'.weights.h5')
+                new_path = os.path.join(path, name + "_" + str(n) + '.weights.h5')
                 model.load_weights(new_path)
         else:
-            new_path = os.path.join(path, name+'.weights.h5')
+            new_path = os.path.join(path, name + '.weights.h5')
             self.model.load_weights(new_path)
-        #os.environ["TF_CPP_MIN_LOG_LEVEL"] = old_level_info
+        # os.environ["TF_CPP_MIN_LOG_LEVEL"] = old_level_info
 
     def compile(self, step=0, optimizer=None, loss=None, metrics=None, **kwarg):
         if optimizer is None:
@@ -423,7 +420,7 @@ class NN_UQ(UQEstimator):
                         validation_steps,
                         steps_per_epoch,
                         batch_size
-                        ) = self.dataset_generator(
+                    ) = self.dataset_generator(
                         Inputs=apply_mask(Inputs, train_),
                         Targets=apply_mask(Targets, train_),
                         validation_data=(
@@ -517,10 +514,9 @@ class NN_UQ(UQEstimator):
             steps_per_epoch,
             batch_size,
         )
-    
+
     def Build_generator(self, X, y, batch=32, shuffle=True, train=True):
         return default_Generator(X, y, metamodel=self, batch=batch, shuffle=shuffle, train=train)
-
 
     def predict(self, X, type_output=None, generator=None, **kwargs):
         if type_output is None:

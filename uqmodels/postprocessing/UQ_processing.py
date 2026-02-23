@@ -295,7 +295,7 @@ def renormalise_UQ(UQ, type_UQ, scaler=None, var_min=0, var_max=None):
     Returns:
         UQ: normalised UQmeasure
     """
-    escale_val = 1
+    # escale_val = 1
     if scaler is not None:
         rescale_val = scaler.var_
 
@@ -648,8 +648,8 @@ def process_UQmeasure_to_residu(
             res_norm = res_norm[:, None]
             reshape_marker = True
             if with_born:
-                born_bot = pred[:,None]
-                born_top = pred[:,None]
+                born_bot = pred[:, None]
+                born_top = pred[:, None]
 
         for dim in range(y.shape[1]):
             mask = res_norm[:, dim] > 0
@@ -664,7 +664,7 @@ def process_UQmeasure_to_residu(
                 born_top[mask, dim] = pred - E_penalisation + (sigma)
 
             sigma = np.power(UQ_top[~mask, dim], q_var)
-            res_norm[~mask, dim] = res_norm[~mask, dim] / (sigma+epsilon)
+            res_norm[~mask, dim] = res_norm[~mask, dim] / (sigma + epsilon)
             res_norm = np.sign(res_norm) * np.power(res_norm, d)
             if with_born:
                 born_bot[~mask, dim] = pred + E_penalisation + (sigma)

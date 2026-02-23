@@ -4,12 +4,13 @@ import scipy.stats
 import math
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from dataclasses import dataclass, field
-from typing import Callable, Dict, Any, Sequence, Tuple, Optional, List
+# from dataclasses import dataclass, field
+from typing import Callable, Dict, Any, Sequence, Optional
 from uqmodels.utils import cut, base_cos_freq
 from uqmodels.preprocessing.preprocessing import rolling_statistics
 
 rng = np.random.RandomState(42)
+
 
 def attack_mean(y: np.ndarray,
                 loc: np.ndarray,
@@ -58,6 +59,7 @@ def attack_spike(y: np.ndarray,
         y[idx, d] += f
     return y
 
+
 @dataclass
 class AttackSpec:
     """
@@ -87,6 +89,7 @@ def apply_attacks(y: np.ndarray,
         y_out = spec.func(y_out, spec.loc, **spec.kwargs)
     return y_out
 
+
 def core_gen(
     N: int = 10000,
     freq: float = 100.0,
@@ -103,7 +106,7 @@ def core_gen(
     # fonctions externes
     cut_func: Callable[[np.ndarray, float, float], np.ndarray] = cut,
     base_cos_freq_func: Callable[[np.ndarray, Sequence[float]], np.ndarray] = base_cos_freq,
-    rolling_statistics_func: Callable[..., pd.DataFrame] = rolling_statistics):
+        rolling_statistics_func: Callable[..., pd.DataFrame] = rolling_statistics):
     """
     Version enrichie : retourne aussi
       - y_no_obs : y et Z perturbés, sans statistiques
@@ -205,37 +208,37 @@ def core_gen(
     old_mean_var_10 = rolling_statistics_func(
         pd.DataFrame(np.roll(old_y, 0)),
         10, 1,
-        ['mean','std','extremum'],
-        ['mean','std','extremum']
-    ).replace(np.nan,0).values[:,:1]
-    
+        ['mean', 'std', 'extremum'],
+        ['mean', 'std', 'extremum']
+    ).replace(np.nan, 0).values[:, :1]
+
     old_var_and_ext = rolling_statistics_func(
         pd.DataFrame(np.roll(old_y, 0)),
         30, 1,
-        ['mean','std','extremum'],
-        ['mean','std','extremum']
-    ).replace(np.nan,0).values[:,1:]
-    
+        ['mean', 'std', 'extremum'],
+        ['mean', 'std', 'extremum']
+    ).replace(np.nan, 0).values[:, 1:]
+
     old_Z_mean_var_10 = rolling_statistics_func(
         pd.DataFrame(np.roll(old_Z, 0)),
         10, 1,
-        ['mean','std','extremum'],
-        ['mean','std','extremum']
-    ).replace(np.nan,0).values[:,:1]
-    
+        ['mean', 'std', 'extremum'],
+        ['mean', 'std', 'extremum']
+    ).replace(np.nan, 0).values[:, :1]
+
     old_Z_var_and_ext = rolling_statistics_func(
         pd.DataFrame(np.roll(old_Z, 0)),
         30, 1,
-        ['mean','std','extremum'],
-        ['mean','std','extremum']
-    ).replace(np.nan,0).values[:,1:]
-    
+        ['mean', 'std', 'extremum'],
+        ['mean', 'std', 'extremum']
+    ).replace(np.nan, 0).values[:, 1:]
+
     # --- y_old = même format que y_target mais sur données non perturbées ---
     y_old = np.concatenate(
         [old_mean_var_10, old_var_and_ext,
          old_Z_mean_var_10, old_Z_var_and_ext],
         axis=1
-)
+    )
 
     # cible ML
     y_target = np.concatenate(
@@ -244,10 +247,10 @@ def core_gen(
     )
 
     y_old = np.concatenate([
-    old_mean_var_10,
-    old_var_and_ext,
-    old_Z_mean_var_10,
-    old_Z_var_and_ext], axis=1)
+        old_mean_var_10,
+        old_var_and_ext,
+        old_Z_mean_var_10,
+        old_Z_var_and_ext], axis=1)
 
     # -----------------------------
     # 6. Features contextuelles
@@ -273,10 +276,10 @@ def core_gen(
         "Context": state,
         "train": train_mask,
         "test": np.invert(train_mask),
-        "split":train_mask,
-        "aux":{"y_no_obs": y_no_obs,
-              "y_old": y_old}
-              }
+        "split": train_mask,
+        "aux": {"y_no_obs": y_no_obs, "y_old": y_old}
+    }
+
 
 def generate_default(dict_params=dict()):
     dict_data = core_gen(**dict_params)

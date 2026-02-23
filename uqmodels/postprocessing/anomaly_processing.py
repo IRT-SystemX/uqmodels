@@ -268,7 +268,8 @@ def fit_born_calibrated(
     q_var=1,
     empiric_rescale=True,
 ):
-    """!!!!Depreciated !!! Estimate calibration parameters in order to calibrate born from UQ measure, pred, observation and target
+    """!!!!Depreciated !!! Estimate calibration parameters in order to calibrate born from UQ measure, pred,
+    observation and target
 
     Args:
         UQ (np.array or list): UQmeasure obtain from UQEstimator

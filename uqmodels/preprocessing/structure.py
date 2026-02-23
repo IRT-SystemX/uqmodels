@@ -167,7 +167,8 @@ def step_to_date(step, delta=1, dtype="datetime64[s]", date_init=None):
     delta = check_delta(delta, dtype).astype(float)
     date_init = check_date(date_init, dtype).astype(float)
 
-    if (not type(step) == np.array) & (not type(step) == np.ndarray):
+    if not isinstance(step, np.ndarray):
+        # if (not type(step) == np.array) & (not type(step) == np.ndarray):
         step = np.array(step)
 
     step_init = 0

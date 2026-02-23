@@ -5,6 +5,7 @@ from uqmodels.utils import compute_born, propagate, _merge_config, _merge_nested
 import matplotlib.dates as mdates
 from matplotlib.colors import LinearSegmentedColormap
 
+
 def aux_adjust_axes(ax, x, y_list, ylim=None, x_lim=None, margin=0.05, x_margin=0.5):
     """
     Adjust x/y axis limits based on data and optional explicit limits.
@@ -115,6 +116,7 @@ DEFAULT_LINE_CONFIG = {
     "zorder": None,
 }
 
+
 def aux_plot_line(ax, x, y, config=None):
     """
     Plot a line (or markers only) on an Axes with configurable style.
@@ -136,6 +138,7 @@ def aux_plot_line(ax, x, y, config=None):
     # Filtrer les None pour ne pas polluer ax.plot
     kwargs = {k: v for k, v in cfg.items() if v is not None}
     return ax.plot(x, y, **kwargs)
+
 
 DEFAULT_PLOT_PRED_CONFIG = {
     "truth_line": {   # line for y (true / observed curve)
@@ -195,6 +198,7 @@ def aux_plot_pred(ax, x, y, pred, config=None):
     # Points d'observation
     aux_plot_line(ax, x, y, config=cfg["obs_scatter"])
 
+
 DEFAULT_PLOT_ANOM_CONFIG = {
     "anom_scatter": {
         "linewidth": 1,
@@ -218,6 +222,7 @@ DEFAULT_PLOT_ANOM_CONFIG = {
     }
 }
 
+
 def aux_plot_anom(ax, x, y, config=None):
     """
     Plot anomalous observations on an Axes using aux_plot_line.
@@ -235,6 +240,7 @@ def aux_plot_anom(ax, x, y, config=None):
 
     cfg = _merge_config(DEFAULT_PLOT_ANOM_CONFIG, config)
     aux_plot_line(ax, x, y, config=cfg["anom_scatter"])
+
 
 DEFAULT_FILL_AREA_CONFIG = {
     "color": None,
@@ -281,6 +287,7 @@ def aux_fill_between(ax, x, y1, y2, where=None, config=None):
         **kwargs,
     )
 
+
 def aux_fill_area(ax, x, env_bot, env_top, config=None):
     """
     Fill an envelope between two curves on an Axes.
@@ -310,6 +317,7 @@ def aux_fill_area(ax, x, env_bot, env_top, config=None):
         label=final_cfg["label"],
     )
 
+
 DEFAULT_PI_PLOT_CONFIG = {
     "line": {      # style des lignes de bornes
         "ls": "dotted",
@@ -321,6 +329,7 @@ DEFAULT_PI_PLOT_CONFIG = {
         "alpha": 0.2,
     },
 }
+
 
 def aux_plot_PIs(
     ax,
@@ -399,6 +408,7 @@ def aux_plot_PIs(
 
         aux_fill_area(ax, x, low, high, config=fill_kwargs)
 
+
 DEFAULT_CONF_SCORE_CONFIG = {
     "marker": "D",
     "s": 14,
@@ -407,6 +417,7 @@ DEFAULT_CONF_SCORE_CONFIG = {
     "cmap": "RdYlGn_r",
     "zorder_base": 10,
 }
+
 
 def aux_plot_conf_score(ax, x, pred, confidence_lvl, label, mode_res=False, config=None):
     """
@@ -459,6 +470,7 @@ def aux_plot_conf_score(ax, x, pred, confidence_lvl, label, mode_res=False, conf
             label=label[i],
             zorder=cfg["zorder_base"] + i,
         )
+
 
 DEFAULT_CONFIDENCE_PLOT_CONFIG = {
     "pred": None,              # config -> aux_plot_pred
@@ -621,7 +633,7 @@ def aux_plot_confiance(
     aux_adjust_axes(ax, x, [y, y_lower], ylim=ylim, margin=axes_cfg["margin"], x_margin=axes_cfg["x_margin"])
 
 
-#Auxiliar function related to matplot
+# Auxiliar function related to matplot
 
 def aux_norm_score_inputs(score, f_obs=None, cmap=None):
     """
@@ -822,6 +834,7 @@ def aux_finalize_figure(fig, show_plot=True):
     if show_plot:
         plt.show()
 
+
 def provide_cmap(mode="bluetored"):
     """Generate a bluetored or a cyantopurple cutsom cmap
 
@@ -891,6 +904,7 @@ def provide_cmap(mode="bluetored"):
             "cyantopurple", [np.array(i[1]) / 255 for i in cyantopurple], N=255
         )
         return cyantopurple_cmap
+
 
 def _get_panel_ax(axs, n_dim, n_ctx, idx_dim, idx_ctx):
     """Sélectionne l'Axes correct dans la grille axs (len(dim) x n_ctx)."""

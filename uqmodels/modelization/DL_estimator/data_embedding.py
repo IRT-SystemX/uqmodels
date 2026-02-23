@@ -58,7 +58,7 @@ class Mouving_Windows_Embedding(layers.Layer):
         slide_tensor = []
         for i in range(self.n_windows):
             slide_tensor.append(
-                inputs[:, (i * self.step) : (i * self.step) + self.size_window]
+                inputs[:, (i * self.step): (i * self.step) + self.size_window]
             )
         MWE_raw = K.stack(slide_tensor, axis=1)
         MWE = K.reshape(
@@ -87,6 +87,7 @@ class Mouving_Window_Embedding(layers.Layer):
         Returns:
             _type_: _description_
         """
+        size_output = None
         if mode == "encoder":
             size_output = self.size_window
         elif mode == "decoder":
@@ -100,7 +101,7 @@ class Mouving_Window_Embedding(layers.Layer):
             for i in range(size_output):
                 slide_tensor.append(
                     inputs[
-                        :, (i * self.padding) : (i * self.padding) + self.sub_seq_size
+                        :, (i * self.padding): (i * self.padding) + self.sub_seq_size
                     ]
                 )
             MWE_raw = K.stack(slide_tensor, axis=1)

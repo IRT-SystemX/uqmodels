@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import uqmodels.postprocessing.UQ_processing as UQ_proc
 
+
 def plot_prediction_interval(
     y: np.array,
     y_pred_lower: np.array,
@@ -109,6 +110,7 @@ def plot_prediction_interval(
     else:
         plt.show()
 
+
 def plot_sorted_pi(
     y: np.array,
     y_pred_lower: np.array,
@@ -208,7 +210,8 @@ def plot_sorted_pi(
     plt.legend()
 
     plt.show()
-    
+
+
 def visu_latent_space(grid_dim, embedding, f_obs, context_grid, context_grid_name=None):
     fig = plt.figure(figsize=(15, 7))
     for i in range(grid_dim[0]):
@@ -278,17 +281,17 @@ def show_dUQ_refinement(
 
     fig, ax = plt.subplots(3 + val, 1, sharex=True, figsize=(20, 5))
     if val == 1:
-        ax[0].plot(y[f_obs, d : d + 1], label="true_val")
-    ax[0 + val].plot(var_A[f_obs, d : d + 1], label="row_var_A")
-    ax[0 + val].plot(var_A_cut[f_obs, d : d + 1], label="refined_var_A")
+        ax[0].plot(y[f_obs, d: d + 1], label="true_val")
+    ax[0 + val].plot(var_A[f_obs, d: d + 1], label="row_var_A")
+    ax[0 + val].plot(var_A_cut[f_obs, d: d + 1], label="refined_var_A")
     ax[0 + val].legend()
-    ax[1 + val].plot(var_E[f_obs, d : d + 1], label="row_var_E")
-    ax[1 + val].plot(var_E_res[f_obs, d : d + 1], label="refined_var_E")
+    ax[1 + val].plot(var_E[f_obs, d: d + 1], label="row_var_E")
+    ax[1 + val].plot(var_E_res[f_obs, d: d + 1], label="refined_var_E")
     ax[1 + val].legend()
-    ratio = var_E[f_obs, d : d + 1] / var_A[f_obs, d : d + 1]
+    ratio = var_E[f_obs, d: d + 1] / var_A[f_obs, d: d + 1]
     ax[2 + val].plot(ratio / ratio.std(), label="row_ratio")
-    refined_ratio = (var_A_res[f_obs, d : d + 1] + var_E_res[f_obs, d : d + 1]) / (
-        var_A_cut[f_obs, d : d + 1] + var_E_cut[f_obs, d : d + 1]
+    refined_ratio = (var_A_res[f_obs, d: d + 1] + var_E_res[f_obs, d: d + 1]) / (
+        var_A_cut[f_obs, d: d + 1] + var_E_cut[f_obs, d: d + 1]
     )
     ax[2 + val].plot(refined_ratio / refined_ratio.std(), label="refined_ratio")
     ax[2 + val].legend()

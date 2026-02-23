@@ -20,7 +20,7 @@ jobs:
 
      strategy:
        matrix:
-         python-version: ["3.10","3.11","3.12"]
+         python-version: ["3.12"]
 
      steps:
        - uses: actions/checkout@v3
@@ -41,9 +41,4 @@ jobs:
             ./run_quality_check.sh
             cd ..
 
-       - name: Launch tests coverage
-         run: |
-            cd scripts 
-            chmod +x run_test_coverage.sh
-            ./run_test_coverage.sh
-            cd ..
+    

@@ -1,8 +1,7 @@
 import tensorflow as tf
 import numpy as np
+from uqmodels.utils import apply_mask
 
-import random
-from uqmodels.utils import apply_mask,identity
 
 class default_Generator(tf.keras.utils.Sequence):
     def __init__(
@@ -62,6 +61,7 @@ class default_Generator(tf.keras.utils.Sequence):
         if self.shuffle:
             rng = np.random.default_rng(self.random_state)
             rng.shuffle(self.indices)
+
 
 class Folder_Generator(tf.keras.utils.Sequence):
     def __init__(
@@ -180,9 +180,9 @@ class Folder_Generator(tf.keras.utils.Sequence):
         if isinstance(Inputs, (list, tuple)):
             Inputs = tuple(np.asarray(xi) for xi in Inputs)
         else:
-            Inputs = np.asarray(Inputs,dtype=self.dtype)
+            Inputs = np.asarray(Inputs, dtype=self.dtype)
 
-        Outputs = np.asarray(Outputs,dtype=self.dtype)
+        Outputs = np.asarray(Outputs, dtype=self.dtype)
 
         return Inputs, Outputs
 

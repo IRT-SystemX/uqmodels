@@ -3,6 +3,7 @@ import pandas as pd
 import inspect
 from sklearn.ensemble import RandomForestRegressor
 
+
 def check_transform_input_to_panda(input, name=""):
     """Check if input is dataframe.
         if it's a np.ndarray turn it to dataframe
@@ -47,6 +48,7 @@ def select_features_from_FI(X, y, model="RF", threesold=0.01, **kwargs):
         features_mask = estimator.feature_importances_ > threesold
     return features_mask
 
+
 def select_data_and_context(
     data, context=None, ind_data=None, ind_context=None, **kwargs
 ):
@@ -85,6 +87,7 @@ def select_data_and_context(
         data_selected = pd.concat(data_selected, axis=1)
     return data_selected.values
 
+
 def build_window_representation(y, step=1, window=10):
     if step > 1:
         mask = np.arange(len(y)) % step == step - 1
@@ -107,9 +110,3 @@ def build_window_representation(y, step=1, window=10):
         df_ts = df_ts[df_ts["id"] == len(y) - 1]
         y_target = y_target[-1:]
     return (df_ts, y_target)
-
-def mask_corr_feature_target(X, y, v_seuil=0.05):
-    v_corr = np.abs(corr_matrix_array(X, y[:, 0]))
-    for i in np.arange(y.shape[1] - 1):
-        v_corr = np.maximum(v_corr, np.abs(corr_matrix_array(X, y[:, i + 1])))
-    return v_corr > v_seuil

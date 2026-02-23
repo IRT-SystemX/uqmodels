@@ -1,16 +1,17 @@
 """
 Visualization module.
 """
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy
+
 import uqmodels.postprocessing.UQ_processing as UQ_proc
 from uqmodels.check import dim_1d_check
 import uqmodels.visualization.aux_visualization as auxvisu
-from uqmodels.visualization.aux_visualization import provide_cmap
-from uqmodels.visualization.old_visualisation import plot_prediction_interval,plot_sorted_pi,visu_latent_space,show_dUQ_refinement
-
+from uqmodels.visualization.aux_visualization import provide_cmap  # noqa: F401
+from uqmodels.visualization.old_visualisation import plot_prediction_interval, plot_sorted_pi  # noqa: F401
+from uqmodels.visualization.old_visualisation import visu_latent_space, show_dUQ_refinement  # noqa: F401
 
 plt.rcParams["figure.figsize"] = [8, 8]
 plt.rcParams["font.family"] = "sans-serif"
@@ -18,6 +19,7 @@ plt.rcParams["ytick.labelsize"] = 15
 plt.rcParams["xtick.labelsize"] = 15
 plt.rcParams["axes.labelsize"] = 15
 plt.rcParams["legend.fontsize"] = 15
+
 
 def plot_pi(
     y,
@@ -30,10 +32,11 @@ def plot_pi(
     size=(12, 2),
     name=None,
     show_plot=True,
-    config= None,
-    ylim =None,
-    xlim =None,
-    **kwargs):
+    config=None,
+    ylim=None,
+    xlim=None,
+    **kwargs,
+):
     """
     Plot prediction intervals (PI) together with observations and predictions.
 
@@ -122,9 +125,7 @@ def plot_pi(
                 "marker": cfg_outside.get("marker", "o"),
                 "markersize": cfg_outside.get("markersize", 2),
                 "linestyle": "none",
-                "label": cfg_outside.get(
-                    "label", "Observation (outside PI)"
-                ),
+                "label": cfg_outside.get("label", "Observation (outside PI)"),
                 "zorder": cfg_outside.get("zorder", 21),
             }
             auxvisu.aux_plot_line(ax, x_plot[anom], y[f_obs][anom], config=outside_cfg)
@@ -174,258 +175,8 @@ def plot_pi(
     if show_plot:
         plt.show()
 
-def uncertainty_plot(
-    y,
-    output,
-    context=None,
-    size=(15, 5),
-    f_obs=None,
-    name="UQplot",
-    mode_res=False,
-    born=None,
-    born_bis=None,
-    dim=0,
-    confidence_lvl=None,
-    list_percent=[0.8, 0.9, 0.99, 0.999, 1],
-    env=[0.95, 0.65],
-    type_UQ="old",
-    show_plot=True,
-    with_colorbar=False,
-    **kwarg,
-):
-    if f_obs is None:
-        f_obs = np.arange(len(y))
-
-    ind_ctx = None
-    if "ind_ctx" in kwarg.keys():
-        ind_ctx = kwarg["ind_ctx"]
-
-    split_ctx = -1
-    if "split_ctx" in kwarg.keys():
-        split_ctx = kwarg["split_ctx"]
-
-    ylim = None
-    if "ylim" in kwarg.keys():
-        ylim = kwarg["ylim"]
-
-    if "compare_deg" in kwarg.keys():
-        kwarg["compare_deg"]
-    else:
-        pass
-
-    min_A, min_E = 0.000001, 0.000001
-    if "var_min" in kwarg.keys():
-        min_A, min_E = kwarg["var_min"]
-
-    if output is not None:
-        if type_UQ == "old":
-            pred, var_A, var_E = output
-
-        elif type_UQ == "var_A&E":
-            pred, (var_A, var_E) = output
-
-            var_E[var_E < min_E] = min_E
-            var_A[var_A < min_A] = min_A
-
-            # Post-processig PIs naifs:
-            # Post-processing epistemics naifs.
-
-        var_E[var_E < min_E] = min_E
-        var_A[var_A < min_A] = min_A
-
-    only_data = False
-    if "list_name_subset" in kwarg.keys():
-        list_name_subset = kwarg["list_name_subset"]
-
-    if "only_data" in kwarg.keys():
-        only_data = kwarg["only_data"]
-        if only_data:
-            name = "Data"
-
-    f_obs_full = np.copy(f_obs)
-    n_ctx = 1
-    if isinstance(dim, int):
-        dim = [dim]
-
-    if split_ctx > -1:
-        if ind_ctx is None:
-            list_ctx_ = list(set(context[f_obs, split_ctx]))
-        else:
-            list_ctx_ = ind_ctx
-        n_ctx = len(list_ctx_)
-
-    fig, axs = plt.subplots(len(dim), n_ctx, sharex=True, figsize=size)
-    label = None
-
-    for n, d in enumerate(dim):
-        for n_fig in range(n_ctx):
-            ax = axs
-            if len(dim) > 1:
-                ax = ax[n]
-            if n_ctx > 1:
-                ax = ax[n_fig]
-
-            if split_ctx > -1:
-                f_obs = f_obs_full[context[f_obs_full, split_ctx] == list_ctx_[n_fig]]
-            if only_data:
-                ax.scatter(
-                    f_obs,
-                    y[f_obs, d],
-                    c="black",
-                    s=10,
-                    marker="x",
-                    linewidth=1,
-                    label="observation",
-                )
-
-                ax.plot(
-                    f_obs,
-                    y[f_obs, d],
-                    ls=":",
-                    color="darkgreen",
-                    alpha=1,
-                    linewidth=0.7,
-                    zorder=-4,
-                )
-                if ylim is not None:
-                    ax.set_ylim(ylim[0], ylim[1])
-                else:
-                    (y.min(), y.max())
-
-            else:
-                born_ = None
-                if born:
-                    born_ = born[0][f_obs, d], born[1][f_obs, d]
-
-                born_bis_ = None
-                if born_bis:
-                    born_bis_ = born_bis[0][f_obs, d], born_bis[1][f_obs, d]
-
-                x = np.arange(len(y))
-                if "x" in kwarg.keys():
-                    x = kwarg["x"]
-
-                if confidence_lvl is None:
-                    confidence_lvl, params_ = UQ_proc.compute_Epistemic_score(
-                        (var_A, var_E),
-                        type_UQ="var_A&E",
-                        pred=pred,
-                        list_percent=list_percent,
-                        params_=None,
-                    )
-
-                auxvisu.aux_plot_confiance(
-                    ax=ax,
-                    y=y[f_obs, d],
-                    pred=pred[f_obs, d],
-                    var_A=var_A[f_obs, d],
-                    var_E=var_E[f_obs, d],
-                    born=born_,
-                    born_bis=born_bis_,
-                    env=env,
-                    x=x[f_obs],
-                    mode_res=mode_res,
-                    **kwarg,
-                )
-
-                label = [str(i) for i in list_percent]
-                label.append(">1")
-
-                auxvisu.aux_plot_conf_score(
-                    ax,
-                    x[f_obs],
-                    pred[f_obs, d],
-                    confidence_lvl[f_obs, d],
-                    label=label,
-                    mode_res=mode_res,
-                )
-
-            if "ctx_attack" in kwarg.keys():
-                y[f_obs, d]
-                if ylim is None:
-                    ylim = (y.min(), y.max())
-                dim_ctx, ctx_val = kwarg["ctx_attack"]
-                if ctx_val == -1:
-                    list_ctx = list(set(context[f_obs, dim_ctx]))
-                    color = plt.get_cmap("jet", len(list_name_subset))
-                    list_color = [color(i) for i in range(3)]
-                    for n, i in enumerate(list_ctx):
-                        ax.fill_between(
-                            f_obs,
-                            ylim[0],
-                            ylim[1],
-                            where=context[f_obs, dim_ctx] == i,
-                            color=list_color[int(i)],
-                            alpha=0.2,
-                        )
-                else:
-                    ax.fill_between(
-                        f_obs,
-                        y.min(),
-                        y.max(),
-                        where=context[f_obs, dim_ctx] == 1,
-                        color="yellow",
-                        alpha=0.2,
-                    )
-
-            if n_fig != 0:
-                ax.set_yticklabels([])
-
-            if "ctx_attack" in kwarg.keys():
-                color = plt.get_cmap("jet", len(list_name_subset))
-                for n, i in enumerate(range(len(list_name_subset))):
-                    ax.fill_between(
-                        [],
-                        ylim[0],
-                        ylim[1],
-                        where=[],
-                        label=list_name_subset[int(i)],
-                        color=color(i),
-                        alpha=0.08,
-                    )
-    plt.suptitle(name)
-    plt.subplots_adjust(
-        wspace=0.03, hspace=0.03, left=0.1, bottom=0.22, right=0.90, top=0.8
-    )
-    plt.legend(frameon=True, ncol=6, fontsize=10, bbox_to_anchor=(0.5, 0, 0.38, -0.11))
-    # plt.xlim(0, 8400)
-
-    if label is not None:
-        cmap = [plt.get_cmap("RdYlGn_r", 7)(i) for i in np.arange(len(label))]
-
-        list_percent
-        bounds = np.concatenate(
-            [[0], np.cumsum(np.abs(np.array(list_percent) - 1) + 0.1)]
-        )
-        bounds = 10 * bounds / bounds.max()
-
-        if with_colorbar:
-            cmap = mpl.colors.ListedColormap(cmap)
-            norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
-            color_ls = mpl.cm.ScalarMappable(norm=norm, cmap=cmap)
-            cbar1 = plt.colorbar(
-                color_ls,
-                pad=0.20,
-                fraction=0.10,
-                shrink=0.5,
-                anchor=(0.2, 0.0),
-                orientation="horizontal",
-                spacing="proportional",
-            )
-            cbar1.set_label("Confidence_lvl", fontsize=14)
-
-            ticks = (bounds + np.roll(bounds, -1)) / 2
-            ticks[-1] = 10
-
-            cbar1.set_ticks(ticks)
-            cbar1.set_ticklabels(label, fontsize=12)
-    plt.tight_layout()
-    if show_plot:
-        plt.show()
-    return
-
-
 # ---------- Orchestrateur principal ----------
+
 
 def plot_anom_matrice(
     score,
@@ -505,10 +256,10 @@ def plot_anom_matrice(
     None
         The function creates the figure and optionally displays it.
     """
-    
+
     # 1) Normalisation des entrées score / f_obs / cmap
-    score_list, len_score, dim_score, n_score, f_obs, cmap = auxvisu.aux_norm_score_inputs(
-        score, f_obs=f_obs, cmap=cmap
+    score_list, len_score, dim_score, n_score, f_obs, cmap = (
+        auxvisu.aux_norm_score_inputs(score, f_obs=f_obs, cmap=cmap)
     )
 
     # 2) Préparation de x et des extents pour imshow
@@ -627,6 +378,7 @@ def plot_anom_matrice(
     # 8) Finalisation figure
     auxvisu.aux_finalize_figure(fig, show_plot=show_plot)
 
+
 def uncertainty_plot(
     y,
     output,
@@ -644,7 +396,8 @@ def uncertainty_plot(
     type_UQ="old",
     show_plot=True,
     with_colorbar=False,
-    **kwarg):
+    **kwarg,
+):
     """
     Visualize uncertainty diagnostics for multivariate predictive models.
 
@@ -983,7 +736,9 @@ def uncertainty_plot(
         plt.show()
     return
 
+
 # Display of data curve with mean and variance.
+
 
 def aux_get_var_color_sets():
     """

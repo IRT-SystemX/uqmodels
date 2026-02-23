@@ -5,12 +5,10 @@
 # Class UQmodels : from an UQestimators : perform dadada
 
 import numpy as np
-
 import uqmodels.postprocessing.custom_UQKPI_Processor as custom_UQProc
 import uqmodels.postprocessing.UQKPI_Processor as UQProc
 import uqmodels.preprocessing.preprocessing as pre_pre
 import uqmodels.preprocessing.structure as pre_struc
-from uqmodels.modelization.DL_estimator import lstm_ed, transformer_ed
 from uqmodels.modelization.DL_estimator.metalayers import mlp
 from uqmodels.modelization.DL_estimator.neural_network_UQ import (
     NN_UQ,
@@ -23,7 +21,6 @@ from uqmodels.modelization.ML_estimator.random_forest_UQ import (
 )
 from uqmodels.preprocessing.Custom_Preprocessor import Generic_Features_processor
 from uqmodels.preprocessing.features_processing import (
-    compute_pca,
     fit_compute_lag_values,
     fit_pca,
 )
@@ -31,7 +28,8 @@ from uqmodels.processing import Cache_manager
 from uqmodels.UQModel import UQModel
 from uqmodels.utils import apply_mask, coefficients_spreaded, cut
 
-# We can also create a more complexe UQmodel that handle several UQKPI_Processor to build at inference (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
+# We can also create a more complexe UQmodel that handle several UQKPI_Processor to build at inference
+#  (UQMesure, Predictive interval and model unreliability score) and after observation (Anomaly score)
 
 # Specification of the UQestimator & Instanciation in a UQmodels wrapper that include post-processing
 
@@ -390,7 +388,7 @@ class MultiDEEPUQModel(UQModel):
         if y is not None:
             size_data = len(y)
             list_y = [
-                np.squeeze(y[:, mask, n_chan * i : n_chan * (i + 1)])
+                np.squeeze(y[:, mask, n_chan * i: n_chan * (i + 1)])
                 for i in range(n_sources)
             ]
 
@@ -399,7 +397,7 @@ class MultiDEEPUQModel(UQModel):
         if pred is not None:
             size_data = len(pred)
             list_pred = [
-                np.squeeze(pred[:, mask, n_chan * i : n_chan * (i + 1)])
+                np.squeeze(pred[:, mask, n_chan * i: n_chan * (i + 1)])
                 for i in range(n_sources)
             ]
 
@@ -412,7 +410,7 @@ class MultiDEEPUQModel(UQModel):
                 np.squeeze(
                     np.array(
                         [
-                            UQ_chan[:, mask, n_chan * i : n_chan * (i + 1)]
+                            UQ_chan[:, mask, n_chan * i: n_chan * (i + 1)]
                             for UQ_chan in UQ
                         ]
                     )

@@ -2,20 +2,20 @@
 Data preprocessing module.
 """
 
-
 import numpy as np
 import pandas as pd
 from sklearn.decomposition import PCA
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
-
-
-from uqmodels.preprocessing.tsfresh_utils import select_tsfresh_params,fit_tsfresh_feature_engeenering,compute_tsfresh_feature_engeenering
-import uqmodels.preprocessing.features_processing as f_proc
-from uqmodels.preprocessing.preprocessing import downscale_series, upscale_series, check_transform_input_to_panda,select_features_from_FI,select_data_and_context,mask_corr_feature_target,build_window_representation
-from uqmodels.utils import base_cos_freq, convolute_1D, corr_matrix_array
+from uqmodels.preprocessing.tsfresh_utils import (
+    select_tsfresh_params, fit_tsfresh_feature_engeenering,
+    compute_tsfresh_feature_engeenering)
+from uqmodels.preprocessing.preprocessing import (
+    downscale_series, upscale_series,
+    select_features_from_FI, select_data_and_context)
+from uqmodels.utils import base_cos_freq, convolute_1D
 
 # import uqmodels.test as UQ_test
+
 
 def normalise_panda(dataframe, mode, scaler=None):
     """Apply normalisation on a dataframe
@@ -48,7 +48,6 @@ def normalise_panda(dataframe, mode, scaler=None):
 # Target selection from data :
 
 
-
 def select_data(data, context=None, ind_data=None, **kwargs):
     """Select data from ind_data indice array
 
@@ -67,8 +66,6 @@ def select_data(data, context=None, ind_data=None, **kwargs):
 
 # ----------------------------------------- #
 # PCA transformation form data & context
-
-
 
 def fit_pca(
     data,
@@ -291,6 +288,7 @@ def fit_compute_lag(
             new_features_name.append("lag_" + str(i) + "_dim:" + str(g))
     new_features_name = np.array(new_features_name)
     return np.array(new_features_list).T, params
+
 
 def fit_FE_by_estimator(
     data,
@@ -522,7 +520,7 @@ def get_FE_params(delta=None):
         "ts_fresh": {
             "window": 20,
             "step": 5,
-            "ts_fresh_params": f_proc.select_tsfresh_params(["mean", "cwt"]),
+            "ts_fresh_params": select_tsfresh_params(["mean", "cwt"]),
         },
     }
     if delta is not None:
