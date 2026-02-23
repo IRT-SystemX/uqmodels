@@ -90,6 +90,7 @@ class Folder_Generator(tf.keras.utils.Sequence):
         self.batch = batch
 
         self.factory = metamodel.factory
+        self.factory_parameters = metamodel.factory_parameters
         self._format = metamodel._format
         self.rescale = metamodel.rescale
 
@@ -133,8 +134,16 @@ class Folder_Generator(tf.keras.utils.Sequence):
         if self.X is None:
             return [None, None], y_batch
         else:
-            # X est supposé être une liste [X0, X1]
-            return [self.X[0][idx_min:idx_max], self.X[1][idx_min:idx_max]], y_batch
+            # Gestion polymorphique de X -> 
+            if(type(self.X) is list):
+                input = [array[idx_min:idx_max] for array in self.X]
+                if len(input)==1:
+                    input = input[0]
+            else:
+                input = self.X[idx_min:idx_max]
+
+            print(input.shape)
+            return input, y_batch
 
     def __len__(self):
         """Nombre de batches par epoch."""
@@ -145,33 +154,24 @@ class Folder_Generator(tf.keras.utils.Sequence):
             idx = self.indices[idx]
 
         x, y = self.load(idx)
-
+    
         Inputs, Outputs, _ = self.factory(x, y, fit_rescale=False)
 
-        selection = np.zeros(len(Inputs[0]), dtype=bool)
-        idx_min = max(0, idx * self.batch - self.past_horizon)
-        idx_max = max(
-            self.size_seq + idx_min,
-            idx * self.batch + self.batch + self.futur_horizon,
-        )
+        if('skip' in self.factory_parameters.keys() and self.factory_parameters['skip']):
+            selection = np.ones(len(Inputs[0]), dtype=bool)
 
-        if self.train:
-            selection[self.past_horizon : -self.futur_horizon] = True
         else:
-            idx_min = max(0, idx * self.batch - self.past_horizon)
-            idx_max = max(
-                self.size_seq + idx_min,
-                idx * self.batch + self.batch + self.futur_horizon,
+            # TO DO : A replacer coté factory respective.
+            selection = aux_compute_sliding_mask(
+            n_items=len(Inputs[0]),
+            idx=idx,
+            batch=self.batch,
+            past_horizon=self.past_horizon,
+            futur_horizon=self.futur_horizon,
+            size_seq=self.size_seq,
+            len_=self.len_,
+            train=self.train,
             )
-
-            if idx == 0:
-                if self.batch >= self.len_:
-                    selection[:] = True
-                else:
-                    selection[: -self.past_horizon - self.futur_horizon] = True
-            else:
-                padding_test = max(self.futur_horizon, idx_max - self.len_)
-                selection[padding_test + self.past_horizon :] = True
 
         Inputs = apply_mask(Inputs, selection)
         Outputs = apply_mask(Outputs, selection)
@@ -191,3 +191,107 @@ class Folder_Generator(tf.keras.utils.Sequence):
         if self.shuffle:
             rng = np.random.default_rng(self.random_state)
             rng.shuffle(self.indices)
+
+
+def aux_compute_sliding_mask(
+    n_items: int,
+    *,
+    idx: int,
+    batch: int,
+    past_horizon: int,
+    futur_horizon: int,
+    size_seq: int,
+    len_: int,
+    train: bool,
+) -> np.ndarray:
+    """
+    Build a boolean mask for windowed time-series samples produced by a sliding-window factory.
+
+    This helper is designed to be **retro-compatible** with the legacy inlined masking logic:
+    - In training mode, it keeps only indices that have a full past and full future context:
+        selection[past_horizon : -futur_horizon] = True
+    - In evaluation mode, it attempts to return only the subset of indices associated to the
+      batch number `idx`, while handling boundary/padding effects near sequence start/end.
+
+    Parameters
+    ----------
+    n_items : int
+        Number of windowed items produced by the factory (typically len(Inputs[0])).
+    idx : int
+        Batch index.
+    batch : int
+        Batch size (in number of windowed items).
+    past_horizon : int
+        Required past context length (number of steps).
+    futur_horizon : int
+        Required future horizon length (number of steps).
+    size_seq : int
+        Minimal segment length used by the legacy computation of idx_max.
+    len_ : int
+        Total available number of windowed items in the underlying sequence (legacy: self.len_).
+    train : bool
+        Whether we are in training mode (legacy: self.train).
+
+    Returns
+    -------
+    np.ndarray, dtype=bool, shape (n_items,)
+        Boolean selection mask to apply on Inputs / Outputs.
+
+    Notes
+    -----
+    - The logic intentionally mirrors the original behavior, including edge-case handling.
+    - `idx_min` is computed for completeness/traceability but is not directly used in masking,
+      matching the legacy code structure.
+    """
+    if n_items < 0:
+        raise ValueError("n_items must be non-negative.")
+    if batch <= 0:
+        raise ValueError("batch must be > 0.")
+    if past_horizon < 0 or futur_horizon < 0:
+        raise ValueError("past_horizon and futur_horizon must be >= 0.")
+    if size_seq < 0:
+        raise ValueError("size_seq must be >= 0.")
+    if len_ < 0:
+        raise ValueError("len_ must be >= 0.")
+    if idx < 0:
+        raise ValueError("idx must be >= 0.")
+
+    selection = np.zeros(n_items, dtype=bool)
+
+    # ---- Train: keep only indices with full past & future -------------------
+    if train:
+        # Guard against empty slices when horizons are larger than n_items.
+        start = min(past_horizon, n_items)
+        end = n_items - futur_horizon
+        if end < start:
+            return selection  # all False
+        selection[start:end] = True
+        return selection
+
+    # ---- Eval/Test: legacy batch-aware selection ----------------------------
+    # Legacy idx_min / idx_max computations (kept for retro-compat behavior).
+    idx_min = max(0, idx * batch - past_horizon)
+    idx_max = max(
+        size_seq + idx_min,
+        idx * batch + batch + futur_horizon,
+    )
+
+    if idx == 0:
+        if batch >= len_:
+            selection[:] = True
+        else:
+            # Equivalent to legacy: selection[: -past_horizon - futur_horizon] = True
+            cut = past_horizon + futur_horizon
+            if cut == 0:
+                selection[:] = True
+            else:
+                end = n_items - cut
+                if end > 0:
+                    selection[:end] = True
+    else:
+        padding_test = max(futur_horizon, idx_max - len_)
+        start = padding_test + past_horizon
+        if start < n_items:
+            selection[start:] = True
+
+    return selection

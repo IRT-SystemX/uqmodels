@@ -193,7 +193,6 @@ def build_lstm_stacked(
     # Preprocessing computation
     Data = MWE(Y_past)
     # Concat with cat features
-    print(type(CTX_inputs),type(Data))
     if with_ctx_input:
         Data = layers.Concatenate(axis=-1)([CTX_inputs, Data])
 
@@ -316,8 +315,11 @@ class Lstm_ED_UQ(NN_UQ):
     def factory(self, X, y, mask=None, only_fit_scaler=False, **kwarg):
         model_params = self.model_parameters
         factory_params = self.factory_parameters
-
         with_ctx_input = model_params["with_ctx_input"]
+        skip = self.factory_parameters['skip']
+
+        if(skip):
+            return(X,y,mask)
 
         step = 1
         if "step" in model_params.keys():

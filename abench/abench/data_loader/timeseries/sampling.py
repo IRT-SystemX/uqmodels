@@ -9,8 +9,7 @@ def _dtype_agg_dict(
     float_agg: str = "mean",
     int_agg: str = "first",
     str_agg: str = "first",
-    other_agg: str = "first",
-) -> dict:
+    other_agg: str = "first") -> dict:
     """
     Build a dtype-aware aggregation dict for pandas .agg().
     """

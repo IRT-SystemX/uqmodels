@@ -9,9 +9,16 @@ def aux_adjust_axes(ax, x, y_list, ylim=None, x_lim=None, margin=0.05, x_margin=
     """
     Adjust x/y axis limits based on data and optional explicit limits.
 
+    Notes
+    -----
+    - If x is datetime-like (numpy datetime64 / timedelta64 / python datetime),
+      x-margin arithmetic with floats is invalid. In that case:
+        * if x_lim is provided -> it is applied as-is
+        * else -> x-limits are not adjusted (matplotlib autoscale applies)
+
     Parameters
     ----------
-    ax : Axes
+    ax : matplotlib.axes.Axes
     x : array-like
     y_list : array-like or list of array-like
         One or several y-series to consider for limits.
@@ -22,17 +29,17 @@ def aux_adjust_axes(ax, x, y_list, ylim=None, x_lim=None, margin=0.05, x_margin=
     margin : float
         Relative margin applied to inferred y-limits (ignored if ylim is set).
     x_margin : float
-        Margin added around min/max of x (ignored if x_lim is set).
+        Margin added around min/max of x (ignored if x_lim is set). Only used for numeric x.
     """
     x = np.asarray(x)
 
     if not isinstance(y_list, (list, tuple)):
         y_list = [y_list]
 
+    # ---------- Y limits ----------
     y_min = min(np.asarray(y).min() for y in y_list)
     y_max = max(np.asarray(y).max() for y in y_list)
 
-    # Y limits
     if ylim is None:
         y_low = y_min - abs(y_min * margin)
         y_high = y_max + abs(y_max * margin)
@@ -41,15 +48,39 @@ def aux_adjust_axes(ax, x, y_list, ylim=None, x_lim=None, margin=0.05, x_margin=
 
     ax.set_ylim(y_low, y_high)
 
-    # X limits
-    if x_lim is None:
+    # ---------- X limits ----------
+    # If explicitly provided, apply and return
+    if x_lim is not None:
+        ax.set_xlim(*x_lim)
+        return
+
+    # Detect datetime-like / timedelta-like x
+    is_datetime64 = np.issubdtype(x.dtype, np.datetime64)
+    is_timedelta64 = np.issubdtype(x.dtype, np.timedelta64)
+
+    # Object arrays may contain python datetime/date
+    is_object_datetime = False
+    if x.dtype == object and x.size > 0:
+        # Check a few non-null entries
+        import datetime as _dt
+        sample = [v for v in x.flat[: min(10, x.size)] if v is not None]
+        is_object_datetime = any(isinstance(v, (_dt.datetime, _dt.date, _dt.timedelta)) for v in sample)
+
+    if is_datetime64 or is_timedelta64 or is_object_datetime:
+        # Do not adjust x-limits to avoid invalid arithmetic (datetime + float)
+        # Let matplotlib autoscale; user can still pass x_lim explicitly.
+        ax.autoscale(enable=True, axis="x", tight=False)
+        return
+
+    # Numeric x: safe to add float margins
+    try:
         x_low = x.min() - x_margin
         x_high = x.max() + x_margin
-    else:
-        x_low, x_high = x_lim
+        ax.set_xlim(x_low, x_high)
+    except Exception:
+        # Fallback: if anything unexpected happens, don't touch x-limits
+        ax.autoscale(enable=True, axis="x", tight=False)   
 
-    ax.set_xlim(x_low, x_high)
-    
 DEFAULT_PLOT_PRED_CONFIG = {
     "truth_line": {  # line for y (true / observed curve)
         "ls": "dotted",

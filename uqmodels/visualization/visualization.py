@@ -706,7 +706,7 @@ def uncertainty_plot(
     -----
     - This function acts as a high-level orchestrator and delegates rendering
       to modular visualization helpers (aux_plot_confiance, aux_plot_conf_score,
-      aux_plot_line, aux_fill_between, etc.).
+      auxvisu.aux_plot_line, aux_fill_between, etc.).
     - The input API is preserved for backward compatibility.
 
     Returns
@@ -1195,7 +1195,7 @@ def plot_var(
                 },
             )
 
-    # Gestion des axes (en s'appuyant sur aux_adjust_axes)
+    # Gestion des axes (en s'appuyant sur auxvisu.aux_adjust_axes)
     y_for_axes = [per[0][f_obs, step], per[-1][f_obs, step], series]
     auxvisu.aux_adjust_axes(
         ax,
@@ -1212,3 +1212,225 @@ def plot_var(
     plt.show()
 
     return per, per_list
+
+
+# PANNEL Visualisation
+
+from dataclasses import dataclass
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+CurveSpec = Union[
+    str,                               # column name in df
+    Tuple[str, Dict[str, Any]],         # (column name, per-curve config)
+    Dict[str, Any],                     # {"y": "COL", ...config...} or {"y": array_like, ...}
+]
+
+CurveRef = Union[str, np.ndarray, Sequence[Any]]
+
+
+def plot_timeseries_panels(
+    df,
+    groups,
+    *,
+    x: Optional[Union[str, np.ndarray, Sequence[Any]]] = None,
+    params=None,
+    titles=None,
+    sharex: Union[bool, str] = True,
+    sharey: Union[bool, str] = False,
+    figsize: Optional[Tuple[float, float]] = None,
+    constrained_layout: bool = True,
+    grid: bool = True,
+    legend: bool = True,
+    x_date: bool = False,
+    axes_config: Optional[Dict[str, Any]] = None,
+    global_curve_config: Optional[Dict[str, Any]] = None,
+    show: bool = True,
+):
+    """
+    Plot multiple time series across linked panels using low-level helpers.
+
+    The function supports:
+      - 1D layout: groups = list[list[curve]]
+      - 2D grid  : groups = list[list[list[curve]]]  (rows x cols x curves)
+
+    The plotting logic relies on low-level functions exposed by `aux_visualization`,
+    imported as `auxvisu` (e.g., auxvisu.aux_plot_line).
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Data container. Curves can be column names (str) or array-like.
+    groups : nested lists
+        1D: [ [c1, c2], [c3] , ... ]
+        2D: [ [ [..curves..], [..curves..] ],
+              [ [..curves..], [..curves..] ] ]
+    x : str or array-like, optional
+        X values. If str, uses df[x]. If None, uses df.index.
+    params : nested lists matching `groups`, optional
+        Per-curve plotting configs aligned with groups.
+        Each dict is forwarded to auxvisu.aux_plot_line(config=...).
+    titles : optional
+        Titles matching layout:
+          - 1D: list[str|None] length = n_panels
+          - 2D: list[list[str|None]] shape = (n_rows, n_cols)
+    sharex, sharey : bool or {'row','col','all','none'}
+        Matplotlib sharing behaviour.
+    axes_config : dict, optional
+        Forwarded to auxvisu.aux_adjust_axes (e.g., {"margin": 0.05, "x_margin": 0.5, "ylim": (...)}).
+    global_curve_config : dict, optional
+        Base config merged into each curve config (overridden by params).
+    show : bool
+        If True, calls plt.show().
+
+    Returns
+    -------
+    fig, axs
+        Matplotlib figure and axes (scalar/1D/2D depending on layout).
+    """
+    # ----------------- normalize groups to 2D grid -----------------
+    if not isinstance(groups, (list, tuple)) or len(groups) == 0:
+        raise ValueError("`groups` must be a non-empty nested list.")
+
+    is_2d = (
+        isinstance(groups[0], (list, tuple))
+        and len(groups[0]) > 0
+        and isinstance(groups[0][0], (list, tuple))
+    )
+
+    if not is_2d:
+        groups_2d: List[List[List[CurveRef]]] = [[panel] for panel in groups]
+    else:
+        groups_2d = groups  # type: ignore[assignment]
+
+    n_rows = len(groups_2d)
+    n_cols = len(groups_2d[0])
+    if any(len(row) != n_cols for row in groups_2d):
+        raise ValueError("In 2D mode, all rows in `groups` must have the same number of columns.")
+
+    # ----------------- resolve x -----------------
+    if x is None:
+        x_vals = df.index.to_numpy() if hasattr(df.index, "to_numpy") else np.asarray(df.index)
+    elif isinstance(x, str):
+        x_vals = np.asarray(df[x])
+    else:
+        x_vals = np.asarray(x)
+
+    # ----------------- validate params shape -----------------
+    if params is not None:
+        if not is_2d:
+            params_2d = [[p] for p in params]
+        else:
+            params_2d = params
+        if len(params_2d) != n_rows:
+            raise ValueError("`params` must match `groups` (rows).")
+        for r in range(n_rows):
+            if len(params_2d[r]) != n_cols:
+                raise ValueError("`params` must match `groups` (cols).")
+            for c in range(n_cols):
+                if len(params_2d[r][c]) != len(groups_2d[r][c]):
+                    raise ValueError(
+                        f"`params[{r}][{c}]` must have same length as `groups[{r}][{c}]` "
+                        f"({len(params_2d[r][c])} vs {len(groups_2d[r][c])})."
+                    )
+    else:
+        params_2d = None
+
+    # ----------------- titles normalization -----------------
+    if titles is not None:
+        if not is_2d:
+            titles_2d = [[titles[r] if r < len(titles) else None] for r in range(n_rows)]
+        else:
+            titles_2d = titles
+    else:
+        titles_2d = None
+
+    # ----------------- figure creation -----------------
+    if figsize is None:
+        figsize = (6.0 * n_cols, max(2.4 * n_rows, 3.0))
+
+    fig, axs = plt.subplots(
+        n_rows,
+        n_cols,
+        sharex=sharex,
+        sharey=sharey,
+        figsize=figsize,
+        constrained_layout=constrained_layout,
+    )
+
+    if n_rows == 1 and n_cols == 1:
+        axs_2d = [[axs]]
+    elif n_rows == 1:
+        axs_2d = [list(axs)]
+    elif n_cols == 1:
+        axs_2d = [[ax] for ax in axs]
+    else:
+        axs_2d = [list(row) for row in axs]
+
+    axes_cfg = dict(axes_config or {})
+    forced_ylim = axes_cfg.pop("ylim", None)
+    forced_xlim = axes_cfg.pop("x_lim", None)
+
+    def _resolve_y(curve: CurveRef) -> Tuple[np.ndarray, Optional[str]]:
+        """Return (y_values, inferred_label)."""
+        if isinstance(curve, str):
+            return np.asarray(df[curve]), curve
+        return np.asarray(curve), None
+
+    # ----------------- plotting loop -----------------
+    for r in range(n_rows):
+        for c in range(n_cols):
+            ax = axs_2d[r][c]
+            panel_curves = groups_2d[r][c]
+            y_for_limits = []
+
+            for j, curve in enumerate(panel_curves):
+                y, inferred_label = _resolve_y(curve)
+
+                cfg: Dict[str, Any] = {}
+                if global_curve_config:
+                    cfg.update({k: v for k, v in global_curve_config.items() if v is not None})
+
+                if params_2d is not None:
+                    cfg_j = params_2d[r][c][j]
+                    if cfg_j:
+                        cfg.update({k: v for k, v in cfg_j.items() if v is not None})
+
+                if cfg.get("label") is None and inferred_label is not None:
+                    cfg["label"] = inferred_label
+
+                auxvisu.aux_plot_line(ax, x_vals, y, config=cfg)
+                y_for_limits.append(y)
+
+            # Title
+            if titles_2d is not None:
+                t = titles_2d[r][c] if r < len(titles_2d) and c < len(titles_2d[r]) else None
+                if t:
+                    ax.set_title(t)
+            else:
+                if len(panel_curves) == 1 and isinstance(panel_curves[0], str):
+                    ax.set_title(panel_curves[0])
+
+            if grid:
+                ax.grid(True)
+            if legend:
+                ax.legend()
+
+            if y_for_limits:
+                auxvisu.aux_adjust_axes(
+                    ax,
+                    x_vals,
+                    y_for_limits,
+                    ylim=forced_ylim,
+                    x_lim=forced_xlim,
+                    **axes_cfg,
+                )
+
+            auxvisu.aux_format_time_axis(ax, x_flag=True, x_date=x_date)
+
+    if show:
+        plt.show()
+
+    return fig, axs

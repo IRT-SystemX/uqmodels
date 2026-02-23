@@ -55,6 +55,78 @@ def explore_csv_hierarchy(root_dir, depth_name_list=None,allowed_ext=('.csv')):
     # Optional: sort columns (levels first, then filename/path)
     return df
 
+def apply_caraterisation_across_datasets(load_fn, carac_fn, metadata=None, path=None):
+    """
+    Apply a characterization function across multiple datasets discovered from metadata or a filesystem path.
+
+    This utility iterates over a collection of dataset descriptors (one per file), loads each dataset
+    using `load_fn`, computes characterization outputs using `carac_fn`, prints a per-file summary,
+    and returns a dictionary mapping filenames to characterization results.
+
+    Parameters
+    ----------
+    load_fn : Callable[[str], Any]
+        Function that loads a dataset from a file path. It is called as:`df = load_fn(file_path)`.
+        Typical usage returns a pandas DataFrame, but any object accepted by `carac_fn` is valid.
+    carac_fn : Callable[[Any], Any]
+        Characterization function applied to the loaded dataset. It is called as:
+        `carac_fn(df)` and can return any serializable object (scalar, dict, tuple, etc.).
+    metadata : pandas.DataFrame, optional
+        Table describing the datasets to iterate over. Must contain at least the columns:
+        - 'path': str, path to the dataset file
+        - 'filename': str, identifier used as the result key
+        If None, metadata is inferred from `path` via `explore_csv_hierarchy(path)`.
+    path : str or pathlib.Path, optional
+        Root directory used to infer metadata when `metadata` is None.
+        If both `metadata` and `path` are None, the function raises a ValueError.
+
+    Returns
+    -------
+    Dict[str, Any]
+        Dictionary mapping each dataset filename (`metadata['filename']`) to the result returned by `carac_fn`.
+
+    Raises
+    ------
+    ValueError
+        If both `metadata` and `path` are None.
+    KeyError
+        If `metadata` does not contain required columns ('path', 'filename').
+
+    Notes
+    -----
+    - `carac_fn` is called twice per dataset in the current implementation
+      (once for printing, once for storing). If `carac_fn` is expensive or stochastic,
+      consider caching the result per dataset.
+    - This function prints progress to stdout for quick interactive exploration.
+
+    Examples
+    --------
+    >>> def load_csv(p): return pd.read_csv(p, parse_dates=["timestamp"]).set_index("timestamp")
+    >>> def carac(df): return {"n_rows": len(df), "n_cols": df.shape[1]}
+    >>> out = apply_caraterisation_across_datasets(load_csv, carac, path="data/fcu/")
+    >>> list(out.keys())[:3]
+    ['scenario_01.csv', 'scenario_02.csv', 'scenario_03.csv']
+    """
+    if metadata is None:
+        if path is None:
+            raise(ValueError('metadata and path cannot be both None'))
+        else:
+            metadata = explore_csv_hierarchy(path)
+
+    res_dict = {}
+    for n,i in metadata.iterrows():
+        df = load_fn(i['path'])
+        print(i['filename'],carac_fn(df))
+        res_dict[i['filename']]=carac_fn(df)
+    return(res_dict)
+        
+
+    
+
+    df = load_data(i['path'])
+    print(i['filename'],set_of_FAN_CTRL(df))
+
+
 def load_csv(storing,keys):
     return(read(storing,keys))
     
