@@ -7,7 +7,8 @@ import numpy as np
 import scipy
 
 import uqmodels.utils as ut
-from uqmodels.utils import apply_middledim_reduction, cut
+from uqmodels.utils import cut
+from uqmodels.transform import apply_axis_transformation
 
 
 def check_y_vs_pred_and_UQ_shape(y, pred, UQ=None):
@@ -412,7 +413,7 @@ def process_UQmeasure_to_sigma(
         var = np.power(np.array(sigma).mean(axis=0), 2)
         sigma = np.sqrt(norm_var(var, min_cut, max_cut, var_min, q_var=q_var))
 
-    sigma = apply_middledim_reduction(sigma, reduc_filter)
+    sigma = apply_axis_transformation(sigma,axis=1,reduc_filter= reduc_filter)
 
     return sigma
 
@@ -492,9 +493,8 @@ def process_UQmeasure_to_TOT_and_E_sigma(
     sigma_nominal = np.sqrt(var_nominal)
     sigma_atypic = k_var_e * np.sqrt(var_atypic)
 
-    sigma_nominal = apply_middledim_reduction(sigma_nominal, reduc_filter, roll=roll)
-
-    sigma_atypic = apply_middledim_reduction(sigma_atypic, reduc_filter, roll=roll)
+    sigma_nominal = apply_axis_transformation(sigma_nominal,axis=1,reduc_filter=reduc_filter, roll=roll)
+    sigma_atypic = apply_axis_transformation(sigma_atypic,axis=1,reduc_filter= reduc_filter, roll=roll)
     return (sigma_nominal, sigma_atypic)
 
 
@@ -676,7 +676,7 @@ def process_UQmeasure_to_residu(
     if debug:
         print("Mid build res norm:", np.abs(res_norm).mean(), reduc_filter, roll)
 
-    res_norm = apply_middledim_reduction(res_norm, reduc_filter, roll=roll)
+    res_norm = apply_axis_transformation(res_norm,axis=1,reduc_filter=reduc_filter, roll=roll)
 
     if debug:
         print("End build res norm :", np.abs(res_norm).mean())
@@ -775,9 +775,7 @@ def process_UQmeasure_to_quantile(
     else:
         raise ValueError(type_UQ + " not covered")
 
-    gaussian_quantile = apply_middledim_reduction(
-        gaussian_quantile, reduc_filter, roll=roll
-    )
+    gaussian_quantile = apply_axis_transformation(gaussian_quantile,axis=1,reduc_filter= reduc_filter, roll=roll)
     return gaussian_quantile
 
 
@@ -840,7 +838,7 @@ def process_UQmeasure_to_Epistemicscore(
         )
         raise ValueError
 
-    Eval = apply_middledim_reduction(Eval, reduc_filter, roll=roll)
+    Eval = apply_axis_transformation(Eval,axis=1,reduc_filter= reduc_filter, roll=roll)
     return Eval
 
 

@@ -7,7 +7,8 @@ import scipy
 from sklearn.covariance import EmpiricalCovariance
 
 import uqmodels.postprocessing.UQ_processing as UQ_proc
-from uqmodels.utils import apply_conv, apply_middledim_reduction
+from uqmodels.utils import apply_conv
+from uqmodels.transform import apply_axis_transformation
 
 
 def score_seuil(s, per_seuil=0.995, local=True):
@@ -814,7 +815,7 @@ def compute_anom_score(
         print("End", (anom_score < -1).mean(), (anom_score > 1).mean())
 
     if with_born:
-        pred = apply_middledim_reduction(pred, reduc_filter=reduc_filter, roll=roll)
+        pred = apply_axis_transformation(pred, axis=1, reduc_filter=reduc_filter, roll=roll)
 
         res_born = np.power(sigma, d)
         res_born, _ = compute_calibrate(
@@ -862,7 +863,7 @@ def fit_score_fusion(
     **kwargs
 ):
     # middle dim reduction
-    score = UQ_proc.apply_middledim_reduction(score, fusion_reduc_filter)
+    score = UQ_proc.apply_axis_transformation(score, axis=1, reduc_filter = fusion_reduc_filter)
 
     # Temporal convolution
     score = score_seuil(apply_conv(score, filt), per_seuil, True)
@@ -933,7 +934,7 @@ def compute_score_fusion(
     params_calibrate_, cov_estimator = params_
 
     # Middledim reduction
-    score = UQ_proc.apply_middledim_reduction(score, fusion_reduc_filter)
+    score = UQ_proc.apply_axis_transformation(score,axis=1,reduc_filter= fusion_reduc_filter)
 
     # Temporal convolution
     score = score_seuil(apply_conv(score, filt), per_seuil, True)

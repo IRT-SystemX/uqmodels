@@ -18,6 +18,13 @@ EPSILON = sys.float_info.min  # small value to avoid underflow
 def identity(*args):
     return args
 
+def _normalize_weights(weights):
+    """Normalize weights so that they sum to 1."""
+    weights = np.asarray(weights, dtype=float)
+    total = weights.sum()
+    if total == 0:
+        raise ValueError("Reduction weights sum to zero.")
+    return weights / total
 
 def add_random_state(random_state, values):
     """hold addition with possible None values
@@ -308,78 +315,69 @@ def stack_and_roll_layer(inputs, size_window, size_subseq, padding, name=""):
     x = tf.transpose(x, [1, 0, 2, 3])
     return x
 
-
-def apply_middledim_reduction(ndarray, reduc_filter=None, roll=0):
-    """Apply middledim using ponderate mean reduc_filter weigth or do nothing
-
-    Args:
-        ndarray (np.array): object to reduce
-        reduc_filter (np.array): ponderate weigth for reduction
-
-    Return:
-        reduced_ndarray: reduced object
-    """
-
-    ndarray = deepcopy(ndarray)
-    if reduc_filter is None:
-        return ndarray
-
-    reduc_filter = np.array(reduc_filter)
-
-    dim_g = ndarray.shape[-1]
-    list_reduced_ndarray_by_dim = []
-    # Pour chaque dimension de s
-    for i in range(dim_g):
-        # Incompatibility test :
-        if len(reduc_filter) != ndarray.shape[1]:
-            print(
-                "error expect size of reduc filter : ",
-                str(ndarray.shape[1]),
-                "current size :",
-                str(len(reduc_filter)),
-            )
-            break
-
-        filt = reduc_filter / reduc_filter.sum()
-        ndarray[:, :, i] = ndarray[:, :, i] * filt
-        if roll:
-            reduced_ndarray = ndarray[:, 0, i]
-            for j in range(ndarray.shape[1] - 1):
-                reduced_ndarray += np.roll(ndarray[:, j + 1, i], (j + 1) * roll, axis=0)
-        else:
-            ndarray[:, :, i] = ndarray[:, :, i] * filt
-            reduced_ndarray = ndarray[:, :, i].sum(axis=1)
-
-        list_reduced_ndarray_by_dim.append(reduced_ndarray[:, None])
-    reduced_ndarray = np.concatenate(list_reduced_ndarray_by_dim, axis=1)
-    return reduced_ndarray
-
-
 def apply_mask(list_or_array_or_none, mask, axis=0, mode="bool_array"):
-    """Select subpart of an array/list_of_array/tupple using a mask and np.take function.
-        If list_or_array_or_none is array, then direclty apply selection on it.
-        else if it is a Tupple or list of array apply it on array in the list/tupple structure
+    """Apply a mask-based selection along a given axis.
+
+    This function supports:
+    - a single ndarray,
+    - a list of ndarrays,
+    - a tuple of ndarrays,
+    - None.
 
     Args:
-        list_or_array_or_none (_type_): ND array (list or tupple or ND.array)
-        mask (_type_): Mask as boolean array or indices array.
-        axis (int, optional): axis on sub array to apply. Defaults to 1.
-        mode (str, optional):if 'bool_array', turn bool_array_mask into an indice_array. Defaults to 'bool_array'.
+        list_or_array_or_none: Input object to sub-select.
+            Can be an ndarray, a list/tuple of ndarrays, or None.
+        mask (array-like): Mask used for selection.
+            If mode="bool_array", mask must be a boolean array of length
+            equal to the target axis size.
+            If mode="indices", mask must be an array of integer indices.
+        axis (int): Axis on which selection is applied.
+        mode (str): Mask interpretation mode.
+            Supported values: "bool_array", "indices".
 
     Returns:
-        (List or Tuple or array or Ndarray) : Sub_selected list of array or Ndarray
+        Same type as input with masked content applied.
     """
-
-    if mode == "bool_array":
-        indices = np.arange(len(mask))[mask]
-
-    if type(list_or_array_or_none) in [list, tuple]:
-        return [np.take(array, indices, axis=axis) for array in list_or_array_or_none]
     if list_or_array_or_none is None:
         return None
-    else:
-        return np.take(list_or_array_or_none, indices, axis=axis)
 
+    if mode == "bool_array":
+        mask = np.asarray(mask)
+        if mask.dtype != bool:
+            raise ValueError("Mask must be boolean when mode='bool_array'.")
+        indices = np.arange(mask.shape[0])[mask]
+    elif mode == "indices":
+        indices = np.asarray(mask)
+    else:
+        raise ValueError(f"Unsupported mask mode: {mode}")
+
+    if isinstance(list_or_array_or_none, tuple):
+        return tuple(np.take(array, indices, axis=axis) for array in list_or_array_or_none)
+
+    if isinstance(list_or_array_or_none, list):
+        return [np.take(array, indices, axis=axis) for array in list_or_array_or_none]
+
+    return np.take(list_or_array_or_none, indices, axis=axis)
+
+
+def apply_axis_masks(array, axis_masks=None, mask_mode="bool_array"):
+    """Apply multiple masks on different axes sequentially.
+
+    Args:
+        array (np.ndarray): Input array.
+        axis_masks (dict[int, array-like] | None): Mapping axis -> mask.
+        mask_mode (str): Mask interpretation mode passed to `apply_mask`.
+
+    Returns:
+        np.ndarray: Masked array.
+    """
+    if axis_masks is None:
+        return array
+
+    transformed = array
+    for axis, mask in sorted(axis_masks.items(), key=lambda x: x[0]):
+        transformed = apply_mask(transformed, mask=mask, axis=axis, mode=mask_mode)
+    return transformed
 
 def base_cos_freq(array, freq=[2]):
     """Transform 1D modulo features [1, N] in cyclic (cos,sin) features for given freq"""

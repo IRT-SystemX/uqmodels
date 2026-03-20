@@ -12,7 +12,7 @@ import numpy as np
 import uqmodels.postprocessing.anomaly_processing as anom_proc
 import uqmodels.postprocessing.UQ_processing as UQ_proc
 from uqmodels.processing import Cache_manager, Processor
-from uqmodels.utils import apply_middledim_reduction
+from uqmodels.transform import apply_axis_transformation
 
 
 class UQKPI_Processor(Processor):
@@ -80,17 +80,21 @@ class UQKPI_Processor(Processor):
             if UQ is not None:
                 UQ = np.array(
                     [
-                        apply_middledim_reduction(
-                            i, self.KPI_parameters["reduc_filter"]
+                        apply_axis_transformation(
+                            i,
+                            axis=1,
+                            reduc_filter=self.KPI_parameters["reduc_filter"]
                         )
                         for i in UQ
                     ]
                 )
 
             if pred is not None:
-                pred = apply_middledim_reduction(
-                    pred, self.KPI_parameters["reduc_filter"]
-                )
+                pred = apply_axis_transformation(
+                    pred,
+                    axis=1,
+                    reduc_filter= self.KPI_parameters["reduc_filter"]
+                    )
 
         if "pred_and_UQ" in self.KPI_parameters.keys():
             if self.KPI_parameters["pred_and_UQ"]:

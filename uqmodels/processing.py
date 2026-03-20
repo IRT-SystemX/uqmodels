@@ -611,7 +611,6 @@ class Processor:
             except (FileNotFoundError, NotADirectoryError):
                 raise FileNotFoundError
 
-
 # Pipeline ##################################
 
 

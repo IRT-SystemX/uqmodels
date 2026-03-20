@@ -6,12 +6,14 @@
 
 import inspect
 import os
+
+import numpy
 from sklearn.base import BaseEstimator
 
 import uqmodels.modelization.ML_estimator.random_forest_UQ as RF_UQ
 from uqmodels.processing import Cache_manager
-from uqmodels.utils import add_random_state, apply_mask, apply_middledim_reduction
-
+from uqmodels.utils import add_random_state, apply_mask
+from uqmodels.transform import apply_axis_transformation
 
 class UQModel(BaseEstimator):
     """
@@ -455,9 +457,8 @@ class UQModel(BaseEstimator):
         )
 
         if self.reduc_filter is not None:
-            pred = apply_middledim_reduction(
-                pred, reduc_filter=self.reduc_filter, roll=self.roll
-            )
+            pred = apply_axis_transformation(
+                pred, axis=1, reduc_filter=self.reduc_filter, roll=self.roll)
 
         if self.save_result:
             query = {"name": name_save + "_UQEstimator"}
