@@ -294,27 +294,6 @@ def stack_and_roll(array, horizon, lag=0, seq_idx=None, step=1):
         new_array = new_array[mask]
     return new_array
 
-
-def stack_and_roll_layer(inputs, size_window, size_subseq, padding, name=""):
-    # slide_tensor = []
-    n_step = get_fold_nstep(size_window, size_subseq, padding)
-    # Implementation numpy
-    # if False:
-    #     for i in range(n_step):
-    #         slide_tensor.append(
-    #             inputs[:, (i * padding) : (i * padding) + size_subseq, :][:, None]
-    #         )
-    #     return Lambda(lambda x: K.concatenate(x, axis=1), name=name + "_rollstack")(
-    #         slide_tensor
-    #     )
-    x = tf.map_fn(
-        lambda i: inputs[:, (i * padding): (i * padding) + size_subseq, :],
-        tf.range(n_step),
-        fn_output_signature=tf.float32,
-    )
-    x = tf.transpose(x, [1, 0, 2, 3])
-    return x
-
 def apply_mask(list_or_array_or_none, mask, axis=0, mode="bool_array"):
     """Apply a mask-based selection along a given axis.
 

@@ -4,7 +4,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import KFold
-
+from abc import ABC, abstractmethod
 import uqmodels.modelization.DL_estimator.loss as uqloss
 import uqmodels.processing as uqproc
 from uqmodels.modelization.DL_estimator.utils import set_global_determinism
@@ -13,12 +13,133 @@ from uqmodels.modelization.DL_estimator.data_generator import default_Generator
 from uqmodels.utils import add_random_state, apply_mask, cut
 
 
-def Identity_factory(X, y, **kwargs):
-    return (X, y, None)
+class UQOutput(ABC):
+    """
+    Interface for models exposing uncertainty outputs.
+    Required by `NN_UQ.basic_inference` to extract aleatoric/epistemic variance.
+    """
 
+    @abstractmethod
+    def get_uq_outputs(self, y_pred: np.ndarray, type_output: str):
+        """
+        Parse raw model output into (mean, var_a, var_e).
+
+        Args:
+            y_pred: raw model prediction (e.g., [recon] or [mean, logvar] or [γ, ν, α, β])
+            type_output: one of 'PNN', 'EDL', 'MC_Dropout', 'Deep_ensemble', None
+
+        Returns:
+            tuple: (mean, var_a, var_e) each as np.ndarray or None (if not available)
+        """
+        pass
+
+
+class UQModelMixin:
+    """
+    Mixin to be inherited by TensorFlow models (or wrapped models) that support UQ output parsing.
+    Provides default implementation for `get_uq_outputs`.
+    """
+
+    def get_uq_outputs(self, y_pred: np.ndarray, type_output: str):
+        """
+        Default behavior:
+        - 'PNN': y_pred = [μ, logσ²] → var_a = exp(logσ²), var_e = 0
+        - 'EDL': y_pred = [γ, ν, α, β] → compute Normal-Gamma variance
+        - else: y_pred = μ → var_a = var_e = 0
+        """
+        if type_output == "PNN":
+            mu, logvar = np.split(y_pred, 2, axis=-1)
+            return mu, np.exp(logvar), np.zeros_like(mu)
+
+        elif type_output == "EDL":
+            gamma, nu, alpha, beta = np.split(y_pred, 4, axis=-1)
+            alpha = alpha + 1e-5
+            var_a = beta / (alpha - 1)
+            var_e = beta / (nu * (alpha - 1))
+            # replace inf
+            var_e[var_e == np.inf] = 0.0
+            var_a[var_a == np.inf] = 0.0
+            return gamma, var_a, var_e
+
+        else:  # deterministic or None
+            return y_pred, np.zeros_like(y_pred), np.zeros_like(y_pred)
 
 class NN_UQ(UQEstimator):
-    "Neural Network UQ"
+    """
+    Neural Network wrapper for Uncertainty Quantification (UQ) on time series.
+
+    This class provides a high-level interface to train and perform inference on
+    deep learning models capable of estimating both **aleatoric** (data-inherent)
+    and **epistemic** (model-induced) uncertainty. It supports three mainstream
+    UQ paradigms:
+
+    - **MC Dropout**: Stochastic inference via repeated forward passes with dropout enabled.
+    - **Deep Ensemble**: Averaging predictions from multiple independently trained models.
+    - **Epistemic Neural Networks (EDL)**: Explicit probabilistic modeling (e.g., Gamma distribution) to quantify uncertainty.
+
+    For all modes, the interface is unified:
+      - ``predict(X)`` returns a tuple ``(y_pred, UQ)``
+      - ``UQ`` has shape ``(2, *y_pred.shape[1:])``: ``UQ[0] = var_aleatoric``, ``UQ[1] = var_epistemic``
+
+    The wrapper manages the entire lifecycle:
+      - *Data preparation* (rescaling, masking, train/test split, generators)
+      - *Model instantiation* (via user-provided initializer)
+      - *Training* (multi-stage, multi-loss, early stopping, snapshots)
+      - *Serialization* (weights + hyperparameters)
+
+    It is designed for **sequence modeling** (e.g., time-series forecasting), but
+    supports any input-output ND array where axes are compatible with the initializer.
+
+    Parameters
+    ----------
+    model_initializer : callable
+        Factory function returning a TensorFlow/Keras model (or dict with keys
+        ``'model'`` and optionally ``'encoder'``). It must accept keyword arguments
+        defined in `model_parameters`.
+    model_parameters : dict
+        Arguments passed to ``model_initializer`` (e.g., ``dim_in``, ``dim_out``,
+        ``layers_size``, ``dp``, ``random_state``).
+    factory_parameters : dict, optional
+        Reserved for future extension (currently unused).
+    training_parameters : dict
+        Training configuration, including epochs, batch sizes, learning rates,
+        loss functions, metrics, callbacks, etc. Use ``get_training_parameters``
+        helper to generate defaults per ``type_output``.
+    type_output : {'MC_Dropout', 'Deep_ensemble', 'EDL', 'PNN', None}, optional
+        UQ strategy. Defaults to None → deterministic output.
+    rescale : bool, default False
+        Whether to apply input/target rescaling (handled by parent `UQEstimator`).
+    n_ech : int, default 5
+        Number of stochastic draws (MC Dropout) or ensemble members (Deep Ensemble).
+    train_ratio : float, default 0.9
+        Fraction of data used for training (remaining used for validation).
+    var_min : float, default 1e-6
+        Minimum variance clamped during inference (prevents numerical instabilities).
+    name : str, default "NN"
+        Identifier used for saving/loading models.
+    random_state : int or None, default None
+        Seed for reproducibility (applied where supported by the initializer).
+
+    Notes
+    -----
+    - The model initializer can return:
+        - A single Keras model (used for prediction & encoding if ``model_encode`` not provided)
+        - A dict with keys ``'model'`` (prediction model) and optionally ``'encoder'``
+          (intermediate representation model). Encoder inference is invoked via ``.encode()``.
+
+    - Uncertainty decomposition:
+        - *Aleatoric*: irreducible noise in observations.
+        - *Epistemic*: reducible model uncertainty (via diversity: dropout, ensembles, or EDL).
+
+    - For **EDL**, outputs are expected to be split into 4 chunks: ``[γ, ν, α, β]``
+      describing a Normal-Gamma distribution; variance formulas are:
+      .. math::
+          \\sigma^2_A = \\frac{\\beta}{\\alpha - 1}, \\quad
+          \\sigma^2_E = \\frac{\\beta}{\\nu (\\alpha - 1)}
+
+    - For **PNN**, outputs are ``[y, \\log \\sigma^2]``; aleatoric variance is
+      ``exp(\\log \\sigma^2)``.
+    """
 
     def __init__(
         self,
@@ -183,6 +304,43 @@ class NN_UQ(UQEstimator):
 
         return (X, y, mask)
 
+    def get_uq_from_prediction(self, y_pred: np.ndarray, type_output: str):
+        """
+        Extract (mean, var_a, var_e) from raw prediction, using model's interface if available.
+
+        Falls back to default parsing if model doesn't implement UQOutput.
+        """
+        # Try to delegate to model
+        if hasattr(self, "model") and isinstance(self.model, (list, tuple)):
+            # Deep ensemble: assume all members implement same interface
+            model = self.model[0]
+        else:
+            model = self.model
+
+        if isinstance(model, UQOutput):
+            return model.get_uq_outputs(y_pred, type_output)
+
+        # Default behavior (backward compatible)
+        return self._default_uq_parse(y_pred, type_output)
+
+    def _default_uq_parse(self, y_pred, type_output):
+        """Original logic, kept for backward compatibility."""
+        if type_output == "EDL":
+            gamma, nu, alpha, beta = np.split(y_pred, 4, axis=-1)
+            alpha += 1e-5
+            var_a = beta / (alpha - 1)
+            var_e = beta / (nu * (alpha - 1))
+            var_e[var_e == np.inf] = 0.0
+            var_a[var_a == np.inf] = 0.0
+            return gamma, var_a, var_e
+
+        elif type_output == "PNN":
+            mu, logvar = np.split(y_pred, 2, axis=-1)
+            return mu, np.exp(logvar), np.zeros_like(mu)
+
+        else:
+            return y_pred, np.zeros_like(y_pred), np.zeros_like(y_pred)
+        
     def save(self, path=None, name=None):
         if name is None:
             name = self.name
@@ -242,27 +400,106 @@ class NN_UQ(UQEstimator):
         self.model.compile(**kwarg)
 
     def modify_dropout(self, dp):
-        self.model.save_weights(self.name)
+        """Rebuild model(s) with a new dropout rate and reload previous weights.
+
+        This method relies on `init_neural_network` so that model instantiation
+        remains consistent with the initializer contract:
+            - model
+            - {"model": ..., "encode": ...}
+        """
+        if not self.initialized:
+            raise RuntimeError("Cannot modify dropout before model initialization.")
+
+        if self.type_output == "Deep_ensemble":
+            weight_paths = []
+            for i, model in enumerate(self.model):
+                weight_path = f"{self.name}_{i}"
+                model.save_weights(weight_path)
+                weight_paths.append(weight_path)
+        else:
+            self.model.save_weights(self.name)
+
         self.model_parameters["dp"] = dp
-        self.model = self.model_initializer(**self.model_parameters)
-        self.initialized = True
-        self.model.load_weights(self.name)
+        self.init_neural_network()
+
+        if self.type_output == "Deep_ensemble":
+            for model, weight_path in zip(self.model, weight_paths):
+                model.load_weights(weight_path)
+        else:
+            self.model.load_weights(self.name)
 
     def reset(self):
         del self.model
         self.initialized = False
 
+    def _parse_initializer_output(self, init_output):
+        """Normalize initializer output into model and optional encoder.
+
+        Supported initializer outputs:
+            - a model object
+            - a dict containing at least key "model" and optionally key "encode"
+
+        Args:
+            init_output: Output returned by self.model_initializer(**self.model_parameters).
+
+        Returns:
+            tuple:
+                model: Main prediction model.
+                model_encode: Optional encoding model, or None.
+
+        Raises:
+            TypeError: If the initializer output format is unsupported.
+            KeyError: If a dict output does not contain the required "model" key.
+        """
+        if isinstance(init_output, dict):
+            if "model" not in init_output:
+                raise KeyError(
+                    "Initializer returned a dict but missing required key 'model'."
+                )
+            model = init_output["model"]
+            model_encode = init_output.get("encoder", None)
+        else:
+            model = init_output
+            model_encode = None
+
+        return model, model_encode
+
+
     def init_neural_network(self):
-        "apply model_initializer function with model_parameters and store in self.model"
+        """Instantiate and store prediction model and optional encoder.
+
+        The initializer can return either:
+            - a model object
+            - a dict with keys:
+                - 'model': main prediction model
+                - 'encode': optional encoder model
+
+        For deep ensembles, self.model and self.model_encode are lists of length n_ech.
+        For non-ensemble settings, self.model is a single model and self.model_encode
+        is either a single encoder model or None.
+        """
+        self.model_encode = None
         if self.random_state is not None:
             set_global_determinism(seed=self.random_state)
 
         if self.type_output == "Deep_ensemble":
             self.model = []
-            for i in range(self.n_ech):
-                self.model.append(self.model_initializer(**self.model_parameters))
+            self.model_encode = []
+
+            for _ in range(self.n_ech):
+                init_output = self.model_initializer(**self.model_parameters)
+                model, model_encode = self._parse_initializer_output(init_output)
+                self.model.append(model)
+                self.model_encode.append(model_encode)
+
+            # If no encoder was provided for any ensemble member, keep a simpler API.
+            if all(enc is None for enc in self.model_encode):
+                self.model_encode = None
+
         else:
-            self.model = self.model_initializer(**self.model_parameters)
+            init_output = self.model_initializer(**self.model_parameters)
+            self.model, self.model_encode = self._parse_initializer_output(init_output)
+
         self.initialized = True
 
     def fit(
@@ -519,11 +756,17 @@ class NN_UQ(UQEstimator):
         return default_Generator(X, y, metamodel=self, batch=batch, shuffle=shuffle, train=train)
 
     def predict(self, X, type_output=None, generator=None, **kwargs):
+        """User API for prediction inference."""
         if type_output is None:
             type_output = self.type_output
 
-        pred, UQ = self.basic_predict(
-            X, n_ech=self.n_ech, type_output=type_output, generator=generator, **kwargs
+        pred, UQ = self.basic_inference(
+            X,
+            n_ech=self.n_ech,
+            type_output=type_output,
+            generator=generator,
+            inference_mode="prediction",
+            **kwargs,
         )
 
         if self.rescale:
@@ -532,18 +775,59 @@ class NN_UQ(UQEstimator):
                 None, UQ, type_transform="inverse_transform", mode_UQ=True
             )
 
-        return (pred, UQ)
+        return pred, UQ
 
-    def basic_predict(
+
+    def encode(self, X, type_output=None, generator=None, **kwargs):
+        """User API for encoding inference.
+
+        This method reuses the same intermediate inference pipeline as `predict`,
+        but requests encoder inference instead of prediction inference.
+
+        Warning:
+            Output rescaling is not applied in encoding mode, since latent
+            representations are not assumed to belong to the original target space.
+        """
+        if type_output is None:
+            type_output = self.type_output
+
+        pred, UQ = self.basic_inference(
+            X,
+            n_ech=self.n_ech,
+            type_output=type_output,
+            generator=generator,
+            inference_mode="encoding",
+            **kwargs,
+        )
+        return pred, UQ
+
+    def basic_inference(
         self,
         Inputs,
         n_ech=6,
         type_output="MC_Dropout",
         generator=None,
         test_batch_size=None,
-        **kwarg
+        inference_mode="prediction",
+        **kwargs,
     ):
-        # Variational prediction + variance estimation for step T+1 et T+4(lag)
+        """Intermediate inference API for prediction or encoding.
+
+        Args:
+            Inputs: Raw inputs or iterable input source.
+            n_ech (int): Number of stochastic draws when relevant.
+            type_output (str | None): Output mode for prediction inference.
+            generator (bool | None): Whether to use generator-based inference.
+            test_batch_size (int | None): Batch size used for generator inference.
+            inference_mode (str): Inference target:
+                - "prediction"
+                - "encoding"
+
+        Returns:
+            tuple[np.ndarray, np.ndarray]:
+                pred: Prediction output or latent encoding.
+                UQ: Uncertainty tensor.
+        """
         if generator is None:
             generator = self.training_parameters["generator"]
 
@@ -557,195 +841,301 @@ class NN_UQ(UQEstimator):
                 Inputs, None, batch=test_batch_size, shuffle=False, train=False
             )
 
-        if type_output in ["MC_Dropout", "MC_Dropout_no_PNN"]:
-            pred, UQ = Drawn_based_prediction(
+        effective_type_output = self.type_output if type_output is None else type_output
+        
+        if inference_mode == "prediction":
+            inference_model = self.model
+
+        elif inference_mode == "encoding":
+            if not hasattr(self, "model_encode") or self.model_encode is None:
+                raise AttributeError(
+                    "Encoding inference requested but 'self.model_encode' is not defined."
+                )
+            inference_model = self.model_encode
+
+
+        else:
+            raise ValueError(
+                f"Unsupported inference_mode='{inference_mode}'. "
+                "Expected 'prediction' or 'encoding'."
+            )
+        if effective_type_output in ["MC_Dropout", "MC_Dropout_no_PNN"]:
+            pred, UQ = Drawn_based_inference(
                 Inputs,
-                self.model,
+                inference_model,
                 n_ech,
                 ddof=self.ddof,
                 generator=generator,
-                type_output=type_output,
+                type_output=effective_type_output,
+                uq_parser=self.get_uq_from_prediction,
             )
 
-        elif type_output == "Deep_ensemble":
-            pred, UQ = Ensemble_based_prediction(
+        elif effective_type_output == "Deep_ensemble":
+            pred, UQ = Ensemble_based_inference(
                 Inputs,
-                self.model,
+                inference_model,
                 ddof=self.ddof,
                 generator=generator,
-                type_output=type_output,
+                type_output=effective_type_output,
+                uq_parser=self.get_uq_from_prediction,
             )
 
-        elif type_output in ["EDL", "PNN", "None", None]:
-            pred, UQ = Deterministic_prediction(
+        elif effective_type_output in ["EDL", "PNN", "None", None]:
+            pred, UQ = Deterministic_inference(
                 Inputs,
-                self.model,
+                inference_model,
                 ddof=self.ddof,
                 generator=generator,
-                type_output=type_output,
+                type_output=effective_type_output,
+                uq_parser=self.get_uq_from_prediction,
             )
 
         else:
             raise Exception(
-                "Unknown type_output : choose 'MC_Dropout' or 'Deep_esemble' or 'EDL' or 'Non' or None"
+                "Unknown type_output: choose 'MC_Dropout', 'MC_Dropout_no_PNN', "
+                "'Deep_ensemble', 'EDL', 'PNN', 'None' or None."
             )
 
-        return (pred, UQ)
+        return pred, UQ
+    
+def Deterministic_inference(Inputs, model, ddof, generator=False, type_output=None,uq_parser=None):
+    """Run deterministic inference on a provided model.
 
+    The provided model can be either:
+        - a prediction model
+        - an encoding model
 
-def Drawn_based_prediction(
-    Inputs, model, n_ech, ddof, generator=False, type_output="MC_Dropout"
-):
-    """Prediction (mu,sigma) of Inputs using  Drawn_based UQ-paragim (Ex : MC_dropout)
+    In both cases, this function only aggregates the model output and applies
+    optional output parsing when requested by `type_output`.
 
     Args:
-        model (tf.model): neural network
-        n_ech (n_draw): number of dropout drawn
-        Inputs (_type_): Inputs of model
-        ddof (_type_): ddof
-        generator (bool, optional): specify if Inputs is generator or not. Defaults to False.
+        Inputs: Model inputs or generator yielding (x, y).
+        model: Inference model exposing predict(...).
+        ddof: Unused for deterministic inference, kept for API compatibility.
+        generator (bool, optional): Whether Inputs is a generator.
+        type_output (str | None, optional): Output interpretation.
+            Supported values:
+                - "EDL"
+                - "PNN"
+                - None
 
     Returns:
-        _type_: _description_
+        tuple[np.ndarray, np.ndarray]:
+            pred: Prediction or latent representation.
+            UQ: Array with shape (2, ...) where:
+                UQ[0] = epistemic variance
+                UQ[1] = aleatoric variance
     """
+    if generator:
+        output = []
+        for Inputs_gen, _ in Inputs:
+            output.append(model.predict(Inputs_gen))
+        output = np.concatenate(output, axis=0)
+    else:
+        output = model.predict(Inputs)
+    
+    if uq_parser is not None:
+        mean, var_a, var_e = uq_parser(output, type_output)
 
+    else:
+        # default parsing (backward compat)    
+        if type_output == "EDL":
+            gamma, vu, alpha, beta = np.split(output, 4, axis=-1)
+            alpha = alpha + 1e-5
+            pred = gamma
+            var_A = beta / (alpha - 1)
+            var_E = beta / (vu * (alpha - 1))
+
+            if (var_E == np.inf).sum() > 0:
+                print("Warning inf values in var_E replaced by 0")
+            if (var_A == np.inf).sum() > 0:
+                print("Warning inf values in var_A replaced by 0")
+
+            var_E[var_E == np.inf] = 0
+            var_A[var_A == np.inf] = 0
+
+        elif type_output == "PNN":
+            mu, logvar = np.split(output, 2, axis=-1)
+            mean, var_a, var_e = mu, np.exp(logvar), np.zeros_like(mu)
+
+        else:
+            mean, var_a, var_e = output, np.zeros_like(output), np.zeros_like(output)
+
+    UQ = np.concatenate([var_e[None, :], var_a[None, :]], axis=0)
+    return mean, UQ
+
+def Drawn_based_inference(
+    Inputs,
+    model,
+    n_ech,
+    ddof,
+    generator=False,
+    type_output="MC_Dropout",
+    uq_parser=None,
+):
+    """Run draw-based inference on a provided model.
+
+    Args:
+        Inputs: Model inputs or generator yielding (x, y).
+        model: Inference model exposing predict(...).
+        n_ech (int): Number of stochastic draws.
+        ddof (int): Delta degrees of freedom for variance estimation.
+        generator (bool, optional): Whether Inputs is a generator.
+        type_output (str, optional): Output interpretation.
+            Supported values:
+                - "MC_Dropout": output is concatenated as [pred, logvar]
+                - "MC_Dropout_no_PNN": output is pred only
+                - None: deterministic direct output
+        uq_parser (callable | None, optional): Function (y_pred, type_output) -> (mean, var_a, var_e).
+            If None, uses _default_uq_parse.
+
+    Returns:
+        tuple[np.ndarray, np.ndarray]:
+            pred: Mean output over draws.
+            UQ: Array with shape (2, ...) where:
+                UQ[0] = aleatoric variance
+                UQ[1] = epistemic variance
+    """
     if generator:
         pred = []
         var_a = []
         var_e = []
-        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results
+
+        for Inputs_gen, _ in Inputs:
             output = []
-            for i in range(n_ech):
+            for _ in range(n_ech):
                 output.append(model.predict(Inputs_gen))
 
-            if type_output == "MC_Dropout_no_PNN":
-                pred_ = np.array(output)
-                var_a.append(0 * pred_.mean(axis=0))
+            output = np.array(output)
 
-            if type_output == "MC_Dropout":
-                pred_, logvar = np.split(np.array(output), 2, -1)
-                var_a.append(np.exp(logvar).mean(axis=0))
+            # Use custom parser if available, else fallback
+            if uq_parser is not None:
+                mean_batch, var_a_batch, var_e_batch = uq_parser(output, type_output)
+            else:
+                if type_output == "MC_Dropout":
+                    pred_, logvar = np.split(output, 2, axis=-1)
+                    var_a_batch = np.exp(logvar).mean(axis=0)
+                else:
+                    pred_ = output
+                    var_a_batch = np.zeros_like(pred_.mean(axis=0))
 
-            pred.append(pred_.mean(axis=0))
-            var_e.append(pred_.var(axis=0))
+                var_e_batch = np.var(pred_, axis=0, ddof=ddof)
+                mean_batch = pred_.mean(axis=0)
+
+            pred.append(mean_batch)
+            var_a.append(var_a_batch)
+            var_e.append(var_e_batch)
 
         pred = np.concatenate(pred, axis=0)
         var_a = np.concatenate(var_a, axis=0)
         var_e = np.concatenate(var_e, axis=0)
-        UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
+
     else:
         output = []
-        for i in range(n_ech):
+        for _ in range(n_ech):
             output.append(model.predict(Inputs))
 
-        if type_output == "MC_Dropout_no_PNN":
-            pred_ = np.array(output)
-            var_a = 0 * pred_.mean(axis=0)
+        output = np.array(output)
 
-        if type_output == "MC_Dropout":
-            pred_, logvar = np.split(np.array(output), 2, -1)
-            var_a = np.exp(logvar).mean(axis=0)
-        var_e = np.var(pred_, axis=0, ddof=ddof)
-        pred = pred_.mean(axis=0)
+        # Use custom parser if available, else fallback
+        if uq_parser is not None:
+            mean, var_a, var_e = uq_parser(output, type_output)
+        else:
+            if type_output == "MC_Dropout":
+                pred_, logvar = np.split(output, 2, axis=-1)
+                var_a = np.exp(logvar).mean(axis=0)
+            else:
+                pred_ = output
+                var_a = np.zeros_like(pred_.mean(axis=0))
+
+            var_e = np.var(pred_, axis=0, ddof=ddof)
+            mean = pred_.mean(axis=0)
+
     UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
-    return (pred, UQ)
+    return mean, UQ
 
 
-def Deterministic_prediction(Inputs, model, ddof, generator=False, type_output=None):
-    """Prediction (mu,sigma) of Inputs using Deterministic UQ-paragim (Ex : EDL)
-
-    Args:
-        model (tf.model): neural network
-        n_ech (n_draw): number of dropout drawn
-        Inputs (_type_): Inputs of model
-        ddof (_type_): ddof
-        generator (bool, optional): specify if Inputs is generator or not. Defaults to False.
-        type_output : type_output (EDL)
-
-    Returns:
-        _type_: _description_
-    """
-
-    if generator:
-        output = []
-        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results
-            output.append(model.predict(Inputs_gen))
-        output = np.concatenate(output, axis=0)
-
-    else:
-        output = model.predict(Inputs)
-
-    if type_output == "EDL":
-        gamma, vu, alpha, beta = np.split(output, 4, -1)
-        alpha = alpha + 10e-6
-        pred = gamma
-        var_A = beta / (alpha - 1)
-        # WARNING sqrt or not sqrt ?
-        var_E = beta / (vu * (alpha - 1))
-        if (var_E == np.inf).sum() > 0:
-            print("Warning inf values in var_E replace by s-min")
-        if (var_A == np.inf).sum() > 0:
-            print("Warning inf values in var_E replace by s-min")
-        var_E[var_E == np.inf] = 0
-        var_A[var_A == np.inf] = 0
-
-    elif type_output == "PNN":
-        pred, logvar = np.split(output, 2, -1)
-        var_A = np.exp(logvar)
-        var_E = logvar * 0
-
-    else:
-        pred = output
-        var_A = 0 * pred
-        var_E = 0 * pred
-
-    UQ = np.concatenate([var_E[None, :], var_A[None, :]], axis=0)
-    return (pred, UQ)
-
-
-def Ensemble_based_prediction(Inputs, models, ddof, generator=False, type_output=None):
-    """Prediction (mu,sigma) of Inputs using Ensemble_based UQ-paradign
+def Ensemble_based_inference(
+    Inputs, models, ddof, generator=False, type_output=None, uq_parser=None
+):
+    """Run ensemble-based inference on a provided list of models.
 
     Args:
-        model (tf.model): neural network
-        n_ech (n_draw): number of dropout drawn
-        Inputs (_type_): Inputs of model
-        ddof (_type_): ddof
-        generator (bool, optional): specify if Inputs is generator or not. Defaults to False.
-        type_output : type_output (curently useless)
+        Inputs: Model inputs or generator yielding (x, y).
+        models (list): List of ensemble members exposing predict(...).
+        ddof (int): Delta degrees of freedom for variance estimation.
+        generator (bool, optional): Whether Inputs is a generator.
+        type_output (str | None, optional): Output interpretation.
+            Supported values:
+                - "PNN": concatenated output [pred, logvar]
+                - None: deterministic direct output
+        uq_parser (callable | None, optional): Function (y_pred, type_output) -> (mean, var_a, var_e).
+            If None, uses _default_uq_parse.
 
     Returns:
-        _type_: _description_
+        tuple[np.ndarray, np.ndarray]:
+            pred: Mean output over ensemble members.
+            UQ: Array with shape (2, ...) where:
+                UQ[0] = aleatoric variance
+                UQ[1] = epistemic variance
     """
-
     if generator:
         pred = []
         var_a = []
         var_e = []
-        for Inputs_gen, _ in Inputs:  # by batch do n inf and aggreagate results
+
+        for Inputs_gen, _ in Inputs:
             output = []
             for submodel in models:
                 output.append(submodel.predict(Inputs_gen))
 
-            pred_, logvar = np.split(np.array(output), 2, -1)
-            var_a.append(np.exp(logvar).mean(axis=0))
-            var_e.append(pred_.var(axis=0, ddof=ddof))
-            pred.append(pred_.mean(axis=0))
+            output = np.array(output)
+
+            # Use custom parser if available, else fallback
+            if uq_parser is not None:
+                mean_batch, var_a_batch, var_e_batch = uq_parser(output, type_output)
+            else:
+                if type_output == "PNN":
+                    pred_, logvar = np.split(output, 2, axis=-1)
+                    var_a_batch = np.exp(logvar).mean(axis=0)
+                else:
+                    pred_ = output
+                    var_a_batch = np.zeros_like(pred_.mean(axis=0))
+
+                var_e_batch = np.var(pred_, axis=0, ddof=ddof)
+                mean_batch = pred_.mean(axis=0)
+
+            pred.append(mean_batch)
+            var_a.append(var_a_batch)
+            var_e.append(var_e_batch)
 
         pred = np.concatenate(pred, axis=0)
         var_a = np.concatenate(var_a, axis=0)
         var_e = np.concatenate(var_e, axis=0)
+
     else:
         output = []
         for submodel in models:
             output.append(submodel.predict(Inputs))
-        pred, logvar = np.split(np.array(output), 2, -1)
-        var_a = np.exp(logvar).mean(axis=0)
-        var_e = np.var(pred, axis=0, ddof=ddof)
-        pred = pred.mean(axis=0)
-    UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
-    return (pred, UQ)
 
+        output = np.array(output)
+
+        # Use custom parser if available, else fallback
+        if uq_parser is not None:
+            mean, var_a, var_e = uq_parser(output, type_output)
+        else:
+            if type_output == "PNN":
+                pred_, logvar = np.split(output, 2, axis=-1)
+                var_a = np.exp(logvar).mean(axis=0)
+            else:
+                pred_ = output
+                var_a = np.zeros_like(pred_.mean(axis=0))
+
+            var_e = np.var(pred_, axis=0, ddof=ddof)
+            mean = pred_.mean(axis=0)
+
+    UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
+    return mean, UQ
 
 def get_training_parameters(
     epochs=[100, 100],
@@ -800,7 +1190,6 @@ def get_training_parameters(
         dict_params[key_arg] = kwargs[key_arg]
     return dict_params
 
-
 def get_params_dict(
     dim_in,
     dim_out=1,
@@ -841,7 +1230,6 @@ def get_params_dict(
         dict_params[key_arg] = kwargs[key_arg]
 
     return dict_params
-
 
 def generate_K_fold_removing_index(
     n_model, k_fold, train, data_drop, random_state=None
@@ -886,7 +1274,6 @@ def generate_K_fold_removing_index(
                 )
                 list_sampletoremove[n] = sampletoremove
     return list_sampletoremove
-
 
 def generate_train_test(len_, train_ratio=0.92, last_val=True, random_state=None):
     if last_val:

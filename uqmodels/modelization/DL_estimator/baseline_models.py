@@ -50,7 +50,7 @@ def cnn_mlp(
         dp=dp,
         flag_mc=True,
     )
-    output = MWE(inputs)
+    embedding = MWE(inputs)
     Interpretor = mlp(
         dim_in=32,
         dim_out=dim_target,
@@ -59,6 +59,7 @@ def cnn_mlp(
         type_output=type_output,
         name="Interpretor",
     )
-    output = TimeDistributed(Interpretor)(output)
-    cnn_mlp = tf.keras.Model(inputs, output, name="CNN_MLP_" + name)
-    return cnn_mlp
+    output = TimeDistributed(Interpretor)(embedding)
+    model = tf.keras.Model(inputs, output, name="CNN_MLP_" + name)
+    encoder = tf.keras.Model(inputs, embedding, name="CNN_encoder_" + name)
+    return {'model':model,'encoder':encoder}

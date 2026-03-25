@@ -477,7 +477,8 @@ def build_transformer(
     outputs = TimeDistributed(Interpretor)(dec_out[:, -(dim_horizon):])
 
     model = tf.keras.Model(list_input, outputs, name="model")
-    return model
+    encoder = tf.keras.Model(list_input, enc_out, name="model")
+    return {'model':model,'encoder':encoder}
 
 
 class Transformer_ED_UQ(NN_UQ):

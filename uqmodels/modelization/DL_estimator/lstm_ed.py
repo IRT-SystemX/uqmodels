@@ -206,6 +206,8 @@ def build_lstm_stacked(
     if residuals_link:
         Z_enc = Z_enc + Embedding
 
+    Model_encoder = tf.keras.Model(list_inputs, Z_enc[:,-1])
+
     Z_enc = FTE(Z_enc)
 
     # Lattent embedding of each state (Z_t) and last current memory state (H et C)
@@ -262,8 +264,8 @@ def build_lstm_stacked(
         #     tf.keras.Model(list_input, outputs_training)
         # model = tf.keras.Model(list_input, outputs)
     else:
-        model = tf.keras.Model(list_inputs, outputs_training)
-    return model
+        Model = tf.keras.Model(list_inputs, outputs_training)
+    return {'model':Model,'encoder':Model_encoder}
 
 
 class Lstm_ED_UQ(NN_UQ):
