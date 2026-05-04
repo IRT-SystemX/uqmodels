@@ -22,11 +22,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Sequence
 
-from uqmodels.modelization.TF_estimator.ts_diffusion.base_diffusion import (
-    RunConfig,
-    CollectSpec,
-    SweepSpec,
-)
+from uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_dataclass import (RunConfig,CollectSpec,SweepSpec)
 
 
 def get_preset_config(
@@ -46,7 +42,7 @@ def get_preset_config(
     reduce_x0_var_approx: bool = False,
     # Choose reduction style when sweeps are present
     reduce_style: str = "flat",                # "flat" | "two_stage"
-) -> RunConfig:
+    ) -> RunConfig:
     """
     Return a pre-specified RunConfig preset.
 

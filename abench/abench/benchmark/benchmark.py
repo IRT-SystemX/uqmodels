@@ -371,6 +371,7 @@ def compute_metrics_on_dataloader(storing,
                                   list_metrics=[],
                                   set_name=None,
                                   store=True,
+                                  Component_class_dict=None,
                                   verbose=0):
     if(ABloader is None):
         if(set_name is None):
@@ -394,8 +395,9 @@ def compute_metrics_on_dataloader(storing,
     for component_name in list_component_name:
         dict_output[component_name] = api.get_output(storing,component_name,trainset_name,set_name)
         if(dict_output[component_name] is None):
-            dict_output[component_name] = []
-            list_component_to_compute_output.append(component_name)
+            raise(ValueError(component_name,' not executed on the pair '(trainset_name,set_name)))
+            #dict_output[component_name] = []
+            #list_component_to_compute_output.append(component_name)
 
             
     #Collect Target and Context from data loader
@@ -407,9 +409,10 @@ def compute_metrics_on_dataloader(storing,
         list_context = []
         X,y = ABdata
         list_y.append(y)
-        for componant_name in list_component_to_compute_output:
-            component = api.get_component(storing,trainset_name,component_name)
-            dict_output[component_name].append(component.predict(X))
+        #Depreciated model prediction should be done by inference function 
+        #for componant_name in list_component_to_compute_output:
+        #    component = api.get_component(storing,trainset_name,component_name)
+        #    dict_output[component_name].append(component.predict(X))
 
         if(ABcontext is not None):
             list_context.append(ABcontext)

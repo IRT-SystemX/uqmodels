@@ -149,7 +149,7 @@ def extract_sequence_dataset(
     
     # -------- convert to NumPy --------------------------------------------
     x_data = df_sampled[x_features]
-    print(type(x_data.values[0,0]))
+
     x_data = x_data.drop(columns=x_data.select_dtypes(include=["datetime", "datetimetz"]).columns)
     x_data = x_data.to_numpy()
     y_data = df_sampled[y_features].to_numpy()

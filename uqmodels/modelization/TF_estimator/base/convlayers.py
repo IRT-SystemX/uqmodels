@@ -28,7 +28,7 @@ class ConvBlock1D(layers.Layer):
         self.kernel = int(kernel)
         self.strides = int(strides)
         self.dp = float(dp)
-        self.mc_dropout = bool(mc_dropdown := mc_dropout)
+        self.mc_dropout = bool(mc_dropout)
         self.random_state = random_state
         self.padding = padding
         self.activation = activation
@@ -91,7 +91,7 @@ class ConvBlock2D(layers.Layer):
         self.kernel = kernel
         self.strides = strides
         self.dp = float(dp)
-        self.mc_dropdown = bool(mc_dropout)
+        self.mc_dropout = bool(mc_dropout)
         self.random_state = random_state
         self.padding = padding
         self.activation = activation
@@ -106,7 +106,7 @@ class ConvBlock2D(layers.Layer):
         y = self.conv(x)
         y = self.bn(y, training=training)
         if self.drop is not None:
-            y = self.drop(y, training=(training or self.mc_dropdown))
+            y = self.drop(y, training=(training or self.mc_dropout))
         return y
 
     def get_config(self):
@@ -117,7 +117,7 @@ class ConvBlock2D(layers.Layer):
             "kernel": self.kernel,
             "strides": self.strides,
             "dp": self.dp,
-            "mc_dropout": self.mc_dropdown,
+            "mc_dropout": self.mc_dropout,
             "random_state": self.random_state,
             "padding": self.padding,
             "activation": self.activation,
@@ -149,7 +149,7 @@ class TConvBlock1D(layers.Layer):
         self.kernel = int(kernel)
         self.strides = int(strides)
         self.dp = float(dp)
-        self.mc_dropdown = bool(mc_dropout)
+        self.mc_dropout = bool(mc_dropout)
         self.random_state = random_state
         self.padding = padding
         self.activation = activation
@@ -169,7 +169,7 @@ class TConvBlock1D(layers.Layer):
         y = self.tconv(x)
         y = self.bn(y, training=training)
         if self.drop is not None:
-            y = self.drop(y, training=(training or self.mc_dropdown))
+            y = self.drop(y, training=(training or self.mc_dropout))
         return y
 
     def get_config(self):
@@ -180,7 +180,7 @@ class TConvBlock1D(layers.Layer):
             "kernel": self.kernel,
             "strides": self.strides,
             "dp": self.dp,
-            "mc_dropout": self.mc_dropdown,
+            "mc_dropout": self.mc_dropout,
             "random_state": self.random_state,
             "padding": self.padding,
             "activation": self.activation,
@@ -189,7 +189,6 @@ class TConvBlock1D(layers.Layer):
     @classmethod
     def from_config(cls, config):
         return cls(**config)
-
 
 @tf.keras.utils.register_keras_serializable(package="UQModels_layers")
 class TConvBlock2D(layers.Layer):
@@ -211,7 +210,7 @@ class TConvBlock2D(layers.Layer):
         self.kernel = int(kernel)
         self.strides = strides
         self.dp = float(dp)
-        self.mc_dropdown = bool(mc_dropout)
+        self.mc_dropout = bool(mc_dropout)
         self.random_state = random_state
         self.activation = activation
 
@@ -226,7 +225,7 @@ class TConvBlock2D(layers.Layer):
         y = self.tconv(x)
         y = self.bn(y, training=training)
         if self.drop is not None:
-            y = self.drop(y, training=(training or self.mc_dropdown))
+            y = self.drop(y, training=(training or self.mc_dropout))
         return y
 
     def get_config(self):
@@ -237,7 +236,7 @@ class TConvBlock2D(layers.Layer):
             "kernel": self.kernel,
             "strides": self.strides,
             "dp": self.dp,
-            "mc_dropout": self.mc_dropdown,
+            "mc_dropout": self.mc_dropout,
             "random_state": self.random_state,
             "activation": self.activation,
         }

@@ -34,10 +34,7 @@ from typing import Any, Dict, Optional, Tuple, Callable, Union,  List,Literal, S
 
 
 import tensorflow as tf
-from tensorflow.keras import metrics
-from kevin.uqmodels.uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_noise import make_noise_model
-from uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_core import ConditionalMaskingMixin, IdentityKernel, TemporalConvKernel, make_kernel_operator
-from kevin.uqmodels.uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_schedule import DiffusionScheduleMixin
+from uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_noise import make_noise_model,make_kernel_operator
 
 def _extract_t(coeffs_1d: tf.Tensor, t: tf.Tensor) -> tf.Tensor:
     """

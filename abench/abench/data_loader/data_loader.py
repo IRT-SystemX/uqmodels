@@ -2,6 +2,8 @@ from copy import deepcopy
 from abc import ABC, abstractmethod
 from typing import Iterator, List, Optional, Tuple, Dict,Any
 from copy import deepcopy
+from abench.store.api import store_ABDataExperiment,get_ABDataExperiment,store_ABloader,get_ABloader
+   
 
 class ABLoader(ABC):
     """
@@ -71,6 +73,18 @@ class ABLoader(ABC):
             contextloader (Iterator): Optional context loader.
         """
         return cls(**dict_arg)
+    
+    def save(self,storing,set_name):
+        store_ABloader(storing,set_name,ABloader=self)
+
+    @classmethod
+    def load(cls,storing,set_name):
+        ABloader = get_ABloader(storing,set_name)
+        return(ABloader)
+
+    
+
+
 
 class ABLoaderGeneric(ABLoader):
     """
@@ -164,7 +178,6 @@ class ABLoaderGenericArray(ABLoaderGeneric):
         metadata = metadata
         super().__init__(dataloader,contextloader,metadata,with_context,with_metadata,name)
 
-
 class ABDataExperiment(ABC):
     """
     Abstract base class for managing a cross-validation experimental setup,
@@ -244,6 +257,14 @@ class ABDataExperiment(ABC):
             for b in B:
                 print('Test',b.get_setname())
 
+    def save(self,storing):
+        store_ABDataExperiment(storing,ABDataExperiment=self)
+
+    @classmethod
+    def load(cls,storing,name):
+        ABDataExperiment = get_ABDataExperiment(storing,name)
+        return(ABDataExperiment)
+
     @classmethod
     def from_dict(cls, data: dict):
         """
@@ -251,6 +272,41 @@ class ABDataExperiment(ABC):
         """
         raise NotImplementedError("Use a concrete subclass to load from dict.")
     
+    def merge(self, other: "ABDataExperiment") -> None:
+        """
+        Merge another experiment into the current one.
+
+        Existing train sets are matched by name and their test sets are merged
+        without duplicates. New train sets are appended with their test sets.
+
+        Parameters
+        ----------
+        other : ABDataExperiment
+            Experiment to merge.
+        """
+        current_plan = self.get_experiment_plan()
+
+        for other_train_loader, other_test_loaders in other:
+            train_name = other_train_loader.get_setname()
+
+            if train_name in current_plan:
+                idx = next(
+                    i for i, train_loader in enumerate(self._train_loaders)
+                    if train_loader.get_setname() == train_name
+                )
+
+                existing_test_names = set(current_plan[train_name])
+                for test_loader in other_test_loaders:
+                    test_name = test_loader.get_setname()
+                    if test_name not in existing_test_names:
+                        self._test_loader_sets[idx].append(test_loader)
+                        existing_test_names.add(test_name)
+            else:
+                self._train_loaders.append(other_train_loader)
+                self._test_loader_sets.append(list(other_test_loaders))
+                current_plan[train_name] = [
+                    test_loader.get_setname() for test_loader in other_test_loaders
+                ]
 
 
 

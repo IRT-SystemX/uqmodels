@@ -131,6 +131,21 @@ def get_output(storing,component_name,trainset_name,set_name):
 
 #Dict_perf
 def store_dictperf(storing,trainset_name=None,component_name=None,set_name=None,agg_name=None,dictperf={}):
+    """Store a performance dictionary in the standardized storage backend.
+        ----------
+        storing : Any
+            Storage backend handle.
+        trainset_name : str | None, optional
+            Training dataset namespace.
+        component_name : str | None, optional
+            Component namespace.
+        set_name : str | None, optional
+            Evaluation set namespace.
+        agg_name : str | None, optional
+            Aggregation namespace.
+        dictperf : dict, optional
+            Performance dictionary to store.
+        """
     keys = []
     if agg_name is not None:
         keys.append(agg_name)
@@ -144,6 +159,18 @@ def store_dictperf(storing,trainset_name=None,component_name=None,set_name=None,
     write(storing, keys, dictperf)
 
 def get_dictperf(storing,trainset_name=None,component_name=None,set_name=None,agg_name=None):
+    """Load a performance dictionary from the standardized storage backend.
+        ----------
+        storing : Any, Storage backend handle.
+        trainset_name : str | None, optional, Training dataset namespace.
+        component_name : str | None, optional, Component namespace.
+        set_name : str | None, optional, Evaluation set namespace.
+        agg_name : str | None, optional, Aggregation key to extract from the loaded dictionary.
+
+        Returns
+        -------
+        dict
+            Loaded performance dictionary, or an empty dictionary if missing."""
     keys = []
     if trainset_name is not None:
         keys.append(trainset_name)
@@ -169,6 +196,18 @@ def get_dictperf(storing,trainset_name=None,component_name=None,set_name=None,ag
 # Perf_agg
 
 def get_data(storing,set_name,keep_X=False):
+    """Load dataset elements from the standardized storage backend.
+
+        Parameters
+        ----------
+        storing : Any, Storage backend handle.
+        set_name : str,  Dataset namespace to load.
+        keep_X : bool, optional, Whether to return input features.
+
+        Returns
+        -------
+        tuple: `(X, y, context, metadata)` with concatenated tensors/arrays and metadata list.
+        """
     ABloader = get_ABloader(storing,set_name)
     List_X,List_y,List_context,List_metadata = [],[],[],[]
     for (X,y),context,metadata in ABloader:
@@ -185,7 +224,24 @@ def get_data(storing,set_name,keep_X=False):
     return(List_X,List_y,List_context,List_metadata)
 
 
-def get_data_and_output(storing,component_name,trainset_name,set_name,keep_X=False):       
+def get_data_and_output(storing,component_name,trainset_name,set_name,keep_X=False):
+    """Load dataset elements and component outputs from the standardized storage backend.
+        ----------
+        storing : Any
+            Storage backend handle.
+        component_name : str
+            Component namespace.
+        trainset_name : str
+            Training dataset namespace.
+        set_name : str
+            Evaluation set namespace.
+        keep_X : bool, optional
+            Whether to return input features.
+
+        Returns
+        -------
+        tuple: `(X, y, output, context, metadata)`.
+        """       
     output = get_output(storing=storing,
                         component_name=component_name,
                         trainset_name=trainset_name,

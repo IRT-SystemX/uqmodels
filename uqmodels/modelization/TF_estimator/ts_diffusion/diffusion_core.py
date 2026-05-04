@@ -117,10 +117,9 @@ from typing import Any, Dict, Optional, Tuple, Callable, Union,  List,Literal, S
 import tensorflow as tf
 from tensorflow.keras import metrics
 from uqmodels.modelization.TF_estimator.base.model import BaseKModel
-from uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_noise import make_noise_model
 from uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_masking import ConditionalMaskingMixin
 from uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_schedule import DiffusionScheduleMixin, _extract_t
-from uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_dataclass import TrajectoryResult, RunConfig, RunResult, CollectSpec, SweepSpec
+from uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_dataclass import TrajectoryResult, RunConfig, RunResult, CollectSpec
 from uqmodels.modelization.TF_estimator.ts_diffusion.diffusion_reducer import REDUCER_REGISTRY,ReducerInputs
 
 # -----------------------------------------------------------------------------
@@ -574,6 +573,9 @@ class BaseDiffusionModel(DiffusionScheduleMixin, ConditionalMaskingMixin, BaseKM
 # ==================================================================
 # Core Function related to noise-trajectory inference 
 # ==================================================================
+    def _init_x(self, shape, rng=None, dtype=tf.float32):
+        """Initialize reverse trajectory from standard Gaussian noise."""
+        return normal_like(shape, rng=rng, dtype=dtype)
 
     def _infer_one_trajectory(
         self,
@@ -611,18 +613,21 @@ class BaseDiffusionModel(DiffusionScheduleMixin, ConditionalMaskingMixin, BaseKM
             Observation mask (B,T,C).
         """
         rng = tf.random.Generator.from_seed(seed)
+        x_ref = tf.cast(x_ref, tf.float32)
+        x_init = self._init_x(tf.shape(x_ref), rng=rng, dtype=tf.float32)
 
         if self.masking_cfg is None:
-            raise ValueError("_infer_one_trajectory requires masking_cfg to be set.")
+            cond, y_obs, mask = None, None, None
 
-        x_ref = tf.cast(x_ref, tf.float32)
-        self.reset_mask_context()
-        cond, y_obs, mask = self.make_condition(x_ref)
-        if cond is None or y_obs is None or mask is None:
-            raise RuntimeError("make_condition did not produce cond/y_obs/mask.")
+            proj_fn = None
+        else:
+            self.reset_mask_context()
+            cond, y_obs, mask = self.make_condition(x_ref)
+            if cond is None or y_obs is None or mask is None:
+                raise RuntimeError("make_condition did not produce cond/y_obs/mask.")
+            proj_fn = self._make_projector(y_obs=y_obs, mask=mask, mode=projection)
 
-        x_init = self._init_x(tf.shape(x_ref), seed=seed)
-        proj_fn = self._make_projector(y_obs=y_obs, mask=mask, mode=projection)
+
 
 
         collected: Optional[Dict[str, Any]] = None
@@ -771,6 +776,8 @@ class BaseDiffusionModel(DiffusionScheduleMixin, ConditionalMaskingMixin, BaseKM
                 group_m.append(res)
             groups.append(group_m)
 
+        results = [r for group in groups for r in group]
+
         inputs = ReducerInputs(
             groups=groups,
             ctx = {
@@ -798,7 +805,7 @@ class BaseDiffusionModel(DiffusionScheduleMixin, ConditionalMaskingMixin, BaseKM
                 raise ValueError("Each reducer spec must define a non-empty 'name'.")
             reduced[name] = self._apply_reducer(spec, inputs)
 
-        return RunResult(results=inputs.runs, groups=inputs.groups, reduced=reduced)
+        return RunResult(results=results, groups=inputs.groups, reduced=reduced)
 
     def _resolved_run_cfg(
         self,

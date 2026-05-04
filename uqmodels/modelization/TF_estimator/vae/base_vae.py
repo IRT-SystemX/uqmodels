@@ -157,8 +157,8 @@ class BaseAutoencoder(BaseKModel):
     def save(self, model_dir: str, **kwargs) -> None:
             super().save(model_dir, **kwargs)
 
-            enc_path = os.path.join(model_dir,"enc.h5")
-            dec_path = os.path.join(model_dir,"dec.h5")
+            enc_path = os.path.join(model_dir,"enc.weights.h5")
+            dec_path = os.path.join(model_dir,"dec.weights.h5")
             self.encoder.save_weights(enc_path)
             self.decoder.save_weights(dec_path)
             self._extra_save(model_dir)
@@ -174,8 +174,8 @@ class BaseAutoencoder(BaseKModel):
             )
 
         # 2) load encoder / decoder weights
-        enc_path = os.path.join(model_dir, "enc.h5")
-        dec_path = os.path.join(model_dir, "dec.h5")
+        enc_path = os.path.join(model_dir, "enc.weights.h5")
+        dec_path = os.path.join(model_dir, "dec.weights.h5")
 
         if os.path.exists(enc_path):
             obj.encoder.load_weights(enc_path)
