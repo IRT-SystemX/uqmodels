@@ -13,20 +13,20 @@ from uqmodels.modelization.TF_estimator.vae.base_vae import BaseAutoencoder,Base
 
 
 class LSTMEncoder(KModel):
-    def __init__(self, timesteps, input_dim, hidden_dim, latent_dim, name="encoder",variational=True,**kwargs):
+    def __init__(self, dim_seq, dim_in, dim_h, dim_z, name="encoder",variational=True,**kwargs):
         super().__init__(name=name, **kwargs)
-        self.timesteps = timesteps
-        self.input_dim = input_dim
-        self.hidden_dim = hidden_dim
-        self.latent_dim = latent_dim
+        self.dim_seq = dim_seq
+        self.dim_in = dim_in
+        self.dim_h = dim_h
+        self.dim_z = dim_z
 
-        self.enc_lstm = layers.LSTM(self.hidden_dim, return_sequences=True, name="enc_lstm")
-        self.z_mean_td = layers.TimeDistributed(layers.Dense(self.latent_dim), name="z_mean")
+        self.enc_lstm = layers.LSTM(self.dim_h, return_sequences=True, name="enc_lstm")
+        self.z_mean_td = layers.TimeDistributed(layers.Dense(self.dim_z), name="z_mean")
         if(self.variational):
-            self.z_log_var_td = layers.TimeDistributed(layers.Dense(self.latent_dim), name="z_log_var")
+            self.z_log_var_td = layers.TimeDistributed(layers.Dense(self.dim_z), name="z_log_var")
 
         # Optionnel : définir un input_spec pour une validation d'entrée plus stricte
-        self.input_spec = layers.InputSpec(shape=(None, self.timesteps, self.input_dim))
+        self.input_spec = layers.InputSpec(shape=(None, self.dim_seq, self.dim_in))
 
     def call(self, inputs, training=None):
         x = self.enc_lstm(inputs, training=training)
@@ -39,19 +39,19 @@ class LSTMEncoder(KModel):
 
     def build(self, input_shape):
         # Force l’init des variables en appelant les couches sur un tenseur fictif
-        _ = self.enc_lstm.build((input_shape[0], self.timesteps, self.input_dim))
-        _ = self.z_mean_td.build((input_shape[0], self.timesteps, self.hidden_dim))
+        _ = self.enc_lstm.build((input_shape[0], self.dim_seq, self.dim_in))
+        _ = self.z_mean_td.build((input_shape[0], self.dim_seq, self.dim_h))
         if(self.variational):
-            _ = self.z_log_var_td.build((input_shape[0], self.timesteps, self.hidden_dim))
+            _ = self.z_log_var_td.build((input_shape[0], self.dim_seq, self.dim_h))
         super().build(input_shape)
 
     def get_config(self):
         base = super().get_config()
         base.update({
-            "timesteps": self.timesteps,
-            "input_dim": self.input_dim,
-            "hidden_dim": self.hidden_dim,
-            "latent_dim": self.latent_dim,
+            "dim_seq": self.dim_seq,
+            "dim_in": self.dim_in,
+            "dim_h": self.dim_h,
+            "dim_z": self.dim_z,
             "name": self.name,
         })
         return base
@@ -61,16 +61,16 @@ class LSTMEncoder(KModel):
 # Decoder: (B, T, D) -> (B, T, F)
 # --------------------------
 class LSTMDecoder(KModel):
-    def __init__(self, timesteps, input_dim, hidden_dim, latent_dim, name="decoder", **kwargs):
+    def __init__(self, dim_seq, dim_in, dim_h, dim_z, name="decoder", **kwargs):
         super().__init__(name=name, **kwargs)
-        self.timesteps = timesteps
-        self.input_dim = input_dim
-        self.hidden_dim = hidden_dim
-        self.latent_dim = latent_dim
+        self.dim_seq = dim_seq
+        self.dim_in = dim_in
+        self.dim_h = dim_h
+        self.dim_z = dim_z
 
-        self.dec_lstm = layers.LSTM(self.hidden_dim, return_sequences=True, name="dec_lstm")
-        self.recon_td = layers.TimeDistributed(layers.Dense(self.input_dim), name="recon_out")
-        self.input_spec = layers.InputSpec(shape=(None, self.timesteps, self.latent_dim))
+        self.dec_lstm = layers.LSTM(self.dim_h, return_sequences=True, name="dec_lstm")
+        self.recon_td = layers.TimeDistributed(layers.Dense(self.dim_in), name="recon_out")
+        self.input_spec = layers.InputSpec(shape=(None, self.dim_seq, self.dim_z))
 
     def call(self, inputs, training=None):
         y = self.dec_lstm(inputs, training=training)
@@ -78,17 +78,17 @@ class LSTMDecoder(KModel):
         return out
 
     def build(self, input_shape):
-        _ = self.dec_lstm.build((input_shape[0], self.timesteps, self.latent_dim))
-        _ = self.recon_td.build((input_shape[0], self.timesteps, self.hidden_dim))
+        _ = self.dec_lstm.build((input_shape[0], self.dim_seq, self.dim_z))
+        _ = self.recon_td.build((input_shape[0], self.dim_seq, self.dim_h))
         super().build(input_shape)
 
     def get_config(self):
         base = super().get_config()
         base.update({
-            "timesteps": self.timesteps,
-            "input_dim": self.input_dim,
-            "hidden_dim": self.hidden_dim,
-            "latent_dim": self.latent_dim,
+            "dim_seq": self.dim_seq,
+            "dim_in": self.dim_in,
+            "dim_h": self.dim_h,
+            "dim_z": self.dim_z,
             "name": self.name,
         })
         return base
@@ -96,44 +96,44 @@ class LSTMDecoder(KModel):
 class SeqVariationalVAE(BaseAutoencoder):
     def __init__(
         self,
-        timesteps: int,
-        input_dim: int,
-        latent_dim: int,
-        hidden_dim: int = 128,
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        dim_h: int = 128,
         name: str = "seq_vae",
         **kwargs
     ):
         # Multiple inheritance init order: call BaseAutoencoder and VariationalMixin
         super().__init__(self, name=name, **kwargs)
-        self.timesteps = int(timesteps)
-        self.input_dim = int(input_dim)
-        self.latent_dim = int(latent_dim)
-        self.hidden_dim = int(hidden_dim)
+        self.dim_seq = int(dim_seq)
+        self.dim_in = int(dim_in)
+        self.dim_z = int(dim_z)
+        self.dim_h = int(dim_h)
 
-        self.encoder = LSTMEncoder(timesteps, input_dim, hidden_dim, latent_dim,variational=False)
-        self.decoder = LSTMDecoder(timesteps, input_dim, hidden_dim, latent_dim)
+        self.encoder = LSTMEncoder(dim_seq, dim_in, dim_h, dim_z,variational=False)
+        self.decoder = LSTMDecoder(dim_seq, dim_in, dim_h, dim_z)
         # KL tracker (optional)
         self.kl_loss_tracker = tf.keras.metrics.Mean(name="kl_loss")
 
 class SeqVariationalVAE(BaseVariationalAutoencoder):
     def __init__(
         self,
-        timesteps: int,
-        input_dim: int,
-        latent_dim: int,
-        hidden_dim: int = 128,
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        dim_h: int = 128,
         kl_weight: float = 1.0,
         name: str = "seq_vae",
         **kwargs):
         # Multiple inheritance init order: call BaseAutoencoder and VariationalMixin
         super().__init__(self, name=name,kl_weight=kl_weight, **kwargs)
-        self.timesteps = int(timesteps)
-        self.input_dim = int(input_dim)
-        self.latent_dim = int(latent_dim)
-        self.hidden_dim = int(hidden_dim)
+        self.dim_seq = int(dim_seq)
+        self.dim_in = int(dim_in)
+        self.dim_z = int(dim_z)
+        self.dim_h = int(dim_h)
 
-        self.encoder = LSTMEncoder(timesteps, input_dim, hidden_dim, latent_dim,variational=True)
-        self.decoder = LSTMDecoder(timesteps, input_dim, hidden_dim, latent_dim)
+        self.encoder = LSTMEncoder(dim_seq, dim_in, dim_h, dim_z,variational=True)
+        self.decoder = LSTMDecoder(dim_seq, dim_in, dim_h, dim_z)
         # KL tracker (optional)
         self.kl_loss_tracker = tf.keras.metrics.Mean(name="kl_loss")
 
@@ -147,7 +147,7 @@ class HybridSequenceVAE(HybridMixin, BaseVariationalAutoencoder):
     Supervision: tête branchée sur z (B, T, D) ou sur un pooling de z selon HybridMixin.
 
     Paramètres principaux:
-      - timesteps, input_dim, latent_dim, hidden_dim
+      - dim_seq, dim_in, dim_z, dim_h
       - n_outputs: taille de la cible (classes ou régression)
       - sup_weight: poids de la tête supervisée
       - supervised_loss: loss de supervision (défaut: CCE from_logits=False)
@@ -159,10 +159,10 @@ class HybridSequenceVAE(HybridMixin, BaseVariationalAutoencoder):
 
     def __init__(
         self,
-        timesteps: int,
-        input_dim: int,
-        latent_dim: int,
-        hidden_dim: int = 128,
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        dim_h: int = 128,
         *,
         n_outputs: int,
         sup_weight: float = 1.0,
@@ -185,10 +185,10 @@ class HybridSequenceVAE(HybridMixin, BaseVariationalAutoencoder):
                        name=name,
                        **kwargs)
 
-        self.timesteps = int(timesteps)
-        self.input_dim = int(input_dim)
-        self.latent_dim = int(latent_dim)
-        self.hidden_dim = int(hidden_dim)
+        self.dim_seq = int(dim_seq)
+        self.dim_in = int(dim_in)
+        self.dim_z = int(dim_z)
+        self.dim_h = int(dim_h)
 
 
 

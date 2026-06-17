@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="abench",
-    version="1.0.5",
+    version="1.0.6",
     description="Agnostic benchmark",
     author="Kevin PASINI",
     author_email="Kevin.pasini@irt-systemX.fr",

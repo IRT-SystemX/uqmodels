@@ -43,6 +43,7 @@ def filter_indicator_data(
     # Nettoyage NaN / inf
     valid = np.isfinite(meta_values) & np.isfinite(indicator_values)
     meta_values = apply_mask(meta_values, valid)
+    print(indicator_values,len(valid))
     indicator_values = apply_mask(indicator_values, valid)
 
     if meta_values.size == 0:
@@ -157,6 +158,7 @@ def compute_indicator_curve(
     """
 
     # 1) filtrage / masking / nettoyage
+    print(indicator_values)
     meta_values_f, indicator_values_f = filter_indicator_data(
         meta_values=meta_values,
         indicator_values=indicator_values,
@@ -732,7 +734,6 @@ def plot_indicator_curve_from_AB_results(storing,component_name,Exp_plan,metric,
             list_keys = ['context_mask','context_dim_mask','context_variable_ids']
             context_mask,context_dim_mask,context_variable_ids = Extract_dict(dict_sets_config,list_keys=list_keys)
             context_filtered = apply_mask_along_dim(context, context_mask, context_dim_mask)
-            print(context_filtered.shape)
             if(len(context_variable_ids[0])==1):
                 mode = '1D'
                 x_grid, y_interp, bin_centers, y_binned = compute_indicator_curve(

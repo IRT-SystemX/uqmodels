@@ -398,5 +398,4 @@ class Anomscore_processor(UQKPI_Processor):
                 anom_score, _ = anom_proc.compute_score_fusion(
                     anom_score, params_=self.fusion_params_, **self.KPI_parameters
                 )
-                anom_score = -anom_score
         return anom_score

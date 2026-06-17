@@ -50,7 +50,7 @@ class UQModelMixin:
         if type_output == "PNN":
             mu, logvar = np.split(y_pred, 2, axis=-1)
             return mu, np.exp(logvar), np.zeros_like(mu)
-
+        
         elif type_output == "EDL":
             gamma, nu, alpha, beta = np.split(y_pred, 4, axis=-1)
             alpha = alpha + 1e-5
@@ -1010,17 +1010,20 @@ def Drawn_based_inference(
 
             # Use custom parser if available, else fallback
             if uq_parser is not None:
+                if type_output == "MC_Dropout":
+                    type_output="PNN"
                 mean_batch, var_a_batch, var_e_batch = uq_parser(output, type_output)
             else:
                 if type_output == "MC_Dropout":
-                    pred_, logvar = np.split(output, 2, axis=-1)
-                    var_a_batch = np.exp(logvar).mean(axis=0)
+                    mean_batch, logvar = np.split(output, 2, axis=-1)
+                    var_a_batch = np.exp(logvar)
                 else:
-                    pred_ = output
-                    var_a_batch = np.zeros_like(pred_.mean(axis=0))
+                    mean_batch = output
+                    var_a_batch = np.zeros_like(mean_batch)
 
-                var_e_batch = np.var(pred_, axis=0, ddof=ddof)
-                mean_batch = pred_.mean(axis=0)
+            var_e_batch = np.var(mean_batch, axis=0, ddof=ddof)
+            var_a_batch = var_a_batch.mean(axis=0)
+            mean_batch = mean_batch.mean(axis=0)
 
             pred.append(mean_batch)
             var_a.append(var_a_batch)
@@ -1039,17 +1042,20 @@ def Drawn_based_inference(
 
         # Use custom parser if available, else fallback
         if uq_parser is not None:
+            if type_output == "MC_Dropout":
+                type_output="PNN"
             mean, var_a, var_e = uq_parser(output, type_output)
         else:
             if type_output == "MC_Dropout":
-                pred_, logvar = np.split(output, 2, axis=-1)
-                var_a = np.exp(logvar).mean(axis=0)
+                mean, logvar = np.split(output, 2, axis=-1)
+                var_a = np.exp(logvar)
             else:
-                pred_ = output
-                var_a = np.zeros_like(pred_.mean(axis=0))
+                mean = output
+                var_a = np.zeros_like(mean)
 
-            var_e = np.var(pred_, axis=0, ddof=ddof)
-            mean = pred_.mean(axis=0)
+        var_e = np.var(mean, axis=0, ddof=ddof)
+        var_a = var_a.mean(axis=0)
+        mean = mean.mean(axis=0)
 
     UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
     return mean, UQ
@@ -1093,17 +1099,20 @@ def Ensemble_based_inference(
 
             # Use custom parser if available, else fallback
             if uq_parser is not None:
+                if type_output == "MC_Dropout":
+                    type_output="PNN"
                 mean_batch, var_a_batch, var_e_batch = uq_parser(output, type_output)
             else:
                 if type_output == "PNN":
-                    pred_, logvar = np.split(output, 2, axis=-1)
-                    var_a_batch = np.exp(logvar).mean(axis=0)
+                    mean_batch, logvar = np.split(output, 2, axis=-1)
+                    var_a_batch = np.exp(logvar)
                 else:
-                    pred_ = output
-                    var_a_batch = np.zeros_like(pred_.mean(axis=0))
+                    mean_batch = output
+                    var_a_batch = np.zeros_like(mean_batch)
 
-                var_e_batch = np.var(pred_, axis=0, ddof=ddof)
-                mean_batch = pred_.mean(axis=0)
+            var_e_batch = np.var(mean_batch, axis=0, ddof=ddof)
+            var_a_batch = var_a_batch.mean(axis=0)
+            mean_batch = mean_batch.mean(axis=0)
 
             pred.append(mean_batch)
             var_a.append(var_a_batch)
@@ -1121,18 +1130,23 @@ def Ensemble_based_inference(
         output = np.array(output)
 
         # Use custom parser if available, else fallback
+        print('connard')
         if uq_parser is not None:
+            if type_output == "MC_Dropout":
+                type_output="PNN"
             mean, var_a, var_e = uq_parser(output, type_output)
+
         else:
             if type_output == "PNN":
-                pred_, logvar = np.split(output, 2, axis=-1)
-                var_a = np.exp(logvar).mean(axis=0)
+                mean, logvar = np.split(output, 2, axis=-1)
+                var_a = np.exp(logvar)
             else:
-                pred_ = output
-                var_a = np.zeros_like(pred_.mean(axis=0))
+                mean = output
+                var_a = np.zeros_like(mean)
 
-            var_e = np.var(pred_, axis=0, ddof=ddof)
-            mean = pred_.mean(axis=0)
+        var_a = var_a.mean(axis=0)
+        var_e = np.var(mean, axis=0, ddof=ddof)
+        mean = mean.mean(axis=0)
 
     UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
     return mean, UQ

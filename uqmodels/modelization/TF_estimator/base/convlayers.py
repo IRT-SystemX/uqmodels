@@ -4,7 +4,7 @@ from tensorflow.keras import backend as K
 
 from uqmodels.modelization.DL_estimator.utils import set_global_determinism
 from uqmodels.utils import add_random_state, generate_random_state, get_fold_nstep
-from uqmodels.modelization.TF_estimator.base.layers import ProbabilisticProcessing, EDLProcessing
+from uqmodels.modelization.TF_estimator.base.layers import ProbProcessingLayers, EDLProcessingLayers
 
 
 @tf.keras.utils.register_keras_serializable(package="UQModels_layers")
@@ -410,9 +410,9 @@ class CNNDecoder(layers.Layer):
         # Post-traitements probabilistes
         self.post_prob = None
         if self.type_output in ["Variational","MC_Dropout", "Deep_ensemble"]:
-            self.post_prob = ProbabilisticProcessing(self.min_logvar)
+            self.post_prob = ProbProcessingLayers(self.min_logvar)
         elif self.type_output == "EDL":
-            self.post_prob = EDLProcessing(self.min_logvar)
+            self.post_prob = EDLProcessingLayers(self.min_logvar)
 
         # Reshape final vers (B, size_subseq_dec, dim_space * dim_chan_out)
         self.final_reshape = layers.Lambda(

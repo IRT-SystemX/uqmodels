@@ -401,18 +401,17 @@ def compute_metrics_on_dataloader(storing,
 
             
     #Collect Target and Context from data loader
+    list_y = []
+    list_context = []
     for ABdata,ABcontext,ABmetadata in ABloader:
         context = stack_iterable_output(ABcontext)
-
-        list_y = []
-        list_output = []
-        list_context = []
         X,y = ABdata
         list_y.append(y)
         #Depreciated model prediction should be done by inference function 
         #for componant_name in list_component_to_compute_output:
         #    component = api.get_component(storing,trainset_name,component_name)
         #    dict_output[component_name].append(component.predict(X))
+        #dict_output[componant_name] = stack_iterable_output(dict_output[component_name])
 
         if(ABcontext is not None):
             list_context.append(ABcontext)
@@ -424,11 +423,7 @@ def compute_metrics_on_dataloader(storing,
     else:
         context=None
 
-    for componant_name in list_component_to_compute_output:
-        dict_output[componant_name] = stack_iterable_output(dict_output[component_name])
     # Use it for comppute metrics
-
-
     #For each component get_output or run model, Compute metrics, Store metrics.
     for component_name in list_component_name:
         if(verbose>0):

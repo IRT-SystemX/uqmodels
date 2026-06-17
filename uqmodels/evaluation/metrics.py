@@ -92,6 +92,7 @@ class Generic_metric(Encapsulated_metrics):
 
         if self.list_ctx_constraint is not None:
             ctx_mask = build_ctx_mask(context, self.list_ctx_constraint)
+        
         for set_ in sets:
             if self.list_ctx_constraint is not None:
                 set_ = set_ & ctx_mask

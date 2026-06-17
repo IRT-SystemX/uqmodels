@@ -894,7 +894,7 @@ def plot_grid_mean_std(
 
             # --- NOUVEAU : meta labels sur axes ---
             if j == 0 and meta_row_headers is not None:
-                ax.set_ylabel(str(meta_row_headers[i]), fontsize=axis_label_fontsize, labelpad=axis_label_pad)
+                ax.set_ylabel(str(meta_row_headers[i]), fontsize=axis_label_fontsize, labelpad=axis_label_pad+2,rotation=80)
             if i == 0 and meta_col_headers is not None:
                 ax.set_xlabel(str(meta_col_headers[j]), fontsize=axis_label_fontsize, labelpad=axis_label_pad)
                 ax.xaxis.set_label_position('top') 

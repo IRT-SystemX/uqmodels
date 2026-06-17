@@ -13,14 +13,14 @@ def _double_conv(x, nf, name):
 
 
 def build_unet_vae_encoder(
-    in_shape: tuple[int, int, int], latent_dim: int, base_filters: int = 32, depth: int = 4,mode_vae=True
+    shape_in: tuple[int, int, int], dim_z: int, base_filters: int = 32, depth: int = 4,mode_vae=True
 ) -> tf.keras.Model:
     """
     Encoder U-Net (2D):
       - retourne (z_mean, z_log_var, z, skips)
       - 'skips' = liste de tensors des features descendantes (pour la remontée)
     """
-    inp = Input(shape=in_shape, name="unet_enc_input")
+    inp = Input(shape=shape_in, name="unet_enc_input")
     x = inp
     skips = []
     nf = base_filters
@@ -39,11 +39,11 @@ def build_unet_vae_encoder(
     x_flat = layers.Flatten(name="bottleneck_flat")(x)
     
     if(mode_vae==True):
-        z_mean = layers.Dense(latent_dim, name="z_mean")(x_flat)
-        z_log_var = layers.Dense(latent_dim, name="z_log_var")(x_flat)
+        z_mean = layers.Dense(dim_z, name="z_mean")(x_flat)
+        z_log_var = layers.Dense(dim_z, name="z_log_var")(x_flat)
         output = [z_mean, z_log_var]
     else:
-        z_mean = layers.Dense(latent_dim, name="z_mean")(x_flat)
+        z_mean = layers.Dense(dim_z, name="z_mean")(x_flat)
         output = [z_mean]
 
     # On renvoie aussi la shape spatiale du bottleneck pour reshape côté decoder
@@ -55,7 +55,7 @@ def build_unet_vae_encoder(
 
 
 def build_unet_vae_decoder(
-    out_shape: tuple[int, int, int], latent_dim: int, base_filters: int = 32, depth: int = 4
+    out_shape: tuple[int, int, int], dim_z: int, base_filters: int = 32, depth: int = 4
 ) -> tf.keras.Model:
     """
     Decoder U-Net (2D):
@@ -63,7 +63,7 @@ def build_unet_vae_decoder(
       - reconstruit l'image (B, H, W, C)
     """
     # Entrées: z + une entrée par skip
-    z_in = Input(shape=(latent_dim,), name="z_in")
+    z_in = Input(shape=(dim_z,), name="z_in")
     skip_ins = [Input(shape=None, name=f"skip_in_{i}") for i in range(depth)]  # shapes dynamiques → None
 
     # On a besoin de connaître la taille spatiale du bottleneck avant flatten.
@@ -88,15 +88,15 @@ def build_unet_vae_decoder(
     return Model([z_in] + skip_ins, out, name="unet_decoder")
 
 class UNetAE(BaseAutoencoder):
-    def __init__(self, seq_len,input_dim, latent_dim, base_filters=32, depth=4, name="unet_ae"):
-        in_shape = (seq_len,input_dim)
+    def __init__(self, seq_len,input_dim, dim_z, base_filters=32, depth=4, name="unet_ae"):
+        shape_in = (seq_len,input_dim)
         super().__init__(name=name)
-        self.encoder = build_unet_vae_encoder(in_shape, latent_dim, base_filters, depth,mode_vae=False)
-        self.decoder = build_unet_vae_decoder(in_shape, latent_dim, base_filters, depth)
+        self.encoder = build_unet_vae_encoder(shape_in, dim_z, base_filters, depth,mode_vae=False)
+        self.decoder = build_unet_vae_decoder(shape_in, dim_z, base_filters, depth)
 
 class UNetVAE(BaseVariationalAutoencoder):
-    def __init__(self, seq_len,input_dim, latent_dim, base_filters=32, depth=4, kl_weight=1.0, name="unet_vae"):
-        in_shape = (seq_len,input_dim)
+    def __init__(self, seq_len,input_dim, dim_z, base_filters=32, depth=4, kl_weight=1.0, name="unet_vae"):
+        shape_in = (seq_len,input_dim)
         super().__init__(kl_weight=kl_weight, name=name)
-        self.encoder = build_unet_vae_encoder(in_shape, latent_dim, base_filters, depth,mode_vae=False)
-        self.decoder = build_unet_vae_decoder(in_shape, latent_dim, base_filters, depth)
+        self.encoder = build_unet_vae_encoder(shape_in, dim_z, base_filters, depth,mode_vae=False)
+        self.decoder = build_unet_vae_decoder(shape_in, dim_z, base_filters, depth)

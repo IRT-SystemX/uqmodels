@@ -138,7 +138,8 @@ class BaseAutoencoder(BaseKModel):
         return self.decoder(z, **kwargs)
 
     def predict(self, x, **kwargs):
-        return self.decode(self.encode(x, **kwargs), **kwargs)
+        output = self.decode(self.encode(x, **kwargs), **kwargs)
+        return output.numpy()
 
     def summary(self, print_fn=print):
         print_fn("\nEncoder:")

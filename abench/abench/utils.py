@@ -4,7 +4,7 @@ import itertools
 import re
 from fnmatch import fnmatch
 from collections.abc import Iterable
-from typing import Callable, List, Optional, Union, Sequence
+from typing import Any, Callable, List, Optional, Union, Sequence
 
 def extend_list_unique(list_old, lis_new):
     for elem in lis_new:
@@ -100,6 +100,9 @@ def apply_mask_along_dim(
     """
     arr = np.asarray(array)
 
+    if(mask is None):
+        return(arr)
+
     # Bring dim_mask to front (axis 0)
     arr_moved = np.moveaxis(arr, dim_mask, 0)
 
@@ -182,39 +185,52 @@ def apply_mask(arr, mask):
 
 def stack_iterable_output(batch_iterable, stack_fn=np.concatenate):
     """
-    Takes an iterable of tuples (e.g., (X, y, context)), and stacks the elements by position.
-    
-    Args:
-        batch_iterable: iterable of tuples of equal length
-        stack_fn: function to stack each field, e.g., np.stack, torch.stack, tf.stack
+    Stack an iterable of outputs.
 
-    Returns:
-        tuple of stacked outputs (e.g., stacked_X, stacked_y, stacked_context)
+    Supported cases
+    ---------------
+    np.ndarray:
+        Returned as-is.
+
+    list with one element:
+        Unpacked.
+
+    iterable of tuples:
+        Stack elements by position.
+
+    iterable of dictionaries:
+        Recursively aggregate dictionaries with identical structure.
     """
-    if(type(batch_iterable) in [np.array,np.ndarray]):
-        return(batch_iterable)
-    elif (type(batch_iterable) is list) & (len(batch_iterable)==1):
-        return(batch_iterable[0])
-    else:
-        items = list(batch_iterable)
-        
-        if not items:
-            raise ValueError("Input iterable is empty")
+    if isinstance(batch_iterable, np.ndarray):
+        return batch_iterable
+    
+    if isinstance(batch_iterable,pd.core.frame.DataFrame):
+        return batch_iterable
 
-        # Transpose list of tuples into tuple of lists
-        stack_output = [list(i) for i in list(zip(*items))]
-        for i in range(len(stack_output)):
+    items = list(batch_iterable)
+
+    if not items:
+        raise ValueError("Input iterable is empty")
+
+    if len(items) == 1:
+        return items[0]
+
+    if all(isinstance(x, dict) for x in items):
+        return aggregate_dicts(items, stack_fn=stack_fn)
+
+    grouped = [list(values) for values in zip(*items)]
+
+    out = []
+    for values in grouped:
+        try:
+            out.append(stack_fn(values, axis=0))
+        except TypeError:
             try:
-                stack_output[i] = stack_fn(stack_output[i], axis=0)
-            except:
-                try:
-                    stack_output[i] = stack_fn(stack_output[i])
-                except:
-                    None
-        # Apply stacking function to each group
-            if(len(stack_output)==1):
-                stack_output = stack_output[0]
-        return stack_output
+                out.append(stack_fn(values))
+            except Exception:
+                out.append(values)
+
+    return out[0] if len(out) == 1 else tuple(out)
 
 def build_ctx_mask(context: np.ndarray, list_ctx_constraint):
     """
@@ -431,3 +447,140 @@ def build_sets(context,
         list_pairs.append(block_infos)
 
     return list_sets, list_pairs
+
+# ----------- Fonction d'aggrégation de dictionnaires -------- # 
+
+def assert_same_structure(items: list[dict[str, Any]]) -> None:
+    """
+    Check that all dictionaries have the same recursive structure.
+
+    Leaves must be numpy arrays. Nested dictionaries are supported.
+
+    Raises
+    ------
+    ValueError
+        If structures differ.
+    TypeError
+        If unsupported leaf types are found.
+    """
+    if not items:
+        raise ValueError("Cannot validate an empty list.")
+
+    def _check(ref: Any, obj: Any, path: str = "") -> None:
+        if isinstance(ref, dict):
+            if not isinstance(obj, dict):
+                raise TypeError(f"Structure mismatch at '{path}': expected dict.")
+
+            if set(ref.keys()) != set(obj.keys()):
+                missing = set(ref.keys()) - set(obj.keys())
+                extra = set(obj.keys()) - set(ref.keys())
+                raise ValueError(
+                    f"Key mismatch at '{path}': missing={missing}, extra={extra}"
+                )
+
+            for key in ref:
+                next_path = f"{path}.{key}" if path else key
+                _check(ref[key], obj[key], next_path)
+
+        elif isinstance(ref, np.ndarray):
+            if not isinstance(obj, np.ndarray):
+                raise TypeError(
+                    f"Structure mismatch at '{path}': expected np.ndarray, "
+                    f"got {type(obj)}."
+                )
+
+            if ref.ndim != obj.ndim:
+                raise ValueError(
+                    f"Dimension mismatch at '{path}': "
+                    f"expected ndim={ref.ndim}, got ndim={obj.ndim}."
+                )
+
+            if ref.shape[1:] != obj.shape[1:]:
+                raise ValueError(
+                    f"Shape mismatch at '{path}': "
+                    f"expected trailing shape {ref.shape[1:]}, "
+                    f"got {obj.shape[1:]}."
+                )
+
+        else:
+            raise TypeError(
+                f"Unsupported type at '{path}': {type(ref)}. "
+                "Expected dict or np.ndarray."
+            )
+
+    ref = items[0]
+    for i, obj in enumerate(items[1:], start=1):
+        _check(ref, obj, path=f"item[{i}]")
+
+def aggregate_dicts(items: list[dict[str, Any]]) -> dict[str, Any]:
+    """
+    Recursively aggregate a list of dictionaries containing numpy arrays.
+
+    Arrays are concatenated along axis 0.
+
+    Parameters
+    ----------
+    items : list[dict[str, Any]]
+        List of dictionaries with identical recursive structure.
+
+    Returns
+    -------
+    dict[str, Any]
+        Aggregated dictionary.
+    """
+    assert_same_structure(items)
+
+    def _aggregate(values: list[Any]) -> Any:
+        first = values[0]
+
+        if isinstance(first, dict):
+            return {
+                key: _aggregate([v[key] for v in values])
+                for key in first
+            }
+
+        if isinstance(first, np.ndarray):
+            return np.concatenate(values, axis=0)
+
+        raise TypeError(f"Unsupported leaf type: {type(first)}")
+
+    return _aggregate(items)
+
+# ------------ # 
+
+def stack_iterable_output_old(batch_iterable, stack_fn=np.concatenate):
+    """
+    Takes an iterable of tuples (e.g., (X, y, context)), and stacks the elements by position.
+    
+    Args:
+        batch_iterable: iterable of tuples of equal length
+        stack_fn: function to stack each field, e.g., np.stack, torch.stack, tf.stack
+
+    Returns:
+        tuple of stacked outputs (e.g., stacked_X, stacked_y, stacked_context)
+    """
+    if(type(batch_iterable) in [np.array,np.ndarray]):
+        return(batch_iterable)
+    
+    elif (type(batch_iterable) is list) & (len(batch_iterable)==1):
+        return(batch_iterable[0])
+    else:
+        items = list(batch_iterable)
+        
+        if not items:
+            raise ValueError("Input iterable is empty")
+
+        # Transpose list of tuples into tuple of lists
+        stack_output = [list(i) for i in list(zip(*items))]
+        for i in range(len(stack_output)):
+            try:
+                stack_output[i] = stack_fn(stack_output[i], axis=0)
+            except:
+                try:
+                    stack_output[i] = stack_fn(stack_output[i])
+                except:
+                    None
+        # Apply stacking function to each group
+            if(len(stack_output)==1):
+                stack_output = stack_output[0]
+        return stack_output

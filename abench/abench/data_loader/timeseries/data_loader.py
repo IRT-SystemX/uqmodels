@@ -20,6 +20,147 @@ def is_scaler_class(obj):
 def is_scaler_TemporalFeatureScaler(obj):
     return isinstance(obj, TemporalFeatureScaler) and not isinstance(obj, type)
 
+def make_sequence_filter_cfg(
+    segment_id_col: str | None = None,
+    mode: str = "same_id_xy",
+    enabled: bool = True,
+) -> dict | None:
+    """
+    Build a sequence-window filtering configuration.
+
+    Parameters
+    ----------
+    segment_id_col : str | None
+        Column identifying independent sequence segments.
+        If None, no filtering configuration is produced.
+
+    mode : {"same_id_x", "same_id_xy"}
+        Filtering strategy:
+        - "same_id_x": all X timesteps must belong to the same segment.
+        - "same_id_xy": all X and Y timesteps must belong to the same segment.
+
+    enabled : bool
+        If False, returns None to preserve the default behavior.
+
+    Returns
+    -------
+    dict | None
+        Sequence filtering configuration compatible with extract_sequence_dataset.
+    """
+    if not enabled or segment_id_col is None:
+        return None
+
+    allowed_modes = {"same_id_x", "same_id_xy"}
+    if mode not in allowed_modes:
+        raise ValueError(
+            f"Invalid sequence filtering mode: {mode}. "
+            f"Expected one of {sorted(allowed_modes)}."
+        )
+
+    return {
+        "segment_id_col": segment_id_col,
+        "mode": mode,
+    }
+
+def build_sequence_index_matrices(
+    df: pd.DataFrame,
+    window_size: int,
+    horizon_start: int,
+    prediction_number: int,
+    y_step: int,
+    sample_stride: int,
+    sequence_filter_cfg: dict | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """
+    Build vectorized X/Y index matrices for sliding-window extraction.
+
+    If `sequence_filter_cfg["segment_id_col"]` is provided, starts are generated
+    independently within each contiguous segment. Otherwise, a global regular
+    grid is used.
+
+    Returns
+    -------
+    x_idx : np.ndarray
+        Shape (n_windows, window_size).
+    y_idx : np.ndarray
+        Shape (n_windows, prediction_number).
+    """
+    n_rows = len(df)
+
+    if n_rows == 0:
+        return (
+            np.empty((0, window_size), dtype=int),
+            np.empty((0, prediction_number), dtype=int),
+        )
+
+    last_required_offset = max(
+        window_size - 1,
+        horizon_start + (prediction_number - 1) * y_step,
+    )
+
+    max_start = n_rows - last_required_offset - 1
+
+    if max_start < 0:
+        return (
+            np.empty((0, window_size), dtype=int),
+            np.empty((0, prediction_number), dtype=int),
+        )
+
+    segment_id_col = (
+        None
+        if sequence_filter_cfg is None
+        else sequence_filter_cfg.get("segment_id_col", None)
+    )
+
+    if segment_id_col is None:
+        starts = np.arange(0, max_start + 1, sample_stride, dtype=int)
+
+    else:
+        if segment_id_col not in df.columns:
+            raise KeyError(f"Missing segment id column: {segment_id_col}")
+
+        segment_ids = df[segment_id_col].to_numpy()
+
+        is_start = np.empty(n_rows, dtype=bool)
+        is_start[0] = True
+        is_start[1:] = segment_ids[1:] != segment_ids[:-1]
+
+        seg_starts = np.flatnonzero(is_start)
+        seg_ends = np.r_[seg_starts[1:], n_rows]
+
+        starts_parts = [
+            seg_start + np.arange(
+                0,
+                seg_end - seg_start - last_required_offset,
+                sample_stride,
+                dtype=int,
+            )
+            for seg_start, seg_end in zip(seg_starts, seg_ends)
+            if seg_end - seg_start > last_required_offset
+        ]
+
+        starts = (
+            np.concatenate(starts_parts)
+            if starts_parts
+            else np.empty(0, dtype=int)
+        )
+
+    if len(starts) == 0:
+        return (
+            np.empty((0, window_size), dtype=int),
+            np.empty((0, prediction_number), dtype=int),
+        )
+
+    x_offsets = np.arange(window_size)
+    y_offsets = horizon_start + np.arange(prediction_number) * y_step
+
+    x_idx = starts[:, None] + x_offsets[None, :]
+    y_idx = starts[:, None] + y_offsets[None, :]
+
+    # Defensive bounds mask.
+    valid_bounds = (x_idx[:, -1] < n_rows) & (y_idx[:, -1] < n_rows)
+
+    return x_idx[valid_bounds], y_idx[valid_bounds]
 
 def extract_sequence_dataset(
     df: pd.DataFrame,
@@ -35,7 +176,8 @@ def extract_sequence_dataset(
     seed: int = 0,
     drop_frac: float = 0.0,
     sampling_cfg: dict | None = None,
-    feature_engineering: object | None = None):
+    feature_engineering: object | None = None,
+    sequence_filter_cfg: dict | None = None):
     """
     Build supervised time-series samples ``(X, y, Context)`` from a DataFrame.
 
@@ -67,8 +209,8 @@ def extract_sequence_dataset(
         Random seed controlling both the initial sampling offset and
         the optional dropping phase.
     drop_frac : float, default 0.0
-        Fraction (0 ≤ *drop_frac* < 1) of generated samples to discard
-        uniformly at random *after* sequence extraction.
+        Fraction (0 ≤ drop_frac < 1) of valid candidate windows to discard
+        uniformly at random after consistency filtering and before tensor extraction.
     feature_engineering : None | Callable | Sequence[Callable] | dict, optional
         Optional feature-engineering step applied on the raw dataframe **before**
         sampling and sequence extraction.
@@ -132,6 +274,7 @@ def extract_sequence_dataset(
     # -------- deterministic sub-sampling ----------------------------------
     df_sampled = _apply_sampling(df, seed=seed, sampling=sampling, sampling_cfg=sampling_cfg)
     
+
     # -------- sanity check: required columns exist ------------------------
     def _missing(cols):
         return [c for c in (cols or []) if c not in df_sampled.columns]
@@ -145,8 +288,6 @@ def extract_sequence_dataset(
             f"missing_x={missing_x}, missing_y={missing_y}, missing_context={missing_c}"
             )
     
-    
-    
     # -------- convert to NumPy --------------------------------------------
     x_data = df_sampled[x_features]
 
@@ -159,60 +300,103 @@ def extract_sequence_dataset(
         if context_features is not None
         else None
     )
-    if(window_size==1):
-        return x_data[:,None,:], y_data[:,None,:], context_data[:,None,:]
+
+    # -------- build vectorized index matrices ------------------------------
+    x_idx, y_idx = build_sequence_index_matrices(
+        df=df_sampled,
+        window_size=window_size,
+        horizon_start=horizon_start,
+        prediction_number=prediction_number,
+        y_step=y_step,
+        sample_stride=sample_stride,
+        sequence_filter_cfg=sequence_filter_cfg)
 
 
-    # -------- minimal length required for one sequence --------------------
-    min_size = (
-        window_size                        # history
-        + (horizon_start - window_size)    # gap (may be 0)
-        + (prediction_number - 1) * y_step # last forecast offset
-    )
-    max_start = len(df_sampled) - min_size
-    if max_start <= 0:
-        # too few rows → return empty tensors of the right shape
+    # -------- sequence consistency mask ------------------------------------
+    masking_func = build_sequence_window_masker(
+        df_sampled,
+        sequence_filter_cfg=sequence_filter_cfg)
+
+    valid_sequence_mask = masking_func(x_idx, y_idx)
+
+    x_idx = x_idx[valid_sequence_mask]
+    y_idx = y_idx[valid_sequence_mask]
+
+    # -------- random window drop on indices --------------------------------
+    if 0.0 < drop_frac < 1.0 and len(x_idx):
+        rng = np.random.RandomState(seed)
+        keep_n = int(np.round(len(x_idx) * (1.0 - drop_frac)))
+        keep_idx = rng.choice(len(x_idx), keep_n, replace=False)
+
+        x_idx = x_idx[keep_idx]
+        y_idx = y_idx[keep_idx]
+
+    # -------- empty output guard -------------------------------------------
+    if len(x_idx) == 0:
+        print('Warning sequence length is 0')
         return (
-            np.empty((0, window_size, len(x_features))),
+            np.empty((0, window_size, x_data.shape[-1])),
             np.empty((0, prediction_number, len(y_features))),
-            np.empty(
-                (0, prediction_number, len(context_features or []))
-            ),
+            np.empty((0, prediction_number, len(context_features or []))),
         )
 
-    # -------- build index lists -------------------------------------------
-    X_list, Y_list, C_list = [], [], []
-    for i in range(0, max_start + 1, sample_stride):
-        x_idx = np.arange(i, i + window_size)
-        y_idx = np.arange(
-            i + horizon_start,
-            i + horizon_start + prediction_number * y_step,
-            y_step,
-        )
-        # bounds check
-        if x_idx[-1] < len(df_sampled) and y_idx[-1] < len(df_sampled):
-            X_list.append(x_data[x_idx])
-            Y_list.append(y_data[y_idx])
-            if context_features is not None:
-                C_list.append(context_data[y_idx])
+    # -------- vectorized extraction -> Stacking ----------------------------------------
+    X = x_data[x_idx]
+    Y = y_data[y_idx]
 
-    # -------- stack into arrays -------------------------------------------
-    X = np.stack(X_list)
-    Y = np.stack(Y_list)
     Context = (
-        np.stack(C_list)
+        context_data[y_idx]
         if context_features is not None
         else np.empty((len(X), prediction_number, 0))
-    )
-
-    # -------- random drop (optional, deterministic) -----------------------
-    if 0.0 < drop_frac < 1.0 and len(X):
-        rng = np.random.RandomState(seed)
-        keep_n = int(np.round(len(X) * (1.0 - drop_frac)))
-        keep_idx = rng.choice(len(X), keep_n, replace=False)
-        X, Y, Context = X[keep_idx], Y[keep_idx], Context[keep_idx]
-
+)
     return X, Y, Context
+
+def build_sequence_window_masker(
+    df: pd.DataFrame,
+    sequence_filter_cfg: dict | None = None):
+    """
+    Build a vectorized and memory-efficient window-level mask function.
+    """
+    if sequence_filter_cfg is None:
+        return lambda x_idx, y_idx: np.ones(len(x_idx), dtype=bool)
+
+    if not isinstance(sequence_filter_cfg, dict):
+        raise TypeError("sequence_filter_cfg must be None or a dict.")
+
+    segment_id_col = sequence_filter_cfg.get("segment_id_col", None)
+    mode = sequence_filter_cfg.get("mode", "same_id_xy")
+
+    if segment_id_col is None:
+        return lambda x_idx, y_idx: np.ones(len(x_idx), dtype=bool)
+
+    if segment_id_col not in df.columns:
+        raise KeyError(f"Missing segment id column: {segment_id_col}")
+
+    allowed_modes = {"same_id_x", "same_id_xy"}
+    if mode not in allowed_modes:
+        raise ValueError(
+            f"Unknown sequence filtering mode: {mode}. "
+            f"Expected one of {sorted(allowed_modes)}."
+        )
+
+    segment_ids = df[segment_id_col].to_numpy()
+
+    boundary = np.empty(len(segment_ids), dtype=bool)
+    boundary[0] = False
+    boundary[1:] = segment_ids[1:] != segment_ids[:-1]
+
+    def masking_func(x_idx: np.ndarray, y_idx: np.ndarray) -> np.ndarray:
+        valid_x = ~boundary[x_idx[:, 1:]].any(axis=1)
+
+        if mode == "same_id_x":
+            return valid_x
+
+        valid_y = ~boundary[y_idx[:, 1:]].any(axis=1)
+        same_xy = segment_ids[x_idx[:, 0]] == segment_ids[y_idx[:, 0]]
+
+        return valid_x & valid_y & same_xy
+
+    return masking_func
 
 class ABLoaderFromSequenceFolder(ABLoader):
     def __init__(self, 
@@ -242,7 +426,8 @@ class ABLoaderFromSequenceFolder(ABLoader):
                  dir_cache=None,
                  cache_tag=None,
                  sampling_cfg=None,
-                 feature_engineering=None):
+                 feature_engineering=None,
+                 sequence_filter_cfg=None):
         """
         Initializes a data loader for time series sequences stored in CSV files within a folder structure.
         This loader supports windowing, feature scaling, future target prediction, contextual features,
@@ -338,6 +523,7 @@ class ABLoaderFromSequenceFolder(ABLoader):
         self.cache_tag = cache_tag
         self.sampling_cfg = sampling_cfg
         self.feature_engineering = feature_engineering
+        self.sequence_filter_cfg = sequence_filter_cfg
 
         self.dict_chunk_info = compute_chunk_info(window_size = self.w_size,
                                                   horizon_start = horizon_start,
@@ -423,6 +609,8 @@ class ABLoaderFromSequenceFolder(ABLoader):
                                                 y_features=self.y_features,
                                                 context_features=self.context_features,
                                                 sampling_cfg=self.sampling_cfg,
+                                                feature_engineering=getattr(self, "feature_engineering", None),
+                                                sequence_filter_cfg=getattr(self, "sequence_filter_cfg", None),
                                                 drop_frac=drop_frac)
         return(X_,Y_,Context_)
         
@@ -581,7 +769,20 @@ class ABLoaderFromSequenceFolder(ABLoader):
         payload = {
             "paths": self._paths_from_chunk_dataframe(),
             "feature_engineering": fe_fingerprint,
-        }
+            "windowing": {
+                "w_size": self.w_size,
+                "sampling": self.sampling,
+                "sample_stride": self.sample_stride,
+                "horizon_start": self.horizon_start,
+                "prediction_number": self.prediction_number,
+                "y_step": self.y_step,
+                "x_features": self.x_features,
+                "y_features": self.y_features,
+                "context_features": self.context_features,
+                "sampling_cfg": getattr(self, "sampling_cfg", None),
+                "sequence_filter_cfg": getattr(self, "sequence_filter_cfg", None),
+},
+                }
         return self._stable_hash(payload)
 
     def _base_cache(self):
@@ -704,3 +905,7 @@ class ABLosoDataExperiment(ABCVDataExperiment):
             stacklevel=2
         )
         super().__init__(*args, **kwargs)
+
+
+# --------------- Fonction d'API Configuration ---------
+        
