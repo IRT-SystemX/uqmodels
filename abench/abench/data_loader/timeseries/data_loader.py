@@ -875,7 +875,7 @@ class ABCVDataExperiment(ABDataExperiment):
             for name_valid_setup, dict_config in validation_config.items():
                 #Other validation set
                 ABloader_dict_params_cur = deepcopy(ABloader_dict_params)
-                ABloader_dict_params_cur['name'] = ABloader_dict_params_cur['name']+'_Valid_LOSO_'+subject+"_"+name_valid_setup
+                ABloader_dict_params_cur['name'] = ABloader_dict_params_cur['name']+'_Valid_LOSO_'+name_valid_setup+"_"+subject
                 ABloader_dict_params_cur['constraint_selection_list'].append((depth_name,[subject]))
 
                 constraint_selection_list = ABloader_dict_params_cur['constraint_selection_list']

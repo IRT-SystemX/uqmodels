@@ -1,11 +1,15 @@
 import tensorflow as tf
 import yaml
+import numpy as np
 import os
 import copy
+from collections.abc import Mapping
 from tensorflow import keras
 from uqmodels.modelization.TF_estimator.base.train_config import make_optimizer_default,make_callbacks
 from uqmodels.modelization.TF_estimator.base.loss import build_MSE_loss
 from collections.abc import Mapping
+
+
 
 class BaseKModel(keras.Model):
     """
@@ -79,7 +83,7 @@ class BaseKModel(keras.Model):
         else:
             batch_size =  64
          
-        self.compile_kwargs = {"optimizer": make_optimizer_default(optimizer),
+        self.compile_kwargs = {"optimizer": make_optimizer_default(**optimizer),
                                "loss": loss,
                                "metrics": []}
          
@@ -158,15 +162,18 @@ class BaseKModel(keras.Model):
         return super().fit(X, y, **fit_kwargs)
 
     def build_init_config(self):
-        """Build a YAML-safe config dict from a model skipping any init key starting with '__'."""
-
+        """
+        Build a YAML-safe initialization configuration.
+        """
         if not hasattr(self, "_init_keys"):
-            raise AttributeError("Model must define `_init_keys` in __init__.")
+            raise AttributeError(
+                "Model must define `_init_keys` in __init__."
+            )
 
         init_kwargs = {}
+
         for key in self._init_keys:
 
-            # skip special/internal attributes (e.g. __class__, __foo__)
             if key.startswith("__"):
                 continue
 
@@ -174,21 +181,20 @@ class BaseKModel(keras.Model):
                 continue
 
             value = getattr(self, key)
-            if(isinstance(value, Mapping)):
-                value = dict(value)
-            init_kwargs[key] = value
+            init_kwargs[key] = to_yaml_safe(value)
 
         cfg = {
-        "class_name": self.__class__.__name__,
-        "name": self.name,
-        "init_kwargs": init_kwargs}
+            "class_name": self.__class__.__name__,
+            "name": self.name,
+            "init_kwargs": init_kwargs,
+        }
 
-        # optional hook on the model
         hook = getattr(self, "_extra_init_config", None)
+
         if callable(hook):
             cfg = hook(cfg)
-        return cfg
 
+        return to_yaml_safe(cfg)
 
     def save(self, model_dir: str, **kwargs):
         if not getattr(self, "name", None):
@@ -247,3 +253,35 @@ class BaseKModel(keras.Model):
     def _extra_load(self, model_dir: str) -> None:
         """Hook for subclasses."""
         pass
+
+def to_yaml_safe(value):
+    """
+    Recursively convert objects to YAML-safe native Python types.
+    """
+    if value is None:
+        return None
+
+    if isinstance(value, Mapping):
+        return {
+            str(key): to_yaml_safe(val)
+            for key, val in value.items()
+        }
+
+    if isinstance(value, (list, tuple)):
+        return [
+            to_yaml_safe(item)
+            for item in value
+        ]
+
+    if isinstance(value, np.generic):
+        return value.item()
+
+    if tf.is_tensor(value):
+        return value.numpy().tolist()
+
+    if isinstance(value, (str, int, float, bool)):
+        return value
+
+    raise TypeError(
+        f"Unsupported YAML object type: {type(value).__name__}: {value!r}"
+    )

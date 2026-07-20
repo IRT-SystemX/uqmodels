@@ -16,8 +16,8 @@ from uqmodels.utils import add_random_state, get_fold_nstep
 
 @tf.keras.utils.register_keras_serializable(package="UQModels_layers")
 class EDLProcessing(Layer):
-    def __init__(self, min_logvar=-6, **kwargs):
-        self.min_logvar = min_logvar
+    def __init__(self, logvar_min=-6, **kwargs):
+        self.logvar_min = logvar_min
         super().__init__(**kwargs)
 
     def compute_output_shape(self, input_shape):
@@ -39,7 +39,7 @@ class EDLProcessing(Layer):
         return tf.concat([mu, v, alpha, beta], axis=-1)
 
     def get_config(self):
-        return {"min_logvar": self.min_logvar}
+        return {"logvar_min": self.logvar_min}
 
 
 @tf.keras.utils.register_keras_serializable(package="UQModels_layers")
@@ -50,8 +50,8 @@ class ProbabilisticProcessing(Layer):
         Layer (_type_): _description_
     """
 
-    def __init__(self, min_logvar=-10, max_logvar=10, **kwargs):
-        self.min_logvar = min_logvar
+    def __init__(self, logvar_min=-10, max_logvar=10, **kwargs):
+        self.logvar_min = logvar_min
         self.max_logvar = max_logvar
         super().__init__(**kwargs)
 
@@ -68,14 +68,14 @@ class ProbabilisticProcessing(Layer):
             _type_: _description_
         """
         mu, logsigma = tf.split(x, 2, axis=-1)
-        logsigma = tf.where(logsigma > self.min_logvar, logsigma, self.min_logvar)
+        logsigma = tf.where(logsigma > self.logvar_min, logsigma, self.logvar_min)
 
         logsigma = tf.where(logsigma < self.max_logvar, logsigma, self.max_logvar)
         # logsigma = tf.nn.softplus(logsigma)
         return tf.concat([mu, logsigma], axis=-1)
 
     def get_config(self):
-        return {"min_logvar": self.min_logvar, "max_logvar": self.max_logvar}
+        return {"logvar_min": self.logvar_min, "max_logvar": self.max_logvar}
 
 
 def mlp(
@@ -477,7 +477,7 @@ def cnn_dec(
     dim_chan=1,
     type_output=None,
     k1=10,
-    min_logvar=-6,
+    logvar_min=-6,
     dim_z=100,
     dp=0.01,
     random_state=None,
@@ -491,7 +491,7 @@ def cnn_dec(
         dim_chan (int, optional): _description_. Defaults to 1.
         type_output (_type_, optional): _description_. Defaults to None.
         k1 (int, optional): _description_. Defaults to 10.
-        min_logvar (int, optional): _description_. Defaults to -6.
+        logvar_min (int, optional): _description_. Defaults to -6.
         dim_z (int, optional): _description_. Defaults to 100.
         dp (float, optional): _description_. Defaults to 0.01.
         random_state (_type_, optional): _description_. Defaults to None.
@@ -541,11 +541,11 @@ def cnn_dec(
 
     # Probablistic NN
     if type_output in ["MC_Dropout", "Deep_ensemble"]:
-        output = ProbabilisticProcessing(min_logvar)(output)
+        output = ProbabilisticProcessing(logvar_min)(output)
 
     # aamini/evidential-deep-learning
     elif type_output == "EDL":
-        output = EDLProcessing(min_logvar)(output)
+        output = EDLProcessing(logvar_min)(output)
 
     else:
         pass
@@ -731,7 +731,7 @@ def cnn_dec_bis(
     dim_out,
     dim_chan=1,
     type_output=None,
-    min_logvar=-6,
+    logvar_min=-6,
     list_filters=[64, 64],
     strides=(1, 1),
     list_kernels=[4, 4],
@@ -775,11 +775,11 @@ def cnn_dec_bis(
 
     # Probablistic NN
     if type_output in ["MC_Dropout", "Deep_ensemble"]:
-        output = ProbabilisticProcessing(min_logvar)(output)
+        output = ProbabilisticProcessing(logvar_min)(output)
 
     # aamini/evidential-deep-learning
     elif type_output == "EDL":
-        output = EDLProcessing(min_logvar)(output)
+        output = EDLProcessing(logvar_min)(output)
 
     output = tf.keras.layers.Lambda(
         lambda x: K.reshape(x, (-1, size_subseq_dec, dim_space * dim_chan_out))
@@ -1251,7 +1251,7 @@ def get_cnn_dec_params(dim_target, size_subseq_dec=1, dim_z=50, random_state=Non
         "list_filters": [64, 64],
         "strides": (2, 1),
         "list_kernels": [4, 4],
-        "min_logvar": -10,
+        "logvar_min": -10,
         "random_state": random_state,
     }
 

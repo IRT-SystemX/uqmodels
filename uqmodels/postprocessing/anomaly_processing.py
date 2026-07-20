@@ -1,15 +1,189 @@
 ####################################################################
 # Ensemble of processing aim to process UQmesures into Intermediate quantity or into Anom-KPI
 
-
+from typing import Literal
 import numpy as np
 import scipy
-from sklearn.covariance import EmpiricalCovariance
+from sklearn.covariance import EmpiricalCovariance, LedoitWolf
 
 import uqmodels.postprocessing.UQ_processing as UQ_proc
 from uqmodels.utils import apply_conv
 from uqmodels.transform import apply_axis_transformation
 
+CovarianceMode = Literal[
+    "EmpiricalCovariance",
+    "LedoitWolf",
+    "auto",
+]
+
+
+def _resolve_covariance_mode(
+    n_samples: int,
+    n_features: int,
+    *,
+    mode: CovarianceMode,
+    auto_threshold: float,
+) -> Literal["EmpiricalCovariance", "LedoitWolf"]:
+    """Resolve the covariance estimator used for Mahalanobis scoring."""
+    valid_modes = {
+        "EmpiricalCovariance",
+        "LedoitWolf",
+        "auto",
+    }
+
+    if mode not in valid_modes:
+        raise ValueError(
+            f"Unknown mode {mode!r}. Expected one of {sorted(valid_modes)}."
+        )
+
+    if not 0.0 < auto_threshold:
+        raise ValueError("auto_threshold must be strictly positive.")
+
+    if mode != "auto":
+        return mode
+
+    ratio = n_features / n_samples
+
+    if n_features >= n_samples or ratio >= auto_threshold:
+        return "LedoitWolf"
+
+    return "EmpiricalCovariance"
+
+
+def fit_mahalanobis(
+    z: np.ndarray,
+    *,
+    mode: CovarianceMode = "EmpiricalCovariance",
+    auto_threshold: float = 0.10,
+    assume_centered: bool = False,
+):
+    """
+    Fit a covariance estimator for Mahalanobis scoring.
+
+    Parameters
+    ----------
+    z:
+        Reference embeddings with shape (n_samples, n_features).
+        These data should normally contain nominal samples only.
+    mode:
+        Covariance estimator:
+        - "EmpiricalCovariance";
+        - "LedoitWolf";
+        - "auto".
+    auto_threshold:
+        In auto mode, Ledoit-Wolf is selected when
+        n_features / n_samples >= auto_threshold.
+    assume_centered:
+        Whether the input data are assumed to be centered.
+
+    Returns
+    -------
+    params_:
+        Fitted scikit-learn covariance estimator.
+    """
+
+    n_samples, n_features = z.shape
+
+    if n_samples < 2:
+        raise ValueError("At least two samples are required.")
+
+    selected_mode = _resolve_covariance_mode(
+        n_samples=n_samples,
+        n_features=n_features,
+        mode=mode,
+        auto_threshold=auto_threshold,
+    )
+
+    if selected_mode == "EmpiricalCovariance":
+        params_ = EmpiricalCovariance(
+            assume_centered=assume_centered,
+            store_precision=True,
+        )
+    else:
+        params_ = LedoitWolf(
+            assume_centered=assume_centered,
+            store_precision=True,
+        )
+
+    params_.fit(z)
+
+    # Optional metadata attached to the fitted estimator.
+    params_.requested_mode_ = mode
+    params_.selected_mode_ = selected_mode
+    params_.feature_sample_ratio_ = n_features / n_samples
+    params_.n_reference_samples_ = n_samples
+    params_.n_reference_features_ = n_features
+
+    return params_
+
+
+def compute_mahalanobis(
+    z: np.ndarray,
+    *,
+    params_=None,
+    mode: CovarianceMode = "EmpiricalCovariance",
+    auto_threshold: float = 0.10,
+    assume_centered: bool = False,
+    squared: bool = False,
+) -> tuple[np.ndarray, object]:
+    """
+    Compute Mahalanobis scores.
+
+    When `params_` is None, the covariance estimator is fitted directly
+    on `z`, then the same data are scored.
+
+    Parameters
+    ----------
+    z:
+        Embeddings to score, with shape (n_samples, n_features).
+    params_:
+        Optional fitted estimator returned by `fit_mahalanobis`.
+    mode, auto_threshold, assume_centered:
+        Parameters used only when `params_` is None.
+    squared:
+        Return squared Mahalanobis distances when True.
+
+    Returns
+    -------
+    scores:
+        One anomaly score per sample.
+    params_:
+        Existing or newly fitted covariance estimator.
+    """
+
+    if params_ is None:
+        params_ = fit_mahalanobis(
+            z,
+            mode=mode,
+            auto_threshold=auto_threshold,
+            assume_centered=assume_centered,
+        )
+
+    if not hasattr(params_, "mahalanobis"):
+        raise TypeError(
+            "params_ must be a fitted covariance estimator returned "
+            "by fit_mahalanobis."
+        )
+
+    expected_features = np.asarray(params_.location_).shape[0]
+
+    if z.shape[1] != expected_features:
+        raise ValueError(
+            f"Expected {expected_features} features, "
+            f"received {z.shape[1]}."
+        )
+
+    squared_scores = np.asarray(
+        params_.mahalanobis(z),
+        dtype=float,
+    )
+
+    # Protect against small negative values caused by numerical errors.
+    squared_scores = np.maximum(squared_scores, 0.0)
+
+    scores = squared_scores if squared else np.sqrt(squared_scores)
+
+    return scores, params_
 
 def score_seuil(s, per_seuil=0.995, local=True):
     """Thresholding of extrem values by percentile by dimension if local = True or globally else.
@@ -869,11 +1043,12 @@ def fit_score_fusion(
     score = score_seuil(apply_conv(score, filt), per_seuil, True)
     if type_fusion == "mahalanobis":
         # Mahalanobis pour synthese en score global.
-        cov_estimator = EmpiricalCovariance(assume_centered=True).fit(score)
-        anom_score = cov_estimator.mahalanobis(score)
+        mahalanobis_params_ = fit_mahalanobis(score,mode="EmpiricalCovariance",assume_centered=True)
+        # Compute training aggregated scores.
+        anom_score, _ = compute_mahalanobis(score,params_=mahalanobis_params_,squared=True)
         # Seuillage du score aggrégées
     else:
-        cov_estimator = None
+        mahalanobis_params_ = None
         anom_score = np.abs(score).mean(axis=1)
 
     if fusion_debug:
@@ -885,7 +1060,7 @@ def fit_score_fusion(
         anom_score, ctx_mask, beta, type_norm, empiric_rescale=True, debug=fusion_debug
     )
 
-    return (params_calibrate_, cov_estimator)
+    return (params_calibrate_, mahalanobis_params_)
 
 
 def compute_score_fusion(
@@ -931,7 +1106,7 @@ def compute_score_fusion(
             filt=filt,
         )
 
-    params_calibrate_, cov_estimator = params_
+    params_calibrate_, mahalanobis_params_ = params_
 
     # Middledim reduction
     score = UQ_proc.apply_axis_transformation(score,axis=1,reduc_filter= fusion_reduc_filter)
@@ -943,8 +1118,10 @@ def compute_score_fusion(
         print("Start_compute", (score < -1).mean(), (score > 1).mean())
 
     if type_fusion == "mahalanobis":
-        # Mahalanobis pour synthese en score global.
-        score_agg = cov_estimator.mahalanobis(score)
+        score_agg, _ = compute_mahalanobis(
+                        score,
+                        params_=mahalanobis_params_,
+                        squared=True)
         # Seuillage du score aggrégées
     else:  # type_fusion == "mean":
         score_agg = np.abs(score).mean(axis=1)

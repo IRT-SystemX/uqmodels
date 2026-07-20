@@ -1,5 +1,5 @@
 import numpy as np
-from abench.utils import Extract_dict, concat, extend_list_unique
+from abench.utils import Extract_dict, stack_iterable_output, concat, extend_list_unique
 from abench.store.store import write, read
 from typing import Any, Dict, List, Iterable, Union, Tuple, Any, Optional, Callable, Sequence, Mapping
 from collections import defaultdict
@@ -31,7 +31,6 @@ def filter_experiment_plan(experiment_plan, train_filters=None, test_filters=Non
             result[key] = filtered_values
 
     return result
-
 
 def store_list_id(storing,components_name_list=None,trainset_name_list=None,testset_name_list=None):
     list_to_store = []
@@ -78,7 +77,6 @@ def store_component(storing,trainset_name,component_name,component):
     component.save(storing,keys)
     update_store_list_id(storing,Exp_plan={},components_name_list=[component_name])
     
-
 def get_component(storing,trainset_name,component_name,component_wrapper):
     keys = [trainset_name,component_name,"component"]
     component = component_wrapper.load(storing,keys)
@@ -102,6 +100,7 @@ def get_ABDataExperiment(storing,name):
 
 
 # ABdata
+
 def store_ABloader(storing,set_name,ABloader):
     write(storing, ["src_data", set_name, "ABloader"], ABloader)
 
@@ -117,17 +116,77 @@ def store_output(storing,trainset_name,component_name,set_name,output,time_pred=
     for (keys, values) in list_to_store:
         write(storing, keys, values)
 
-def get_output(storing,component_name,trainset_name,set_name):       
-    try :
-        output = read(storing, [trainset_name,component_name,set_name,'output'])
-    
-    except :
+def get_output(
+    storing,
+    component_name,
+    trainset_name,
+    set_name,
+):
+    """
+    Load component outputs for one or multiple evaluation sets.
+
+    Parameters
+    ----------
+    storing
+        Storage backend.
+
+    component_name : str
+        Component name.
+
+    trainset_name : str
+        Training set name.
+
+    set_name : str | list[str]
+        Evaluation set name or ordered list of set names.
+    """
+    if isinstance(set_name, tuple):
+        set_name = list(set_name)
+
+    print(set_name)
+
+    if isinstance(set_name, list):
+        list_output = []
+
+        for current_set_name in set_name:
+            output = get_output(
+                storing=storing,
+                component_name=component_name,
+                trainset_name=trainset_name,
+                set_name=current_set_name,
+            )
+
+            if output is None:
+                raise ValueError(
+                    f"Missing output for component '{component_name}' "
+                    f"on ({trainset_name}, {current_set_name})."
+                )
+
+            list_output.append(output)
+
+        return stack_iterable_output(list_output)
+
+    try:
+        output = read(
+            storing,
+            [
+                trainset_name,
+                component_name,
+                set_name,
+                "output",
+            ],
+        )
+
+    except Exception:
         output = None
 
     if output is None:
-        print("There is no output of"+str(component_name)+" trained on "+str(trainset_name)+" for testset "+str(set_name))
+        print(
+            f"There is no output of {component_name} "
+            f"trained on {trainset_name} "
+            f"for testset {set_name}"
+        )
 
-    return(output)
+    return output
 
 #Dict_perf
 def store_dictperf(storing,trainset_name=None,component_name=None,set_name=None,agg_name=None,dictperf={}):
@@ -193,65 +252,117 @@ def get_dictperf(storing,trainset_name=None,component_name=None,set_name=None,ag
             raise ValueError(agg_name, 'not in dict_perf keys')
     return(dictperf)
 
-# Perf_agg
+def get_data(storing, set_name=None, keep_X=False):
+    """
+    Load and aggregate dataset content.
 
-def get_data(storing,set_name,keep_X=False):
-    """Load dataset elements from the standardized storage backend.
+    `storing` can be either:
+    - a storage backend;
+    - an ABLoader-compatible object.
 
-        Parameters
-        ----------
-        storing : Any, Storage backend handle.
-        set_name : str,  Dataset namespace to load.
-        keep_X : bool, optional, Whether to return input features.
+    `set_name` can be either:
+    - a string;
+    - a list of strings.
+    """
 
-        Returns
-        -------
-        tuple: `(X, y, context, metadata)` with concatenated tensors/arrays and metadata list.
-        """
-    ABloader = get_ABloader(storing,set_name)
-    List_X,List_y,List_context,List_metadata = [],[],[],[]
-    for (X,y),context,metadata in ABloader:
-        if(keep_X):
-            List_X.append(X)
-        List_y.append(y)
-        List_context.append(context)
-        List_metadata.append(metadata)
-    
-    if(keep_X):
-        List_X = concat(List_X)
-    List_y= concat(List_y)
-    List_context = concat(List_context)
-    return(List_X,List_y,List_context,List_metadata)
+    # Direct ABLoader-like object
+    if hasattr(storing, "__iter__") and hasattr(storing, "get_setname"):
+        ABloader = storing
 
+    else:
+        if set_name is None:
+            raise ValueError(
+                "set_name must be provided when using a storage backend."
+            )
 
-def get_data_and_output(storing,component_name,trainset_name,set_name,keep_X=False):
-    """Load dataset elements and component outputs from the standardized storage backend.
-        ----------
-        storing : Any
-            Storage backend handle.
-        component_name : str
-            Component namespace.
-        trainset_name : str
-            Training dataset namespace.
-        set_name : str
-            Evaluation set namespace.
-        keep_X : bool, optional
-            Whether to return input features.
+        if isinstance(set_name, str):
+            ABloader = get_ABloader(
+                storing=storing,
+                set_name=set_name,
+            )
 
-        Returns
-        -------
-        tuple: `(X, y, output, context, metadata)`.
-        """       
-    output = get_output(storing=storing,
-                        component_name=component_name,
-                        trainset_name=trainset_name,
-                        set_name=set_name)
+        elif isinstance(set_name, list):
+            ABloaders = [
+                get_ABloader(
+                    storing=storing,
+                    set_name=current_set_name,
+                )
+                for current_set_name in set_name
+            ]
 
-    X,y,context,metadata = get_data(storing=storing,
-                                    set_name=set_name,
-                                    keep_X=keep_X)
+            # No need to instantiate ABLoaderAggregate here.
+            # Iteration is directly flattened below.
+            ABloader = (
+                batch
+                for loader in ABloaders
+                for batch in loader
+            )
 
-    return(X,y,output,context,metadata)
+        else:
+            raise TypeError(
+                "set_name must be a string, a list of strings, or None."
+            )
+
+    list_X = []
+    list_y = []
+    list_context = []
+    metadata = {}
+
+    for (X, y), context, batch_metadata in ABloader:
+
+        if keep_X:
+            list_X.append(X)
+
+        list_y.append(y)
+
+        if context is not None:
+            list_context.append(context)
+
+        if batch_metadata is not None:
+            for key, value in batch_metadata.items():
+                metadata.setdefault(key, value)
+
+    X = (
+        stack_iterable_output(list_X)
+        if keep_X and list_X
+        else None
+    )
+
+    y = stack_iterable_output(list_y)
+
+    context = (
+        stack_iterable_output(list_context)
+        if list_context
+        else None
+    )
+
+    return X, y, context, metadata
+
+def get_data_and_output(
+    storing,
+    component_name=None,
+    trainset_name=None,
+    set_name=None,
+    keep_X=False,
+):
+    """
+    Load dataset content and corresponding component outputs.
+    """
+
+    output = get_output(
+        storing=storing,
+        component_name=component_name,
+        trainset_name=trainset_name,
+        set_name=set_name,
+    )
+
+    X, y, context, metadata = get_data(
+        storing=storing,
+        set_name=set_name,
+        keep_X=keep_X,
+    )
+
+    return X, y, output, context, metadata
 
 
 # Extract result from dict_perf

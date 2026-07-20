@@ -1,3 +1,10 @@
+"""
+Dense layers and sub-networks.
+
+Provides reusable dense building blocks and structured MLP sub-networks,
+including output heads and uncertainty-aware output processing.
+"""
+
 import tensorflow as tf
 from tensorflow.keras import layers, regularizers, Model
 from tensorflow.keras import backend as K
@@ -41,8 +48,8 @@ def validate_type_output(type_output: str | None) -> None:
 
 @tf.keras.utils.register_keras_serializable(package="UQModels_layers")
 class EDLProcessingLayers(layers.Layer):
-    def __init__(self, min_logvar=-6, **kwargs):
-        self.min_logvar = min_logvar
+    def __init__(self, logvar_min=-6, **kwargs):
+        self.logvar_min = logvar_min
         super().__init__(**kwargs)
 
     def compute_output_shape(self, input_shape):
@@ -64,7 +71,7 @@ class EDLProcessingLayers(layers.Layer):
         return tf.concat([mu, v, alpha, beta], axis=-1)
 
     def get_config(self):
-        return {"min_logvar": self.min_logvar}
+        return {"logvar_min": self.logvar_min}
 
 
 @tf.keras.utils.register_keras_serializable(package="UQModels_layers")
@@ -75,8 +82,8 @@ class ProbProcessingLayers(layers.Layer):
         Layer (_type_): _description_
     """
 
-    def __init__(self, min_logvar=-10, max_logvar=10, **kwargs):
-        self.min_logvar = min_logvar
+    def __init__(self, logvar_min=-10, max_logvar=10, **kwargs):
+        self.logvar_min = logvar_min
         self.max_logvar = max_logvar
         super().__init__(**kwargs)
 
@@ -93,14 +100,14 @@ class ProbProcessingLayers(layers.Layer):
             _type_: _description_
         """
         mu, logsigma = tf.split(x, 2, axis=-1)
-        logsigma = tf.where(logsigma > self.min_logvar, logsigma, self.min_logvar)
+        logsigma = tf.where(logsigma > self.logvar_min, logsigma, self.logvar_min)
 
         logsigma = tf.where(logsigma < self.max_logvar, logsigma, self.max_logvar)
         # logsigma = tf.nn.softplus(logsigma)
         return tf.concat([mu, logsigma], axis=-1)
 
     def get_config(self):
-        return {"min_logvar": self.min_logvar, "max_logvar": self.max_logvar}
+        return {"logvar_min": self.logvar_min, "max_logvar": self.max_logvar}
 
 # Dense Layers
 
@@ -217,50 +224,41 @@ class DenseHeadBlock(layers.Layer):
     def from_config(cls, config):
         return cls(**config)
 
-def make_cfg_MLPBlock(
-    layers_size: list[int] | tuple[int, ...] = (100, 50),
-    dp: float = 0.01,
-    activation: str | list[str] | tuple[str, ...] | None = "relu",
-    reg_W: tuple[float, float] = (1e-5, 1e-5),
-    mc_dropout: bool = True,
-    random_state: int | None = None,
-    name: str | None = "mlp_block",
-) -> dict:
-    """
-    Build a configuration dictionary for MLPBlock.
+    @staticmethod
+    def make_cfg(
+        dim_out: int | None = 1,
+        type_output: str | None = None,
+        logvar_min: float = -10.0,
+        name: str | None = "dense_head_block",
+    ) -> dict:
+        """
+        Build a configuration dictionary for DenseHeadBlock.
 
-    Parameters
-    ----------
-    layers_size:
-        Hidden layer dimensions.
-    dp:
-        Dropout rate.
-    activation:
-        Dense activation. Can be a string, None, or one activation per layer.
-    reg_W:
-        L1/L2 regularization factors for Dense kernels.
-    mc_dropout:
-        Whether dropout remains active during inference.
-    random_state:
-        Random seed propagated to dropout layers.
-    name:
-        Keras layer name.
+        Parameters
+        ----------
+        dim_out:
+            Output dimension.
+        type_output:
+            Output semantics: None, "variational", "mc_dropout",
+            "deep_ensemble", "edl", or "classif".
+        logvar_min:
+            Lower numerical bound for probabilistic output processing.
+        name:
+            Keras layer name.
 
-    Returns
-    -------
-    dict
-        Configuration dictionary passed to MLPBlock.
-    """
-    return {
-        "layers_size": layers_size,
-        "dp": dp,
-        "activation": activation,
-        "reg_W": reg_W,
-        "mc_dropout": mc_dropout,
-        "random_state": random_state,
-        "name": name,
-    }
+        Returns
+        -------
+        dict
+            Configuration dictionary passed to DenseHeadBlock.
+        """
+        return {
+            "dim_out": dim_out,
+            "type_output": type_output,
+            "logvar_min": logvar_min,
+            "name": name,
+        }
 
+ 
 @tf.keras.utils.register_keras_serializable(package="UQModels")
 class MLPBlock(layers.Layer):
     """
@@ -300,10 +298,10 @@ class MLPBlock(layers.Layer):
 
         reg = regularizers.l1_l2(l1=self.reg_W[0], l2=self.reg_W[1])
 
-        self.layers_stack = []
+        self.layers= []
 
         for idx, dim_layer in enumerate(self.layers_size):
-            self.layers_stack.append(
+            self.layers.append(
                 layers.Dense(
                     units=dim_layer,
                     activation=self._get_activation(idx),
@@ -313,7 +311,7 @@ class MLPBlock(layers.Layer):
             )
 
             if self.dp > 0.0:
-                self.layers_stack.append(
+                self.layers.append(
                     layers.Dropout(
                         rate=self.dp,
                         seed=add_random_state(self.random_state, idx),
@@ -339,7 +337,7 @@ class MLPBlock(layers.Layer):
     def call(self, inputs, training=False):
         x = inputs
 
-        for layer in self.layers_stack:
+        for layer in self.layers:
             if isinstance(layer, layers.Dropout):
                 x = layer(x, training=(training or self.mc_dropout))
             else:
@@ -365,38 +363,58 @@ class MLPBlock(layers.Layer):
     def from_config(cls, config):
         return cls(**config)
 
-def make_cfg_DenseHeadBlock(
-    dim_out: int | None = 1,
-    type_output: str | None = None,
-    logvar_min: float = -10.0,
-    name: str | None = "dense_head_block",
-) -> dict:
-    """
-    Build a configuration dictionary for DenseHeadBlock.
+    @staticmethod
+    def make_config(
+        layers_size: list[int] | tuple[int, ...] = (100, 50),
+        dp: float = 0.01,
+        activation: str | list[str] | tuple[str, ...] | None = "relu",
+        reg_W: tuple[float, float] = (1e-5, 1e-5),
+        mc_dropout: bool = True,
+        random_state: int | None = None,
+        name: str | None = "mlp_block",
+    ) -> dict:
+        """
+        Build a configuration dictionary for MLPBlock.
 
-    Parameters
-    ----------
-    dim_out:
-        Output dimension.
-    type_output:
-        Output semantics: None, "variational", "mc_dropout",
-        "deep_ensemble", "edl", or "classif".
-    logvar_min:
-        Lower numerical bound for probabilistic output processing.
-    name:
-        Keras layer name.
+        Parameters
+        ----------
+        layers_size:
+            Hidden layer dimensions.
+        dp:
+            Dropout rate.
+        activation:
+            Dense activation. Can be a string, None, or one activation per layer.
+        reg_W:
+            L1/L2 regularization factors for Dense kernels.
+        mc_dropout:
+            Whether dropout remains active during inference.
+        random_state:
+            Random seed propagated to dropout layers.
+        name:
+            Keras layer name.
 
-    Returns
-    -------
-    dict
-        Configuration dictionary passed to DenseHeadBlock.
-    """
-    return {
-        "dim_out": dim_out,
-        "type_output": type_output,
-        "logvar_min": logvar_min,
-        "name": name,
-    }
+        Returns
+        -------
+        dict
+            Configuration dictionary passed to MLPBlock.
+        """
+        return {
+            "layers_size": layers_size,
+            "dp": dp,
+            "activation": activation,
+            "reg_W": reg_W,
+            "mc_dropout": mc_dropout,
+            "random_state": random_state,
+            "name": name,
+        }
+
+    @property
+    def dim_out(self) -> int:
+        """
+        Output feature dimension of the last Lstm layer.
+        """
+        return int(self.layers_size[-1])
+
 
 @tf.keras.utils.register_keras_serializable(package="UQModels")
 class MLPSubNet(layers.Layer):
@@ -419,11 +437,10 @@ class MLPSubNet(layers.Layer):
         shape_out: tuple[int, int] | None = None,
         type_output: str | None = None,
         random_state: int | None = None,
-        cfg_MLPBlock: dict | None = None,
-        cfg_DenseHeadBlock: dict | None = None,
+        cfg_backbone: dict | None = None,
+        cfg_head: dict | None = None,
         name: str | None = None,
-        **kwargs,
-    ):
+        **kwargs):
         super().__init__(name=name, **kwargs)
 
         try:
@@ -441,22 +458,22 @@ class MLPSubNet(layers.Layer):
         validate_type_output(self.type_output)
         self._validate_shapes()
 
-        self.cfg_MLPBlock = {} if cfg_MLPBlock is None else dict(cfg_MLPBlock)
+        self.cfg_backbone = {} if cfg_backbone is None else dict(cfg_backbone)
         mc_dropout = False
         if(self.type_output == "mc_dropout"):
             mc_dropout = True
-        self.cfg_MLPBlock.setdefault("mc_dropout", mc_dropout)
-        self.cfg_MLPBlock.setdefault("random_state", self.random_state)
-        self.cfg_MLPBlock.setdefault("name", "mlp_block")
+        self.cfg_backbone.setdefault("mc_dropout", mc_dropout)
+        self.cfg_backbone.setdefault("random_state", self.random_state)
+        self.cfg_backbone.setdefault("name", "mlp_block")
 
-        self.cfg_DenseHeadBlock = (
-            {} if cfg_DenseHeadBlock is None else dict(cfg_DenseHeadBlock))
-        self.cfg_DenseHeadBlock.setdefault("dim_out", self.dim_out)
-        self.cfg_DenseHeadBlock.setdefault("type_output", self.type_output)
-        self.cfg_DenseHeadBlock.setdefault("name", "dense_head_block")
+        self.cfg_head = (
+            {} if cfg_head is None else dict(cfg_head))
+        self.cfg_head.setdefault("dim_out", self.dim_out)
+        self.cfg_head.setdefault("type_output", self.type_output)
+        self.cfg_head.setdefault("name", "dense_head_block")
 
-        self.mlp_block = MLPBlock(**self.cfg_MLPBlock)
-        self.head_block = DenseHeadBlock(**self.cfg_DenseHeadBlock)
+        self.mlp_block = MLPBlock(**self.cfg_backbone)
+        self.head_block = DenseHeadBlock(**self.cfg_head)
 
     @property
     def n_param(self) -> int:
@@ -516,8 +533,8 @@ class MLPSubNet(layers.Layer):
                 "shape_out": self.shape_out,
                 "type_output": self.type_output,
                 "random_state": self.random_state,
-                "cfg_MLPBlock": self.cfg_MLPBlock,
-                "cfg_DenseHeadBlock": self.cfg_DenseHeadBlock,
+                "cfg_backbone": self.cfg_backbone,
+                "cfg_head": self.cfg_head,
             }
         )
         return config
@@ -526,81 +543,59 @@ class MLPSubNet(layers.Layer):
     def from_config(cls, config):
         return cls(**config)
 
-    
-def make_mlp_model(
-    dim_in: int = 10,
-    dim_out: int | None = 1,
-    shape_in: tuple[int, int] | None = None,
-    shape_out: tuple[int, int] | None = None,
-    type_output: str | None = None,
-    logvar_min: float = -10.0,
-    random_state: int | None = None,
-    cfg_MLPBlock: dict | None = None,
-    cfg_DenseHeadBlock: dict | None = None,
-    name: str = "MLP") -> Model:
-    """
-    Build a functional Keras MLP model.
+    @staticmethod
+    def make_config(
+        dim_in: int = 10,
+        dim_out: int | None = 1,
+        shape_in: tuple[int, int] | None = None,
+        shape_out: tuple[int, int] | None = None,
+        type_output: str | None = None,
+        random_state: int | None = None,
+        cfg_backbone: dict | None = None,
+        cfg_head: dict | None = None,
+        name: str | None = "mlp_subnet",
+    ) -> dict:
+        """
+        Build a configuration dictionary for MLPSubNet.
 
-    Architecture:
-        Input -> MLPSubNet -> Output
+        Parameters
+        ----------
+        dim_in:
+            Flattened input dimension.
+        dim_out:
+            Number of output target dimensions.
+        shape_in:
+            Optional structured input shape. Its product must match ``dim_in``.
+        shape_out:
+            Optional structured output shape. Its product must match ``dim_out``.
+        type_output:
+            Output formalization type handled by DenseHeadBlock.
+        random_state:
+            Random seed propagated to internal blocks when not explicitly defined.
+        cfg_backbone:
+            Configuration dictionary passed to MLPBlock.
+        cfg_head:
+            Configuration dictionary passed to DenseHeadBlock.
+        name:
+            Keras layer name.
 
-    Parameters
-    ----------
-    dim_in:
-        Flattened input dimension.
-    dim_out:
-        Flattened output dimension.
-    shape_in:
-        Optional structured input shape, excluding batch dimension.
-    shape_out:
-        Optional structured output shape, excluding batch dimension.
-    type_output:
-        Output semantics handled by DenseHeadBlock.
-    logvar_min:
-        Lower numerical bound for probabilistic output processing.
-    random_state:
-        Random seed propagated to stochastic subcomponents.
-    cfg_MLPBlock:
-        Configuration dictionary passed to MLPBlock.
-    cfg_DenseHeadBlock:
-        Configuration dictionary passed to DenseHeadBlock.
-    name:
-        Keras model name.
-
-    Returns
-    -------
-    tf.keras.Model
-        Functional Keras model.
-    """
-    if shape_in is None:
-        inputs = layers.Input(shape=(dim_in,), name=f"input_{name}")
-    else:
-        if len(shape_in) != 2:
-            raise ValueError("shape_in must be a tuple of length 2: (H, W).")
-
-        height, width = shape_in
-        if dim_in != height * width:
-            raise ValueError(
-                "dim_in must be equal to H * W when shape_in is provided."
-            )
-
-        inputs = layers.Input(shape=shape_in, name=f"input_{name}")
-
-    mlp_subnet = MLPSubNet(
-        dim_in=dim_in,
-        dim_out=dim_out,
-        shape_in=shape_in,
-        shape_out=shape_out,
-        type_output=type_output,
-        logvar_min=logvar_min,
-        random_state=random_state,
-        cfg_MLPBlock=cfg_MLPBlock,
-        cfg_DenseHeadBlock=cfg_DenseHeadBlock,
-        name=f"{name}_subnet",
-    )
-
-    outputs = mlp_subnet(inputs)
-
-    return Model(inputs, outputs, name=name)
-
-# Dense Layers
+        Returns
+        -------
+        dict
+            Configuration dictionary passed to MLPSubNet.
+        """
+        return {
+            "dim_in": dim_in,
+            "dim_out": dim_out,
+            "shape_in": shape_in,
+            "shape_out": shape_out,
+            "type_output": type_output,
+            "random_state": random_state,
+            "cfg_backbone": (
+                {} if cfg_backbone is None else dict(cfg_backbone)
+            ),
+            "cfg_head": (
+                {} if cfg_head is None else dict(cfg_head)
+            ),
+            "name": name,
+        }

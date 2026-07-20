@@ -177,7 +177,6 @@ def plot_pi(
 
 # ---------- Orchestrateur principal ----------
 
-
 def plot_anom_matrice(
     score,
     score2=None,
@@ -1130,7 +1129,7 @@ def plot_timeseries_panels(
 
     def _resolve_y(curve: CurveRef) -> Tuple[np.ndarray, Optional[str]]:
         """Return (y_values, inferred_label)."""
-        if isinstance(curve, str):
+        if (curve in df.columns):
             return np.asarray(df[curve]), curve
         return np.asarray(curve), None
 
@@ -1143,6 +1142,7 @@ def plot_timeseries_panels(
 
             for j, curve in enumerate(panel_curves):
                 y, inferred_label = _resolve_y(curve)
+                print(y,inferred_label,df[curve])
 
                 cfg: Dict[str, Any] = {}
                 if global_curve_config:
@@ -1155,7 +1155,7 @@ def plot_timeseries_panels(
 
                 if cfg.get("label") is None and inferred_label is not None:
                     cfg["label"] = inferred_label
-
+                print(x_vals.shape,y.shape)
                 auxvisu.aux_plot_line(ax, x_vals, y, config=cfg)
                 y_for_limits.append(y)
 

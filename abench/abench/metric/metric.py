@@ -431,7 +431,6 @@ class ABMetricGeneric(ABMetric):
                                                context=context,
                                                selector=self.output_selector)
 
-
         if self.mask_cfg is not None:
             if ('target' in self.mask_cfg.keys()) and (self.mask_cfg['target'] is not None) and (self._is_array_like_context(target_values)):
                 target_values = apply_mask_along_dim(
@@ -451,7 +450,7 @@ class ABMetricGeneric(ABMetric):
                     mask=self.mask_cfg['context']['mask'],
                     dim_mask=self.mask_cfg['context']['axis'])
                 
-        
+
         if sets is None:
             sets = self._build_default_sets(target_values, context)
 
@@ -466,8 +465,8 @@ class ABMetricGeneric(ABMetric):
                 set_ = set_ & ctx_mask
 
             y_set = apply_mask(target_values, mask=set_)
-            output_set = apply_mask(output_values, mask=set_)
 
+            output_set = apply_mask(output_values, mask=set_)
             if self._is_array_like_context(context):
                 context_set = apply_mask(context, mask=set_)
             else:

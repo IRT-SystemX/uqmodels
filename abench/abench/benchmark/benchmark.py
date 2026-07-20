@@ -2,19 +2,31 @@
 This module aim to performs a agnostics task benchmark using Encaspulated object
 """
 
+import inspect
 import time
-import numpy as np
 from copy import deepcopy
 from abench.store import api
-from abench.visu.visu import print_agg_result
-from abench.utils import stack_iterable_output,Extract_dict,extend_list_unique
+from abench.utils import stack_iterable_output,Extract_dict
+from abench.benchmark.evaluation import compute_metrics_on_dataloader,perf_compute_metrics,perf_agg_compute
 import abench.store.api as api
-from tqdm import tqdm
+
+
 
 # Dictionary reading function for multiple keys.
 
 ######################################################################################
 # Task agnostics benchmark core function :
+
+def is_valid_params(cls, params):
+    sig = inspect.signature(cls.__init__)
+
+    try:
+        sig.bind(None, **params)  # None remplace self
+        return True
+    except TypeError:
+        return False
+
+    return set(params).issubset(valid_params)
 
 def ABtunning(dict_exp,tuning_scheme,list_dict_component):
     """ Run a preliminary step of parameters tuning.
@@ -93,7 +105,7 @@ def ABtunning(dict_exp,tuning_scheme,list_dict_component):
                     else:
                         current_submodule = (submodule, grid_params)
 
-def ABgenerate_dict_submodule(dict_component,dict_exp):
+def ABgenerate_dict_submodule(dict_component,dict_exp,Component_class):
     """turn instantiate_dict_submodule from text placeholder.
 
     Args:
@@ -105,14 +117,29 @@ def ABgenerate_dict_submodule(dict_component,dict_exp):
     list_submodule = list(dict_component.keys())
     list_submodule.remove('name')
 
+    if(len(list_submodule)==1):
+        submodule_str = list_submodule[0]
+        submodule_name = dict_component[submodule_str]
+        is_valid_params(Component_class,dict_exp[submodule_str][submodule_name])
+        dict_submodule = dict_exp[submodule_str][submodule_name]
+        return(dict_submodule)
+
     for n, submodule_str in enumerate(list_submodule):
         submodule_name = dict_component[submodule_str]
         submodule_storage = dict_exp[submodule_str][submodule_name]
         if type(submodule_storage) == dict:
-            dict_submodule[submodule_str] = {
-                "initializer": submodule_storage["module"],
-                "parameters": submodule_storage["parameters"],
-            }
+            if("module" in submodule_storage.keys()):
+                dict_submodule[submodule_str] = {
+                    "initializer": submodule_storage["module"],
+                    "parameters": submodule_storage["parameters"],
+                }
+            elif("initializer" in submodule_storage.keys()):
+                dict_submodule[submodule_str] = {
+                    "initializer": submodule_storage["initializer"],
+                    "parameters": submodule_storage["parameters"],
+                }
+            else:
+                raise ValueError("submodule_storage must be a dict with a 'module' or 'initializer' plus a 'parameters' keys")
         elif type(submodule_storage) == tuple:
             dict_submodule[submodule_str] = {
                 "initializer": submodule_storage[0],
@@ -171,6 +198,8 @@ def ABcomponent_predict_and_store(component,ABloader,component_name='model',trai
     for ABdata,ABcontext,ABmetadata in ABloader:
         list_output.append(component.predict(*ABdata,**target_arg))
     time_pred = time.time() - start_time
+    if(list_output == []):
+        raise(ValueError('Issues on dataloader :',ABloader.name))
     output = stack_iterable_output(list_output)
     
     if(store):
@@ -271,8 +300,7 @@ def benchmark(
 
             # Recovers name of component_candidate
             component_name = dict_component["name"]
-            # Generate dict_argument of component_init method
-            dict_submodule = ABgenerate_dict_submodule(dict_component,dict_exp)  
+            dict_submodule = ABgenerate_dict_submodule(dict_component,dict_exp,Component_class)  
             train_and_inference(storing,ABDataExperiment,component_name,Component_class,dict_submodule,skip_train=False,verbose=verbose)
 
 
@@ -363,233 +391,3 @@ def inference(storing,
         list_metrics,
         agg_name=None)
         
-
-def compute_metrics_on_dataloader(storing,
-                                  ABloader=None,
-                                  trainset_name='Train_set',
-                                  list_component_name=[],
-                                  list_metrics=[],
-                                  set_name=None,
-                                  store=True,
-                                  Component_class_dict=None,
-                                  verbose=0):
-    if(ABloader is None):
-        if(set_name is None):
-            raise(ValueError('ABloader and set_name cannot be both None'))
-        else:
-            ABloader=api.get_ABloader(storing=storing,set_name=set_name)
-
-    set_name = ABloader.get_setname()
-    if(set_name is None):
-        print('Warning ABloader with "None" as name')
-
-    target_arg = ABloader.get_target_arg()
-
-    checkABloader = api.get_ABloader(storing,set_name=set_name)
-
-    if checkABloader is None: # Stockage des données si nouveau set d'évaluation
-        api.store_ABloader(storing,trainset_name,set_name,ABloader)
-
-    dict_output = {}
-    list_component_to_compute_output = []
-    for component_name in list_component_name:
-        dict_output[component_name] = api.get_output(storing,component_name,trainset_name,set_name)
-        if(dict_output[component_name] is None):
-            raise(ValueError(component_name,' not executed on the pair '(trainset_name,set_name)))
-            #dict_output[component_name] = []
-            #list_component_to_compute_output.append(component_name)
-
-            
-    #Collect Target and Context from data loader
-    list_y = []
-    list_context = []
-    for ABdata,ABcontext,ABmetadata in ABloader:
-        context = stack_iterable_output(ABcontext)
-        X,y = ABdata
-        list_y.append(y)
-        #Depreciated model prediction should be done by inference function 
-        #for componant_name in list_component_to_compute_output:
-        #    component = api.get_component(storing,trainset_name,component_name)
-        #    dict_output[component_name].append(component.predict(X))
-        #dict_output[componant_name] = stack_iterable_output(dict_output[component_name])
-
-        if(ABcontext is not None):
-            list_context.append(ABcontext)
-
-    # Aggregate target and context
-    y = stack_iterable_output(list_y)
-    if(len(list_context)>0):
-        context = stack_iterable_output(list_context)
-    else:
-        context=None
-
-    # Use it for comppute metrics
-    #For each component get_output or run model, Compute metrics, Store metrics.
-    for component_name in list_component_name:
-        if(verbose>0):
-            print('component_name :',component_name)
-            
-        dictperf = api.get_dictperf(storing,trainset_name,component_name)
-        dictperf_cv = api.get_dictperf(storing,trainset_name,component_name,set_name=set_name)
-
-
-        for metric in list_metrics:
-            metric_name = str(metric.name)
-            perf_metric = metric.compute(
-                y,
-                dict_output[component_name],
-                context=context,
-                target_arg=target_arg)
-                
-            dictperf_cv[metric_name] = perf_metric
-        
-        dictperf[set_name]=dictperf_cv
-        if(store):
-            api.store_dictperf(storing,trainset_name,component_name,set_name=set_name,dictperf=dictperf_cv)
-            api.store_dictperf(storing,trainset_name,component_name,dictperf=dictperf)
-    return(dictperf_cv, set_name)
-        
-def perf_compute_metrics(
-    storing,
-    ABDataExperiment,
-    list_component_name,
-    list_metrics,
-    verbose=0,
-    ):
-    """Perform evaluation for a component candidate from stored data & results and store performance in the given dict_res
-
-    Args:
-        model_result (dict): benchmark dict_res result for a specified component candidate (contain  and ground truth).
-        list_metrics (list): List of meta_metrics used for evaluation
-        obj_param (dict): dict of target_arg parameter that have to be given to the component
-
-    Returns:
-        None : Performance are stored in model_result dict
-    """
-
-    # Identify number of sub-component.
-    for n_trainset, (ABtrainloader, ABtestloader_set) in enumerate(ABDataExperiment):
-        trainset_name = ABtrainloader.get_setname()
-        if(verbose>0):
-            print('Set:',trainset_name)
-        if(ABtrainloader is not None):
-            compute_metrics_on_dataloader(storing,
-                                         ABtrainloader,
-                                         trainset_name,
-                                         list_component_name,
-                                         list_metrics,
-                                         verbose=verbose)
-
-        
-    
-        if(ABtestloader_set is not None): 
-            for ABtestloader in ABtestloader_set:
-                compute_metrics_on_dataloader(storing,
-                                              ABtestloader,
-                                              trainset_name,
-                                              list_component_name,
-                                              list_metrics,
-                                              verbose=verbose)
-    dictperf = api.get_dictperf(storing)
-    return(dictperf)
-
-
-def perf_agg_compute(
-        storing,
-        experiment_plan,
-        list_component_name,
-        list_metrics,
-        agg_name=None,
-        perf_train=False,
-        ):
-           # For each modelsTime_pred
-    
-    
-    dictperf_agg = api.get_dictperf(storing)
-
-    if(agg_name is None):
-        agg_name = 'all'
-    
-    if('no-agg' not in dictperf_agg.keys()):
-        dictperf_agg['no-agg']= {}
-        
-    if(agg_name not in dictperf_agg.keys()):
-        dictperf_agg[agg_name]= {}
-
-    for component_name in list_component_name:
-        if(component_name not in dictperf_agg['no-agg'].keys()):
-            dictperf_agg['no-agg'][component_name]={}
-        
-        if(component_name not in dictperf_agg[agg_name].keys()):
-            dictperf_agg[agg_name][component_name]={}
-
-        # Compute meta-perform for each meta-metrics by aggreagate sub-component
-        
-        list_dictperf_train = []
-        list_dictperf_test = []
-        for trainset_name, testset_name_list in experiment_plan.items():
-            if(trainset_name not in dictperf_agg.keys()):
-                dictperf_agg['no-agg'][component_name][trainset_name]={}
-
-            if (perf_train):
-                dictperf_train = api.get_dictperf(storing,trainset_name,component_name,trainset_name)
-                dictperf_agg['no-agg'][component_name][trainset_name][trainset_name]=dictperf_train
-                list_dictperf_train.append(dictperf_train)
-                
-            for set_name in testset_name_list:
-                dictperf = api.get_dictperf(storing,trainset_name,component_name,set_name)
-                list_dictperf_test.append(dictperf)
-                dictperf_agg['no-agg'][component_name][trainset_name][set_name]=dictperf
-
-
-        # Time_fit
-        list_time_fit = []
-        for dictperf_cv in list_dictperf_train:
-            if("time_fit" not in dictperf_cv.keys()):
-                list_time_fit.append(0)
-            else:
-                if(dictperf_cv["time_fit"] is None):
-                    list_time_fit.append(0)
-                else:
-                    list_time_fit.append(dictperf_cv["time_fit"])
-
-        time_fit_mean = np.array(list_time_fit).mean()
-        dictperf_agg[agg_name][component_name]["time_fit"] = time_fit_mean
-
-        # Time_pred
-
-        time_pred_mean = np.array(
-            [dictperf_cv["time_pred"] for dictperf_cv in list_dictperf_test]).mean()
-        dictperf_agg[agg_name][component_name]["time_pred"] = time_pred_mean
-
-        # Compute meta-perform for each meta-metrics by aggreagate sub-component
-
-        for metric in list_metrics:
-            metric_name = metric.name   
-            
-            metrics_perfs_train = []
-            for dictperf_cv in list_dictperf_train:
-                try:
-                    metrics_perfs_train.append(dictperf_cv[metric_name])
-                except:
-                    print('Train : dict_perf have no '+metric_name)
-
-            metrics_perfs_train = np.array(metrics_perfs_train)
-
-            metrics_perfs_test = np.array(
-                [dictperf_cv[metric_name] for dictperf_cv in list_dictperf_test]
-            )
-
-            means_train = metrics_perfs_train.mean(axis=0)
-            stds_train = metrics_perfs_train.std(axis=0)
-            means_test = metrics_perfs_test.mean(axis=0)
-            stds_test = metrics_perfs_test.std(axis=0)
-            dictperf_agg[agg_name][component_name][metric_name] = {}
-            dictperf_agg[agg_name][component_name][metric_name]['mean_train'] = means_train
-            dictperf_agg[agg_name][component_name][metric_name]['std_train'] = stds_train
-            dictperf_agg[agg_name][component_name][metric_name]['mean_test'] = means_test
-            dictperf_agg[agg_name][component_name][metric_name]['std_test'] = stds_test
-        api.store_dictperf(storing,dictperf=dictperf_agg)
-        print_agg_result(storing,agg_name,component_name,list_metrics)
-    return(dictperf_agg)
-    

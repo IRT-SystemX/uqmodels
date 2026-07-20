@@ -1,206 +1,480 @@
-# Modular Variational Autoencoder Framework
+# Modular Autoencoder and Variational Autoencoder Framework
 
 ## Overview
 
-This repository provides a **modular and extensible framework** for building autoencoders and variational autoencoders (VAEs) in TensorFlow / Keras.
+This repository provides a modular TensorFlow / Keras framework for building autoencoders and variational autoencoders.
 
-It supports multiple architectures:
-- **Dense / MLP-based** autoencoders and VAEs  
-- **Convolutional** (1D/2D) VAEs  
-- **Temporal** (TimeVAE) models with trend and seasonality  
-- **Sequential** (LSTM-based) VAEs  
-- **U-Net-based** VAEs (1D or 2D) -> Not Working ATM
-- **Transformer-based** VAEs for sequential data
-- **Hybrid models** (supervised VAE for classification or forecasting)
+The architecture follows a layered decomposition:
 
-The system separates:
-- **Training logic** (AE, VAE, Hybrid)  
-- **Behavioral mixins** (variational, sequence, supervision)  
-- **Concrete architectures** (Dense, Conv, Time, U-Net, Seq)
+```text
+Layers
+    ↓
+Blocks
+    ↓
+SubNets
+    ↓
+Builder Functions
+    ↓
+Final AE / VAE Models
+```
 
-This design enables easy composition of new architectures by combining mixins and base classes without rewriting training loops.
+Each level has a clear responsibility:
+
+* **Layers** implement elementary neural or structured operations.
+* **Blocks** group reusable architectural patterns.
+* **SubNets** assemble blocks into configurable encoder or decoder components.
+* **Builder functions** wrap SubNets into standard `tf.keras.Model` encoders and decoders.
+* **Final models** combine encoder, decoder, and shared AE/VAE training logic.
+
+Supported architectures include:
+
+* Dense / MLP
+* Convolutional 1D and 2D
+* LSTM
+* Transformer
+* Decomposition-based models with level, trend, seasonality, and optional CNN residual components
+* Experimental U-Net-based models
+* Hybrid supervised latent models
 
 ---
 
-## Project structure
+## Project Structure
 
+```text
 project_root/
 │
 ├── base_vae.py
-│ ├── BaseAutoencoder
-│ ├── BaseVariationalAutoencoder
-│ ├── SequenceMixin
-│ ├── VariationalMixin
-│ ├── HybridMixin
+│   ├── BaseAutoencoder
+│   ├── BaseVariationalAutoencoder
+│   ├── VariationalMixin
+│   ├── SequenceMixin
+│   └── HybridMixin
 │
-├── vae.py
-│ ├── DenseAE / DenseVAE
-│ ├── ConvAE / ConvVAE
-│ ├── Encoder / Decoder factory functions
+├── layers.py
+│   ├── MLPBlock
+│   ├── DenseHeadBlock
+│   ├── VariationalBlock
+│   └── MLPSubNet
 │
-├── timevae.py
-│ ├── TimeVAE
-│ ├── TrendLayer / SeasonalLayer
-│ ├── Encoder / Decoder builders
+├── convlayers.py
+│   ├── ConvBlock1D / ConvBlock2D
+│   ├── TConvBlock1D / TConvBlock2D
+│   └── CNNSubNet
 │
+├── seqlayers.py
+│   ├── LstmBlock
+│   └── LSTMSubNet
+│
+├── attlayers.py
+│   ├── PositionalEmbedding
+│   ├── TransformerEncoderBlock
+│   ├── TransformerDecoderBlock
+│   └── TransformerSubNet
+│
+├── trendseasonlayers.py
+│   ├── LevelLayer
+│   ├── TrendLayer
+│   ├── SeasonalLayer
+│   └── DecompositionSubNet
+│
+├── densevae.py
+├── cnnvae.py
+├── lstmvae.py
+├── transformervae.py
+├── decompositionvae.py
 ├── uvae.py
-│ ├── UNetVAE
-│ ├── (optional) UNetHybridVAE
-│ ├── Encoder / Decoder builders
-│
-├── seq_vae.py
-│ ├── SeqVAE
-│ ├── HybridSequenceVAE
-│
-├── transformer_vae.py
-│ ├── AETransformer
-│ ├── VAETransformer
-│ ├── Encoder / Decoder builders (Transformer)
 │
 └── README.md
+```
 
-## Core architecture
+---
 
-### 1. Base classes & mixins (`base_vae.py`)
+## Core Architecture
 
-| Component | Responsibility |
-|------------|----------------|
-| **BaseAutoencoder** | Generic Keras `Model` providing a unified training loop (`train_step`, `test_step`) that delegates loss computation to a single hook: `forward_and_losses()` |
-| **BaseVariationalAutoencoder** | Extends `BaseAutoencoder` and `VariationalMixin` with default VAE loss handling (reconstruction + KL) and a KL tracker |
-| **VariationalMixin** | Low-level API for variational logic: latent sampling, KL divergence computation, and helper methods |
-| **SequenceMixin** | Adapts reconstruction loss for sequential/time-series data (`sum over time + mean over batch`) |
-| **HybridMixin** | Adds supervised heads (classification or forecasting) and manages the supervised loss and accuracy metrics |
+### Base Models
 
-These components are fully composable.  
-For instance:
-```python
-DenseVAE = VariationalMixin + BaseAutoencoder
-HybridSeqVAE = HybridMixin + SequenceMixin + VariationalMixin + BaseAutoencoder
+`BaseAutoencoder` centralizes deterministic AE training behavior.
 
-2. Model hierarchy
+`BaseVariationalAutoencoder` extends it with:
+
+* latent sampling
+* KL divergence
+* KL loss tracking
+* variational training logic
+
+Final architecture classes therefore remain lightweight and mainly define:
+
+```text
+encoder
+decoder
+```
+
+---
+
+### Architectural Hierarchy
+
+#### 1. Layers
+
+Elementary neural or structured operations.
+
+Examples:
+
+```text
+Dense
+Dropout
+PositionalEmbedding
+LevelLayer
+TrendLayer
+SeasonalLayer
+```
+
+#### 2. Blocks
+
+Reusable architectural patterns.
+
+Examples:
+
+```text
+MLPBlock
+ConvBlock1D
+ConvBlock2D
+TConvBlock1D
+TConvBlock2D
+LstmBlock
+TransformerEncoderBlock
+TransformerDecoderBlock
+DenseHeadBlock
+VariationalBlock
+```
+
+#### 3. SubNets
+
+Configurable encoder or decoder components built from reusable blocks.
+
+Available SubNets include:
+
+```text
+MLPSubNet
+CNNSubNet
+LSTMSubNet
+TransformerSubNet
+DecompositionSubNet
+```
+
+Typical structure:
+
+```text
+Backbone
+    ↓
+optional intermediate block
+    ↓
+DenseHeadBlock
+```
+
+#### 4. Builder Functions
+
+Builders wrap SubNets into standard Keras models:
+
+```text
+Keras Input
+    ↓
+SubNet
+    ↓
+optional VariationalBlock
+    ↓
+tf.keras.Model
+```
+
+#### 5. Final Models
+
+Final AE and VAE classes combine:
+
+```text
+Base training behavior
++
+Encoder builder
++
+Decoder builder
+```
+
+Examples:
+
+```text
+DenseAE / DenseVAE
+ConvAE / ConvVAE
+LstmAE / LstmVAE
+TransformerAE / TransformerVAE
+DecompositionAE / DecompositionVAE
+```
+
+---
+
+## Model Hierarchy
+
+```text
 BaseAutoencoder
+│
 ├── DenseAE
 ├── ConvAE
-├── TimeAE
+├── LstmAE
+├── TransformerAE
+├── DecompositionAE
 ├── UNetAE
-├── AETransformer
-├── BaseVariationalAutoencoder
-│   ├── DenseVAE
-│   ├── ConvVAE
-│   ├── TimeVAE
-│   ├── UNetVAE
-|   ├── VAETransformer
-│   └── (custom VAE architectures)
 │
-├── SequenceMixin + VariationalMixin + BaseAutoencoder
-│   ├── SeqVAE
-│   └── HybridSequenceVAE
-│
-└── HybridMixin + (any of the above)
-    ├── HybridAE
-    ├── HybridVAE
-    ├── HybridSequenceVAE
-    └── UNetHybridVAE
+└── BaseVariationalAutoencoder
+    ├── DenseVAE
+    ├── ConvVAE
+    ├── LstmVAE
+    ├── TransformerVAE
+    ├── DecompositionVAE
+    └── UNetVAE
+```
 
-Design philosophy
-Mixins as orthogonal capabilities
+Optional mixins provide additional behavior:
 
-Each Mixin provides one dimension of behavior:
+```text
+VariationalMixin
+SequenceMixin
+HybridMixin
+```
 
-VariationalMixin → latent sampling & KL divergence
+The primary architectural composition is nevertheless based on:
 
-SequenceMixin → time-aware reconstruction
+```text
+Layer → Block → SubNet → Builder → Model
+```
 
-HybridMixin → supervised objective (classification / forecasting)
+---
 
-They can be combined in any order to form new architectures without redefining the training loop.
+## Supported Architectures
 
-Unified training loop
+### Dense
 
-Every model inherits a single generic training routine from BaseAutoencoder:
+```text
+MLPBlock
+    ↓
+MLPSubNet
+    ↓
+DenseAE / DenseVAE
+```
 
-def train_step(self, data):
-    with tf.GradientTape() as tape:
-        total_loss, logs = self.forward_and_losses(data)
-    grads = tape.gradient(total_loss, self.trainable_weights)
-    self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
-    self._update_trackers(total_loss, logs)
-    return self._collect_results(logs)
+### Convolutional
 
+Supports 1D and 2D convolutional architectures.
 
-Models only need to implement forward_and_losses() to define how losses are computed:
+```text
+Conv / TConv Blocks
+    ↓
+CNNSubNet
+    ↓
+ConvAE / ConvVAE
+```
 
-For AE: reconstruction only
+### LSTM
 
-For VAE: reconstruction + KL
+Designed for sequential inputs of shape:
 
-For HybridVAE: reconstruction + KL + supervised loss
+```text
+(B, T, F)
+```
 
-###################################
-Example: DenseVAE
-from vae import DenseVAE
-import tensorflow as tf
+```text
+LstmBlock
+    ↓
+LSTMSubNet
+    ↓
+LstmAE / LstmVAE
+```
 
-# Create a dense VAE
-model = DenseVAE(seq_len=128, feat_dim=8, latent_dim=16, kl_weight=0.1)
-model.compile(optimizer=tf.keras.optimizers.Adam(1e-3))
+### Transformer
 
-# Train on input-only data
-model.fit(x_train, epochs=50, batch_size=64)
+```text
+PositionalEmbedding
++
+Transformer Blocks
+    ↓
+TransformerSubNet
+    ↓
+TransformerAE / TransformerVAE
+```
 
-# Encode & decode
-z_mean, z_log_var, z = model.encoder(x_train)
-x_recon = model.decoder(z)
-###################################
+### Decomposition-Based Models
 
+Structured reconstruction based on:
 
-How to extend
+```text
+level
++
+trend
++
+seasonality
++
+optional CNN residual
+```
 
--1 Create your architecture
+The structured components are aggregated by `DecompositionSubNet`.
 
--2 Define encoder and decoder (and optionally classifier).
+Available models:
 
--3 Make them standard tf.keras.Models.
+```text
+DecompositionAE
+DecompositionVAE
+```
 
--4 Pick the right base
+---
 
-	Simple AE → BaseAutoencoder
+## Variational Modeling and Output Uncertainty
 
-	VAE → BaseVariationalAutoencoder
+Two independent concepts are distinguished.
 
-	Sequential → add SequenceMixin
+### Variational latent modeling
 
-	Supervised → add HybridMixin
+```python
+variational=True
+```
 
--5 Implement or inherit forward_and_losses()
+adds:
 
-	Usually already provided by BaseVariationalAutoencoder or Hybrid variant.
+```text
+latent representation
+    ↓
+VariationalBlock
+    ↓
+z_mean, z_log_var
+```
+
+Sampling and KL divergence are managed by `BaseVariationalAutoencoder`.
+
+### Output formalization
+
+`type_output` controls the output representation, for example:
+
+```text
+None
+mc_dropout
+Deep_ensemble
+EDL
+```
+
+This logic is handled through `DenseHeadBlock` where applicable.
+
+Variational latent modeling and output uncertainty are therefore independent mechanisms.
+
+---
+
+## Configuration-Driven Construction
+
+Architectures are configured through dictionaries.
 
 Example:
 
+```python
+cfg_encoder = {
+    "dim_seq": 60,
+    "dim_in": 52,
+    "dim_z": 16,
+    "variational": True,
+    "cfg_subnet": CNNSubNet.make_config(
+        mode="encoder",
+        dim_seq=60,
+        dim_in=52,
+        dim_z=16,
+    ),
+}
+```
+
+Final model:
+
+```python
+model = ConvVAE(
+    cfg_encoder=cfg_encoder,
+    cfg_decoder=cfg_decoder,
+    kl_weight=0.1,
+)
+```
+
+This supports reproducibility, serialization, benchmarking, and systematic configuration management.
+
+---
+
+## How to Extend
+
+Adding a new architecture follows the same pattern:
+
+```text
+1. Create primitive layers if needed
+2. Create reusable blocks
+3. Assemble them into a SubNet
+4. Build encoder and decoder Keras models
+5. Create final AE and VAE classes
+```
+
+Minimal model pattern:
+
+```python
 class MyCustomVAE(BaseVariationalAutoencoder):
-    def __init__(self, ...):
-        super().__init__(kl_weight=0.1)
-        self.encoder = build_my_encoder(...)
-        self.decoder = build_my_decoder(...)
 
-🚀 Key advantages
+    def __init__(
+        self,
+        cfg_encoder,
+        cfg_decoder,
+        kl_weight=1.0,
+        **kwargs,
+    ):
+        super().__init__(
+            kl_weight=kl_weight,
+            **kwargs,
+        )
 
-✅ Unified training loop — same fit/evaluate/predict workflow for all models
-✅ Composable mixins — easy to combine AE/VAE + Sequence + Hybrid
-✅ Clean separation of concerns — training logic, architecture, and task objectives are independent
-✅ Extensible — easy to add new backbones (e.g., Transformers, GraphVAEs, Diffusion decoders)
+        self.encoder = build_my_encoder(**cfg_encoder)
+        self.decoder = build_my_decoder(**cfg_decoder)
+```
 
-📘 Future extensions
+No architecture-specific training loop is required.
 
-TransformerMixin → self-attention encoder/decoder
+---
 
-DiffusionMixin → denoising/diffusion objectives
+## Design Principles
 
-GraphVAE → graph neural VAE encoder/decoder
+The framework follows four main principles:
 
-HybridForecastVAE → time-sequence forecasting head (multi-horizon)
+* **Composition over duplication**
+* **Clear separation of responsibilities**
+* **Configuration-driven architecture construction**
+* **Shared AE/VAE training behavior**
 
-✨ Credits
+The central design is:
 
--> Partial inspiration from : https://github.com/abudesai/timeVAE/tree/main/src/vae
+```text
+Layer
+    ↓
+Block
+    ↓
+SubNet
+    ↓
+Builder
+    ↓
+Model
+```
+
+---
+
+## Key Advantages
+
+* Unified AE/VAE API
+* Shared training logic
+* Reusable architectural components
+* Configurable and serializable SubNets
+* Independent variational and output-uncertainty mechanisms
+* Easy integration of new backbones
+* Native TensorFlow / Keras compatibility
+
+---
+
+## Credits
+
+The decomposition-based architecture is partially inspired by TimeVAE:
+
+```text
+https://github.com/abudesai/timeVAE/tree/main/src/vae
+```

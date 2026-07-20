@@ -44,7 +44,7 @@ Ensure:
 | Uncertainty (UQ) | `mc_` / `flag_` | `mc_dropout=True`, `flag_mc=True` | Stochastic behavior toggles |
 | Random seed | `random_state` | `random_state=42` | Global random seed |
 | Output heads | `head_` / `type_output` | `type_output="EDL"`, `head_type="MC_Dropout"` | Type of output/probabilistic head |
-| Nested kwargs | `*cfg_` | `cfg_MLP_Block`, `cfg_CNNEncoder_SubNet` | user-facing or serialized configuration |
+| Nested kwargs | `*cfg_` | `cfg_mlp`, `cfg_CNNEncoder_SubNet` | user-facing or serialized configuration |
 | System names | `name` | `name="Encoder_Block"` | Internal Keras name (always last) |
 
 
@@ -57,7 +57,7 @@ All `layers.Layer`, `tf.keras.Model`, `Block`, and `SubNet` classes should follo
 2. **Regularization / Activation**: dropout, activation, normalization, regularization  
 3. **Output / Head semantics**: output type, probabilistic head, numerical bounds  
 4. **Stochastic / UQ**: Monte Carlo flags, seeds  
-5. **component configuration**: `cfg_block`  
+5. **component configuration**: `cfg_typeblock`  
 6. **System / Keras**: `name`, `**kwargs`
 
 ✅ The same argument order applies to:

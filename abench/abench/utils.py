@@ -12,6 +12,16 @@ def extend_list_unique(list_old, lis_new):
             list_old.append(elem)
     return list_old
 
+def merge_dict(list_dicts):
+    """
+    Merge dictionaries with priority given to the first occurrence.
+    """
+    mergeded_dict = {}
+
+    for dict in reversed(list_dicts):
+        mergeded_dict.update(dict)
+
+    return mergeded_dict
 
 def concat(obj, axis: int = 0, newaxis: bool = False):
     """
@@ -128,7 +138,10 @@ def apply_mask_along_dim(
 
 def apply_mask(arr, mask):
     """
-    Apply boolean or integer masking to `arr` while preserving depth (`ndim`).
+    Apply boolean or integer masking to `arr` while preserving its structure.
+
+    Supported inputs:
+    - ndarray,list,tuple,pandas.DataFrame,pandas.Series,dict(recursively)
 
     Behavior:
     - If `mask` is None: return `arr` unchanged.
@@ -140,47 +153,80 @@ def apply_mask(arr, mask):
         Output shape becomes (num_selected, *arr.shape[1:]).
     - Otherwise, treat `mask` as integer indexing (NumPy standard rules).
 
-    The original container type (list, tuple, ndarray) is preserved.
+    The original container type (list, tuple, ndarray, dict) is preserved.
+
+    For dictionaries, the same mask is applied independently to each value.
     """
     if mask is None:
         return arr
 
-    is_list = isinstance(arr, list)
-    is_tuple = isinstance(arr, tuple)
-    arr_np = np.asarray(arr)
+    # Recursive handling of dictionaries
+    if isinstance(arr, dict):
+        return {
+            key: apply_mask(value, mask)
+            for key, value in arr.items()
+        }
+
     m = np.asarray(mask)
 
-    # Cas masque booléen
+    # Pandas DataFrame / Series
+    if isinstance(arr, (pd.DataFrame, pd.Series)):
+        if m.dtype == bool:
+            # Allow shapes: (N,), (N, 1), (N, 1, 1), ...
+            if (
+                m.ndim >= 1
+                and m.shape[0] == len(arr)
+                and all(s == 1 for s in m.shape[1:])
+            ):
+                m_1d = m.reshape(m.shape[0])
+                return arr.loc[m_1d]
+
+            raise ValueError(
+                f"Boolean mask shape {m.shape} incompatible with "
+                f"DataFrame/Series length {len(arr)}."
+            )
+
+        # Integer positional indexing
+        return arr.iloc[m]
+
+    is_list = isinstance(arr, list)
+    is_tuple = isinstance(arr, tuple)
+
+    arr_np = np.asarray(arr)
+
+    # Boolean mask
     if m.dtype == bool:
-        # 1) Même shape -> comportement NumPy standard
+        # 1) Same shape -> standard NumPy boolean indexing
         if m.shape == arr_np.shape:
             out = arr_np[m]
 
+        # 2) Selection along axis 0
+        elif (
+            arr_np.ndim >= 1
+            and m.ndim >= 1
+            and m.shape[0] == arr_np.shape[0]
+            and all(s == 1 for s in m.shape[1:])
+        ):
+            m_1d = m.reshape(m.shape[0])
+            out = arr_np[m_1d, ...]
+
         else:
-            # 2) Masque utilisé pour sélectionner le long du premier axe uniquement.
-            #    On autorise des shapes du type (N,), (N,1), (N,1,1), ...
-            if arr_np.ndim >= 1 and m.shape[0] == arr_np.shape[0] and all(
-                s == 1 for s in m.shape[1:]
-            ):
-                # On réduit à un masque 1D pour l'axe 0
-                m_1d = m.reshape(m.shape[0])   # shape -> (N,)
-                # Sélection le long du premier axe, profondeur préservée
-                out = arr_np[m_1d, ...]
-            else:
-                raise ValueError(
-                    f"Boolean mask shape {m.shape} incompatible with source {arr_np.shape} "
-                    "(première dimension ou shape complète requise)."
-                )
+            raise ValueError(
+                f"Boolean mask shape {m.shape} incompatible with "
+                f"source shape {arr_np.shape}."
+            )
 
     else:
-        # Indices entiers (NumPy standard)
+        # Standard NumPy integer indexing
         out = arr_np[m]
 
-    # Restauration du type d'origine
+    # Restore original container type
     if is_list:
         return out.tolist()
+
     if is_tuple:
         return tuple(out.tolist())
+
     return out
 
 def stack_iterable_output(batch_iterable, stack_fn=np.concatenate):
@@ -192,19 +238,25 @@ def stack_iterable_output(batch_iterable, stack_fn=np.concatenate):
     np.ndarray:
         Returned as-is.
 
+    pd.DataFrame:
+        Returned as-is.
+
     list with one element:
         Unpacked.
 
+    iterable of numpy arrays:
+        Concatenated directly along axis 0.
+
     iterable of tuples:
-        Stack elements by position.
+        Aggregated recursively by position.
 
     iterable of dictionaries:
-        Recursively aggregate dictionaries with identical structure.
+        Recursively aggregated.
     """
     if isinstance(batch_iterable, np.ndarray):
         return batch_iterable
-    
-    if isinstance(batch_iterable,pd.core.frame.DataFrame):
+
+    if isinstance(batch_iterable, pd.DataFrame):
         return batch_iterable
 
     items = list(batch_iterable)
@@ -215,22 +267,27 @@ def stack_iterable_output(batch_iterable, stack_fn=np.concatenate):
     if len(items) == 1:
         return items[0]
 
+    # Critical fix: concatenate arrays directly on the batch axis.
+    if all(isinstance(x, np.ndarray) for x in items):
+        return stack_fn(items, axis=0)
+
+    if all(isinstance(x, pd.DataFrame) for x in items):
+        return pd.concat(items, axis=0, ignore_index=True)
+
     if all(isinstance(x, dict) for x in items):
-        return aggregate_dicts(items, stack_fn=stack_fn)
+        return aggregate_dicts(items)
 
-    grouped = [list(values) for values in zip(*items)]
+    if all(isinstance(x, tuple) for x in items):
+        return tuple(
+            stack_iterable_output(values, stack_fn=stack_fn)
+            for values in zip(*items)
+        )
 
-    out = []
-    for values in grouped:
-        try:
-            out.append(stack_fn(values, axis=0))
-        except TypeError:
-            try:
-                out.append(stack_fn(values))
-            except Exception:
-                out.append(values)
-
-    return out[0] if len(out) == 1 else tuple(out)
+    # Generic fallback.
+    try:
+        return stack_fn(items, axis=0)
+    except (TypeError, ValueError):
+        return items
 
 def build_ctx_mask(context: np.ndarray, list_ctx_constraint):
     """

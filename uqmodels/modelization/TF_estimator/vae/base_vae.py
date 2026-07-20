@@ -9,15 +9,22 @@ Base Autoencoder with hook-based training.
 """
 
 import os
-import json
-import yaml
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import Model, layers, metrics
+from tensorflow.keras import layers, metrics
 from uqmodels.modelization.TF_estimator.base.model import BaseKModel
-
+from uqmodels.modelization.DL_estimator.utils import set_global_determinism
 
 class BaseAutoencoder(BaseKModel):
+    """Generic Autoencoder with hook-based training
+
+    Args:
+        BaseKModel (_type_): _description_
+    """
+
+
+    EXPECTED_VARIATIONAL = False
+
     def __init__(self, *,name='AE',**kwargs):
         super().__init__(name=name,**kwargs)
         # Core models must be defined by subclasses/mixins:
@@ -137,9 +144,19 @@ class BaseAutoencoder(BaseKModel):
     def decode(self, z, **kwargs):
         return self.decoder(z, **kwargs)
 
-    def predict(self, x, **kwargs):
-        output = self.decode(self.encode(x, **kwargs), **kwargs)
-        return output.numpy()
+    def call(self, inputs, training=None):
+        z = self.encode(inputs, training=training)
+        return self.decode(z, training=training)
+    
+    def predict(self, x, batch_size=None, **kwargs):
+        if batch_size is None:
+            batch_size = self.fit_kwargs.get("batch_size", 64)
+
+        return super().predict(
+            x,
+            batch_size=batch_size,
+            **kwargs,
+        )
 
     def summary(self, print_fn=print):
         print_fn("\nEncoder:")
@@ -191,8 +208,112 @@ class BaseAutoencoder(BaseKModel):
         # 3) optional subclass hook
         obj._extra_load(model_dir)
         return obj
+    
+    def _validate_encoder_config(
+        self,
+        cfg_encoder: dict,
+    ) -> None:
+        """Validate encoder variational configuration."""
+
+        if "variational" not in cfg_encoder:
+            raise ValueError(
+                "cfg_encoder must explicitly define "
+                "'variational'."
+            )
+
+        if cfg_encoder["variational"] is not self.EXPECTED_VARIATIONAL:
+            raise ValueError(
+                f"{self.__class__.__name__} requires "
+                f"cfg_encoder['variational']="
+                f"{self.EXPECTED_VARIATIONAL}."
+            )
 
 
+@tf.keras.utils.register_keras_serializable(package="UQModels_layers")
+class VariationalBlock(layers.Layer):
+    """
+    Variational latent projection block.
+
+    Projects an input representation into the parameters of a Gaussian
+    latent distribution:
+
+        input -> z_mean
+              -> z_log_var
+
+    The block returns the mean and log-variance of the latent distribution.
+    """
+
+    def __init__(
+        self,
+        dim_z: int,
+        logvar_min: float | None = None,
+        max_logvar: float | None = None,
+        name: str | None = None,
+        **kwargs,
+    ):
+        super().__init__(name=name, **kwargs)
+
+        self.dim_z = int(dim_z)
+        self.logvar_min = logvar_min
+        self.max_logvar = max_logvar
+
+        self.z_mean = layers.Dense(
+            units=self.dim_z,
+            name="z_mean",
+        )
+
+        self.z_log_var = layers.Dense(
+            units=self.dim_z,
+            name="z_log_var",
+        )
+
+    def call(self, inputs):
+        z_mean = self.z_mean(inputs)
+        z_log_var = self.z_log_var(inputs)
+
+        if self.logvar_min is not None:
+            z_log_var = tf.maximum(
+                z_log_var,
+                tf.cast(self.logvar_min, z_log_var.dtype),
+            )
+
+        if self.max_logvar is not None:
+            z_log_var = tf.minimum(
+                z_log_var,
+                tf.cast(self.max_logvar, z_log_var.dtype),
+            )
+
+        return z_mean, z_log_var
+
+    def get_config(self):
+        config = super().get_config()
+        config.update(
+            {
+                "dim_z": self.dim_z,
+                "logvar_min": self.logvar_min,
+                "max_logvar": self.max_logvar,
+            }
+        )
+        return config
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+    @staticmethod
+    def make_config(
+        dim_z: int,
+        logvar_min: float | None = None,
+        max_logvar: float | None = None,
+        name: str | None = "variational_block",
+    ) -> dict:
+        """Build a configuration dictionary for VariationalBlock."""
+        return {
+            "dim_z": dim_z,
+            "logvar_min": logvar_min,
+            "max_logvar": max_logvar,
+            "name": name,
+        }
 
 class Sampling(layers.Layer):
     """z = mean + exp(0.5 * log_var) * eps (broadcast-friendly)."""
@@ -262,6 +383,8 @@ class BaseVariationalAutoencoder(VariationalMixin, BaseAutoencoder):
       - faire que decoder prenne [z] + extras (ça marchera sans override),
       - soit surcharger _decode().
     """
+    EXPECTED_VARIATIONAL = True
+    
 
     def __init__(self,*,kl_weight: float = 1.0, name='VAE',**kwargs):
         super().__init__(name=name, kl_weight=kl_weight,**kwargs)
@@ -309,10 +432,40 @@ class BaseVariationalAutoencoder(VariationalMixin, BaseAutoencoder):
         logs = {"reconstruction_loss": recon_loss, "kl_loss": kl_loss}
         return total, logs
     
-    def predict(self, X, **kwargs):
-        z_mean, z_log_var, z, *extras = self._encode(X, training=True)
-        X_recon = self._decode(z, extras, training=True)
-        return X_recon
+    def call(self, inputs, training=None):
+        """
+        Forward pass through encoder and decoder.
+        """
+        z_mean, z_log_var, z, *extras = self._encode(
+            inputs,
+            training=training,
+        )
+
+        return self._decode(
+            z,
+            extras,
+            training=training,
+        )
+        
+    def predict(
+        self,
+        X,
+        batch_size: int | None = None,
+        **kwargs,
+    ):
+        """
+        Run inference using Keras native mini-batching.
+        """
+        if batch_size is None:
+            batch_size = self.fit_kwargs.get("batch_size", 64)
+
+        return super().predict(
+            X,
+            batch_size=batch_size,
+            **kwargs,
+    )
+    
+    
 
 
 class HybridMixin:
@@ -514,18 +667,158 @@ class UncertaintyMixin:
             raise ValueError(f"Unknown dist: {self._unc_dist}")
 
     # MC Dropout prediction utility (N stochastic passes)
-    def predict_mc(self, X, n_samples=20, batch_size=None):
-        outs = []
-        for _ in range(n_samples):
-            # training=True keeps dropout active
-            pred = self(X, training=True, batch_size=batch_size)  # assumes model(x) returns (mu, log_var)
-            outs.append(pred)
-        # stack (N, B, ...) and compute moments on mu and var
-        mus = tf.stack([o[0] for o in outs], axis=0)
-        logvars = tf.stack([o[1] for o in outs], axis=0)
-        aleatoric = tf.reduce_mean(tf.exp(logvars), axis=0)
-        epistemic = tf.math.reduce_variance(tf.reduce_mean(mus, axis=0, keepdims=False), axis=0) if False else tf.math.reduce_variance(mus, axis=0)
-        # The variant above: epistemic as var over samples of μ; choose appropriate reduction if per-time-step.
-        mu_mean = tf.reduce_mean(mus, axis=0)
-        total = aleatoric + tf.math.reduce_variance(mus, axis=0)
-        return mu_mean, aleatoric, epistemic, total
+    def predict_mc(
+        self,
+        X,
+        n_samples: int = 20,
+        batch_size: int | None = None,
+        **kwargs,
+        ):
+            """
+            Run Monte Carlo dropout inference using Keras native mini-batching.
+
+            Parameters
+            ----------
+            X:
+                Input data.
+            n_samples:
+                Number of stochastic forward passes.
+            batch_size:
+                Inference mini-batch size. Defaults to the configured training batch size.
+            **kwargs:
+                Additional arguments forwarded to Keras predict.
+
+            Returns
+            -------
+            tuple
+                mu_mean, aleatoric, epistemic, total uncertainty.
+            """
+            if batch_size is None:
+                batch_size = self.fit_kwargs.get("batch_size", 64)
+
+            outs = []
+
+            for _ in range(n_samples):
+                pred = super().predict(
+                    X,
+                    batch_size=batch_size,
+                    **kwargs,
+                )
+                outs.append(pred)
+
+            mus = tf.stack(
+                [tf.convert_to_tensor(o[0]) for o in outs],
+                axis=0,
+            )
+
+            logvars = tf.stack(
+                [tf.convert_to_tensor(o[1]) for o in outs],
+                axis=0,
+            )
+
+            mu_mean = tf.reduce_mean(mus, axis=0)
+
+            aleatoric = tf.reduce_mean(
+                tf.exp(logvars),
+                axis=0,
+            )
+
+            epistemic = tf.math.reduce_variance(
+                mus,
+                axis=0,
+            )
+
+            total = aleatoric + epistemic
+
+            return mu_mean, aleatoric, epistemic, total
+
+
+class HybridSequenceVAE(HybridMixin, BaseVariationalAutoencoder):
+    """
+    VAE séquentiel hybride (reconstruction + KL + supervision).
+
+    Encoder:  (B, T, F) -> (z_mean, z_log_var, z) de shape (B, T, D)
+    Decoder:  (B, T, D) -> (B, T, F)
+    Supervision: tête branchée sur z (B, T, D) ou sur un pooling de z selon HybridMixin.
+
+    Paramètres principaux:
+      - dim_seq, dim_in, dim_z, layers_size
+      - n_outputs: taille de la cible (classes ou régression)
+      - sup_weight: poids de la tête supervisée
+      - supervised_loss: loss de supervision (défaut: CCE from_logits=False)
+      - from_logits: si True, la tête n’a pas d’activation (à gérer dans la loss)
+      - target_sequence: True si la cible est séquentielle (B, T, n_outputs)
+      - pooling: "mean" | "last" | "flatten" (si cible globale et z est séquentiel)
+      - kl_weight: poids du terme KL
+    """
+
+    def __init__(
+        self,
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        layers_size: int = 128,
+        *,
+        n_outputs: int,
+        sup_weight: float = 1.0,
+        supervised_loss=None,
+        from_logits: bool = False,
+        target_sequence: bool = False,
+        pooling: str = "mean",
+        kl_weight: float = 1.0,
+        name: str = "hybrid_seq_vae",
+        **kwargs
+    ):
+        # Respecter l’ordre d’init pour héritage multiple
+        super.__init__(n_outputs=n_outputs,
+                       sup_weight=sup_weight,
+                       supervised_loss=supervised_loss,
+                       from_logits=from_logits,
+                       target_sequence=target_sequence,
+                       pooling=pooling,
+                       kl_weight=kl_weight,
+                       name=name,
+                       **kwargs)
+
+        self.dim_seq = int(dim_seq)
+        self.dim_in = int(dim_in)
+        self.dim_z = int(dim_z)
+        self.layers_size = int(layers_size)
+
+
+
+    @property
+    def metrics(self):
+        # Base + KL + (HybridMixin ajoute supervised_loss (+ accuracy éventuelle))
+        return super().metrics + [self.kl_loss_tracker]
+
+    # -------------- Loop (hook central) -------------- #
+    def forward_and_losses(self, data):
+        """
+        Attend data = (X, y) :
+          - X: (B, T, F)
+          - y: (B, n_outputs) si cible globale
+               ou (B, T, n_outputs) si target_sequence=True
+        """
+        X, y = data
+
+        z_mean, z_log_var, z = self.encoder(X, training=True)
+        X_recon = self.decoder(z, training=True)
+
+        # Reconstruction séquentielle (SequenceMixin)
+        recon_loss = self._get_reconstruction_loss(X, X_recon)
+
+        # KL (VariationalMixin)
+        total_wo_sup, kl_loss = self.compute_total_with_kl(recon_loss, z_mean, z_log_var)
+
+        # Supervision (HybridMixin)
+        sup_loss, y_pred = self.compute_supervised(z, y, training=True)
+
+        total = self.add_supervised_to_total(total_wo_sup, sup_loss)
+
+        logs = {
+            "reconstruction_loss": recon_loss,
+            "kl_loss": kl_loss,
+            "supervised_loss": sup_loss,
+        }
+        return total, logs

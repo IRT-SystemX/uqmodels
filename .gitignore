@@ -24,3 +24,7 @@ demo/
 
 # Examples generated model folder
 examples/model
+dist/
+*.whl
+*.p
+*.parquet

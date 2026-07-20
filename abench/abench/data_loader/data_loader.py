@@ -82,8 +82,6 @@ class ABLoader(ABC):
         ABloader = get_ABloader(storing,set_name)
         return(ABloader)
 
-    
-
 
 
 class ABLoaderGeneric(ABLoader):
@@ -151,6 +149,66 @@ class ABLoaderGeneric(ABLoader):
             if self.with_metadata:
                 output.append(self.metadata)
             yield output[0] if len(output) == 1 else tuple(output)
+
+class ABLoaderAggregate(ABLoader):
+    """
+    Aggregate multiple ABLoader instances into a single iterable loader.
+    """
+
+    def __init__(
+        self,
+        ABloaders,
+        name=None,
+        metadata=None,
+    ):
+        if not ABloaders:
+            raise ValueError("ABloaders must contain at least one loader.")
+
+        super().__init__(
+            metadata=metadata,
+            with_context=True,
+            with_metadata=True,
+            name=name,
+        )
+
+        self.ABloaders = list(ABloaders)
+
+    def __iter__(self):
+        """Iterate sequentially over all underlying loaders."""
+        for ABloader in self.ABloaders:
+            yield from ABloader
+
+    def get_set_names(self):
+        """Return the ordered list of underlying dataset names."""
+        set_names = []
+
+        for ABloader in self.ABloaders:
+            set_name = ABloader.get_setname()
+
+            if set_name is None:
+                raise ValueError(
+                    "Each aggregated ABLoader must have a valid set name."
+                )
+
+            set_names.append(set_name)
+
+        return set_names
+
+    def get_target_arg(self):
+        """Return the common target configuration."""
+        target_args = [
+            ABloader.get_target_arg()
+            for ABloader in self.ABloaders
+        ]
+
+        reference = target_args[0]
+
+        if not all(target_arg == reference for target_arg in target_args[1:]):
+            raise ValueError(
+                "All aggregated ABLoaders must expose the same target_arg."
+            )
+
+        return reference
 
 class ABLoaderGenericArray(ABLoaderGeneric):
     """
@@ -364,3 +422,197 @@ class ABCvDataExperiment(ABDataExperiment):
             name=name)
         
 
+class ABConfiguredDataExperiment(ABDataExperiment):
+    """
+    Build an ABDataExperiment from a configuration dictionary defining
+    training sets and named evaluation sets.
+
+    Expected configuration format
+    -----------------------------
+    {
+        "train_set_1": [
+            {
+                "name": "test_simple_renamed",
+                "set_name": "test_simple",
+            },
+            {
+                "name": "healthy_vs_altered",
+                "set_name": ["healthy", "altered"],
+            },
+        ]
+    }
+    """
+
+    def __init__(
+        self,
+        storing,
+        experiment_config,
+        name="configured_experiment",
+    ):
+        ABtrainloader_list = []
+        ABtestloader_sets_list = []
+
+        for train_set_name, test_configs in experiment_config.items():
+
+            # Load training set
+            ABtrainloader = get_ABloader(
+                storing=storing,
+                set_name=train_set_name,
+            )
+
+            if ABtrainloader is None:
+                raise ValueError(
+                    f"Training ABLoader '{train_set_name}' not found."
+                )
+
+            ABtrainloader_list.append(ABtrainloader)
+
+            # Build associated test loaders
+            test_loaders = []
+
+            for test_config in test_configs:
+
+                evaluation_name = test_config["name"]
+                set_name = test_config["set_name"]
+
+                # Simple ABLoader
+                if isinstance(set_name, str):
+
+                    ABloader = get_ABloader(
+                        storing=storing,
+                        set_name=set_name,
+                    )
+
+                    if ABloader is None:
+                        raise ValueError(
+                            f"ABLoader '{set_name}' not found."
+                        )
+
+                    # Rename logical evaluation set
+                    ABloader.metadata["name"] = evaluation_name
+
+                # Aggregated ABLoader
+                elif isinstance(set_name, (list, tuple)):
+
+                    ABloaders = [
+                        get_ABloader(
+                            storing=storing,
+                            set_name=current_set_name,
+                        )
+                        for current_set_name in set_name
+                    ]
+
+                    missing_sets = [
+                        current_set_name
+                        for current_set_name, loader
+                        in zip(set_name, ABloaders)
+                        if loader is None
+                    ]
+
+                    if missing_sets:
+                        raise ValueError(
+                            f"Missing ABLoaders: {missing_sets}"
+                        )
+
+                    ABloader = ABLoaderAggregate(
+                        ABloaders=ABloaders,
+                        name=evaluation_name,
+                    )
+
+                else:
+                    raise TypeError(
+                        "'set_name' must be a string or a list of strings."
+                    )
+
+                test_loaders.append(ABloader)
+
+            ABtestloader_sets_list.append(test_loaders)
+
+        super().__init__(
+            ABtrainloader_list=ABtrainloader_list,
+            ABtestloader_sets_list=ABtestloader_sets_list,
+            name=name,
+        )
+
+def generate_cross_dataset_config(
+    train_root,
+    healthy_root,
+    perturbation_root,
+    cv_suffixes,
+    perturbations,
+    healthy_alias="healthy",
+):
+    """
+    Generate cross-dataset evaluation configurations.
+
+    Naming convention
+    -----------------
+    Train:
+        <train_root><cv_suffix>
+
+    Healthy reference:
+        <healthy_root><cv_suffix>
+
+    Perturbed dataset:
+        <perturbation_root><perturbation_variant><cv_suffix>
+
+    Parameters
+    ----------
+    train_root : str
+        Root name of training datasets.
+
+    healthy_root : str
+        Root name of healthy reference datasets.
+
+    perturbation_root : str
+        Root name of perturbed datasets.
+
+    cv_suffixes : list[str]
+        Cross-validation suffixes, e.g.
+        ["_set_1", "_set_2", "_set_3"].
+
+    perturbations : dict[str, str]
+        Mapping between perturbation aliases and name variants.
+
+        Example:
+        {
+            "const_low": "_const_low",
+            "noise": "_noise",
+        }
+
+    healthy_alias : str, default="healthy"
+        Alias used in logical evaluation names.
+
+    Returns
+    -------
+    dict
+        Experiment configuration compatible with ABConfiguredDataExperiment.
+    """
+    config = {}
+
+    for cv_suffix in cv_suffixes:
+
+        train_set = f"{train_root}{cv_suffix}"
+        healthy_set = f"{healthy_root}{cv_suffix}"
+
+        config[train_set] = []
+
+        for perturbation_alias, perturbation_variant in perturbations.items():
+
+            perturbed_set = (
+                f"{perturbation_root}"
+                f"{perturbation_variant}"
+                f"{cv_suffix}"
+            )
+
+            config[train_set].append(
+                {
+                    "name": f"{healthy_alias}_vs_{perturbation_alias}{cv_suffix}",
+                    "set_name": [
+                        healthy_set,
+                        perturbed_set,
+                    ],
+                }
+            )
+
+    return config

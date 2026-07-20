@@ -1,87 +1,87 @@
 """
-Time-series decomposition autoencoder models.
+LSTM autoencoder models.
 
-Provides deterministic and variational autoencoders combining structured
-level, trend, seasonal, and convolutional residual reconstruction components.
+Provides deterministic and variational recurrent autoencoders built from
+configurable LSTM sub-networks.
+
+Minimal Sequence Variational Autoencoder built by composing:
+    SequenceMixin + VariationalMixin + BaseAutoencoder
+
+Encoder (B,T,F) -> (z_mean,z_log_var,z) of shape (B,T,D)
+Decoder (B,T,D) -> (B,T,F)
+Training is handled by BaseAutoencoder via the forward_and_losses hook.
 """
-
-import tensorflow as tf
-import math
 import inspect
-from tensorflow.keras import layers,Model
-from tensorflow.keras.layers import Input
-from uqmodels.modelization.TF_estimator.vae.base_vae import BaseAutoencoder,VariationalBlock,BaseVariationalAutoencoder,BaseVariationalAutoencoder
-from uqmodels.modelization.TF_estimator.layers.convlayers import CNNSubNet
-from uqmodels.modelization.TF_estimator.layers.trendseasonlayers import TrendSeasonSubNet
-    
-def build_timevae_encoder(
+import tensorflow as tf
+from tensorflow.keras import layers, Model as KModel
+from uqmodels.modelization.TF_estimator.layers.seqlayers import LstmBlock,LSTMSubNet
+from uqmodels.modelization.TF_estimator.vae.base_vae import BaseAutoencoder,VariationalBlock,BaseVariationalAutoencoder,HybridMixin
+
+
+def build_lstmvae_encoder(
     dim_seq: int,
     dim_in: int,
     dim_z: int,
     variational: bool = True,
     cfg_subnet: dict | None = None,
     random_state: int | None = None,
-    name: str = "encoder_time",
+    name: str = "encoder_lstm",
 ) -> tf.keras.Model:
     """
-    Build a TimeVAE convolutional encoder.
+    Build an LSTM encoder.
 
     Architecture
     ------------
-    Input (B, dim_seq, dim_in)
-        -> CNNSubNet(mode="encoder")
+    Input (B, T, F)
+        -> LSTMSubNet(mode="encoder")
         -> optional VariationalBlock
 
     Parameters
     ----------
     dim_seq:
-        Input sequence length.
-
+        Sequence length.
     dim_in:
-        Number of input features per time step.
-
+        Input feature dimension per time step.
     dim_z:
         Latent dimension.
-
     variational:
         If True, applies VariationalBlock and returns
         ``(z_mean, z_log_var)``.
         Otherwise, returns a deterministic latent representation.
-
     cfg_subnet:
-        Optional configuration dictionary passed to CNNSubNet.
-
+        Optional configuration dictionary passed to LSTMSubNet.
     random_state:
-        Random seed propagated to the sub-network.
-
+        Random seed propagated to LSTMSubNet when not already configured.
     name:
         Keras model name.
 
     Returns
     -------
     tf.keras.Model
-        Configured TimeVAE encoder.
+        Configured LSTM encoder.
     """
 
-    encoder_input = layers.Input(
+    enc_in = layers.Input(
         shape=(dim_seq, dim_in),
         name="encoder_input",
     )
 
     if cfg_subnet is None:
-        cfg_subnet = CNNSubNet.make_config(
+        cfg_subnet = LSTMSubNet.make_config(
             mode="encoder",
             dim_seq=dim_seq,
             dim_in=dim_in,
             dim_z=dim_z,
-            num_channels=1,
-            list_filters=(32, 64, 128),
-            list_kernels=(3, 3, 3),
-            list_strides=(2, 2, 2),
-            block="1D",
             type_output=None,
             random_state=random_state,
-            name="timevae_encoder_subnet",
+            cfg_backbone=LstmBlock.make_config(
+                layers_size=(100, 50),
+                return_sequences=False,
+                return_state=False,
+                random_state=random_state,
+                name="encoder_lstm_block",
+            ),
+            name="encoder_lstm_subnet",
         )
 
     else:
@@ -114,15 +114,15 @@ def build_timevae_encoder(
 
         cfg_subnet.setdefault(
             "name",
-            "timevae_encoder_subnet",
+            "encoder_lstm_subnet",
         )
 
-    encoder_subnet = CNNSubNet(
+    subnet = LSTMSubNet(
         **cfg_subnet
     )
 
-    x = encoder_subnet(
-        encoder_input
+    x = subnet(
+        enc_in
     )
 
     if variational:
@@ -135,76 +135,127 @@ def build_timevae_encoder(
         outputs = x
 
     return tf.keras.Model(
-        inputs=encoder_input,
+        inputs=enc_in,
         outputs=outputs,
         name=name,
     )
 
-def build_timevae_decoder(
+def build_lstmvae_decoder(
     dim_seq: int,
     dim_out: int,
     dim_z: int,
-    cfg_time_subnet: dict | None = None,
-    cfg_cnn_subnet: dict | None = None,
-    use_residual_cnn: bool = True,
+    cfg_subnet: dict | None = None,
     random_state: int | None = None,
-    name: str = "decoder_time",
+    name: str = "decoder_lstm",
 ) -> tf.keras.Model:
+    """
+    Build an LSTM decoder.
 
-    decoder_input = layers.Input(
+    Architecture
+    ------------
+    Input (B, dim_z)
+        -> LSTMSubNet(mode="decoder")
+        -> Output (B, dim_seq, dim_out)
+
+    Parameters
+    ----------
+    dim_seq:
+        Output sequence length.
+
+    dim_out:
+        Number of reconstructed features per time step.
+
+    dim_z:
+        Latent input dimension.
+
+    cfg_subnet:
+        Optional configuration dictionary passed to LSTMSubNet.
+
+    random_state:
+        Random seed propagated to LSTMSubNet when not already configured.
+
+    name:
+        Keras model name.
+
+    Returns
+    -------
+    tf.keras.Model
+        Configured LSTM decoder.
+    """
+
+    dec_in = layers.Input(
         shape=(dim_z,),
         name="decoder_input",
     )
 
-    if cfg_time_subnet is None:
-        cfg_time_subnet = TrendSeasonSubNet.make_config(
+    if cfg_subnet is None:
+        cfg_subnet = LSTMSubNet.make_config(
+            mode="decoder",
             dim_seq=dim_seq,
             dim_out=dim_out,
             dim_z=dim_z,
-            name="time_subnet",
-        )
-
-    components = [
-        TrendSeasonSubNet(
-            **cfg_time_subnet
-        )(decoder_input)
-    ]
-
-    if use_residual_cnn:
-        if cfg_cnn_subnet is None:
-            cfg_cnn_subnet = CNNSubNet.make_config(
-                mode="decoder",
-                dim_seq=dim_seq,
-                dim_out=dim_out,
-                dim_z=dim_z,
-                block="1D",
+            type_output=None,
+            random_state=random_state,
+            cfg_backbone=LstmBlock.make_config(
+                layers_size=(50, 100),
+                return_sequences=True,
+                return_state=False,
                 random_state=random_state,
-                name="residual_cnn_subnet",
-            )
-
-        components.append(
-            CNNSubNet(
-                **cfg_cnn_subnet
-            )(decoder_input)
+                name="decoder_lstm_block",
+            ),
+            name="decoder_lstm_subnet",
         )
 
-    outputs = (
-        components[0]
-        if len(components) == 1
-        else layers.Add(
-            name="timevae_reconstruction"
-        )(components)
+    else:
+        cfg_subnet = dict(cfg_subnet)
+
+        cfg_subnet.setdefault(
+            "mode",
+            "decoder",
+        )
+
+        cfg_subnet.setdefault(
+            "dim_seq",
+            dim_seq,
+        )
+
+        cfg_subnet.setdefault(
+            "dim_out",
+            dim_out,
+        )
+
+        cfg_subnet.setdefault(
+            "dim_z",
+            dim_z,
+        )
+
+        cfg_subnet.setdefault(
+            "random_state",
+            random_state,
+        )
+
+        cfg_subnet.setdefault(
+            "name",
+            "decoder_lstm_subnet",
+        )
+
+    subnet = LSTMSubNet(
+        **cfg_subnet
+    )
+
+    outputs = subnet(
+        dec_in
     )
 
     return tf.keras.Model(
-        inputs=decoder_input,
+        inputs=dec_in,
         outputs=outputs,
         name=name,
     )
 
-class TimeAE(BaseAutoencoder):
+class LstmAE(BaseAutoencoder):
     """
-    Deterministic TimeVAE-inspired autoencoder.
+    Deterministic LSTM autoencoder.
 
     The encoder and decoder are fully configured through dedicated
     builder configuration dictionaries.
@@ -217,7 +268,7 @@ class TimeAE(BaseAutoencoder):
         self,
         cfg_encoder: dict,
         cfg_decoder: dict,
-        name: str = "time_ae",
+        name: str = "lstm_ae",
         **kwargs,
     ):
         frame_locals = inspect.currentframe().f_locals
@@ -242,18 +293,17 @@ class TimeAE(BaseAutoencoder):
             self.cfg_encoder
         )
 
-        self.encoder = build_timevae_encoder(
+        self.encoder = build_lstmvae_encoder(
             **self.cfg_encoder
         )
 
-        self.decoder = build_timevae_decoder(
+        self.decoder = build_lstmvae_decoder(
             **self.cfg_decoder
         )
 
-
-class TimeVAE(BaseVariationalAutoencoder):
+class LstmVAE(BaseVariationalAutoencoder):
     """
-    Variational TimeVAE-inspired autoencoder.
+    Variational LSTM autoencoder.
 
     The encoder and decoder are fully configured through dedicated
     builder configuration dictionaries.
@@ -267,7 +317,7 @@ class TimeVAE(BaseVariationalAutoencoder):
         cfg_encoder: dict,
         cfg_decoder: dict,
         kl_weight: float = 1.0,
-        name: str = "time_vae",
+        name: str = "lstm_vae",
         **kwargs,
     ):
         frame_locals = inspect.currentframe().f_locals
@@ -292,10 +342,10 @@ class TimeVAE(BaseVariationalAutoencoder):
             self.cfg_encoder
         )
 
-        self.encoder = build_timevae_encoder(
+        self.encoder = build_lstmvae_encoder(
             **self.cfg_encoder
         )
 
-        self.decoder = build_timevae_decoder(
+        self.decoder = build_lstmvae_decoder(
             **self.cfg_decoder
         )

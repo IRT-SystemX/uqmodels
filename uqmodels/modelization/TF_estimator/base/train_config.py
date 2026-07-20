@@ -39,7 +39,6 @@ def make_optimizer_default(
     # Default LR depending on task
     if learning_rate is None:
         learning_rate = 1e-3 if task == "deterministic" else 3e-4
-    name = name.lower()
 
     # ---- Adam ----
     if name == "adam":

@@ -9,7 +9,7 @@ import re
 import os
 
 
-def explore_csv_hierarchy(root_dir, depth_name_list=None,allowed_ext=('.csv')):
+def explore_csv_hierarchy(root_dir, depth_name_list=None,allowed_ext=('.csv','.parquet')):
     """
     Recursively explore a directory tree and list all CSV files
     along with their hierarchical structure.
@@ -258,7 +258,9 @@ def enrich_with_descriptors(
             results[gId] = row
 
         summary = pd.DataFrame.from_dict(results, orient="index")
-        enriched = df.merge(summary, left_on=Id_group, right_index=True, how="left")
+        enriched = df.copy()
+        for col in summary.columns:
+            enriched[col] = enriched[Id_group].map(summary[col])
 
     # --- Optional quantization (your existing behavior)
     if quantize:
@@ -394,6 +396,7 @@ def apply_perturbations(
 ) -> pd.DataFrame:
 
     # --- keep original order ---
+    df = df.reset_index()
     _order = df.index
 
     # --- global perturbations ---
@@ -407,7 +410,6 @@ def apply_perturbations(
     # --- groupwise perturbations ---
     dfs = []
     df_sorted = df.sort_values([Id_col, time_col], kind="mergesort")
-
     for gId, sub in df_sorted.groupby(Id_col, sort=False, group_keys=False):
         sub_pert = sub.copy()
         for name, fn in group_perturbation.items():
@@ -418,7 +420,6 @@ def apply_perturbations(
         dfs.append(sub_pert)
 
     out = pd.concat(dfs, axis=0)
-
     # --- restore original input order ---
     return out.loc[_order]
 
@@ -455,6 +456,7 @@ def augment_csvs_with_metadata(
 
     for _, row in metadata_df.iterrows():
         path = row['path']
+        print(path)
         
         # Read CSV
         storing, key = os.path.split(path)
