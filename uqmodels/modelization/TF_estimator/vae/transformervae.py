@@ -304,6 +304,37 @@ class TransformerAE(BaseAutoencoder):
         self.decoder = build_transformervae_decoder(
             **self.cfg_decoder
         )
+    
+    @staticmethod
+    def make_config(
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        cfg_encoder_subnet: dict,
+        cfg_decoder_subnet: dict,
+        random_state: int | None = None,
+        name: str = "transformer_ae",
+        **kwargs,
+    ) -> dict:
+        """
+        Build a TransformerAE configuration.
+
+        Notes
+        -----
+        Encoder and decoder subnet configurations should be created with
+        ``TransformerSubNet.make_config``.
+        """
+        return _make_transformer_autoencoder_config(
+            dim_seq=dim_seq,
+            dim_in=dim_in,
+            dim_z=dim_z,
+            cfg_encoder_subnet=cfg_encoder_subnet,
+            cfg_decoder_subnet=cfg_decoder_subnet,
+            variational=False,
+            random_state=random_state,
+            name=name,
+            **kwargs,
+        )
 
 
 class TransformerVAE(BaseVariationalAutoencoder):
@@ -354,3 +385,83 @@ class TransformerVAE(BaseVariationalAutoencoder):
         self.decoder = build_transformervae_decoder(
             **self.cfg_decoder
         )
+    
+    @staticmethod
+    def make_config(
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        cfg_encoder_subnet: dict,
+        cfg_decoder_subnet: dict,
+        kl_weight: float = 1.0,
+        random_state: int | None = None,
+        name: str = "transformer_vae",
+        **kwargs,
+    ) -> dict:
+        """
+        Build a TransformerVAE configuration.
+
+        Notes
+        -----
+        Encoder and decoder subnet configurations should be created with
+        ``TransformerSubNet.make_config``.
+        """
+        return _make_transformer_autoencoder_config(
+            dim_seq=dim_seq,
+            dim_in=dim_in,
+            dim_z=dim_z,
+            cfg_encoder_subnet=cfg_encoder_subnet,
+            cfg_decoder_subnet=cfg_decoder_subnet,
+            variational=True,
+            kl_weight=kl_weight,
+            random_state=random_state,
+            name=name,
+            **kwargs,
+        )
+
+
+def _make_transformer_autoencoder_config(
+    *,
+    dim_seq: int,
+    dim_in: int,
+    dim_z: int,
+    cfg_encoder_subnet: dict,
+    cfg_decoder_subnet: dict,
+    variational: bool,
+    random_state: int | None = None,
+    kl_weight: float | None = None,
+    name: str,
+    **kwargs,
+) -> dict:
+    """
+    Assemble a Transformer autoencoder configuration.
+
+    Build encoder and decoder configurations with
+    ``TransformerSubNet.make_config``.
+    """
+    config = {
+        "cfg_encoder": {
+            "dim_seq": dim_seq,
+            "dim_in": dim_in,
+            "dim_z": dim_z,
+            "variational": variational,
+            "cfg_subnet": dict(cfg_encoder_subnet),
+            "random_state": random_state,
+            "name": "transformer_encoder",
+        },
+        "cfg_decoder": {
+            "dim_seq": dim_seq,
+            "dim_out": dim_in,
+            "dim_z": dim_z,
+            "cfg_subnet": dict(cfg_decoder_subnet),
+            "random_state": random_state,
+            "name": "transformer_decoder",
+        },
+        "name": name,
+        **kwargs,
+    }
+
+    if kl_weight is not None:
+        config["kl_weight"] = kl_weight
+
+    return config

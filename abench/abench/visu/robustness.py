@@ -43,7 +43,6 @@ def filter_indicator_data(
     # Nettoyage NaN / inf
     valid = np.isfinite(meta_values) & np.isfinite(indicator_values)
     meta_values = apply_mask(meta_values, valid)
-    print(indicator_values,len(valid))
     indicator_values = apply_mask(indicator_values, valid)
 
     if meta_values.size == 0:
@@ -158,7 +157,6 @@ def compute_indicator_curve(
     """
 
     # 1) filtrage / masking / nettoyage
-    print(indicator_values)
     meta_values_f, indicator_values_f = filter_indicator_data(
         meta_values=meta_values,
         indicator_values=indicator_values,

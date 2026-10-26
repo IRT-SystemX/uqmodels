@@ -82,8 +82,14 @@ class BaseKModel(keras.Model):
             batch_size = self.training_params['batch_size']
         else:
             batch_size =  64
+    
+
+        if(type(optimizer) is str):
+            optimizer = make_optimizer_default(optimizer)
+        else:
+            optimizer = make_optimizer_default(**optimizer)
          
-        self.compile_kwargs = {"optimizer": make_optimizer_default(**optimizer),
+        self.compile_kwargs = {"optimizer": optimizer,
                                "loss": loss,
                                "metrics": []}
          
@@ -99,7 +105,7 @@ class BaseKModel(keras.Model):
         if fit_kwargs:
             self.fit_kwargs.update(fit_kwargs)
 
-        print(self.compile_kwargs['loss'])
+
 
         self.loss_fn  = self.compile_kwargs['loss']
 

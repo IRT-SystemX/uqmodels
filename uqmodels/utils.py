@@ -1,3 +1,4 @@
+from importlib.util import find_spec
 import math
 import sys
 from copy import deepcopy
@@ -754,9 +755,19 @@ def dimensional_reduction(data, mode="umap", reducer=None, fit=True, **kwargs):
                 kwargs["n_neighbors"] = 50
             if "min_dist" not in kwargs:
                 kwargs["min_dist"] = 0.01
-            # reducer = umap.UMAP(**kwargs)
+            try:
+                import umap
+                reducer = umap.UMAP(**kwargs)
+            except ImportError:
+                print("UMAP is not installed.")
 
         elif mode == "tsne":
+            if "perplexity" not in kwargs:
+                kwargs["perplexity"] = 50
+            if "early_exaggeration" not in kwargs:
+                kwargs["early_exaggeration"] = 15
+            if "max_iter" not in kwargs:
+                kwargs["max_iter"] = 1001            
             reducer = TSNE(**kwargs)
 
         elif mode == "pca":

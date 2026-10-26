@@ -123,8 +123,7 @@ class TransformerEncoder(layers.Layer):
         dense2 = config.pop("dense2")
 
         obj = cls(**config)
-        print(dense1)
-        print(att)
+ 
         obj.att = tf.keras.utils.deserialize_keras_object(att)
         obj.layernorm1 = tf.keras.utils.deserialize_keras_object(layernorm1)
         obj.layernorm2 = tf.keras.utils.deserialize_keras_object(layernorm2)
@@ -264,7 +263,7 @@ class TransformerDecoder(layers.Layer):
         ffn_dropout = config.pop("ffn_dropout")
         dense1 = config.pop("dense1")
         dense2 = config.pop("dense2")
-        print(config)
+        
         obj = cls(**config)
 
         obj.layernorm1 = tf.keras.utils.deserialize_keras_object(layernorm1)

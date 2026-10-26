@@ -249,6 +249,43 @@ class TimeAE(BaseAutoencoder):
         self.decoder = build_timevae_decoder(
             **self.cfg_decoder
         )
+    
+    @staticmethod
+    def make_config(
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        cfg_encoder_subnet: dict,
+        cfg_time_subnet: dict,
+        cfg_residual_cnn_subnet: dict | None = None,
+        use_residual_cnn: bool = True,
+        random_state: int | None = None,
+        name: str = "time_ae",
+        **kwargs,
+    ) -> dict:
+        """
+        Build a TimeAE configuration.
+
+        Notes
+        -----
+        Use:
+        - CNNSubNet.make_config for cfg_encoder_subnet;
+        - TrendSeasonSubNet.make_config for cfg_time_subnet;
+        - CNNSubNet.make_config for cfg_residual_cnn_subnet.
+        """
+        return _make_time_autoencoder_config(
+            dim_seq=dim_seq,
+            dim_in=dim_in,
+            dim_z=dim_z,
+            cfg_encoder_subnet=cfg_encoder_subnet,
+            cfg_time_subnet=cfg_time_subnet,
+            cfg_residual_cnn_subnet=cfg_residual_cnn_subnet,
+            variational=False,
+            use_residual_cnn=use_residual_cnn,
+            random_state=random_state,
+            name=name,
+            **kwargs,
+        )
 
 
 class TimeVAE(BaseVariationalAutoencoder):
@@ -299,3 +336,104 @@ class TimeVAE(BaseVariationalAutoencoder):
         self.decoder = build_timevae_decoder(
             **self.cfg_decoder
         )
+    
+    @staticmethod
+    def make_config(
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        cfg_encoder_subnet: dict,
+        cfg_time_subnet: dict,
+        cfg_residual_cnn_subnet: dict | None = None,
+        use_residual_cnn: bool = True,
+        kl_weight: float = 1.0,
+        random_state: int | None = None,
+        name: str = "time_vae",
+        **kwargs,
+    ) -> dict:
+        """
+        Build a TimeVAE configuration.
+
+        Notes
+        -----
+        Use:
+        - CNNSubNet.make_config for cfg_encoder_subnet;
+        - TrendSeasonSubNet.make_config for cfg_time_subnet;
+        - CNNSubNet.make_config for cfg_residual_cnn_subnet.
+        """
+        return _make_time_autoencoder_config(
+            dim_seq=dim_seq,
+            dim_in=dim_in,
+            dim_z=dim_z,
+            cfg_encoder_subnet=cfg_encoder_subnet,
+            cfg_time_subnet=cfg_time_subnet,
+            cfg_residual_cnn_subnet=cfg_residual_cnn_subnet,
+            variational=True,
+            use_residual_cnn=use_residual_cnn,
+            kl_weight=kl_weight,
+            random_state=random_state,
+            name=name,
+            **kwargs,
+        )
+
+def _make_time_autoencoder_config(
+    *,
+    dim_seq: int,
+    dim_in: int,
+    dim_z: int,
+    cfg_encoder_subnet: dict,
+    cfg_time_subnet: dict,
+    cfg_residual_cnn_subnet: dict | None,
+    variational: bool,
+    use_residual_cnn: bool = True,
+    random_state: int | None = None,
+    kl_weight: float | None = None,
+    name: str,
+    **kwargs,
+) -> dict:
+    """
+    Assemble a TimeAE or TimeVAE configuration.
+
+    Build sub-network configurations with:
+    - CNNSubNet.make_config for the encoder;
+    - TrendSeasonSubNet.make_config for structured reconstruction;
+    - CNNSubNet.make_config for the optional residual decoder.
+    """
+    if use_residual_cnn and cfg_residual_cnn_subnet is None:
+        raise ValueError(
+            "cfg_residual_cnn_subnet is required when "
+            "use_residual_cnn=True."
+        )
+
+    config = {
+        "cfg_encoder": {
+            "dim_seq": dim_seq,
+            "dim_in": dim_in,
+            "dim_z": dim_z,
+            "variational": variational,
+            "cfg_subnet": dict(cfg_encoder_subnet),
+            "random_state": random_state,
+            "name": "encoder_time",
+        },
+        "cfg_decoder": {
+            "dim_seq": dim_seq,
+            "dim_out": dim_in,
+            "dim_z": dim_z,
+            "cfg_time_subnet": dict(cfg_time_subnet),
+            "cfg_cnn_subnet": (
+                None
+                if cfg_residual_cnn_subnet is None
+                else dict(cfg_residual_cnn_subnet)
+            ),
+            "use_residual_cnn": use_residual_cnn,
+            "random_state": random_state,
+            "name": "decoder_time",
+        },
+        "name": name,
+        **kwargs,
+    }
+
+    if kl_weight is not None:
+        config["kl_weight"] = kl_weight
+
+    return config

@@ -60,7 +60,7 @@ class LstmBlock(layers.Layer):
         activation: str | list[str] | tuple[str, ...] | None = "tanh",
         recurrent_activation: str = "sigmoid",
         reg_W: tuple[float, float] = (1e-5, 1e-5),
-        return_sequences: bool = True,
+        return_sequences: bool | None = None,
         return_state: bool = False,
         mc_dropout: bool = True,
         mc_dropout_rec: bool = False,
@@ -79,7 +79,8 @@ class LstmBlock(layers.Layer):
         self.recurrent_activation = recurrent_activation
         self.reg_W = tuple(reg_W)
 
-        self.return_sequences = bool(return_sequences)
+        if return_sequences is None:
+            return_sequences = self.return_sequences
         self.return_state = bool(return_state)
 
         self.mc_dropout = bool(mc_dropout)
@@ -117,11 +118,8 @@ class LstmBlock(layers.Layer):
                     dropout=self.dp_rec,
                     recurrent_dropout=self.dp_rec,
 
-                    return_sequences=(
-                        True
-                        if not is_last_layer
-                        else self.return_sequences
-                    ),
+                    # Keep temporal dimension through the whole stack.
+                    return_sequences=True,
                     return_state=(
                         self.return_state
                         if is_last_layer
@@ -201,25 +199,25 @@ class LstmBlock(layers.Layer):
     def call(
         self,
         inputs,
-        training=False,
+        training: bool = False,
+        return_sequences: bool = True,
     ):
         """
         Run the LSTM stack.
 
-        External and recurrent Monte Carlo dropout mechanisms are controlled
-        independently through ``mc_dropout`` and ``mc_dropout_rec``.
+        Parameters
+        ----------
+        return_sequences:
+            If True, return the full sequence ``(batch, time, features)``.
+            Otherwise, return the last timestep ``(batch, features)``.
         """
-
         x = inputs
         states = None
 
         for idx, lstm_layer in enumerate(self.lstm_layers):
-
             output = lstm_layer(
                 x,
-                training=(
-                    training or self.mc_dropout_rec
-                ),
+                training=training or self.mc_dropout_rec,
             )
 
             if isinstance(output, (list, tuple)):
@@ -233,10 +231,11 @@ class LstmBlock(layers.Layer):
             if dropout_layer is not None:
                 x = dropout_layer(
                     x,
-                    training=(
-                        training or self.mc_dropout
-                    ),
+                    training=training or self.mc_dropout,
                 )
+
+        if not return_sequences:
+            x = x[:, -1, :]
 
         if self.return_state:
             if states is None:
@@ -585,7 +584,7 @@ class LSTMSubNet(layers.Layer):
         x = self.lstm_block(
             inputs,
             training=training,
-        )
+            return_sequences=False)
 
         if self.mlp_block is not None:
             x = self.mlp_block(
@@ -628,6 +627,20 @@ class LSTMSubNet(layers.Layer):
         )
 
         return x
+
+    def _call_encoder_seq(
+        self,
+        inputs,
+        training=False):
+        """Run encoder forward pass."""
+
+        x = self.lstm_block(
+            inputs,
+            training=training,
+            return_sequences=True)
+
+        return x
+
 
     # ------------------------------------------------------------------
     # Properties

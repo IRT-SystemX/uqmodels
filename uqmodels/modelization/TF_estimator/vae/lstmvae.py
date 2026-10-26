@@ -300,6 +300,38 @@ class LstmAE(BaseAutoencoder):
         self.decoder = build_lstmvae_decoder(
             **self.cfg_decoder
         )
+    
+    @staticmethod
+    def make_config(
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        cfg_encoder_subnet: dict,
+        cfg_decoder_subnet: dict,
+        random_state: int | None = None,
+        name: str = "lstm_ae",
+        **kwargs,
+    ) -> dict:
+        """
+        Build an LstmAE configuration.
+
+        Notes
+        -----
+        Encoder and decoder subnet configurations should be created with
+        ``LSTMSubNet.make_config``.
+        """
+        return _make_lstm_autoencoder_config(
+            dim_seq=dim_seq,
+            dim_in=dim_in,
+            dim_z=dim_z,
+            cfg_encoder_subnet=cfg_encoder_subnet,
+            cfg_decoder_subnet=cfg_decoder_subnet,
+            variational=False,
+            random_state=random_state,
+            name=name,
+            **kwargs,
+        )
+       
 
 class LstmVAE(BaseVariationalAutoencoder):
     """
@@ -349,3 +381,82 @@ class LstmVAE(BaseVariationalAutoencoder):
         self.decoder = build_lstmvae_decoder(
             **self.cfg_decoder
         )
+
+    @staticmethod
+    def make_config(
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        cfg_encoder_subnet: dict,
+        cfg_decoder_subnet: dict,
+        kl_weight: float = 1.0,
+        random_state: int | None = None,
+        name: str = "lstm_vae",
+        **kwargs,
+    ) -> dict:
+        """
+        Build an LstmVAE configuration.
+
+        Notes
+        -----
+        Encoder and decoder subnet configurations should be created with
+        ``LSTMSubNet.make_config``.
+        """
+        return _make_lstm_autoencoder_config(
+            dim_seq=dim_seq,
+            dim_in=dim_in,
+            dim_z=dim_z,
+            cfg_encoder_subnet=cfg_encoder_subnet,
+            cfg_decoder_subnet=cfg_decoder_subnet,
+            variational=True,
+            random_state=random_state,
+            kl_weight=kl_weight,
+            name=name,
+            **kwargs,
+        )
+
+def _make_lstm_autoencoder_config(
+    *,
+    dim_seq: int,
+    dim_in: int,
+    dim_z: int,
+    cfg_encoder_subnet: dict,
+    cfg_decoder_subnet: dict,
+    variational: bool,
+    random_state: int | None = None,
+    kl_weight: float | None = None,
+    name: str,
+    **kwargs,
+) -> dict:
+    """
+    Assemble an LSTM autoencoder configuration.
+
+    Build ``cfg_encoder_subnet`` and ``cfg_decoder_subnet`` with
+    ``LSTMSubNet.make_config``.
+    """
+    config = {
+        "cfg_encoder": {
+            "dim_seq": dim_seq,
+            "dim_in": dim_in,
+            "dim_z": dim_z,
+            "variational": variational,
+            "cfg_subnet": dict(cfg_encoder_subnet),
+            "random_state": random_state,
+            "name": "encoder_lstm",
+        },
+        "cfg_decoder": {
+            "dim_seq": dim_seq,
+            "dim_out": dim_in,
+            "dim_z": dim_z,
+            "cfg_subnet": dict(cfg_decoder_subnet),
+            "random_state": random_state,
+            "name": "decoder_lstm",
+        },
+        "name": name,
+        **kwargs,
+    }
+
+    if kl_weight is not None:
+        config["kl_weight"] = kl_weight
+
+    return config

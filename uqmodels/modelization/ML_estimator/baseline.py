@@ -413,7 +413,6 @@ class REGML_UQEstimator(MeanVarUQEstimator):
         if params is not None:
             # IF forecast model is tunned, skip it's tuning step.
             if not (self.pretuned):
-                print(X.shape, y.shape)
                 self.estimator = super()._tuning(
                     self.estimator, X, y, n_esti, folds, score, params
                 )
@@ -424,7 +423,7 @@ class REGML_UQEstimator(MeanVarUQEstimator):
             # Build residuals and tune bias model by random search on given greed parameters.
             residual = np.squeeze(y) - np.squeeze(pred)
             residual = residual.reshape(y.shape)
-            print(X.shape, residual.shape)
+
             if self.use_biais:
                 self.estimator_bias = super()._tuning(
                     self.estimator_bias,

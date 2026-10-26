@@ -24,6 +24,7 @@ class UniversalKLScheduler(tf.keras.callbacks.Callback):
                  cycle_length=20,
                  free_bits_lambda=0.2,
                  tf_steps=5000,
+                 no_beta_step=30,
                  global_step=None):
 
         super().__init__()
@@ -34,7 +35,7 @@ class UniversalKLScheduler(tf.keras.callbacks.Callback):
         self.cycle_length = cycle_length
         self.free_bits_lambda = free_bits_lambda
         self.tf_steps = tf_steps
-
+        self.no_beta_step = no_beta_step
         # pour la stratégie tf_schedule
         self.global_step = global_step or tf.Variable(0, trainable=False)
 

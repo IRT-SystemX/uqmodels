@@ -266,6 +266,39 @@ class CnnAE(BaseAutoencoder):
             **self.cfg_decoder
         )
 
+    @staticmethod
+    def make_config(
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        cfg_encoder_subnet: dict,
+        cfg_decoder_subnet: dict,
+        num_channels: int = 1,
+        random_state: int | None = None,
+        name: str = "conv_ae",
+        **kwargs) -> dict:
+        """
+        Build a CnnAE configuration.
+
+        Notes
+        -----
+        Encoder and decoder configurations should be created with
+        CNNSubNet.make_config.
+        """
+        return _make_cnn_autoencoder_config(
+            dim_seq=dim_seq,
+            dim_in=dim_in,
+            dim_z=dim_z,
+            cfg_encoder_subnet=cfg_encoder_subnet,
+            cfg_decoder_subnet=cfg_decoder_subnet,
+            variational=False,
+            num_channels=num_channels,
+            random_state=random_state,
+            name=name,
+            **kwargs,
+        )
+        
+
 class CnnVAE(BaseVariationalAutoencoder):
     """
     Convolutional variational autoencoder.
@@ -311,3 +344,81 @@ class CnnVAE(BaseVariationalAutoencoder):
         self.decoder = build_cnnvae_decoder(
             **self.cfg_decoder
         )
+    
+    @staticmethod
+    def make_config(
+        dim_seq: int,
+        dim_in: int,
+        dim_z: int,
+        cfg_encoder_subnet: dict,
+        cfg_decoder_subnet: dict,
+        num_channels: int = 1,
+        random_state: int | None = None,
+        name: str = "conv_vae",
+        **kwargs,
+    ) -> dict:
+        """
+        Build a CnnVAE configuration.
+
+        Notes
+        -----
+        Encoder and decoder configurations should be created with
+        CNNSubNet.make_config.
+        """
+        return _make_cnn_autoencoder_config(
+            dim_seq=dim_seq,
+            dim_in=dim_in,
+            dim_z=dim_z,
+            cfg_encoder_subnet=cfg_encoder_subnet,
+            cfg_decoder_subnet=cfg_decoder_subnet,
+            variational=True,
+            num_channels=num_channels,
+            random_state=random_state,
+            name=name,
+            **kwargs,
+        )
+
+def _make_cnn_autoencoder_config(
+    *,
+    dim_seq: int,
+    dim_in: int,
+    dim_z: int,
+    cfg_encoder_subnet: dict,
+    cfg_decoder_subnet: dict,
+    variational: bool,
+    num_channels: int = 1,
+    random_state: int | None = None,
+    name: str,
+    **kwargs,
+) -> dict:
+    """
+    Assemble a CNN autoencoder configuration.
+
+    Use CNNSubNet.make_config to build cfg_encoder_subnet and
+    cfg_decoder_subnet.
+    """
+    return {
+        "cfg_encoder": {
+            "dim_seq": dim_seq,
+            "dim_in": dim_in,
+            "dim_z": dim_z,
+            "num_channels": num_channels,
+            "variational": variational,
+            "cfg_subnet": dict(cfg_encoder_subnet),
+            "random_state": random_state,
+            "name": "cnn_encoder",
+            "basic": False,
+        },
+        "cfg_decoder": {
+            "dim_seq": dim_seq,
+            "dim_out": dim_in,
+            "dim_z": dim_z,
+            "num_channels": num_channels,
+            "cfg_subnet": dict(cfg_decoder_subnet),
+            "random_state": random_state,
+            "name": "cnn_decoder",
+            "basic": False,
+        },
+        "name": name,
+        **kwargs,
+    }

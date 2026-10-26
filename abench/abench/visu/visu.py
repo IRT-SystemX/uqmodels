@@ -10,8 +10,65 @@ from abench.store.store import read,write
 import abench.store.api as api
 from abench.store.api import extract_tabular_data
 from typing import Any, Dict, Iterable, List, Tuple, Union, Optional
+from matplotlib.offsetbox import AnnotationBbox, TextArea, HPacker
+import re
+import string
+
+# Helper affichage matrix values
+def infer_decimals(value_fmt: str) -> int:
+    """Extract the number of decimal places from a fixed-point format string."""
+    formatter = string.Formatter()
+    _, _, format_spec, _ = next(formatter.parse(value_fmt))
+
+    match = re.search(r"\.(\d+)f$", format_spec)
+    if not match:
+        raise ValueError(f"Unsupported format: {value_fmt!r}")
+    return int(match.group(1))
+
+def add_matrix_annotation(
+    ax,
+    x,
+    y,
+    value_text,
+    uncertainty_text,
+    fontsize=10,
+    uncertainty_scale=0.7,
+):
+    """Add a centered matrix annotation with a smaller uncertainty."""
+    value_box = TextArea(
+        value_text,
+        textprops={"fontsize": fontsize},
+    )
+
+    uncertainty_box = TextArea(
+        f"({uncertainty_text})",
+        textprops={"fontsize": fontsize * uncertainty_scale},
+    )
+
+    annotation = HPacker(
+        children=[value_box, uncertainty_box],
+        align="center",
+        pad=0,
+        sep=1,
+    )
+
+    ax.add_artist(
+        AnnotationBbox(
+            annotation,
+            (x, y),
+            xycoords="data",
+            frameon=False,
+            box_alignment=(0.5, 0.5),
+        )
+    )
 
 # Encapsulated visualitation format :
+def format_value_uncertainty(value: float, uncertainty: float, decimals: int = 3) -> str:
+    """Format a value and uncertainty using compact parenthetical notation."""
+    value_str = f"{value:.{decimals}f}"
+    uncertainty_digits = round(uncertainty * 10**decimals)
+
+    return f"{value_str}({uncertainty_digits})"
 
 
 def print_agg_result(storing,agg_name,component_name,list_metrics):
@@ -813,6 +870,8 @@ def plot_grid_mean_std(
       - col_labels          -> ticks X internes (taille l)
       - row_labels          -> ticks Y internes (taille h)
     """
+    if (vmin is not None) or (vmax is not None):
+        color_scale = 'custom'
     means = np.asarray(means)
     if means.ndim != 4:
         raise ValueError("`means` doit avoir la forme (g_h, g_l, h, l).")
@@ -842,6 +901,7 @@ def plot_grid_mean_std(
         low, high = means - std_mult * stds, means + std_mult * stds
         global_vmin, global_vmax = np.nanmin(low), np.nanmax(high)
     elif color_scale == "custom":
+
         if vmin is None or vmax is None:
             raise ValueError("Avec 'custom', fournir vmin et vmax.")
         global_vmin, global_vmax = float(vmin), float(vmax)
@@ -905,14 +965,32 @@ def plot_grid_mean_std(
                 for y in range(h):
                     for x in range(l):
                         m_val = m_ij[y, x]
+                        
                         if np.isnan(m_val):
                             text = "NaN"
                         else:
                             if s_ij is None or np.isnan(s_ij[y, x]):
                                 text = f"{value_fmt.format(m_val)}"
                             else:
-                                text = f"{value_fmt.format(m_val)}±{value_fmt.format(s_ij[y, x])}"
-                        ax.text(x, y, text, ha="center", va="center", fontsize=annotate_fontsize)
+                                decimals = infer_decimals(value_fmt)
+                                text = (
+                                    f"{value_fmt.format(m_val)}"
+                                    f"({round(s_ij[y, x] * 10**decimals)})"
+                                )
+                                #text = f"{value_fmt.format(m_val)}±{value_fmt.format(s_ij[y, x])}"
+                        #ax.text(x, y, text, ha="center", va="center", fontsize=annotate_fontsize)
+                        decimals = infer_decimals(value_fmt)
+                        value_text = value_fmt.format(m_val)
+                        uncertainty_text = str(round(s_ij[y, x] * 10**decimals))
+                        add_matrix_annotation(
+                            ax,
+                            x,
+                            y,
+                            value_text,
+                            uncertainty_text,
+                            fontsize=annotate_fontsize)
+
+
 
     # colorbar commune
     if show_colorbar:
