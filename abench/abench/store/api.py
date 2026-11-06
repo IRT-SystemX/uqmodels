@@ -35,16 +35,16 @@ def filter_experiment_plan(experiment_plan, train_filters=None, test_filters=Non
 def store_list_id(storing,components_name_list=None,trainset_name_list=None,testset_name_list=None):
     list_to_store = []
     if(components_name_list is not None):
-        list_to_store.append((["src_data","components_name_list"], components_name_list))
+        list_to_store.append((["src_data","components_name_list.p"], components_name_list))
     if(trainset_name_list is not None):
-        list_to_store.append((["src_data","trainset_name_list"], trainset_name_list))
+        list_to_store.append((["src_data","trainset_name_list.p"], trainset_name_list))
     if(testset_name_list is not None):
-        list_to_store.append((["src_data","testset_name_list"], testset_name_list))
+        list_to_store.append((["src_data","testset_name_list.p"], testset_name_list))
     for (keys, values) in list_to_store:
         write(storing, keys, values)
         
 def get_list_id(storing):
-    list_to_read = [["src_data","components_name_list"],["src_data","trainset_name_list"],["src_data","testset_name_list"]]
+    list_to_read = [["src_data","components_name_list.p"],["src_data","trainset_name_list.p"],["src_data","testset_name_list.p"]]
     components_name_list, trainset_name_list, testset_name_list = [read(storing, keys) for keys in list_to_read]
     if(components_name_list is None):
         components_name_list = []
@@ -88,30 +88,64 @@ def get_subcomponent(storing,trainset_name,component_name,subcomponent_name,subc
     return(component)
 
 # store_ABDataExperiment
-def store_ABDataExperiment(storing,ABDataExperiment):
-    write(storing, ["src_data",ABDataExperiment.name], ABDataExperiment)
+from copy import deepcopy
+from itertools import chain
+
+
+def store_ABDataExperiment(
+    storing,
+    ABDataExperiment,
+    store_loaders: bool = False,
+):
+    """
+    Store an ABDataExperiment and optionally its associated DataLoaders.
+
+    Loaders are stored only once, based on their unique set names.
+    """
+    write(storing, ["src_data", ABDataExperiment.name+'.p'], ABDataExperiment)
+
     Exp_plan = ABDataExperiment.get_experiment_plan()
-    update_store_list_id(storing,Exp_plan=Exp_plan,components_name_list=[])
+    update_store_list_id(
+        storing,
+        Exp_plan=Exp_plan,
+        components_name_list=[],
+    )
 
+    if not store_loaders:
+        return
 
+    stored = set()
+
+    for ABtrainloader, ABtestloader_set in deepcopy(ABDataExperiment):
+        for loader in chain((ABtrainloader,), ABtestloader_set):
+            set_name = loader.get_setname()
+
+            if not isinstance(set_name, str) or not set_name:
+                raise ValueError(f"Invalid DataLoader name: {set_name!r}")
+
+            if set_name in stored:
+                continue
+
+            store_ABloader(storing, set_name, loader)
+            stored.add(set_name)
 
 def get_ABDataExperiment(storing,name):
-    return(read(storing, ["src_data",name]))
+    return(read(storing, ["src_data",name+".p"]))
 
 
 # ABdata
 
 def store_ABloader(storing,set_name,ABloader):
-    write(storing, ["src_data", set_name, "ABloader"], ABloader)
+    write(storing, ["src_data", set_name, "ABloader.p"], ABloader)
 
 def get_ABloader(storing,set_name):
-    ABloader = read(storing, ["src_data", set_name, "ABloader"])
+    ABloader = read(storing, ["src_data", set_name, "ABloader.p"])
     return(ABloader)
 
 #Output
 def store_output(storing,trainset_name,component_name,set_name,output,time_pred=0,time_fit=None):
-    list_to_store = [([trainset_name,component_name,set_name,"dictperf"],{"time_fit": time_fit,"time_pred": time_pred}),
-                        ([trainset_name,component_name, set_name, "output"], output)]
+    list_to_store = [([trainset_name,component_name,set_name,"dictperf.p"],{"time_fit": time_fit,"time_pred": time_pred}),
+                        ([trainset_name,component_name, set_name, "output.p"], output)]
 
     for (keys, values) in list_to_store:
         write(storing, keys, values)
@@ -172,7 +206,7 @@ def get_output(
                 trainset_name,
                 component_name,
                 set_name,
-                "output",
+                "output.p",
             ],
         )
 
@@ -214,7 +248,7 @@ def store_dictperf(storing,trainset_name=None,component_name=None,set_name=None,
         keys.append(component_name)
     if(set_name is not None):
         keys.append(set_name)
-    keys.append("dictperf")
+    keys.append("dictperf.p")
     write(storing, keys, dictperf)
 
 def get_dictperf(storing,trainset_name=None,component_name=None,set_name=None,agg_name=None):
@@ -237,7 +271,7 @@ def get_dictperf(storing,trainset_name=None,component_name=None,set_name=None,ag
         keys.append(component_name)
     if(set_name is not None):
         keys.append(set_name)
-    keys.append("dictperf") 
+    keys.append("dictperf.p") 
     try:
         dictperf = read(storing, keys=keys)
     except:
@@ -255,7 +289,8 @@ def get_dictperf(storing,trainset_name=None,component_name=None,set_name=None,ag
 def get_data(storing, set_name=None, keep_X=False):
     """
     Load and aggregate dataset content.
-
+    -> X, y, context, metadata
+    
     `storing` can be either:
     - a storage backend;
     - an ABLoader-compatible object.
@@ -347,6 +382,7 @@ def get_data_and_output(
 ):
     """
     Load dataset content and corresponding component outputs.
+    -> X, y, output, context, metadata
     """
 
     output = get_output(

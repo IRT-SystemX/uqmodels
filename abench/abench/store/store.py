@@ -16,6 +16,9 @@ Goal:
 Enable flexible, backend-agnostic storage management so the same logic
 can operate seamlessly in memory or on persistent filesystems.
 """
+import tempfile
+import warnings
+from typing import Literal
 
 import os, pickle, joblib
 import pandas as pd
@@ -24,6 +27,13 @@ from pathlib import Path
 # -------------------------------------------------------------------
 #  BAS NIVEAU : write / read d'un seul fichier
 # -------------------------------------------------------------------
+
+_FORMATS = {
+    ".joblib": "joblib",
+    ".p": "pickle",
+    ".pickle": "pickle",
+    ".parquet": "parquet",
+    ".csv": "csv"}
 
 def _is_sklearn(obj) -> bool:
     """Detect sklearn-like objects (very lightweight heuristic)."""
@@ -40,22 +50,18 @@ def _parquet_engine() -> str | None:
         try: import fastparquet; return "fastparquet"
         except Exception: return None
 
-def _choose_format(value, suffix: str | None):
-    """
-    Decide (kind, suffix). Precedence:
-      1) explicit valid suffix wins
-      2) sklearn -> joblib; DataFrame -> parquet; else pickle
-    """
-    if suffix:
-        s = suffix.lower()
-        if s == ".joblib": return "joblib", ".joblib"
-        if s in (".p", ".pickle"): return "pickle", ".p"
-        if s == ".parquet": return "parquet", ".parquet"
-        if s == ".csv": return "csv", ".csv"
-        # unknown -> fallback to type inference
-    if _is_sklearn(value): return "joblib", ".joblib"
-    if isinstance(value, pd.DataFrame): return "parquet", ".parquet"
-    return "pickle", ".p"
+def _choose_format(Path: Path | None) -> str:
+    """Resolve the storage format from an explicit file extension."""
+
+    if not Path.suffix:
+        raise ValueError(f"File extension is required for disk storage {str(Path)}")
+
+    suffix = Path.suffix.lower()
+
+    if suffix not in _FORMATS:
+        raise ValueError(f"Unsupported file extension: {str(Path)}")
+
+    return _FORMATS[suffix]
 
 def _candidates(base: Path):
     """Try these when no suffix is provided."""
@@ -67,37 +73,148 @@ def _candidates(base: Path):
         base.with_suffix(".csv"),
     ]
 
-# ------------------------- write function ------------------------ #
 
-def write_function(value, filename):
-    """
-    Write `value` to disk:
-      sklearn -> .joblib
-      DataFrame -> .parquet
-      else -> .p
-    If filename already has a known suffix, respect it.
-    """
-    path = Path(filename)
-    kind, suf = _choose_format(value, path.suffix if path.suffix else None)
-    if path.suffix.lower() != suf:
-        path = path.with_suffix(suf)
-    path.parent.mkdir(parents=True, exist_ok=True)
+def _serialize(value, path: Path, kind: str) -> None:
+    """Serialize an object using the selected storage format."""
 
     if kind == "joblib":
         joblib.dump(value, path)
-    elif kind == "pickle":
-        with open(path, "wb") as f:
-            pickle.dump(value, f, protocol=pickle.HIGHEST_PROTOCOL)
-    elif kind == "parquet":
-        if not isinstance(value, pd.DataFrame):
-            raise TypeError("Parquet writing requires a pandas DataFrame.")
-        value.to_parquet(path, engine=_parquet_engine(), index=False)
-    elif kind == "csv":
-        if not isinstance(value, pd.DataFrame):
-            raise TypeError("CSV writing requires a pandas DataFrame.")
-        value.to_csv(path, index=False)
-    return ()
 
+    elif kind == "pickle":
+        with path.open("wb") as f:
+            pickle.dump(value, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    elif kind in ("csv", "parquet"):
+        if not isinstance(value, pd.DataFrame):
+            raise TypeError(f"{kind} requires a pandas DataFrame")
+
+        if not value.columns.is_unique:
+            raise ValueError("Cannot serialize duplicate column names")
+
+        if kind == "csv":
+            value.to_csv(path, index=False, lineterminator="\n")
+
+        else:
+            value.to_parquet(
+                path,
+                engine=_parquet_engine() or "auto",
+                index=False,
+            )
+
+    else:
+        raise ValueError(f"Unsupported serialization format: {kind}")
+
+# ------------------------ Parquet Validation ----------------------#
+            
+def _validate_written(value, path: Path, kind: str, *,  validation: str = "schema") -> None:
+    """Validate serialized file structure and dataframe dimensions."""
+
+    if not path.is_file() or path.stat().st_size == 0:
+        raise IOError(f"Empty or missing output file: {path}")
+
+    if kind not in ("csv", "parquet"):
+        return
+
+    expected_rows = len(value)
+    expected_cols = [str(c) for c in value.columns]
+
+    if kind == "csv":
+        with path.open("r", newline="", encoding="utf-8") as f:
+            reader = csv.reader(f)
+            columns = next(reader, [])
+            rows = 0
+
+            for row in reader:
+                if len(row) != len(columns):
+                    raise IOError("Invalid CSV row width")
+                rows += 1
+
+    elif kind == "parquet":
+        if validation == "full":
+            verified = pd.read_parquet(
+                path, engine=_parquet_engine() or "auto"
+            )
+            rows = len(verified)
+            columns = list(verified.columns)
+
+        elif _parquet_engine() == "pyarrow":
+            import pyarrow.parquet as pq
+
+            parquet = pq.ParquetFile(path)
+            rows = parquet.metadata.num_rows
+            columns = parquet.schema_arrow.names
+
+        else:
+            verified = pd.read_parquet(
+                path, engine=_parquet_engine() or "auto"
+            )
+            rows = len(verified)
+            columns = list(verified.columns)
+
+    if rows != expected_rows:
+        raise IOError(
+            f"Row count mismatch: {rows} != {expected_rows}"
+        )
+
+    if columns != expected_cols:
+        raise IOError(
+            f"Column schema mismatch: {columns} != {expected_cols}"
+        )
+
+# ------------------------- write function ------------------------ #
+
+def write_function(
+    value,
+    filename,
+    *,
+    validation: Literal["none", "schema", "full"] = "schema",
+) -> None:
+    """
+    Atomically serialize an object to disk.
+
+    The target is replaced only after successful serialization
+    and optional validation.
+    """
+    if validation not in {"none", "schema", "full"}:
+        raise ValueError(f"Invalid validation mode: {validation}")
+
+    path = Path(filename)
+    kind = _choose_format(path)
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Temporary file in the same filesystem
+    fd, tmp = tempfile.mkstemp(
+        prefix=f".{path.stem}.",
+        suffix=path.suffix,
+        dir=path.parent,
+    )
+    os.close(fd)
+    tmp_path = Path(tmp)
+
+    try:
+        _serialize(value, tmp_path, kind)
+
+        if validation != "none":
+            _validate_written(
+                value,
+                tmp_path,
+                kind,
+                validation=validation,
+            )
+
+        # Atomic commit
+        os.replace(tmp_path, path)
+
+    except Exception as exc:
+        raise RuntimeError(
+            f"Storage write failed: {path}\n"
+            f"Format: {kind} | Validation: {validation}\n"
+            f"Cause: {type(exc).__name__}: {exc}"
+        ) from exc
+
+    finally:
+        tmp_path.unlink(missing_ok=True)
 
 # -------------------------- read function ------------------------ #
 
@@ -137,34 +254,90 @@ def read_function(filename):
 #  HAUT NIVEAU : arborescence dict / disque
 # -------------------------------------------------------------------
 
-def write(storing, keys, values, write_function=write_function):
-    """
-    Write data into a nested dictionary or directory tree.
+def _check_overwrite(
+    exists: bool,
+    target: str,
+    policy: Literal["warn", "raise", "allow"],
+) -> None:
+    """Apply the overwrite policy to an existing storage entry."""
 
-    Parameters
-    ----------
-    storing : dict | str
-        Target: nested dict (in-memory) or root directory path (on disk).
-    keys : list[str]
-        Hierarchical keys or subdirectories ending with a filename.
-    values : Any
-        Value to store or write.
-    write_function : callable
-        Function handling the actual write operation to disk:
-        e.g., write_function(values, Path(filepath)).
+    if policy not in {"warn", "raise", "allow"}:
+        raise ValueError(f"Invalid overwrite policy: {policy}")
+
+    if not exists:
+        return
+
+    if policy == "raise":
+        raise FileExistsError(f"Storage entry already exists: {target}")
+
+    if policy == "warn":
+        warnings.warn(
+            f"Overwriting existing storage entry: {target}",
+            RuntimeWarning,
+            stacklevel=3,
+        )
+
+def write(
+    storing,
+    keys,
+    values,
+    write_function=write_function,
+    *,
+    overwrite: Literal["warn", "raise", "allow"] = "warn",
+):
     """
+    Write data to a nested dictionary or filesystem.
+
+    Overwrite policies:
+        warn  : Warn before replacing existing data (default).
+        raise : Prevent replacement.
+        allow : Replace silently.
+    """
+    if not keys:
+        raise ValueError("keys cannot be empty")
+
+    if overwrite not in {"warn", "raise", "allow"}:
+        raise ValueError(f"Invalid overwrite policy: {overwrite}")
+
     if isinstance(storing, dict):
         sub = storing
-        for k in keys[:-1]:
-            sub = sub.setdefault(k, {})
-        sub[keys[-1]] = values
-    elif isinstance(storing, str):
-        full_path = os.path.join(storing, *keys[:-1])
-        os.makedirs(full_path, exist_ok=True, mode=0o777)
-        filepath = Path(os.path.join(full_path, keys[-1]))
-        write_function(values, filepath)
+
+        for key in keys[:-1]:
+            sub = sub.setdefault(key, {})
+            if not isinstance(sub, dict):
+                raise TypeError(
+                    f"Intermediate storage entry {key!r} is not a dict"
+                )
+
+        key = keys[-1]
+        _check_overwrite(
+            key in sub,
+            str(keys),
+            overwrite,
+        )
+        sub[key] = values
+
+    elif isinstance(storing, (str, os.PathLike)):
+        filepath = Path(storing).joinpath(*keys)
+
+        # Resolve the actual output extension before checking existence
+        kind = _choose_format(filepath)
+        target = (
+            filepath if filepath.suffix
+            else filepath.with_suffix(kind)
+        )
+
+        _check_overwrite(
+            target.exists(),
+            str(target),
+            overwrite,
+        )
+
+        target.parent.mkdir(parents=True, exist_ok=True)
+        write_function(values, target)
+
     else:
-        raise TypeError("storing must be dict or str path")
+        raise TypeError("storing must be dict or filesystem path")
 
 def read(storing, keys, read_function=read_function):
     """

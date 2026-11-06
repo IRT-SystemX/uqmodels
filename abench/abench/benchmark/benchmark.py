@@ -206,6 +206,40 @@ def ABcomponent_predict_and_store(component,ABloader,component_name='model',trai
         api.store_output(storing,trainset_name,component_name,set_name,output,time_pred)
     return(output)
 
+def train_and_inference(storing,ABDataExperiment,component_name,Component_class,dict_submodule=None,skip_train=False,verbose=0):
+    ABDataExperiment_copy = deepcopy(ABDataExperiment)
+    for n_trainset, (ABtrainloader, ABtestloader_set) in enumerate(ABDataExperiment_copy):
+        trainset_name = ABtrainloader.get_setname()
+        
+        if not(skip_train):
+            if(verbose>0):
+                print('Train on' + trainset_name)
+    
+            # Instanciate Meta_model be giving submodule model to the component_encaspulator
+            if dict_submodule is None:
+                raise(ValueError('dict_submodule can be None if skip_train=False'))
+            component = Component_class(**dict_submodule)
+            # Fit component using training sample.
+            ABcomponent_fit_predict_and_store(component,ABtrainloader,component_name,storing,store=True)                
+        else:
+            component = api.get_component(storing,trainset_name,component_name,Component_class)
+
+        for n_testset, ABtestloader in enumerate(ABtestloader_set):
+            testset_name = ABtestloader.get_setname()
+            if(verbose>0):
+                print('Test on'+testset_name)
+            output = ABcomponent_predict_and_store(component,ABtestloader,component_name,trainset_name,storing=storing,store=True)
+
+
+        if hasattr(component, "reset"):
+            component.reset()
+        
+
+    if hasattr(component, "delete"):
+        component.delete()
+
+    del component
+
 def benchmark(
     storing,
     ABDataExperiment,
@@ -321,41 +355,6 @@ def benchmark(
         list_metrics,
         agg_name=None)
     return None
-
-def train_and_inference(storing,ABDataExperiment,component_name,Component_class,dict_submodule=None,skip_train=False,verbose=0):
-    ABDataExperiment_copy = deepcopy(ABDataExperiment)
-    for n_trainset, (ABtrainloader, ABtestloader_set) in enumerate(ABDataExperiment_copy):
-        trainset_name = ABtrainloader.get_setname()
-        
-        if not(skip_train):
-            if(verbose>0):
-                print('Train on' + trainset_name)
-    
-            # Instanciate Meta_model be giving submodule model to the component_encaspulator
-            if dict_submodule is None:
-                raise(ValueError('dict_submodule can be None if skip_train=False'))
-            component = Component_class(**dict_submodule)
-            # Fit component using training sample.
-            ABcomponent_fit_predict_and_store(component,ABtrainloader,component_name,storing,store=True)                
-        else:
-            component = api.get_component(storing,trainset_name,component_name,Component_class)
-
-        for n_testset, ABtestloader in enumerate(ABtestloader_set):
-            testset_name = ABtestloader.get_setname()
-            if(verbose>0):
-                print('Test on'+testset_name)
-            output = ABcomponent_predict_and_store(component,ABtestloader,component_name,trainset_name,storing=storing,store=True)
-
-
-        if hasattr(component, "reset"):
-            component.reset()
-        
-
-    if hasattr(component, "delete"):
-        component.delete()
-
-    del component
-
 
 def inference(storing,
               ABDataExperiment,

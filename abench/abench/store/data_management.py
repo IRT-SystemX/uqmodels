@@ -8,6 +8,13 @@ import numpy as np
 import re
 import os
 
+def load_csv(storing,keys):
+    return(read(storing,keys))
+    
+def save_csv(storing,keys):
+    return(write(storing,keys))
+
+
 
 def explore_csv_hierarchy(root_dir, depth_name_list=None,allowed_ext=('.csv','.parquet')):
     """
@@ -54,6 +61,24 @@ def explore_csv_hierarchy(root_dir, depth_name_list=None,allowed_ext=('.csv','.p
     df = pd.DataFrame(data)
     # Optional: sort columns (levels first, then filename/path)
     return df
+
+def filter_metadata(metadata_df, constraint_selection_list=None, constraint_rejection_list=None):
+    df_filtered = metadata_df.copy()
+
+    # Apply inclusion constraints
+    if constraint_selection_list:
+        for col, allowed_values in constraint_selection_list:
+            df_filtered = df_filtered[df_filtered[col].isin(allowed_values)]
+
+    # Apply exclusion constraints
+    if constraint_rejection_list:
+        for col, rejected_values in constraint_rejection_list:
+            df_filtered = df_filtered[~df_filtered[col].isin(rejected_values)]
+    return df_filtered
+
+def filter_paths_from_metadata(metadata_df, constraint_selection_list=None, constraint_rejection_list=None):
+    df_filtered = filter_metadata(metadata_df, constraint_selection_list=constraint_selection_list, constraint_rejection_list=constraint_rejection_list)
+    return df_filtered['path'].tolist()
 
 def apply_caraterisation_across_datasets(load_fn, carac_fn, metadata=None, path=None):
     """
@@ -119,167 +144,235 @@ def apply_caraterisation_across_datasets(load_fn, carac_fn, metadata=None, path=
         print(i['filename'],carac_fn(df))
         res_dict[i['filename']]=carac_fn(df)
     return(res_dict)
-        
-
     
 
-    df = load_data(i['path'])
-    print(i['filename'],set_of_FAN_CTRL(df))
-
-
-def load_csv(storing,keys):
-    return(read(storing,keys))
-    
-def save_csv(storing,keys):
-    return(write(storing,keys))
-
-def filter_metadata(metadata_df, constraint_selection_list=None, constraint_rejection_list=None):
-    df_filtered = metadata_df.copy()
-
-    # Apply inclusion constraints
-    if constraint_selection_list:
-        for col, allowed_values in constraint_selection_list:
-            df_filtered = df_filtered[df_filtered[col].isin(allowed_values)]
-
-    # Apply exclusion constraints
-    if constraint_rejection_list:
-        for col, rejected_values in constraint_rejection_list:
-            df_filtered = df_filtered[~df_filtered[col].isin(rejected_values)]
-    return df_filtered
-
-def filter_paths_from_metadata(metadata_df, constraint_selection_list=None, constraint_rejection_list=None):
-    df_filtered = filter_metadata(metadata_df, constraint_selection_list=constraint_selection_list, constraint_rejection_list=constraint_rejection_list)
-    return df_filtered['path'].tolist()
-
+# =============================================================================
+# Descriptor Enrichment Pipeline
+# =============================================================================
+# Design philosophy:
+# - Orchestration: enrich_with_descriptors coordinates specialized operations
+#   without implementing their internal logic.
+# - Separation of concerns: macro transforms, group-level computations, and
+#   quantization are handled by dedicated functions.
+# - Fail-fast execution: errors are propagated with contextual information
+#   (descriptor, group, operation) rather than silently suppressed.
+# - Data integrity: preserve row identity, validate outputs, and prevent
+#   unintended column overwrites or silent data loss.
+# - Modularity: keep operations independently testable and extensible while
+#   maintaining a stable public API.
+#
+# Principle: invalid enrichment must fail explicitly rather than produce
+# silently corrupted datasets.
+# =============================================================================
 
 def enrich_with_descriptors(
     df: pd.DataFrame,
-    macro_descriptors: Mapping[str, Callable[[pd.DataFrame], pd.DataFrame]] = {},
-    group_descriptors: Mapping[str, Callable[[pd.DataFrame], float]] = {},
+    macro_descriptors: Mapping | None = None,
+    group_descriptors: Mapping | None = None,
     *,
-    Id_group: Optional[str] = "metaId",
+    Id_group: str | None = "metaId",
     time_col: str = "frame",
     time_in_index: bool = False,
-    quantize: Optional[Mapping[str, Sequence[Any]]] = None,
+    quantize: Mapping | None = None,
     cat_prefix: str = "cat_",
 ) -> pd.DataFrame:
-    """
-    Compute optional macro descriptors (row-wise / dataframe-wise transforms) and per-group descriptors,
-    then broadcast per-group descriptor values back to the original rows.
+    """Orchestrate macro, group, and categorical descriptors."""
 
-    This function supports:
-    - Standard case: `Id_group` and `time_col` are regular columns.
-    - No grouping: set `Id_group=None` to treat the whole dataframe as a single group.
-    - Time stored in index: set `time_in_index=True` to sort by the index instead of `time_col`.
+    if not df.columns.is_unique:
+        raise ValueError("Input dataframe has duplicate column names")
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input dataframe.
-    macro_descriptors : Mapping[str, Callable[[pd.DataFrame], pd.DataFrame]]
-        Dict of dataframe transforms. Each function receives a dataframe and must return a dataframe
-        (typically with additional columns).
-    group_descriptors : Mapping[str, Callable[[pd.DataFrame], float]]
-        Dict of {output_column_name: function}. Each function receives a group sub-dataframe (sorted in time)
-        and returns a scalar descriptor.
-    Id_group : str | None
-        Column name used to define groups (trajectories). If None, a single global group is used.
-    time_col : str
-        Column name containing time information when `time_in_index=False`.
-    time_in_index : bool
-        If True, time is taken from the dataframe index for sorting.
-    quantize : Optional[Mapping[str, Sequence[Any]]]
-        Optional categorization spec per descriptor. This is passed to your `categorize_series`.
-        (Kept as `Any` because your function supports different (mode, spec) formats.)
-    cat_prefix : str
-        Prefix for generated categorical columns.
+    result = _apply_macro_descriptors(
+        df.copy(), macro_descriptors or {}
+    )
 
-    Returns
-    -------
-    pd.DataFrame
-        Enriched dataframe (original rows) with descriptor columns (and optional categorical columns).
-    """
-    # --- Apply macro descriptors (dataframe transforms)
-    for _, func in macro_descriptors.items():
-        df = func(df)
+    result = _apply_group_descriptors(
+        result,
+        group_descriptors or {},
+        Id_group=Id_group,
+        time_col=time_col,
+        time_in_index=time_in_index,
+    )
 
-    # --- Validate / decide sorting keys
+    result = _apply_quantization(
+        result,
+        quantize or {},
+        cat_prefix=cat_prefix,
+    )
+
+    return result
+
+def _apply_macro_descriptors(
+    df: pd.DataFrame,
+    descriptors: Mapping[str, Callable],
+) -> pd.DataFrame:
+    """Apply dataframe transforms while preserving row identity."""
+
+    for name, func in descriptors.items():
+        previous_index = df.index.copy()
+
+        try:
+            result = func(df)
+        except Exception as exc:
+            raise RuntimeError(
+                f"Macro descriptor {name!r} failed"
+            ) from exc
+
+        if not isinstance(result, pd.DataFrame):
+            raise TypeError(
+                f"Macro descriptor {name!r} must return a DataFrame"
+            )
+
+        if not result.index.equals(previous_index):
+            raise ValueError(
+                f"Macro descriptor {name!r} changed the row index"
+            )
+
+        if not result.columns.is_unique:
+            raise ValueError(
+                f"Macro descriptor {name!r} produced duplicate columns"
+            )
+
+        df = result
+
+    return df
+
+def _apply_group_descriptors(
+    df: pd.DataFrame,
+    descriptors: Mapping[str, Callable],
+    *,
+    Id_group: str | None,
+    time_col: str,
+    time_in_index: bool,
+) -> pd.DataFrame:
+    """Compute descriptors per time-ordered group and broadcast values."""
+
+    if not descriptors:
+        return df
+
+    # Validate output names
+    overlap = set(descriptors).intersection(df.columns)
+    if overlap:
+        raise ValueError(
+            f"Group descriptor columns already exist: {sorted(overlap)}"
+        )
+
+    # Validate grouping
+    if Id_group is not None:
+        if Id_group not in df.columns:
+            raise KeyError(f"Missing group column: {Id_group!r}")
+
+        if df[Id_group].isna().any():
+            raise ValueError(
+                f"Group column {Id_group!r} contains null identifiers"
+            )
+
+    # Sort observations
     if time_in_index:
-        # Ensure index is sortable and stable
-        df_sorted = df.sort_index(kind="mergesort")
+        if df.index.hasnans:
+            raise ValueError("Time index contains missing values")
+        ordered = df.sort_index(kind="mergesort")
     else:
         if time_col not in df.columns:
-            raise KeyError(
-                f"time_col={time_col!r} not found in df.columns. "
-                "Either provide a valid time_col or set time_in_index=True."
+            raise KeyError(f"Missing time column: {time_col!r}")
+
+        if df[time_col].isna().any():
+            raise ValueError(
+                f"Time column {time_col!r} contains missing values"
             )
-        if Id_group is None:
-            df_sorted = df.sort_values([time_col], kind="mergesort")
-        else:
-            if Id_group not in df.columns:
-                raise KeyError(
-                    f"Id_group={Id_group!r} not found in df.columns. "
-                    "Either provide a valid Id_group or set Id_group=None."
-                )
-            df_sorted = df.sort_values([Id_group, time_col], kind="mergesort")
 
-    # --- Prepare descriptors
-    prepared: Dict[str, Callable[[pd.DataFrame], float]] = dict(group_descriptors)
+        sort_keys = (
+            [time_col]
+            if Id_group is None
+            else [Id_group, time_col]
+        )
+        ordered = df.sort_values(sort_keys, kind="mergesort")
 
-    # --- Compute group descriptors
-    results: Dict[Any, Dict[str, float]] = {}
+    # Prepare groups and results
+    groups = (
+        [(None, ordered)]
+        if Id_group is None
+        else ordered.groupby(Id_group, sort=False, observed=True)
+    )
 
-    if Id_group is None:
-        # Single global group
-        sub = df_sorted
-        row: Dict[str, float] = {}
-        for name, fn in prepared.items():
+    results = {name: {} for name in descriptors}
+
+    # Compute scalar descriptors
+    for group_id, sub in groups:
+        for name, func in descriptors.items():
             try:
-                row[name] = float(fn(sub))
-            except Exception:
-                row[name] = np.nan
-        results["__all__"] = row
+                value = float(func(sub))
 
-        summary = pd.DataFrame.from_dict(results, orient="index")
-        # Broadcast to all rows
-        enriched = df.copy()
-        for col in summary.columns:
-            enriched[col] = summary.loc["__all__", col]
+                if np.isinf(value):
+                    raise ValueError("Infinite descriptor value")
 
-    else:
-        # Standard grouped case
-        for gId, sub in df_sorted.groupby(Id_group, sort=False, as_index=True, group_keys=False):
-            row = {}
-            for name, fn in prepared.items():
-                try:
-                    row[name] = float(fn(sub))
-                except Exception:
-                    row[name] = np.nan
-            results[gId] = row
+            except Exception as exc:
+                raise RuntimeError(
+                    f"Group descriptor {name!r} failed "
+                    f"for group {group_id!r}"
+                ) from exc
 
-        summary = pd.DataFrame.from_dict(results, orient="index")
-        enriched = df.copy()
-        for col in summary.columns:
-            enriched[col] = enriched[Id_group].map(summary[col])
+            results[name][group_id] = value
 
-    # --- Optional quantization (your existing behavior)
-    if quantize:
-        for col, spec in quantize.items():
-            if col in enriched.columns:
-                # Your current code expects (mode, spec). Keep compatibility:
-                # - if user provides tuple (mode, spec)
-                # - else assume legacy spec is already in desired format
-                if isinstance(spec, tuple) and len(spec) == 2:
-                    mode, qspec = spec
-                else:
-                    # fallback (legacy): interpret as quantiles with default mode
-                    mode, qspec = "quantile", spec
-                name, out = categorize_series(
-                    enriched[col], qspec, mode=mode, cat_prefix=cat_prefix, colname=col
-                )
-                enriched[name] = out
+    # Broadcast results to original rows
+    for name, values in results.items():
+        if Id_group is None:
+            df[name] = values.get(None, np.nan)
+        else:
+            df[name] = df[Id_group].map(values)
 
-    return enriched
+    return df
+
+def _apply_quantization(
+    df: pd.DataFrame,
+    quantize: Mapping[str, Any],
+    *,
+    cat_prefix: str,
+) -> pd.DataFrame:
+    """Apply categorical encoding to selected columns."""
+
+    for col, spec in quantize.items():
+        if col not in df.columns:
+            raise KeyError(f"Cannot categorize missing column {col!r}")
+
+        if (
+            isinstance(spec, tuple)
+            and len(spec) == 2
+            and isinstance(spec[0], str)
+        ):
+            mode, qspec = spec
+        else:
+            mode, qspec = "quantile", spec
+
+        try:
+            name, values = categorize_series(
+                df[col],
+                qspec,
+                mode=mode,
+                cat_prefix=cat_prefix,
+                colname=col,
+            )
+        except Exception as exc:
+            raise RuntimeError(
+                f"Categorization failed for column {col!r} "
+                f"(mode={mode!r})"
+            ) from exc
+
+        if name in df.columns:
+            raise ValueError(
+                f"Categorization would overwrite column {name!r}"
+            )
+
+        if (
+            not isinstance(values, pd.Series)
+            or not values.index.equals(df.index)
+        ):
+            raise ValueError(
+                f"Categorization of {col!r} changed the row index"
+            )
+
+        df[name] = values
+
+    return df
 
 def categorize_series(
     s: pd.Series,
@@ -386,6 +479,8 @@ def categorize_series(
 
     return name, out
 
+################################################################################################
+
 def apply_perturbations(
     df: pd.DataFrame,
     macro_perturbation: Mapping[str, Callable[[pd.DataFrame], pd.DataFrame]] = {},
@@ -480,10 +575,16 @@ def augment_csvs_with_metadata(
         else:
             raise ValueError("insert_at must be 'left' or 'right'")
         # Overwrite CSV
-        df_out = df_out.loc[:, ~df.columns.str.contains("^Unnamed")]
-        if(enrich_params is not None):
-            df_out = enrich_with_descriptors(df_out,**enrich_params)
-        df_out.to_csv(path, index=False, lineterminator='\n')
+        df_out = df_out.loc[:, ~df_out.columns.astype(str).str.match(r"^Unnamed")]
+
+        if enrich_params is not None:
+            try:
+                df_out = enrich_with_descriptors(df_out, **enrich_params)
+            except Exception as exc:
+                raise RuntimeError(
+                    f"Enrichment failed for file {path!r}"
+                ) from exc
+        write(storing, [key], df_out)
 
 def stratified_train_val_split(df, strat_cols, alpha=0.8, random_state=42):
     """
