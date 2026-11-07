@@ -770,7 +770,15 @@ class NN_UQ(UQEstimator):
         )
 
         if self.rescale:
-            _, pred = self._format(None, pred, type_transform="inverse_transform")
+            scaler_y = self.scaler[1]
+            n_feat = getattr(scaler_y, "scale_", None)
+            n_feat = n_feat.shape[0] if n_feat is not None else None
+            if n_feat is not None and pred is not None and getattr(pred, "shape", (0,))[1] != n_feat:
+                pred = scaler_y.inverse_transform(pred[:, :n_feat])
+            else:
+                _, pred = self._format(None, pred, type_transform="inverse_transform")
+            if n_feat is not None and UQ is not None and getattr(UQ, "shape", (0,))[-1] != n_feat:
+                UQ = UQ[..., :n_feat]
             _, UQ = self._format(
                 None, UQ, type_transform="inverse_transform", mode_UQ=True
             )
@@ -1010,7 +1018,7 @@ def Drawn_based_inference(
 
             # Use custom parser if available, else fallback
             if uq_parser is not None:
-                if type_output == "MC_Dropout":
+                if type_output in ("MC_Dropout", "Deep_ensemble"):
                     type_output="PNN"
                 mean_batch, var_a_batch, var_e_batch = uq_parser(output, type_output)
             else:
@@ -1042,7 +1050,7 @@ def Drawn_based_inference(
 
         # Use custom parser if available, else fallback
         if uq_parser is not None:
-            if type_output == "MC_Dropout":
+            if type_output in ("MC_Dropout", "Deep_ensemble"):
                 type_output="PNN"
             mean, var_a, var_e = uq_parser(output, type_output)
         else:
@@ -1058,6 +1066,8 @@ def Drawn_based_inference(
         mean = mean.mean(axis=0)
 
     UQ = np.concatenate([var_a[None, :], var_e[None, :]], axis=0)
+    if generator:
+        mean = pred
     return mean, UQ
 
 
@@ -1099,7 +1109,7 @@ def Ensemble_based_inference(
 
             # Use custom parser if available, else fallback
             if uq_parser is not None:
-                if type_output == "MC_Dropout":
+                if type_output in ("MC_Dropout", "Deep_ensemble"):
                     type_output="PNN"
                 mean_batch, var_a_batch, var_e_batch = uq_parser(output, type_output)
             else:
@@ -1130,9 +1140,8 @@ def Ensemble_based_inference(
         output = np.array(output)
 
         # Use custom parser if available, else fallback
-        print('connard')
         if uq_parser is not None:
-            if type_output == "MC_Dropout":
+            if type_output in ("MC_Dropout", "Deep_ensemble"):
                 type_output="PNN"
             mean, var_a, var_e = uq_parser(output, type_output)
 

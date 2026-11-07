@@ -16,6 +16,9 @@ Homepage = "https://irt-systemx.github.io/uqmodels"
 Documentation = "https://irt-systemx.github.io/uqmodels"
 Repository = "https://github.com/IRT-SystemX/uqmodels"
 
+[project.optional-dependencies]
+test = ["nox", "complexipy"]
+
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
 

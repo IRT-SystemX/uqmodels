@@ -36,6 +36,8 @@ def check_y_vs_pred_and_UQ_shape(y, pred, UQ=None):
     else:
         return (y, pred, UQ)
 
+    return (y, pred, UQ)
+
 
 def check_UQ(UQ, type_UQ, type_UQ_params):
     """Check if UQ and type_UQ are compatible.

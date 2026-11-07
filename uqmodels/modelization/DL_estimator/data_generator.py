@@ -142,7 +142,10 @@ class Folder_Generator(tf.keras.utils.Sequence):
             else:
                 input = self.X[idx_min:idx_max]
 
-            print(input.shape)
+            if isinstance(input, (list, tuple)):
+                print([getattr(a, "shape", a) for a in input])
+            else:
+                print(getattr(input, "shape", input))
             return input, y_batch
 
     def __len__(self):

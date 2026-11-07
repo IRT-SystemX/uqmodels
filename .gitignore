@@ -28,3 +28,4 @@ dist/
 *.whl
 *.p
 *.parquet
+logs/

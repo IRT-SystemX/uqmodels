@@ -314,7 +314,7 @@ class Lstm_ED_UQ(NN_UQ):
         model_params = self.model_parameters
         factory_params = self.factory_parameters
         with_ctx_input = model_params["with_ctx_input"]
-        skip = self.factory_parameters['skip']
+        skip = self.factory_parameters.get('skip', False)
 
         if(skip):
             return(X,y,mask)
