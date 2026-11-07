@@ -8,6 +8,7 @@ omit =
 	uqmodels/visualisation/visualization_multisources.py
 
 	uqmodels/visualisation/old_visualization.py
+	uqmodels/visualisation/old_visualisation.py
 
 	uqmodels/custom_UQModel.py
 

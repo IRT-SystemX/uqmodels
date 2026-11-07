@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, List
 
 class BaseComponent(ABC):
     """
@@ -72,7 +72,7 @@ class BaseComponent(ABC):
             f"{cls.__name__} does not implement load()."
         )
     
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, List
 
 
 class BaseBlock(ABC):
@@ -116,7 +116,7 @@ class BaseBlock(ABC):
         }
     
 from dataclasses import dataclass, field
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, List
 
 
 @dataclass

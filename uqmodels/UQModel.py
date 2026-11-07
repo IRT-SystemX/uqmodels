@@ -280,13 +280,12 @@ class UQModel(BaseEstimator):
             if hasattr(
                 self.predictor, "is_fitted"
             ):  # To do replace with sklearn is_fitted check
-                pred = self.predictor.fit(X)
-                y_bis = y - pred
+                self.predictor.fit(X, y)
 
             if self.save_models:
                 self.save()
 
-            if "res" not in self.type_UQ:
+            if self.type_UQ is None or "res" not in self.type_UQ:
                 y_bis = y
             else:
                 print(
@@ -543,7 +542,7 @@ class UQModel(BaseEstimator):
                 query = {"name": name_save + "_predictor"}
                 self.cache_manager.save(query, pred)
 
-            if "res" not in self.type_UQ:
+            if self.type_UQ is None or "res" not in self.type_UQ:
                 y_bis = y
             else:
                 print(

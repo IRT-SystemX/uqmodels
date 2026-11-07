@@ -43,7 +43,7 @@ def cnn_mlp(
         step=step,
         dim_d=dim_dyn,
         dim_chan=dim_chan,
-        conv2D=True,
+        use_conv2D=True,
         list_strides=[2, 2, 1],
         list_filters=[32, 32, 32],
         list_kernels=None,
