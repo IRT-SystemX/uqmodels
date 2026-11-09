@@ -1,6 +1,9 @@
+import matplotlib
 import numpy as np
 import pytest
 import tensorflow as tf
+
+matplotlib.use("Agg")
 
 RANDOM_SEED = 0
 

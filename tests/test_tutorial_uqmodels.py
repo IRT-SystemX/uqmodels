@@ -118,7 +118,7 @@ def test_using_uqestimator_and_processing_fn_or_procesor_object(random_seed):
         (np.array(PIs_KPIs)[:, test] > y[test]).mean(axis=(1, 2)) * 100, 1
     )
     value2 = np.array(list_alpha) * 100
-    value1_true = [1.4, 11.1, 89.6, 98.7]
+    value1_true = [1.4, 11.1, 89.7, 98.7]
     value2_true = [2.5, 16.0, 84.0, 97.5]
     for value, value_true in zip(value1, value1_true):
         assert abs(value - value_true) / value_true < 1.0e-3
@@ -137,7 +137,7 @@ def test_using_uqestimator_and_processing_fn_or_procesor_object(random_seed):
         (np.array(PIs_KPIs)[:, test] > y[test]).mean(axis=(1, 2)) * 100, 1
     )
     value2 = np.array(list_alpha) * 100
-    value1_true = [1.4, 11.1, 89.6, 98.7]
+    value1_true = [1.4, 11.1, 89.7, 98.7]
     value2_true = [2.5, 16.0, 84.0, 97.5]
     for value, value_true in zip(value1, value1_true):
         assert abs(value - value_true) / value_true < 1.0e-3
@@ -167,7 +167,7 @@ def test_uqmodel_pipeline_for_predictive_interval():
         (np.array(PIs_KPIs)[:, test] > y[test]).mean(axis=(1, 2)) * 100, 1
     )
     value2 = np.array(list_alpha) * 100
-    value1_true = [1.4, 11.1, 89.6, 98.7]
+    value1_true = [1.4, 11.1, 89.7, 98.7]
     value2_true = [2.5, 16.0, 84.0, 97.5]
     for value, value_true in zip(value1, value1_true):
         assert abs(value - value_true) / value_true < 1.0e-3

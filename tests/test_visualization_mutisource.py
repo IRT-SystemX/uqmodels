@@ -3,7 +3,9 @@ from uqmodels.visualization.visualization_mutisource import apply_cmap, compute_
 
 
 def test_apply_cmap():
-    cmap = __import__("matplotlib").cm.get_cmap("viridis")
+    import matplotlib
+
+    cmap = matplotlib.colormaps["viridis"]
     val = np.array([0.0, 0.5, 1.0])
     colors = apply_cmap(val, 0.0, 1.0, cmap)
     assert len(colors) == 3

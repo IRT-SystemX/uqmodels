@@ -29,3 +29,6 @@ dist/
 *.p
 *.parquet
 logs/
+
+# Coverage
+.coverage

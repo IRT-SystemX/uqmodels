@@ -241,9 +241,9 @@ class RF_UQEstimator(UQEstimator):
 
             leaves = list(set(tree_affectation))
             if bootstrap:
-                n_samples_bootstrap = _get_n_samples_bootstrap(n_samples, max_samples)
+                n_samples_bootstrap = _get_n_samples_bootstrap(n_samples, max_samples, None)
                 re_sample = _generate_sample_indices(
-                    simple_m.random_state, n_samples, n_samples_bootstrap
+                    simple_m.random_state, n_samples, n_samples_bootstrap, None
                 )
                 inv_draw = np.ones(n_samples)
                 inv_draw[re_sample] = 0
